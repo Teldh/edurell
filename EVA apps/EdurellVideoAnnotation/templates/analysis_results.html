@@ -1,0 +1,144 @@
+{% extends "layout.html" %}
+{% set active_page = "analysis" %}
+  <head>
+
+      {% block head %}
+          {{ super() }}
+
+      {% endblock %}
+
+
+
+  </head>
+  <body>
+    {% block navbar %}{{ super() }}{% endblock %}
+    {% block body %}
+
+
+
+    {% if results.analysis_type == "data_summary" %}
+        <div class="container">
+            <p class="title"> Data Summary </p>
+            <div class="table">
+              <table class="table table-responsive">
+                  <tr class="d-flex">
+                    <td class="col-3">Video title</td>
+                    <th class="col">{{ title }}</th>
+                  </tr>
+                  <tr class="d-flex">
+                    <td class="col-3">Annotator</td>
+                    <th class="col">{{ annotator }}</th>
+                  </tr>
+                  <tr class="d-flex">
+                    <td class="col-3">Number of definitions</td>
+                    <th class="col">{{ results.num_definitions }}</th>
+                  </tr>
+                  <tr class="d-flex">
+                    <td class="col-3">Number of relations</td>
+                    <th class="col">{{ results.num_rels }}</th>
+                  </tr>
+                  <tr class="d-flex">
+                    <td class="col-3">Unique relations</td>
+                    <th class="col">{{ results.num_unique }}</th>
+                  </tr>
+                  <tr class="d-flex">
+                    <td class="col-3">Strong relations</td>
+                    <th class="col">{{ results.num_strong}}</th>
+                  </tr>
+                  <tr class="d-flex">
+                    <td class="col-3">Weak relations</td>
+                    <th class="col">{{ results.num_weak }}</th>
+                  </tr>
+
+                  <tr class="d-flex">
+                    <td class="col-3">Number of concepts</td>
+                    <th class="col">{{ results.num_concepts }}</th>
+                  </tr>
+
+                  <tr class="d-flex">
+                    <td class="col-3">Number of transitive relations</td>
+                    <th class="col">{{ results.num_transitives }}</th>
+                  </tr>
+
+
+              </table>
+            </div>
+
+
+        </div>
+
+    {% elif results.analysis_type == "agreement" %}
+        <div class="container">
+            <p class="title"> Agreement </p>
+            <br>
+            Video title: {{ title }}<br>
+            Annotator1: {{ results.annotator1 }}<br>
+            Annotator2: {{ results.annotator2 }}<br><br>
+
+            K: {{ results.agreement }}
+        </div>
+    {% elif results.analysis_type == "linguistic" %}
+        <div class="container">
+            <p class="title"> Linguistic analysis</p>
+
+            <label for="prerequisite_name" style="background-color: #ff6666;">Prerequisite:</label>
+            <select class="form-control" id="prerequisite_name" name="prerequisite_name"></select>
+            <br />
+            <label for="target_name" style="background-color: lightblue;">Target:</label>
+            <select class="form-control" id="target_name" name="target_name"></select>
+            <br />
+            <label for="edge_weight" id="edge_weight_label">Weight of the relation:</label>
+            <select class="form-control" id="edge_weight" name="edge_weight">
+                <option value='ANY WEIGHT'>ANY WEIGHT</option>
+                <option value='Strong'>Strong</option>
+                <option value='Weak'>Weak</option>
+            </select>
+            <br />
+{#            <label for="sent_id">Sentence of the relation:</label>#}
+{#            <select class="form-control" id="sent_id" name="sent_id"></select>#}
+{#            <br />#}
+            <input type="submit" name="find" id="find" class="btn btn-primary" value="Find" />
+        </div>
+        <br>
+        <div id="results">
+{#        {% for rel in results.concept_map %}#}
+{##}
+{#            <div {% if loop.index is divisibleby(2) %} style="background-color: white" {% endif %}>#}
+{#                <div class = "container" style ="padding:10px">#}
+{#                   <p class="titleLower">{{ rel.prerequisite}} <i style='font-size:24px' class='fas'>&#xf061;</i> {{ rel.target}} </p>#}
+{#                        {{ rel.time}}#}
+{#                    <br>#}
+{#                    {{ rel.sentence }}#}
+{#                </div>#}
+{#                <br>#}
+{##}
+{#            </div>#}
+{#        {% endfor %}#}
+        </div>
+
+        <script type="text/javascript">
+            let concept_map = {{ results.concept_map|tojson }};
+            let concepts = {{ results.concepts|tojson }};
+            concepts.sort()
+        </script>
+
+        <script src="{{ url_for('static', filename='linguistic_analysis.js') }}"></script>
+
+    {% elif analysis_type == "fleiss" %}
+        <div class="container">
+            <p class="title"> Fleiss</p>
+            Fleiss' kappa is a statistical measure for assessing the reliability of a dataset on the basis of the agreement computed between all its annotators.
+This contrasts with Cohens' Kappa, which only works between no more than two annotators.
+        <br><br>
+        <p class="titleLower">Value: {{ results }}</p>
+        </div>
+
+
+    {% endif %}
+
+
+
+    {% endblock %}
+  </body>
+
+ù

@@ -1,0 +1,155 @@
+{% extends "layout.html" %}
+{% set active_page = "video_annotation" %}
+  <head>
+
+      {% block head %}
+          {{ super() }}
+          <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/form_video.css') }}"/>
+
+
+      {% endblock %}
+
+
+
+  </head>
+  <body>
+    {% block navbar %}{{ super() }}{% endblock %}
+    {% block body %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <!-- <strong>Title</strong> --> {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="container" id="mainContainer" style="margin-top: 10px">
+
+      <div class="row">
+        <div class="col">
+            <p class="title"> Video Annotation Selection  </p>
+        </div>
+        <div class="col">
+          <button type="button" class="btn btn-lg btn-dodgerblue btn-primary float-right" data-toggle="modal" data-target="#addVideoModal">
+            + Add Video
+          </button>
+        </div>
+      </div>
+
+      <div class="row" style="">
+        <div class="col">
+            <p class="titleLower"> Select a video</p>
+        </div>
+
+        <div class="input-group rounded searchbar col">
+          <input type="search" class="form-control rounded" autocomplete="off" placeholder="Search" aria-label="Search"
+            aria-describedby="search-addon" id="searchbar" onkeyup="search_video()"/>
+          <span class="input-group-text border-0" id="search-addon" style="color: dodgerblue;">
+            <i class="fas fa-search"></i>
+          </span>
+        </div>
+      </div>
+
+    <div id="videos" class="center_selection" style="margin-top: 2%;">
+
+        {% for vid in videos%}
+            <label class="video_radio" video="{{ vid.video_id }}"  >
+              <input type="radio" name="video" value={{ vid.video_id }} id={{ vid.video_id }}>
+              <img src="https://img.youtube.com/vi/{{ vid.video_id }}/hqdefault.jpg">
+              <p class="video_title">{{ vid.title }}</p>
+            </label>
+        {% endfor %}
+
+    </div>
+
+    <div class="container" id="loading" style="display: none; margin-top: 2%">
+        <div class="text-center" style="margin-top: 4%">
+          <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+    </div>
+
+    </div>
+
+
+
+<!-- Modal add video -->
+<div class="modal fade" id="addVideoModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content" style="background-color: #f8f9fa;">
+      <div class="modal-header">
+
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+
+      <div class="modal-body" style="height:300px;">
+        <h5 class="title" id="conceptsModalLabel" style="margin-top: 2%">Add Youtube Url</h5>
+            <br>
+            <form method="POST" id="urlForm">
+              {{ form.csrf_token }}
+               <div class="form-group">
+                 {{ form.url(class_='form-control', autocomplete="off", id="youtube_url")}}
+               </div>
+            <button type="submit" class="btn btn-dodgerblue float-right">
+                Add Video & Start Annotate
+            </button>
+            </form>
+
+            <div class="container" id="loading2" style="display: none; margin-top: 2%">
+                <div class="text-center" style="margin-top: 4%">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                  </div>
+                </div>
+            </div>
+
+
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+  {% endblock %}
+  </body>
+
+{% block scripts %}
+<!--<script src="../static/search_video.js"></script>-->
+<script src="{{ url_for('static', filename='search_video.js') }}"></script>
+
+<script>
+
+    function loading(){
+        document.getElementById("videos").style.display = "none"
+        document.getElementById("loading").style.display = "block"
+        document.getElementById("urlForm").style.display = "none"
+        document.getElementById("loading2").style.display = "block"
+    }
+
+    $("#urlForm").submit(function() {
+      loading()
+    });
+
+    $(".video_radio").click(function(e) {
+        e.preventDefault();
+        loading()
+        document.getElementById("youtube_url").value = "https://www.youtube.com/watch?v=" + this.getAttribute("video")
+        document.getElementById("urlForm").submit();
+    });
+
+
+</script>
+{% endblock %}
