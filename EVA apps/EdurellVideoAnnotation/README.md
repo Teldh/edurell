@@ -54,5 +54,5 @@ Installation completed, with the environment activated launch the project with:
  Note:
  YouTube just removed the dislike count, for this reason the pafy package it returns an error. 
  Until there is a patch use:
- pip uninstall -y pafy
- pip install git+https://github.com/Cupcakus/pafy
+     pip uninstall -y pafy
+     pip install git+https://github.com/Cupcakus/pafy
