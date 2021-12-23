@@ -1,17 +1,11 @@
 from rdflib import Graph, URIRef, RDF, BNode, ConjunctiveGraph, Namespace
 from rdflib.namespace import SKOS, XSD
 from rdflib.term import Literal
-from rdflib.serializer import Serializer
+
 import json
 import pyld
 import time
 from datetime import datetime
-from rdflib_jsonld.serializer import from_rdf
-from rdflib.plugin import register, Serializer
-#from database import upload
-#from db_firebase import insert_Firebase
-#from db_mongo import insert_graph_MongoDB
-from pprint import pprint
 import db_mongo
 
 oa = Namespace("http://www.w3.org/ns/oa#")
@@ -24,13 +18,13 @@ edurell = "http://edurell.com/"
 context = ["http://www.w3.org/ns/anno.jsonld", {"edu": edurell}]
 
 
-def create_graph_jsonld(annotations, isGoldCreation=False):
+def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
 
     concepts_anno = annotations["definitions"]
     prereq_anno = annotations["relations"]
     video_id = annotations["id"]
 
-    if not isGoldCreation:
+    if not isGoldCreation and not isBurst:
         creator = annotations["annotator"]
         creator = Literal(creator)
 
@@ -66,14 +60,14 @@ def create_graph_jsonld(annotations, isGoldCreation=False):
 
         g.add((ann, RDF.type, oa.annotation))
 
-        if isGoldCreation:
+        if isGoldCreation or isBurst:
             g.add((ann, dcterms.creator, Literal(annotation["creator"])))
         else:
             g.add((ann, dcterms.creator, creator))
 
         g.add((ann, dcterms.created, date))
         g.add((ann, oa.motivatedBy, oa.describing))
-        g.add((ann, SKOS.note, Literal(annotation["description_type"] )))
+        g.add((ann, SKOS.note, Literal(annotation["description_type"])))
 
 
         concept = URIRef(edurell + annotation["concept"].replace(" ", "_"))
@@ -123,7 +117,7 @@ def create_graph_jsonld(annotations, isGoldCreation=False):
 
         g.add((ann, RDF.type, oa.annotation))
 
-        if isGoldCreation:
+        if isGoldCreation or isBurst:
             g.add((ann, dcterms.creator, Literal(annotation["creator"])))
         else:
             g.add((ann, dcterms.creator, creator))
@@ -225,31 +219,17 @@ def graph_to_rdf(jsonld):
 
 if __name__ == '__main__':
 
-    #json_graph = db_mongo.get_graph("60d2e89014ff4217f4f50559", "sXLhYStO0m8")
+    json_graph = db_mongo.get_graph("616726e4d1a3488902b4b55d", "sXLhYStO0m8")
 
-    #print(json_graph)
-    # json_expanded = pyld.jsonld.expand(json_graph)
-    # gr = Graph().parse(data=json.dumps(json_graph), format='json-ld')
-    #
-    #print(gr.serialize(format='turtle').decode("utf-8"))
+    print(json_graph)
+    json_expanded = pyld.jsonld.expand(json_graph)
 
-    annotations = {'id': 'sXLhYStO0m8', 'relations': [{'creator': 'Luca Mirenda', 'prerequisite': 'male pelvis', 'sent_id': '10', 'target': 'pelvis', 'time': '00:01:22', 'weight': 'Strong', 'word_id': '10', 'xywh': 'None'}, {'creator': 'Luca Mirenda', 'prerequisite': 'female pelvis', 'sent_id': '10', 'target': 'pelvis', 'time': '00:01:22', 'weight': 'Strong', 'word_id': '10', 'xywh': 'None'}, {'creator': 'Luca Mirenda', 'prerequisite': 'subpubic angle', 'sent_id': '15', 'target': 'female pelvis', 'time': '00:01:50', 'weight': 'Strong', 'word_id': '21', 'xywh': 'None'}, {'creator': 'Luca Mirenda', 'prerequisite': 'v shaped', 'sent_id': '15', 'target': 'sciatic notch', 'time': '00:02:04', 'weight': 'Strong', 'word_id': '12', 'xywh': 'xywh=percent:8,17,80,65'}, {'creator': 'Luca Mirenda', 'prerequisite': 'pelvis', 'sent_id': '15', 'target': 'sciatic notch', 'time': '00:02:05', 'weight': 'Strong', 'word_id': '12', 'xywh': 'None'}, {'creator': 'Luca Mirenda', 'prerequisite': 'v shaped', 'sent_id': '15', 'target': 'female pelvis', 'time': '00:02:06', 'weight': 'Strong', 'word_id': '21', 'xywh': 'None'}, {'creator': 'Luca Mirenda', 'prerequisite': 'u shaped', 'sent_id': '16', 'target': 'male pelvis', 'time': '00:02:09', 'weight': 'Strong', 'word_id': '8', 'xywh': 'None'}, {'creator': 'Luca Mirenda', 'prerequisite': 'sciatic notch', 'sent_id': '18', 'target': 'auricular surface', 'time': '00:02:40', 'weight': 'Strong', 'word_id': '46', 'xywh': 'None'}, {'creator': 'Luca Mirenda', 'prerequisite': 'auricular surface', 'sent_id': '18', 'target': 'superior surface', 'time': '00:02:40', 'weight': 'Weak', 'word_id': '42', 'xywh': 'None'}, {'creator': 'Luca Mirenda', 'prerequisite': 'feature', 'sent_id': '27', 'target': 'v shaped', 'time': '00:03:44', 'weight': 'Strong', 'word_id': 'None', 'xywh': 'xywh=percent:21,30,23,38'}, {'creator': 'Luca Mirenda', 'prerequisite': 'skull', 'sent_id': '38', 'target': 'eye socket', 'time': '00:04:59', 'weight': 'Strong', 'word_id': '14', 'xywh': 'xywh=percent:18,42,27,26'}], 'definitions': [{'concept': 'female pelvis', 'creator': 'Luca Mirenda', 'description_type': 'Definition', 'end': '00:01:59', 'end_sent_id': '14', 'start': '00:01:41', 'start_sent_id': '13', 'id': 0}, {'concept': 'sciatic notch', 'creator': 'Luca Mirenda', 'description_type': 'Definition', 'end': '00:02:58', 'end_sent_id': '19', 'start': '00:01:59', 'start_sent_id': '14', 'id': 1}, {'concept': 'sciatic notch', 'creator': 'Luca Mirenda', 'description_type': 'In depth', 'end': '00:02:49', 'end_sent_id': '18', 'start': '00:02:28', 'start_sent_id': '17', 'id': 2}, {'concept': 'pre auricular sulcus', 'creator': 'Luca Mirenda', 'description_type': 'Definition', 'end': '00:03:24', 'end_sent_id': '23', 'start': '00:03:01', 'start_sent_id': '20', 'id': 3}, {'concept': 'mastoid process', 'creator': 'Luca Mirenda', 'description_type': 'Definition', 'end': '00:07:04', 'end_sent_id': '58', 'start': '00:06:06', 'start_sent_id': '46', 'id': 4}, {'concept': 'sexual dimorphism', 'creator': 'Luca Mirenda', 'description_type': 'Definition', 'end': '00:09:01', 'end_sent_id': '68', 'start': '00:08:27', 'start_sent_id': '64', 'id': 5}], 'annotator': 'Luca Mirenda'}
-
-    g, json_graph = create_graph_jsonld(annotations)
-
-    #json_expanded = pyld.jsonld.expand(json_graph["graph"])
-
-    gr = Graph().parse(data=json.dumps(json_graph["graph"]), format='json-ld')
-
-    print(gr)
-    print(gr.serialize(format='turtle').decode("utf-8"))
-
-
-    curr_time = "0:01:50"
+    gr = Graph()\
+        .parse(data=json.dumps(json_graph), format='json-ld')
 
     tic = time.time()
 
-    # Trova quale(i) concetti sono spiegati in questo momento
+    # Seleziona i concetti che sono spiegati nel video
     query1 = """
         PREFIX oa: <http://www.w3.org/ns/oa#>
         PREFIX edu: <http://edurell.com/>
@@ -258,6 +238,7 @@ if __name__ == '__main__':
                 ?concept_annotation oa:motivatedBy oa:describing.
                 ?concept_annotation oa:hasBody ?explained_concept.
             }"""
+
     qres = gr.query(query1)
 
     toc = time.time()

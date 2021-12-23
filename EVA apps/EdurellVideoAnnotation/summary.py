@@ -1,7 +1,7 @@
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.lex_rank import LexRankSummarizer
-from keywords import extract_keywords
+from keywords import extract_keywords, rake_top
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, BartTokenizer, BartForConditionalGeneration, BartConfig
 #pip install bert-extractive-summarizer
 from summarizer import Summarizer
@@ -9,10 +9,14 @@ from summarizer import Summarizer
 #from summary import LectureEnsembler
 
 def sumy_summary(clusters, num_sentences):
+    print("SUMY")
     for i, c in enumerate(clusters):
         text = ""
         for sentence in c.sentences:
             text += sentence + " \n\n"
+
+        print("Keywords estratte sul segmento", i)
+        print(rake_top(3,text))
 
 
         parser = PlaintextParser.from_string(text, Tokenizer("english"))
@@ -29,16 +33,20 @@ def sumy_summary(clusters, num_sentences):
         print(summary_text)
 
         print("Keywords estratte sulla summary")
-        print(extract_keywords(summary_text))
+        print(rake_top(3,summary_text))
         print()
         #c.summary = summary
 
 
 def bert_summary(clusters):
+    print("\n\n BERT")
     for i, c in enumerate(clusters):
         text = ""
         for sentence in c.sentences:
             text += sentence + " "
+
+        print("Keywords estratte sul segmento", i)
+        print(rake_top(3, text))
 
         model = Summarizer()
         result = model(text, min_length=60)
@@ -48,8 +56,8 @@ def bert_summary(clusters):
         print("Summary:")
         print(summary_text)
 
-        print("Keywords estratte sul testo")
-        print(extract_keywords(text))
+        print("Keywords estratte sulla summary")
+        print(rake_top(3, summary_text))
         print()
 
 

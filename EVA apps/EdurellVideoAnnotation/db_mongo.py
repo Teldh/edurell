@@ -63,6 +63,20 @@ def insert_graph(data):
         new_graph = {"$set": {"graph": data["graph"]}}
         collection.update_one(query, new_graph)
 
+
+def insert_burst(data):
+    collection = db.graphs
+    query = {
+        "extraction_method": "Burst",
+        "video_id": data["video_id"]
+    }
+
+    if collection.find_one(query) is None:
+        collection.insert_one(data)
+    else:
+        new_graph = {"$set": {"graph": data["graph"]}}
+        collection.update_one(query, new_graph)
+
 def insert_gold(data):
     collection = db.graphs
     query = {
@@ -87,6 +101,9 @@ def insert_video(data):
     collection = db.videos
     if collection.find_one({"video_id": data["video_id"]}) is None:
         collection.insert_one(data)
+    # else:
+    #     new_graph = {"$set": {"extracted_keywords": data["extracted_keywords"]}}
+    #     collection.update_one({"video_id": data["video_id"]}, new_graph)
 
 
 def get_conll(video_id):
@@ -165,9 +182,46 @@ def get_graphs_info(selected_video=None):
                 graphs_info[vid["video_id"]]["annotators"].append(annotator)
 
     if selected_video is not None:
-        return graphs_info[selected_video]
+        if selected_video in graphs_info:
+            return graphs_info[selected_video]
+        else:
+            return None
 
     return graphs_info
+
+
+def get_concepts(annotator, video_id):
+    collection = db.graphs
+
+    pipeline = [
+        {"$unwind": "$graph.@graph"},
+        {
+            "$match":
+                {
+                    "video_id": str(video_id),
+                    "annotator_id": str(annotator),
+                    "graph.@graph.type": "skos:Concept"
+                }
+
+        },
+
+        {"$project":
+            {
+                "concept": "$graph.@graph.id",
+                "_id": 0
+            }
+        }
+
+    ]
+
+    aggregation = collection.aggregate(pipeline)
+    results = list(aggregation)
+    concepts = []
+
+    for concept in results:
+        concepts.append(concept["concept"].replace("edu:","").replace("_"," "))
+
+    return concepts
 
 
 def get_concept_map(annotator, video_id):
@@ -276,11 +330,14 @@ def get_segments_times(video_id):
         return None
 
 
-def get_extracted_keywords(video_id):
+def get_extracted_keywords(video_id, title=False):
     collection = db.videos
 
     if collection.find_one({"video_id":video_id}) is not None:
         video = collection.find_one({"video_id":video_id})
+        if title:
+            return video["title"], video["extracted_keywords"]
+
         return video["extracted_keywords"]
     else:
         return None

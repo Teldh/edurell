@@ -11,6 +11,11 @@ class addVideoForm(FlaskForm):
     submit = SubmitField('Start annotate')
 
 
+class BurstForm(FlaskForm):
+    url = TextField('Url', validators=[InputRequired()])
+    type = RadioField('video', choices=[("semi","semi-automatic"), ("auto","automatic")])
+
+
 class ForgotForm(FlaskForm):
     email = StringField('Email', validators=[InputRequired(), Email('Email not correct')])
     submit = SubmitField('Send mail')

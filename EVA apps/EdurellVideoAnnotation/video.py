@@ -9,7 +9,7 @@ def download(url):
 
     video_id = url_parsed.split("=")[1]
 
-    "creo cartella"
+    #"creo cartella"
     current_path = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(current_path, "static", "videos", video_id)
     if not os.path.exists(path):

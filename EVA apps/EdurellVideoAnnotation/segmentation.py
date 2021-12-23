@@ -60,12 +60,17 @@ def segmentation(video, c_threshold, sec_min, S, frame_range, subtitles, video_i
     transcription = transcription.replace('\n', ' ')\
         .replace(">>", "").replace("Dr.","Dr").replace("dr.","dr").replace("Mr.","Mr").replace("mr.","mr")
 
-
-    '''Add punctuation to the transcript obtained'''
-    print("Checking punctuation..")
-
     # get punctuated transcription from the conll in the db
     punctuated_transcription = get_text(video_id)
+
+    if punctuated_transcription is None:
+        print("Checking punctuation..")
+        if transcription.count(".") > 5 and transcription.count(",") > 5:
+            print("transcription present")
+            punctuated_transcription = transcription
+        else:
+            punctuated_transcription = None
+
 
     # if conll is not in the db
     if punctuated_transcription is None:

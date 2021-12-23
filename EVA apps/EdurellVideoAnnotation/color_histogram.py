@@ -173,7 +173,6 @@ def color_histogram_on_clusters(video_url, cluster_starts, cluster_ends, S, seco
         ret, current_frame = cap.read()
         cap.set(1, frame_number)
 
-
         if ret:
             current_frame = cv2.resize(current_frame, (240, 180))
 
@@ -196,7 +195,6 @@ def color_histogram_on_clusters(video_url, cluster_starts, cluster_ends, S, seco
                 break
 
         else:
-            print("finito")
             break
             
     cap.release()
@@ -282,39 +280,55 @@ def color_histogram_on_clusters(video_url, cluster_starts, cluster_ends, S, seco
 
 
 
-#https://www.youtube.com/watch?v=sXLhYStO0m8" xywh=percent:9,10,83,80" "00:01:05^^xsd:dateTime"
-def get_image_from_video(video_id, concept, timestamp, x_percent, y_percent, w_percent, h_percent):
-
-    current_path = os.path.dirname(os.path.abspath(__file__))
-
-    video_path = os.path.join(current_path, "static", "videos", video_id, video_id + ".mp4")
-    image_path = os.path.join(current_path, "static", "videos", video_id, "concepts")
-
-    cap = cv2.VideoCapture(video_path)
-
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-
-    x = int(width * x_percent/100)
-    y = int(height * y_percent/100)
-
-    w = int(width * w_percent/100)
-    h = int(height * h_percent / 100)
-
-
-    cap.set(1, int(fps * timestamp))
-    ret, current_frame = cap.read()
-
-    if ret:
-        ROI = current_frame[y:y+h, x:x+w].copy()
-        status = cv2.imwrite(os.path.join(image_path, concept+".jpg"), ROI)
-        print(status)
-
-    cap.release()
+# RETURN ROI FROM VIDEO, funziona
+# from PIL import Image
+# import base64
+# import io
+# import numpy as np
+#
+# #https://www.youtube.com/watch?v=sXLhYStO0m8" xywh=percent:9,10,83,80" "00:01:05^^xsd:dateTime"
+# def get_image_from_video(video_id, concept, timestamp, x_percent, y_percent, w_percent, h_percent):
+#
+#     current_path = os.path.dirname(os.path.abspath(__file__))
+#
+#     video_path = os.path.join(current_path, "static", "videos", video_id, video_id + ".mp4")
+#     image_path = os.path.join(current_path, "static", "videos", video_id, "concepts")
+#
+#     cap = cv2.VideoCapture(video_path)
+#
+#     fps = cap.get(cv2.CAP_PROP_FPS)
+#     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+#     height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+#
+#     x = int(width * x_percent/100)
+#     y = int(height * y_percent/100)
+#
+#     w = int(width * w_percent/100)
+#     h = int(height * h_percent / 100)
+#
+#
+#     cap.set(1, int(fps * timestamp))
+#     ret, current_frame = cap.read()
+#
+#     data = io.BytesIO()
+#     encoded_img_data = ""
+#     if ret:
+#         ROI = current_frame[y:y+h, x:x+w].copy()
+#
+#         img = cv2.cvtColor(ROI, cv2.COLOR_BGR2RGB)
+#         im = Image.fromarray(img)
+#         #im.show()
+#         im.save(data, "JPEG")
+#         encoded_img_data = base64.b64encode(data.getvalue())
+#
+#         #status = cv2.imwrite(os.path.join(image_path, concept+".jpg"), ROI)
+#         #print(status)
+#
+#     cap.release()
+#     return encoded_img_data
 
 
 if __name__ == "__main__":
     a = time.time()
-    get_image_from_video('sXLhYStO0m8', "auricular_surface", 166, 5,16,29,65)
-    print("Time: ", time.time() - a, " secondi")
+    #get_image_from_video('sXLhYStO0m8', "auricular_surface", 166, 5,16,29,65)
+    #print("Time: ", time.time() - a, " secondi")

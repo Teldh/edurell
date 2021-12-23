@@ -1,11 +1,10 @@
 import db_mongo
 import networkx as nx
-import igraph
 import agreement
 from conllu import parse
 #import pandas as pd
 from pprint import pprint
-
+import random
 #pip install python-igraph
 #pip install pandas
 
@@ -28,8 +27,7 @@ class Graph:
         self.graph[u].append(v)
 
 
-def data_summary(annotator, video_id):
-    concept_map = db_mongo.get_concept_map(annotator, video_id)
+def data_summary(concept_map, definitions, video_id):
 
     unique_relations = []
     strong_relations = []
@@ -58,20 +56,32 @@ def data_summary(annotator, video_id):
         if rel["target"] not in concepts:
             concepts.append(rel["target"])
 
-    definitions = db_mongo.get_definitions(annotator, video_id)
+    defs = 0
+    depth = 0
+    for d in definitions:
+        if d["concept"] not in concepts:
+            concepts.append(d["concept"])
+
+        if d["description_type"] == "Definition":
+            defs += 1
+        else:
+            depth += 1
 
     results = {"analysis_type": "data_summary", "concept_map": concept_map,
                "num_rels": len(concept_map), "num_weak": len(weak_relations),"num_strong": len(strong_relations),
-               "num_unique": len(unique_relations), "num_definitions":len(definitions), "num_concepts": len(concepts),
+               "num_unique": len(unique_relations), "num_descriptions":len(definitions), "num_definitions":defs,
+               "num_depth":depth, "num_concepts": len(concepts),
                "num_transitives": len(detect_transitive_edges(G,10))}
 
     return results
 
 
-def compute_agreement(user1, user2, video):
-    concept_map1 = db_mongo.get_concept_map(user1, video)
-    concept_map2 = db_mongo.get_concept_map(user2, video)
+def compute_agreement(concept_map1, concept_map2):
+    # concept_map1 = db_mongo.get_concept_map(user1, video)
+    # concept_map2 = db_mongo.get_concept_map(user2, video)
     words = []
+    user1 = "first"
+    user2 = "second"
 
     for rel in concept_map1:
         if rel["prerequisite"] not in words:
@@ -97,15 +107,8 @@ def compute_agreement(user1, user2, video):
 
     coppieannotate, conteggio = agreement.creaCoppieAnnot(user1, user2, term_pairs, all_combs, term_pairs_tuple)
 
-    u1 = db_mongo.get_user(user1)
-    u2 = db_mongo.get_user(user2)
 
-    username1 = u1["name"] + " " + u1["surname"]
-    username2 = u2["name"] + " " + u2["surname"]
-
-
-    results = {"analysis_type": "agreement", "annotator1":username1, "annotator2": username2,
-               "agreement":round(agreement.computeK(conteggio, all_combs), 3)}
+    results = {"analysis_type": "agreement", "agreement":round(agreement.computeK(conteggio, all_combs), 3)}
 
     return results
 
@@ -135,7 +138,6 @@ def fleiss(video_id):
     for id in concept_maps:
         term_pairs[id] = agreement.createUserRel(concept_maps[id], all_combs)[0]
 
-    #TODO se c'è un solo annotatore nel video va in errore
     try:
         fleiss = agreement.computeFleiss(term_pairs, all_combs)
     except:
@@ -152,10 +154,26 @@ def linguistic_analysis(annotator, video_id):
     #print(conll)
     parsed_conll = parse(conll)
 
+    sent_list = []
+    processed_conll = []
+
+    for sent in parsed_conll:
+        sent_list.append(sent.metadata["text"])
+
+        for word in sent:
+            data = {}
+            data['tok_id'] = word["id"]
+            data['sent_id'] = sent.metadata["sent_id"]
+            data['forma'] = word["form"]
+            data['lemma'] = word["lemma"]
+            data['pos_coarse'] = word["upos"]
+            data['pos_fine'] = word["xpos"]
+
+            processed_conll.append(data)
+
     concepts = []
 
     for rel in concept_map:
-        print(rel)
         rel["sentence"] = parsed_conll[int(rel["sent_id"])-1].metadata["text"]
         if rel["prerequisite"] not in concepts:
             concepts.append(rel["prerequisite"])
@@ -163,7 +181,9 @@ def linguistic_analysis(annotator, video_id):
         if rel["target"] not in concepts:
             concepts.append(rel["target"])
 
-    results = {"analysis_type": "linguistic","concept_map": concept_map, "concepts": concepts}
+
+    results = {"analysis_type": "linguistic","concept_map": concept_map, "concepts": concepts, "sentences": sent_list,
+               "conll": processed_conll}
 
     return results
 
@@ -198,34 +218,139 @@ def detect_transitive_edges(graph, cutoff):
 
     return transitives
 
-if __name__ == "__main__":
-
-    # print(fleiss("sXLhYStO0m8"))
-    # print(compute_agreement('60659634a320492e72f72598', '60659634a320492e72f72598', "sXLhYStO0m8"))
-
-    # G = nx.DiGraph()
-    # G.add_edge('a', 'c')
-    # G.add_edge('a', 'b')
-    # G.add_edge('a', 'd')
-    # G.add_edge('b', 'd')
-    # G.add_edge('c', 'd')
 
 
-    # G_ig = igraph.Graph(directed=True)
-    #
-    # G_ig.add_vertices(['b','a', 'c', 'd' ,'e', 'x', 'z'])
-    #
-    # G_ig.add_edges([("a", 'b'), ('b', 'c'), ('c', 'd'), ('d', 'e'), ('e', 'a'), ('z', 'x'), ('x', 'z')])
+def scores(annotation, annotation_gold, concepts):
+    """
+    Concept map scores
+    Find accuracy, precision, recall, F1 score of an annotation compared to the gold standard
 
-    pprint(data_summary("60d2e89014ff4217f4f50559", "sXLhYStO0m8"))
+    This function uses also the transitive relations to calculate the scores.
 
-    # graph = {
-    #     'a': ['b'],
-    #     'b': ['c'],
-    #     'c': ['d'],
-    #     'd': ['e'],
-    #     'e': ['a'],
-    #     'x': ['z'],
-    #     'z': ['x']
-    # }
+    :param annotation: concept map of the annotation
+    :param annotation_gold: concept map of the gold standard
+    :param terminology: all concepts, both gold and ann
+    :return: accuracy, precision, recall, f1-score
+    """
+    TP = 0
+    TN = 0
+    FP = 0
+    FN = 0
+
+    paths_gold = []
+    paths_ann = []
+    negative_relations = []
+
+    G_ann = nx.DiGraph()
+    G_gold = nx.DiGraph()
+
+    for rel in annotation:
+
+        rel["prerequisite"] = rel["prerequisite"].replace("-", " ")
+        rel["target"] = rel["target"].replace("-", " ")
+
+        G_ann.add_edge(rel["prerequisite"], rel["target"])
+
+    for rel in annotation_gold:
+
+        rel["prerequisite"] = rel["prerequisite"].replace("-", " ")
+        rel["target"] = rel["target"].replace("-", " ")
+
+        G_gold.add_edge(rel["prerequisite"], rel["target"])
+
+
+    for c1 in concepts:
+        for c2 in concepts:
+            # se esiste un percorso tra due concetti
+            if c1 in G_gold and c2 in G_gold and nx.has_path(G_gold, c1, c2): #BFS(c1, c2, annotation_gold, cut=300):
+                paths_gold.append((c1, c2))
+            else:
+                negative_relations.append((c1, c2))
+
+            if c1 in G_ann and c2 in G_ann and nx.has_path(G_ann, c1, c2): #BFS(c1, c2, annotation, cut=300):
+                paths_ann.append((c1, c2))
+
+    for r in paths_gold:
+        if r in paths_ann:
+            TP += 1
+        else:
+            FN += 1
+
+    for r in paths_ann:
+        if r not in paths_gold:
+            FP += 1
+
+    for r in random.sample(negative_relations, len(paths_gold)):
+        if r not in paths_ann:
+            TN += 1
+
+
+    accuracy = (TP + TN) / (TP + TN + FP + FN)
+
+    if TP + FP != 0:
+        precision = TP / (TP + FP)
+    else:
+        precision = 0
+
+    if TP + FN != 0:
+        recall = TP / (TP + FN)
+    else:
+        recall = 0
+
+    if precision != 0 or recall != 0:
+        F1 = 2 * (precision * recall) / (precision + recall)
+    else:
+        F1 = 0.0
+
+    return round(accuracy, 3), round(precision, 3), round(recall, 3), round(F1, 3)
+
+
+
+
+
+
+
+def BFS(from_, to_, relations, cut=None):
+    """
+    Breath First Search in concept map
+    """
+
+    queue = [from_]
+    already_visited = [from_]
+    count = 0
+
+    targets = {}
+
+    for rel in relations:
+        if rel["prerequisite"] not in targets:
+            targets[rel["prerequisite"]] = []
+
+        targets[rel["prerequisite"]].append(rel["target"])
+
+
+    while len(queue) > 0:
+
+        if cut is not None:
+            if count > cut:
+                return False
+            count += 1
+
+        curr = queue.pop()
+        if curr in targets:
+            next_level = targets[curr]
+        else:
+            next_level = []
+
+        if to_ in next_level:
+            return True
+        else:
+            for i in range(0, len(next_level)):
+                if next_level[i] not in already_visited:
+                    queue.append(next_level[i])
+                    already_visited.append(next_level[i])
+
+    # not found
+    return False
+
+
 
