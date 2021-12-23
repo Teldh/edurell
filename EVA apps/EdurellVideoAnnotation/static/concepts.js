@@ -1,6 +1,6 @@
 let definingConcepts = []
 
-console.log($concepts)
+//console.log($concepts)
 
   function showConcepts(){
 
@@ -66,102 +66,6 @@ console.log($concepts)
 
 
   }
-  /* DEPRECATED
-  function startDefinition(button, concept){
-
-      //update duration ogni secondo
-      let interval = setInterval(function(){ updateDuration(concept, startTime)}, 1000);
-
-      let startTime = video.currentTime
-
-      //il tasto play diventa pausa
-      button.innerHTML= '<i class="fa fa-pause"></i>'
-      button.setAttribute('onclick','stopDefinition("'+concept+'",'+interval+',this,'+startTime+')')
-
-      let explainedConcepts = document.getElementById("explainedConcepts")
-
-      let sub = getCurrentSubtitle(startTime)
-      let startSentID = getSentenceIDfromSub(sub)
-
-
-      definingConcepts.push({"concept":concept, "startTime":startTime, "interval":interval, "startSentence": startSentID})
-
-
-      //appendo div
-      explainedConcepts.innerHTML += '<div class="conceptDefined" id="'+concept+'Defined">'+
-                                          '<b>'+concept+'</b> <br>'+
-                                          'Duration: <span id="'+concept+'Duration">0.00</span><br>'+
-                                          '<button class="btn btn-danger" style="padding:3px;" ' +
-                                                'onclick="stopDefinition('+"'"+concept+ "'" +')">STOP</button>'+
-                                      '</div>'
-
-
-  }
-
-  function updateDuration(concept, startTime){
-
-      let currentDuration = video.currentTime - startTime;
-      if(currentDuration > 0)
-        document.getElementById(concept+'Duration').innerHTML = String(secondsToHms(currentDuration));
-
-  }
-
-  function stopDefinition(concept){
-
-      let interval
-      let startTime
-      let index
-      let startSentID
-
-      for(let i in definingConcepts){
-          if(definingConcepts[i].concept == concept){
-              interval = definingConcepts[i].interval
-              startTime = definingConcepts[i].startTime
-              startSentID = definingConcepts[i].startSentence
-
-              index = i
-              break
-          }
-      }
-
-      definingConcepts.splice(index,1)
-
-      let endTime = video.currentTime
-
-      //stoppo intervallo
-      clearInterval(interval)
-
-      //rimuovo il div a lato
-      document.getElementById(concept+"Defined").remove()
-
-      //il tasto pausa ridiventa play
-      let button = document.getElementById(concept+"Button")
-      button.innerHTML = '<i class="fa fa-play"></i>'
-      button.setAttribute('onclick','startDefinition(this,"'+concept+'")')
-
-
-      if((endTime - startTime) > 1 ) {
-
-          //aggiungo dropdown menu nella lista dei concetti
-          button.parentElement.classList.add("dropdown-toggle");
-          document.getElementById("sub" + concept.replaceAll(" ", "_")).innerHTML +=
-              '<li>' +
-              '<span style="margin-left:5%">Start: ' + secondsToHms(startTime) + ' End: ' + secondsToHms(endTime) +
-              '<button class="deleteDefinitionIcon" onclick="deleteDefinition('+"'"+concept+ "'" +','+startTime+','+endTime+')"><i class="fa fa-times"></i></button></a></span>' +
-              '</li>'
-
-          let sub = getCurrentSubtitle(endTime)
-          let endSentID = getSentenceIDfromSub(sub)
-          console.log(endSentID)
-
-          //aggiungo la definizione
-          addDefinition(concept, startTime, endTime, startSentID, endSentID)
-      }
-
-
-  }
-
-   */
 
   
 
@@ -170,7 +74,6 @@ console.log($concepts)
     let concept = document.getElementById("newConcept").value
 
     if(!$concepts.includes(concept)) {
-
         fetch('/annotator/lemmatize_word/' + concept).then(function (response) {
 
             response.json().then(function (data) {

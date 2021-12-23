@@ -267,9 +267,16 @@ function getCurrentSubtitle(time){
     return $(".youtube-marker").first()
 
   let subtitles = $(".youtube-marker").filter(function() {
-    //console.log($(this).attr("data-start"))
     return  $(this).attr("data-start") <= time && $(this).attr("data-end") > time;
   });
+
+  //sottotitolo non trovato perchè è un momento di silenzio, prendo quello successivo
+  if(subtitles.length == 0) {
+    let subs = $(".youtube-marker").filter(function () {
+      return $(this).attr("data-start")>=time;
+    });
+    subtitles = subs.first()
+  }
 
   return subtitles[subtitles.length -1]
 
@@ -277,6 +284,8 @@ function getCurrentSubtitle(time){
 }
 
 function getSentenceIDfromSub(sub){
+
+  console.log(sub)
   let startSentID = $(sub).find("span")[0].getAttribute("sent_id")
 
   //se il primo span è un concetto di più parole ritorna null, allora prendo lo span interno

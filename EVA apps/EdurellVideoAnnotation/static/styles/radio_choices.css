@@ -84,3 +84,23 @@
 #fleiss:checked:checked ~ .option-4 span{
   color: #fff;
 }
+
+#semi:checked:checked ~ .option-1,
+#auto:checked:checked ~ .option-2{
+  border-color: dodgerblue;
+  background: dodgerblue;
+}
+#semi:checked:checked ~ .option-1 .dot,
+#auto:checked:checked ~ .option-2 .dot{
+  background: #fff;
+}
+#semi:checked:checked ~ .option-1 .dot::before,
+#auto:checked:checked ~ .option-2 .dot::before{
+  opacity: 1;
+  transform: scale(1);
+}
+
+#semi:checked:checked ~ .option-1 span,
+#auto:checked:checked ~ .option-2 span{
+  color: #fff;
+}

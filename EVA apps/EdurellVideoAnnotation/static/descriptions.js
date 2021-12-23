@@ -8,7 +8,7 @@ function showDescriptionDiv(){
     $('#add-concept-description').show();
     $('#transcript').hide();
     $('#add-concept-description').dimBackground();
-    $("#conceptDefined").innerHTML = ""
+    document.getElementById("conceptDefined").value = ""
     player.controls(false)
     video.pause()
     $("#playButton").removeClass("paused")

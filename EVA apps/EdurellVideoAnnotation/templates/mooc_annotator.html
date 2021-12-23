@@ -170,7 +170,7 @@
                         <h2>RELATIONS</h2>
                     </div>
                     <div class="col">
-                      <button type="button" onclick="showNetwork()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#graphModal" style="
+                      <button type="button" onclick="startVisualization()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#graphModal" style="
                             float: right;">
                       Graph
                       </button>
@@ -344,6 +344,7 @@
   <script src="../static/segmentation.js"></script>
   <script src="../static/create_graph.js"></script>
   <script src="../static/autocomplete.js"></script>-->
+  <script src="{{ url_for('static', filename='graph_visualization.js') }}"></script>
   <script src="{{ url_for('static', filename='video_range_slider.js') }}"></script>
   <script src="{{ url_for('static', filename='concepts.js') }}"></script>
   <script src="{{ url_for('static', filename='descriptions.js') }}"></script>

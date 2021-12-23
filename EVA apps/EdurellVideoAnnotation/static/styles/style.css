@@ -179,3 +179,7 @@ tr {
     display: table;
     table-layout: fixed;
 }
+
+.result_text{
+    float: right;
+}
