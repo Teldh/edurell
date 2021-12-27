@@ -15,11 +15,9 @@ Activate the environment:
 
 Download the repository:
     
-    git clone https://github.com/Mirwe/edurell_annotations.git
+    git clone https://github.com/Teldh/edurell.git
     
-Open the repository
-
-    cd edurell_annotations
+"cd" to the folder EdurellVideoAnnotation
     
 Install requirements:
     
@@ -27,7 +25,7 @@ Install requirements:
     python -m spacy download en
     
 Create a folder "punctuator" (lowercase) in the same level of the .py files, and put inside the file downloaded at the link:
-https://drive.google.com/uc?id=0B7BsN5f2F1fZd1Q0aXlrUDhDbnM
+https://drive.google.com/drive/folders/1NYyehpB5fAlL42_TwTnXLokLz8K-TS3W?usp=sharing
 
 Open the python console and type:
 
@@ -35,6 +33,7 @@ Open the python console and type:
     nltk.download('stopwords')
     nltk.download('punkt')
     nltk.download('wordnet')
+    nltk.download('omw-1.4')
     
 (Facoltative) If you have a gpu, to improve performances:
 
@@ -45,3 +44,16 @@ Open the python console and type:
 Installation completed, with the environment activated launch the project with:
 
     python main.py
+    
+    
+    
+    
+    
+    
+    
+ Note:
+ YouTube just removed the dislike count, for this reason the pafy package returns an error. 
+ Until there is a patch use:
+ 
+     pip uninstall -y pafy
+     pip install git+https://github.com/Cupcakus/pafy
