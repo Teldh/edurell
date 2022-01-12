@@ -165,7 +165,8 @@ class MailSender:
 
 def send_mail(To, subject, html):
 
-    ourmailsender = MailSender('educationalRelationsLearning@gmail.com', 'edurell2021', ('smtp.gmail.com', 587))
+    #ourmailsender = MailSender('educationalRelationsLearning@gmail.com', 'edurell2021', ('smtp.gmail.com', 587))
+    ourmailsender = MailSender('edurellannotator@gmail.com', 'edurell2021', ('smtp.gmail.com', 587))
 
     ourmailsender.set_message("edurell", subject, "Edurell Annotations", html)
 
