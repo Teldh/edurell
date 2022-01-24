@@ -1,6 +1,10 @@
 import copy
 import nltk
 from nltk.corpus import wordnet as wn
+from rdflib import Graph, URIRef, Literal, BNode, Namespace, RDF
+from rdflib.namespace import FOAF, NamespaceManager
+from rdflib.namespace import SKOS, XSD
+
 
 #trovare i sinonimi da una lista di parole, ritorna un dizionario (keyword : lista sinonimi)
 def get_synonyms_from_list(concepts): 
@@ -33,3 +37,31 @@ def get_synonyms_from_list(concepts):
     
 
     return synonyms 
+
+
+
+#create skos dictionary
+def create_skos_dictionary(synonyms):
+    
+    graph = Graph()
+    skos = Namespace('http://www.w3.org/2004/02/skos/core#')
+    graph.bind('skos', skos)
+    uri_edurell = 'http://edurell.com/'
+
+
+    for concept in synonyms.keys():
+        
+        uri_concept = URIRef(uri_edurell + 'Ann/' + concept.replace(" ", "_"))
+        graph.add((uri_concept, RDF['type'], skos['Concept']))
+        graph.add((uri_concept, skos['prefLabel'], Literal(concept, lang='en')))
+        for synonym in synonyms[concept]:
+            graph.add((uri_concept, skos['altLable'], Literal(synonym, lang='en')))
+
+
+    graph.serialize(destination='output.txt', format='pretty-xml')
+
+
+    #print graph.serialize(format='json-ld').decode('utf-8')
+
+
+    return (graph)
