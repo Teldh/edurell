@@ -80,7 +80,6 @@ let definingConcepts = []
 
                 let lemma = data.lemma
                 console.log(lemma)
-
                 let present = true
 
                 let words = lemma.split(" ")
@@ -100,6 +99,8 @@ let definingConcepts = []
                     highlightConcept(lemma, "transcript")
                     $concepts.sort()
                     showConcepts()
+                    console.log($concepts)
+                    console.log("--------------------")
                    // $('#conceptsModal').modal('hide')
                     document.getElementById("newConcept").value = ""
                     document.getElementById("errorConcept").style.display = "none"
