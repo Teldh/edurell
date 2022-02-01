@@ -55,7 +55,7 @@ def create_skos_dictionary(synonyms):
         graph.add((uri_concept, RDF['type'], skos['Concept']))
         graph.add((uri_concept, skos['prefLabel'], Literal(concept, lang='en')))
         for synonym in synonyms[concept]:
-            graph.add((uri_concept, skos['altLable'], Literal(synonym, lang='en')))
+            graph.add((uri_concept, skos['altLabel'], Literal(synonym, lang='en')))
 
 
     graph.serialize(destination='output.txt', format='pretty-xml')
