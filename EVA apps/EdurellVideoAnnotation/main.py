@@ -27,7 +27,7 @@ from conll import get_text
 from burst_class import burst_extraction
 from metrics import calculate_metrics
 from synonyms import create_skos_dictionary, get_synonyms_from_list
-
+from skos_synonyms_query import try_query
 
 @app.route('/')
 def index():
@@ -444,12 +444,12 @@ def burst_launch():
 
     #print(concepts)
 
-    #PARTE EDO-RIC
+    #INIZIO PARTE EDO-RIC
 
   
     synonyms = get_synonyms_from_list(concepts)
     skos_dict = create_skos_dictionary(synonyms)
-
+    try_query(skos_dict)
 
     #FINE 
 
@@ -489,93 +489,6 @@ def burst_launch():
 
     return json
 
-'''
-
-
-'''
-def try_query() :
-
-    sinonimiDiProva = ['eye socket', 'orbit', 'dog', 'cat', 'move', 'run', 'go' ] 
-    synonyms = get_synonyms_from_list(sinonimiDiProva)
-    skos_dict = create_skos_dictionary(synonyms)
-    print(synonyms)
-
-    # Get concept uri from query
-    query1 = """
-        PREFIX edu: <http://edurell.com/Ann/>
-        SELECT ?c
-            WHERE {
-                ?c skos:prefLabel ?label .
-            }
-    """
-
-    # !!! https://derwen.ai/docs/kgl/ex4_0/
-
-    # Get only literal from query
-    query2 = """
-        PREFIX edu: <http://edurell.com/Ann/>
-        SELECT ?stripped_label
-            WHERE {
-                ?c skos:prefLabel ?label .
-                FILTER (lang(?label) = 'en')
-                BIND (STR(?label)  AS ?stripped_label) 
-            }
-    """
-
-    # Get synonyms from query
-    query3 = """
-        PREFIX edu: <http://edurell.com/Ann/>
-        SELECT ?alt_label
-            WHERE {
-                ?c skos:prefLabel ?p_label .
-                ?c skos:altLabel ?alt_label . 
-                FILTER (?p_label = "go"@en)
-            }
-    """
-
-    # Get synonyms from query with paramethers
-    query4 = """
-        PREFIX edu: <http://edurell.com/Ann/>
-        SELECT ?alt_label
-            WHERE {
-                ?c skos:prefLabel ?pr_label .
-                ?c skos:altLabel ?alt_label . 
-                FILTER (?pr_label = ?name)
-            }
-    """
-    
-    print("-------------\n")
-
-    #qres = skos_dict.query(query1)
-
-    #for row in qres:
-    #    print(row["c"].n3())
-
-    print("-------------\n")
-
-    #qres = skos_dict.query(query2)
-
-    #for row in qres:
-    #    print(row["stripped_label"].n3())
-
-    print("-------------\n")
-
-    #qres = skos_dict.query(query3)
-
-    #for row in qres:
-    #    print(row["alt_label"].n3())
-
-    print("-------------\n")
-
-    label_name = rdflib.Literal('run', lang='en')
-    qres = skos_dict.query(query4, initBindings={'name': label_name})
-
-    for row in qres:
-        print(row["alt_label"].n3())
-
-    print("-------------\n")
-
-    return 0
 
 # from color_histogram import get_image_from_video
 # @app.route('/test_image', methods = ['GET', 'POST'])
@@ -586,8 +499,6 @@ def try_query() :
 #
 
 if __name__ == '__main__':
-
-    try_query()
-
-    #app.run(host='127.0.0.1', threaded=True, debug=False) #, port=5050
+    app.run(host='127.0.0.1', threaded=True, debug=False) #, port=5050\
+    
     

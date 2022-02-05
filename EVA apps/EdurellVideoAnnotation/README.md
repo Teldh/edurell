@@ -7,7 +7,7 @@ Prerequisites: Anaconda
 
 Create the virtual environment:
 
-    conda create -n myenv python=3.6 pip pytorch
+    conda create -n myenv python=3.7 pip pytorch
     
 Activate the environment:
 
