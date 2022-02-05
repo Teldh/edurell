@@ -50,22 +50,25 @@
          </div>
 
          <div class="buttons">
-           <button onclick="showRelationDiv()" class="btn btn-primary btn-addrelation btn-dodgerblue">
-             Add Relation
-           </button>
+            <button onclick="showRelationDiv()" class="btn btn-primary btn-addrelation btn-dodgerblue">
+              Add Relation
+            </button>
 
-           <button onclick="showDescriptionDiv()" class="btn btn-primary btn-addrelation btn-dodgerblue">
-             Add description
-           </button>
+            <button onclick="showDescriptionDiv()" class="btn btn-primary btn-addrelation btn-dodgerblue">
+              Add description
+            </button>
 
+            <button type="button" onclick="showSynonyms()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#conceptsModal">
+              Synonyms
+            </button>
 
-             <button type="button" onclick="showConcepts()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#conceptsModal">
+            <button type="button" onclick="showConcepts()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#conceptsModal">
               Concepts
             </button>
 
             <button onclick="downloadJson()" class="btn btn-primary btn-addrelation btn-dodgerblue">
              Save graph
-           </button>
+            </button>
          </div>
 
 
@@ -347,6 +350,7 @@
   <script src="{{ url_for('static', filename='graph_visualization.js') }}"></script>
   <script src="{{ url_for('static', filename='video_range_slider.js') }}"></script>
   <script src="{{ url_for('static', filename='concepts.js') }}"></script>
+  <script src="{{ url_for('static', filename='synonyms.js') }}"></script>
   <script src="{{ url_for('static', filename='descriptions.js') }}"></script>
   <script src="{{ url_for('static', filename='subtitles.js') }}"></script>
   <script src="{{ url_for('static', filename='segmentation.js') }}"></script>
