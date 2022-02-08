@@ -11,35 +11,53 @@ let definingSynonyms = []
     document.getElementById("conceptsTable").innerHTML = "<div class=\" list-group-item list-group-item-action conceptList \"> </div>"
 
     //let synonyms = [["run","go"],["orbit","eye socket"]];
-    let synonyms = {"run":["go"],"go":["run"],"orbit":["eye socket"],"eye socket":["orbit"]};
+    let synonyms = {"run":["go" , "move", "proceed"],"go":["proceed","run", "move"],"proceed":["move", "run","go"], "move":["run" , "go", "proceed"], "orbit":["eye_socket"],"eye_socket":["orbit"],"a":["go" , "move", "proceed"],"b":["proceed","run", "move"],"c":["move", "run","go"], "d":["run" , "go", "proceed"], "e":["eye_socket"],"eye_socket":["orbit"]};
 
-    for(let key in synonyms) {
+    for(let c in synonyms) {
 
-      let c = key.replaceAll(" ","_")
-      console.log(synonyms[key])
+      let conceptX = c.replaceAll("_"," ")
+      let synonymsX = ""
 
-      for(let i in synonyms[key]) {
+      for(let i=0; i<synonyms[c].length; i++) {
 
-        let k = synonyms[key][i].replaceAll(" ","_")
-        console.log(k)
-
-        c = c + " , " + k 
+        let syn = synonyms[c][i].replaceAll("_"," ")
+        synonymsX = synonymsX + syn
+        if(i < synonyms[c].length -1) {
+          synonymsX +=  ", "
+        }
       }
 
       let href = "sub" + c
-
       let row ="<div class=\" list-group-item list-group-item-action conceptList toRemove\"> " +
-          "<a href=\"#"+href+"\" data-toggle=\"collapse\" aria-expanded=\"false\" id='menu_"+c+"' "
+          "<a href=\"#"+href+"\" data-toggle=\"collapse\" aria-expanded=\"false\" id='menu_"+c+"' >"
 
-      row += ">"+c+""
-      //  '<button class="icon-button" onclick="deleteConcept(this,'+"'"+synonyms[i][j]+"'"+')"><i class="fa fa-trash"></i></button>'
+      row += "<p id='concept_"+c+"' class=\" m-concept-text\">"+ conceptX +": </p>"
+      row += '<button class="icon-button" onclick="deleteConcept(this,'+"'"+c+"'"+')"><i class="fa fa-trash"></i></button>'
+      row += "<ul id='synonyms_"+c+"' class=\" m-synonym-text\"><li>"+ synonymsX +"</li></ul>"
 
+      /*
+        row += '</a>'+
+          '<ul class="collapse list-unstyled" id="'+href+'">'
+        if(isDefinition) {
+            for (let j in definitions) {
+                if (definitions[j].concept == $concepts[i]){
+                    let deleteParameters = "'"+$concepts[i]+"','"+ definitions[j].start +"','"+ definitions[j].end + "'"
 
-      row += '</a>'+
-        '<ul class="collapse list-unstyled" id="'+href+'">'
-
-      row += '</ul></div>'  
+                    row += '<li id="definition' +definitions[j].id + '">' +
+                        '<span style="margin-left:5%">Start: ' + definitions[j].start + ' End: ' + definitions[j].end +
+                        '<button class="deleteDefinitionIcon" ' +
+                          'onclick="deleteDefinition('+ deleteParameters +')">' +
+                          '<i class="fa fa-times"></i>' +
+                        '</button></a></span>' +
+                        '</li>'
+                }
+            }
+        }
+        row += '</ul></div>'
+      */
     
+      row += "</div>"
+
       document.getElementById("conceptsTable").innerHTML += row
     }
   }

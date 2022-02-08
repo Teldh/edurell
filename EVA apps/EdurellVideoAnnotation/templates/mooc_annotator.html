@@ -59,7 +59,7 @@
             </button>
 
             <button type="button" onclick="showSynonyms()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#conceptsModal">
-              Synonyms
+              Concepts & Synonyms
             </button>
 
             <button type="button" onclick="showConcepts()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#conceptsModal">
@@ -244,10 +244,12 @@
 
           <ul class="nav nav-tabs" id="myTab" role="tablist">
               <li class="nav-item">
-                <a class="nav-link active" id="concepts-tab" data-toggle="tab" href="#concepts" role="tab" aria-controls="home" aria-selected="true">Concepts</a>
+                <a class="nav-link active" id="concepts-tab" data-toggle="tab" href="#concepts" role="tab" aria-controls="home" aria-selected="true">Vocabulary</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" id="add-tab" data-toggle="tab" href="#add" role="tab" aria-controls="profile" aria-selected="false">Add new concept</a>
+              <li class="nav-item">
+                <a class="nav-link" id="add-tab" data-toggle="tab" href="#add" role="tab" aria-controls="profile" aria-selected="false">Manage synonyms</a>
               </li>
           </ul>
 
@@ -269,7 +271,7 @@
                 </div>
                   <br>
                 <div class="row">
-                    <button  onclick="addConcept()" class="btn btn-primary">Add concept</button>
+                    <button  onclick="addConcept()" class="btn btn-primary">Add new concept</button>
                 </div>
                   <br>
                 <div class="row" id="errorConcept" style="display:none">

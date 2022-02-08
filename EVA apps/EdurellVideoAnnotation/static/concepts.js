@@ -34,14 +34,11 @@ let definingConcepts = []
           else
               row += '<button class="icon-button" id="'+$concepts[i]+'Button" onclick="stopDefinition('+"'"+$concepts[i]+"'"+')"><i class="fa fa-pause"></i></button>'*/
 
-
+          /*
           row += '</a>'+
             '<ul class="collapse list-unstyled" id="'+href+'">'
-
-          /*if(isDefinition) {
+          if(isDefinition) {
               for (let j in definitions) {
-
-
                   if (definitions[j].concept == $concepts[i]){
                       let deleteParameters = "'"+$concepts[i]+"','"+ definitions[j].start +"','"+ definitions[j].end + "'"
 
@@ -53,11 +50,12 @@ let definingConcepts = []
                           '</button></a></span>' +
                           '</li>'
                   }
-
               }
-          }*/
-
+          }
           row += '</ul></div>'
+          */
+
+
 
         document.getElementById("conceptsTable").innerHTML += row
 
