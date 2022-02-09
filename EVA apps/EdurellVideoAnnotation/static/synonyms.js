@@ -11,7 +11,8 @@ let definingSynonyms = []
     document.getElementById("conceptsTable").innerHTML = "<div class=\" list-group-item list-group-item-action conceptList \"> </div>"
 
     //let synonyms = [["run","go"],["orbit","eye socket"]];
-    let synonyms = {"run":["go" , "move", "proceed"],"go":["proceed","run", "move"],"proceed":["move", "run","go"], "move":["run" , "go", "proceed"], "orbit":["eye_socket"],"eye_socket":["orbit"],"a":["go" , "move", "proceed"],"b":["proceed","run", "move"],"c":["move", "run","go"], "d":["run" , "go", "proceed"], "e":["eye_socket"],"eye_socket":["orbit"]};
+
+    let synonyms = $synonyms
 
     for(let c in synonyms) {
 
@@ -33,7 +34,8 @@ let definingSynonyms = []
 
       row += "<p id='concept_"+c+"' class=\" m-concept-text\">"+ conceptX +": </p>"
       row += '<button class="icon-button" onclick="deleteConcept(this,'+"'"+c+"'"+')"><i class="fa fa-trash"></i></button>'
-      row += "<ul id='synonyms_"+c+"' class=\" m-synonym-text\"><li>"+ synonymsX +"</li></ul>"
+      if(synonymsX.length > 0)
+        row += "<ul id='synonyms_"+c+"' class=\" m-synonym-text\"><li>"+ synonymsX +"</li></ul>"
 
       /*
         row += '</a>'+
@@ -62,8 +64,7 @@ let definingSynonyms = []
     }
   }
 
-  /*
-
+  // Add concept manually to the list of concepts (vocabulary)
   function addConcept(){
 
     let concept = document.getElementById("newConcept").value
@@ -93,7 +94,7 @@ let definingSynonyms = []
                     $concepts.push(lemma)
                     highlightConcept(lemma, "transcript")
                     $concepts.sort()
-                    showConcepts()
+                    showSynonyms()
                     console.log($concepts)
                     console.log("--------------------")
                    // $('#conceptsModal').modal('hide')
@@ -107,9 +108,100 @@ let definingSynonyms = []
         document.getElementById("errorConcept").innerHTML ="'" + concept +"' is already a concept"
         document.getElementById("errorConcept").style.display = "block"
     }
-}
+  }
 
+  // Create and add Synonym sets (vocabualary)
+  function selectSynonymSet(){
 
+    let synonymSetString = document.getElementById("selectSynonymSet").value
+    // var synonymSet = "run, move"
+
+    let synoymSet = synonymSetString.split(", ")
+    // var synonymSet = ["run","move"]
+    
+    document.getElementById("synonymSet").style.display = "block"
+    document.getElementById("errorSynonymSet").style.display = "none"
+    document.getElementById("synonymSet").innerHTML = synonymSetString;
+
+    for(let k = 0; k<synoymSet.length; k++) {
+      
+      word = synoymSet[k]
+
+      fetch('/annotator/lemmatize_word/' + word).then(function (response) {
+
+        response.json().then(function (data) {
+
+          let lemma = data.lemma
+          //console.log(lemma)
+          let present = true
+
+          let words = lemma.split(" ")
+          for(let i = 0; i<words.length; i++) {
+            if(!$allLemmas.includes(words[i])) {
+                present = false
+                break
+            }
+          }
+
+          if (!present){
+              document.getElementById("errorSynonymSet").innerHTML ="one or more words are not present in the text"
+              document.getElementById("errorSynonymSet").style.display = "block"
+              document.getElementById("synonymSet").style.display = "none"
+          }
+          
+        })
+      })
+    }
+
+  }
+
+  // Create and add Synonym sets (vocabualary)
+  function addSynonym(){
+
+    let concept = document.getElementById("newSynonymSet").value
+
+    if(!$concepts.includes(concept)) {
+        fetch('/annotator/lemmatize_word/' + concept).then(function (response) {
+
+            response.json().then(function (data) {
+
+                let lemma = data.lemma
+                console.log(lemma)
+                let present = true
+
+                let words = lemma.split(" ")
+                for(let i = 0; i<words.length; i++)
+                    if(!$allLemmas.includes(words[i])) {
+                        present = false
+                        break
+                    }
+
+                if (!present){
+                    document.getElementById("errorConcept").innerHTML ="'" + concept +"' is not present in the text"
+                    document.getElementById("errorConcept").style.display = "block"
+                }
+
+                else if (!$concepts.includes(lemma)){
+                    $concepts.push(lemma)
+                    highlightConcept(lemma, "transcript")
+                    $concepts.sort()
+                    showSynonyms()
+                    console.log($concepts)
+                    console.log("--------------------")
+                   // $('#conceptsModal').modal('hide')
+                    document.getElementById("newConcept").value = ""
+                    document.getElementById("errorConcept").style.display = "none"
+                }
+
+            })
+        })
+    }else{
+        document.getElementById("errorConcept").innerHTML ="'" + concept +"' is already a concept"
+        document.getElementById("errorConcept").style.display = "block"
+    }
+  }
+
+/*
   function deleteConcept(button,concept) {
 
     //rimuovo riga della tabella
@@ -173,7 +265,6 @@ let definingSynonyms = []
 
   /* highlight a concept in a div with id div_id */
 
-  /*
   function highlightConcept(concept, div_id){
 
   let words = concept.split(" ")
@@ -204,16 +295,14 @@ let definingSynonyms = []
           //controllo che le altre parole non siano nella riga successiva
           //prendo riga successiva
           let nextRow =  $(currentSpan).parent().nextAll('p:first')
-
+          
           //prendo la prima parola
             if(nextRow !== undefined){
                 currentSpan = nextRow.find("span")[0]
                 if(currentSpan !== undefined)
                     nextWord = currentSpan.attributes[0].nodeValue
             }
-
         }
-
         if(nextWord !== words[j]){
             isConcept = false
             break
@@ -222,26 +311,16 @@ let definingSynonyms = []
         allSpan.push(currentSpan)
       }
 
-
       if(isConcept){
 
         for(let s=0; s<allSpan.length -1 ; s++)
           allSpan[s].style.marginRight = "4px"//.innerHTML += " "
 
-
         $(allSpan).wrapAll("<span class='concept' lemma='"+ concept.replaceAll(" ", "_") +"'>")
-
       }
-
-
     })
-
   }
 
-  
-
 }
-
-*/
 
 

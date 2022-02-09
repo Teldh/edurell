@@ -62,9 +62,11 @@
               Concepts & Synonyms
             </button>
 
+            <!--
             <button type="button" onclick="showConcepts()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#conceptsModal">
               Concepts
             </button>
+            -->
 
             <button onclick="downloadJson()" class="btn btn-primary btn-addrelation btn-dodgerblue">
              Save graph
@@ -237,23 +239,28 @@
       </div>-->
 
 
+      <!-- Modal Concepts & Synonyms -->
       <div class="modal-body">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
 
+          <!-- Header of the modal Concepts & Synonyms -->
           <ul class="nav nav-tabs" id="myTab" role="tablist">
               <li class="nav-item">
                 <a class="nav-link active" id="concepts-tab" data-toggle="tab" href="#concepts" role="tab" aria-controls="home" aria-selected="true">Vocabulary</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="add-tab" data-toggle="tab" href="#add" role="tab" aria-controls="profile" aria-selected="false">Add new concept</a>
+                <a class="nav-link" id="add-tab" data-toggle="tab" href="#add-concept" role="tab" aria-controls="profile" aria-selected="false">Add new concept</a>
               <li class="nav-item">
-                <a class="nav-link" id="add-tab" data-toggle="tab" href="#add" role="tab" aria-controls="profile" aria-selected="false">Manage synonyms</a>
+                <a class="nav-link" id="add-tab" data-toggle="tab" href="#add-synonyms" role="tab" aria-controls="profile" aria-selected="false">Manage synonyms</a>
               </li>
           </ul>
 
+          <!-- Body of the modal Concepts & Synonyms -->
           <div class="tab-content" id="myTabContent">
+
+            <!-- TAB 1 - Concepts Vocabulary -->
             <div class="tab-pane fade show active" id="concepts" role="tabpanel" aria-labelledby="concepts-tab" style="max-height:400px;overflow:auto;">
                 <!--<table class="table">
                   <tbody id="conceptsTable"></tbody>
@@ -262,7 +269,9 @@
 
                 </div>
             </div>
-            <div class="tab-pane fade" id="add" role="tabpanel" aria-labelledby="add-tab">
+
+            <!-- TAB 2 - Add Concepts -->
+            <div class="tab-pane fade" id="add-concept" role="tabpanel" aria-labelledby="add-tab">
               <div style="padding:7%;">
 
                 <div class="row">
@@ -278,6 +287,43 @@
                 </div>
               </div>
             </div>
+
+            <!-- TAB 3 - Manage Synonyms -->
+            <div class="tab-pane fade" id="add-synonyms" role="tabpanel" aria-labelledby="add-tab">
+              <div style="padding:7%;">
+
+                <!-- Synonym set selected -->
+                <div class="row">
+                  <p id="synonymSet"></p>
+                </div>
+
+                <!-- Synonym set selection -->
+                <div class="row">
+                  <label for="selectSynonymSet">Synonym Set:</label>
+                  <input type="text" class="form-control" autocomplete="off" id="selectSynonymSet"  placeholder="Select synonym list">
+                </div>
+                  <br>
+                <div class="row">
+                    <button  onclick="selectSynonymSet()" class="btn btn-primary">Select Synonym Set</button>
+                </div>
+                <div class="row" id="errorSynonymSet" style="display:none">
+                </div>
+
+                <!-- Add new synonym -->
+                <div class="row">
+                    <label for="newSynonym">New Synonym:</label>
+                    <input type="text" class="form-control" autocomplete="off" id="newSynonym"  placeholder="Enter new synonym">
+                </div>
+                  <br>
+                <div class="row">
+                    <button  onclick="addSynonym()" class="btn btn-primary">Add Synonym Relation</button>
+                </div>
+                  <br>
+                <div class="row" id="errorNewSynonym" style="display:none">
+                </div>
+              </div>
+            </div>
+
           </div>
 
       </div>
@@ -308,6 +354,11 @@
       let $imagesPath = {{ images_path|tojson }};
       let $concepts = {{ concepts|tojson }};
       $concepts.sort()
+      //let $synonyms = {"run":["go" , "move", "proceed"],"go":["proceed","run", "move"],"proceed":["move", "run","go"], "move":["run" , "go", "proceed"], "orbit":["eye_socket"],"eye_socket":["orbit"],"a":["go" , "move", "proceed"],"b":["proceed","run", "move"],"c":["move", "run","go"], "d":["run" , "go", "proceed"], "e":["eye_socket"],"eye_socket":["orbit"]};
+      let $synonyms = {};
+      for(let i in $concepts) {
+        $synonyms[$concepts[i]] = [];
+      }
       let $lemmatizedSubs = {{ lemmatized_subtitles|tojson }};
       let $video_id = {{ vid_id|tojson }};
       let $annotator = {{ annotator|tojson }};
@@ -351,7 +402,7 @@
   <script src="../static/autocomplete.js"></script>-->
   <script src="{{ url_for('static', filename='graph_visualization.js') }}"></script>
   <script src="{{ url_for('static', filename='video_range_slider.js') }}"></script>
-  <script src="{{ url_for('static', filename='concepts.js') }}"></script>
+  <!--<script src="{{ url_for('static', filename='concepts.js') }}"></script>-->
   <script src="{{ url_for('static', filename='synonyms.js') }}"></script>
   <script src="{{ url_for('static', filename='descriptions.js') }}"></script>
   <script src="{{ url_for('static', filename='subtitles.js') }}"></script>

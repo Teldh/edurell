@@ -1,7 +1,7 @@
 autocomplete(document.getElementById("prerequisite"), $concepts);
 autocomplete(document.getElementById("target"), $concepts);
 autocomplete(document.getElementById("conceptDefined"), $concepts);
-
+autocomplete(document.getElementById("selectSynonymSet"), $concepts);
 
 
 function autocomplete(inp, arr) {
