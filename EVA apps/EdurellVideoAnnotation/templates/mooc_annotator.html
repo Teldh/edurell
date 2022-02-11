@@ -294,32 +294,36 @@
 
                 <!-- Synonym set selected -->
                 <div class="row">
-                  <p id="synonymSet"></p>
+                  <p class="spaced-text">Selected synonym set: </p><p class="synonym-set-class" id="synonymSet"></p>
                 </div>
 
                 <!-- Synonym set selection -->
-                <div class="row">
-                  <label for="selectSynonymSet">Synonym Set:</label>
-                  <input type="text" class="form-control" autocomplete="off" id="selectSynonymSet"  placeholder="Select synonym list">
-                </div>
-                  <br>
-                <div class="row">
-                    <button  onclick="selectSynonymSet()" class="btn btn-primary">Select Synonym Set</button>
-                </div>
-                <div class="row" id="errorSynonymSet" style="display:none">
+                <div id="synset-selection" class="spaced-text">
+                  <div class="row">
+                    <label for="selectSynonymSet">Synonym Set:</label>
+                    <input type="text" class="form-control" autocomplete="off" id="selectSynonymSet"  placeholder="Select one of the synonym list word">
+                  </div>
+                    <br>
+                  <div class="row">
+                      <button onclick="selectSynonymSet()" class="btn btn-primary">Select Synonym Set</button>
+                  </div>
+                  <div class="row" id="errorSynonymSet" style="display:none">
+                  </div>
                 </div>
 
                 <!-- Add new synonym -->
-                <div class="row">
-                    <label for="newSynonym">New Synonym:</label>
-                    <input type="text" class="form-control" autocomplete="off" id="newSynonym"  placeholder="Enter new synonym">
-                </div>
-                  <br>
-                <div class="row">
-                    <button  onclick="addSynonym()" class="btn btn-primary">Add Synonym Relation</button>
-                </div>
-                  <br>
-                <div class="row" id="errorNewSynonym" style="display:none">
+                <div id="add-syn-selection" class="spaced-text">
+                  <div class="row">
+                      <label for="newSynonym">New Synonym:</label>
+                      <input type="text" class="form-control" autocomplete="off" id="newSynonym"  placeholder="Enter new synonym">
+                  </div>
+                    <br>
+                  <div class="row">
+                      <button  onclick="addSynonym()" class="btn btn-primary">Add Synonym Relation</button>
+                  </div>
+                    <br>
+                  <div class="row" id="errorNewSynonym" style="display:none">
+                  </div>
                 </div>
               </div>
             </div>
@@ -359,6 +363,7 @@
       for(let i in $concepts) {
         $synonyms[$concepts[i]] = [];
       }
+      let $synonymList = [];
       let $lemmatizedSubs = {{ lemmatized_subtitles|tojson }};
       let $video_id = {{ vid_id|tojson }};
       let $annotator = {{ annotator|tojson }};

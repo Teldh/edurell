@@ -92,6 +92,7 @@ let definingSynonyms = []
 
                 else if (!$concepts.includes(lemma)){
                     $concepts.push(lemma)
+                    $synonyms[lemma]=[];
                     highlightConcept(lemma, "transcript")
                     $concepts.sort()
                     showSynonyms()
@@ -112,93 +113,102 @@ let definingSynonyms = []
 
   // Create and add Synonym sets (vocabualary)
   function selectSynonymSet(){
-
-    let synonymSetString = document.getElementById("selectSynonymSet").value
-    // var synonymSet = "run, move"
-
-    let synoymSet = synonymSetString.split(", ")
-    // var synonymSet = ["run","move"]
     
-    document.getElementById("synonymSet").style.display = "block"
+    $synonymList=[];
+
+    //console.log("---")
+
+    let wordOfSynonymSet = document.getElementById("selectSynonymSet").value
+    // var synonymSet = "run, move"
+    //console.log("synonymSetString")
+    //console.log(synonymSetString)
+
     document.getElementById("errorSynonymSet").style.display = "none"
-    document.getElementById("synonymSet").innerHTML = synonymSetString;
+    document.getElementById("synonymSet").innerHTML = "";
 
-    for(let k = 0; k<synoymSet.length; k++) {
-      
-      word = synoymSet[k]
+    fetch('/annotator/lemmatize_word/' + wordOfSynonymSet).then(function (response) {
 
-      fetch('/annotator/lemmatize_word/' + word).then(function (response) {
+      response.json().then(function (data) {
 
-        response.json().then(function (data) {
+        let lemma = data.lemma
+        //console.log("lemma")
+        //console.log(lemma)
 
-          let lemma = data.lemma
-          //console.log(lemma)
-          let present = true
+        let present = true
 
-          let words = lemma.split(" ")
-          for(let i = 0; i<words.length; i++) {
-            if(!$allLemmas.includes(words[i])) {
-                present = false
-                break
-            }
-          }
+        if(!$concepts.includes(lemma)) {
+            //console.log("concepts")
+            //console.log($concepts) 
+            present = false
+        }
 
-          if (!present){
-              document.getElementById("errorSynonymSet").innerHTML ="one or more words are not present in the text"
-              document.getElementById("errorSynonymSet").style.display = "block"
-              document.getElementById("synonymSet").style.display = "none"
-          }
+        if (!present) {
           
-        })
+          document.getElementById("errorSynonymSet").innerHTML ="one or more words are not present in the text"
+          document.getElementById("errorSynonymSet").style.display = "block"
+          document.getElementById("synonymSet").style.display = "none"
+          $synonymList = [];
+
+        }
+        else if (present) {
+          
+          let listOfSynonymsOfLemma = $synonyms[lemma];
+          let synonymSetText = lemma;
+          for (let i=0; i<listOfSynonymsOfLemma.length; i++) {
+            synonymSetText += ", " + listOfSynonymsOfLemma[i];
+          }
+          $synonymList = [lemma];
+          for (let i=0; i<listOfSynonymsOfLemma.length; i++) {
+            $synonymList.push(listOfSynonymsOfLemma[i]);
+          }
+          document.getElementById("synonymSet").style.display = "block"
+          document.getElementById("synonymSet").innerHTML = synonymSetText;
+        }
+        
       })
-    }
+    })
 
   }
 
   // Create and add Synonym sets (vocabualary)
   function addSynonym(){
 
-    let concept = document.getElementById("newSynonymSet").value
+    let newSynonym = document.getElementById("newSynonym").value
+    
+    document.getElementById("errorNewSynonym").style.display = "none"
 
-    if(!$concepts.includes(concept)) {
-        fetch('/annotator/lemmatize_word/' + concept).then(function (response) {
+    fetch('/annotator/lemmatize_word/' + newSynonym).then(function (response) {
 
-            response.json().then(function (data) {
+        response.json().then(function (data) {
 
-                let lemma = data.lemma
-                console.log(lemma)
-                let present = true
+            let lemma = data.lemma
+            console.log(lemma)
 
-                let words = lemma.split(" ")
-                for(let i = 0; i<words.length; i++)
-                    if(!$allLemmas.includes(words[i])) {
-                        present = false
-                        break
-                    }
+            if($synonymList.includes(lemma)) {  // already present
+              document.getElementById("errorNewSynonym").innerHTML ="'" + lemma +"' is already present in the synonym set"
+              document.getElementById("errorNewSynonym").style.display = "block"
+            }
+            else if (!$concepts.includes(lemma)){ // not a concept
+                document.getElementById("errorNewSynonym").innerHTML ="'" + lemma +"' is not a concept, add it first"
+                document.getElementById("errorNewSynonym").style.display = "block"
+            }
+            else {  // all good !
+              console.log("synonyms")
+              console.log($synonyms);
+              for (let word of $synonymList) {
+                $synonyms[word].push(lemma);          
+              }
+              for (let word of $synonymList) {
+                $synonyms[lemma].push(word);
+              }
+              showSynonyms();
+              console.log("synonyms")
+              console.log($synonyms);
+              $synonymList = [];
+            }
 
-                if (!present){
-                    document.getElementById("errorConcept").innerHTML ="'" + concept +"' is not present in the text"
-                    document.getElementById("errorConcept").style.display = "block"
-                }
-
-                else if (!$concepts.includes(lemma)){
-                    $concepts.push(lemma)
-                    highlightConcept(lemma, "transcript")
-                    $concepts.sort()
-                    showSynonyms()
-                    console.log($concepts)
-                    console.log("--------------------")
-                   // $('#conceptsModal').modal('hide')
-                    document.getElementById("newConcept").value = ""
-                    document.getElementById("errorConcept").style.display = "none"
-                }
-
-            })
         })
-    }else{
-        document.getElementById("errorConcept").innerHTML ="'" + concept +"' is already a concept"
-        document.getElementById("errorConcept").style.display = "block"
-    }
+      })
   }
 
 /*
