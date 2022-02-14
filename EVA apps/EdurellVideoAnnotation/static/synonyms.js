@@ -12,18 +12,18 @@ let definingSynonyms = []
 
     //let synonyms = [["run","go"],["orbit","eye socket"]];
 
-    let synonyms = $synonyms
+    let vocabulary = $conceptVocabulary
 
-    for(let c in synonyms) {
+    for(let c in vocabulary) {
 
       let conceptX = c.replaceAll("_"," ")
       let synonymsX = ""
 
-      for(let i=0; i<synonyms[c].length; i++) {
+      for(let i=0; i<vocabulary[c].length; i++) {
 
-        let syn = synonyms[c][i].replaceAll("_"," ")
+        let syn = vocabulary[c][i].replaceAll("_"," ")
         synonymsX = synonymsX + syn
-        if(i < synonyms[c].length -1) {
+        if(i < vocabulary[c].length -1) {
           synonymsX +=  ", "
         }
       }
@@ -92,7 +92,7 @@ let definingSynonyms = []
 
                 else if (!$concepts.includes(lemma)){
                     $concepts.push(lemma)
-                    $synonyms[lemma]=[];
+                    $conceptVocabulary[lemma]=[];
                     highlightConcept(lemma, "transcript")
                     $concepts.sort()
                     showSynonyms()
@@ -144,7 +144,7 @@ let definingSynonyms = []
 
         if (!present) {
           
-          document.getElementById("errorSynonymSet").innerHTML ="one or more words are not present in the text"
+          document.getElementById("errorSynonymSet").innerHTML ="the word is not a concept"
           document.getElementById("errorSynonymSet").style.display = "block"
           document.getElementById("synonymSet").style.display = "none"
           $synonymList = [];
@@ -152,7 +152,7 @@ let definingSynonyms = []
         }
         else if (present) {
           
-          let listOfSynonymsOfLemma = $synonyms[lemma];
+          let listOfSynonymsOfLemma = $conceptVocabulary[lemma];
           let synonymSetText = lemma;
           for (let i=0; i<listOfSynonymsOfLemma.length; i++) {
             synonymSetText += ", " + listOfSynonymsOfLemma[i];
@@ -167,13 +167,12 @@ let definingSynonyms = []
         
       })
     })
-
   }
 
   // Create and add Synonym sets (vocabualary)
   function addSynonym(){
 
-    let newSynonym = document.getElementById("newSynonym").value
+    let newSynonym = document.getElementById("synonymWord").value
     
     document.getElementById("errorNewSynonym").style.display = "none"
 
@@ -182,7 +181,7 @@ let definingSynonyms = []
         response.json().then(function (data) {
 
             let lemma = data.lemma
-            console.log(lemma)
+            //console.log(lemma)
 
             if($synonymList.includes(lemma)) {  // already present
               document.getElementById("errorNewSynonym").innerHTML ="'" + lemma +"' is already present in the synonym set"
@@ -193,17 +192,17 @@ let definingSynonyms = []
                 document.getElementById("errorNewSynonym").style.display = "block"
             }
             else {  // all good !
-              console.log("synonyms")
-              console.log($synonyms);
+              //console.log("synonyms")
+              //console.log($synonyms);
               for (let word of $synonymList) {
-                $synonyms[word].push(lemma);          
+                $conceptVocabulary[word].push(lemma);          
               }
               for (let word of $synonymList) {
-                $synonyms[lemma].push(word);
+                $conceptVocabulary[lemma].push(word);
               }
               showSynonyms();
-              console.log("synonyms")
-              console.log($synonyms);
+              //console.log("synonyms")
+              //console.log($synonyms);
               $synonymList = [];
             }
 
@@ -211,24 +210,74 @@ let definingSynonyms = []
       })
   }
 
-/*
+ 
+  function removeSynonym(){
+
+    let synonymToRemove = document.getElementById("synonymWord").value
+    
+    document.getElementById("errorRemoveSynonym").style.display = "none"
+
+    fetch('/annotator/lemmatize_word/' + synonymToRemove).then(function (response) {
+
+        response.json().then(function (data) {
+
+            let lemma = data.lemma
+            console.log(lemma)
+
+            if (!$concepts.includes(lemma)){ // not a concept
+                document.getElementById("errorRemoveSynonym").innerHTML ="'" + lemma +"' is not a concept"
+                document.getElementById("errorRemoveSynonym").style.display = "block"
+            }
+            else if(!$synonymList.includes(lemma)) {  // not a synonym
+              document.getElementById("errorRemoveSynonym").innerHTML ="'" + lemma +"' is not in the synonym set selected"
+              document.getElementById("errorRemoveSynonym").style.display = "block"     
+            }
+            else if($synonymList.includes(lemma)) {  // present in the synonymset, to remove
+              
+              $conceptVocabulary[lemma] = []; 
+
+              for (let word of $synonymList) {
+                if(word !== lemma) {
+                  $conceptVocabulary[word] = $conceptVocabulary[word].filter(item => item !== lemma);
+                }
+              }
+
+              showSynonyms();
+              //console.log("synonyms")
+              //console.log($synonyms);
+              $synonymList = [];
+
+            }
+            
+        })
+      })
+  }
+
   function deleteConcept(button,concept) {
 
     //rimuovo riga della tabella
     $(button).closest('div').slideUp(function() {
-        $(this).remove();
+      $(this).remove();
     });
 
-    //cancello concetto
+    //cancello concetto e i sinonimi
+    delete $conceptVocabulary[concept];
+    
+    for (let word in $conceptVocabulary) {
+      if(word !== concept) {
+        $conceptVocabulary[word] = $conceptVocabulary[word].filter(item => item !== concept);
+      }
+    }
+    
     for(let i in $concepts){
-
         if ( $concepts[i] === concept) {
             $concepts.splice(i, 1);
             break
         }
-
     }
 
+    showSynonyms();
+    
 
     //rimuovo relazioni e definizioni del concetto
     let relToRemove = []
@@ -253,9 +302,6 @@ let definingSynonyms = []
     for (let i = defToRemove.length -1; i >= 0; i--)
         definitions.splice(defToRemove[i],1);
 
-
-
-
     //se il concetto è composto da più parole
     if(concept.split(" ").length > 1){
         concept = concept.replaceAll(" ", "_")
@@ -271,7 +317,6 @@ let definingSynonyms = []
 
   }
   
-  */
 
   /* highlight a concept in a div with id div_id */
 

@@ -221,8 +221,49 @@ function showResults(result){
     document.getElementById("loading").style.display = "none"
     document.getElementById("results").style.display = "block"
     //document.getElementById("results").innerText += result
-    network = showNetwork($concepts, result.concept_map, "network")
 
+    let conceptsWithSynonyms = [];
+    let relationsWithSynonyms = [];
+    let $conceptVocabulary = result["conceptVocabulary"];
+
+    for(let word in $conceptVocabulary) {
+        let node = [word];
+        for(let synonym of $conceptVocabulary[word]) {
+            node.push(synonym);
+        }
+        node.sort();
+        let nodeName = "";
+        for(let i=0; i<node.length; i++) {
+            if(i===0) {
+                nodeName = node[i];
+            }
+            else {
+                nodeName += " = " + node[i];
+            }   
+        }
+        //console.log(node)
+
+        conceptsWithSynonyms.push(nodeName);
+        //console.log(conceptsWithSynonyms)
+    }
+
+    let graphNodes = [...new Set(conceptsWithSynonyms)];
+    //console.log(graphNodes)
+
+    for (let item of result.concept_map){
+        let newRelation = {}
+        for (let node of graphNodes){
+            if  (node.split(" = ").includes(item["prerequisite"])){
+                    newRelation["prerequisite"]=node
+            }
+            if  (node.split(" = ").includes(item["target"])){   
+                newRelation["target"]=node
+            }
+        }
+        relationsWithSynonyms.push(newRelation)
+    }
+
+    network = showNetwork(graphNodes, relationsWithSynonyms, "network")
 
     let data_summary = result.data_summary
 

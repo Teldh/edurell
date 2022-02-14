@@ -446,9 +446,8 @@ def burst_launch():
 
     #INIZIO PARTE EDO-RIC
 
-  
-    synonyms = get_synonyms_from_list(concepts)
-    skos_dict = create_skos_dictionary(synonyms)
+    conceptVocabulary = get_synonyms_from_list(concepts)
+    skos_dict = create_skos_dictionary(conceptVocabulary)
     try_query(skos_dict)
 
     #FINE 
@@ -457,15 +456,13 @@ def burst_launch():
     concept_map, definitions = burst_extraction(video_id, concepts)
     results = data_summary(concept_map, definitions, video_id)
 
-
-
     json = {
         "concepts": concepts,
         "concept_map": concept_map,
         "definitions": definitions,
         "data_summary": results,
         "agreement": None,
-        "synonyms": synonyms
+        "conceptVocabulary": conceptVocabulary
     }
 
     graphs = db_mongo.get_graphs_info(video_id)

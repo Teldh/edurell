@@ -348,7 +348,47 @@ function checkCycle(prereq, target){
 /* Visualization of the graph --> graph_visualization.js*/
 function startVisualization(){
 
-    let n = showNetwork($concepts, relations, "network")
+    let conceptsWithSynonyms = [];
+    let relationsWithSynonyms = [];
+
+    for(let word in $conceptVocabulary) {
+        let node = [word];
+        for(let synonym of $conceptVocabulary[word]) {
+            node.push(synonym);
+        }
+        node.sort();
+        let nodeName = "";
+        for(let i=0; i<node.length; i++) {
+            if(i===0) {
+                nodeName = node[i];
+            }
+            else {
+                nodeName += " = " + node[i];
+            }   
+        }
+        //console.log(node)
+
+        conceptsWithSynonyms.push(nodeName);
+        //console.log(conceptsWithSynonyms)
+    }
+
+    let graphNodes = [...new Set(conceptsWithSynonyms)];
+    //console.log(graphNodes)
+
+    for (let item of relations){
+        let newRelation = {}
+        for (let node of graphNodes){
+            if  (node.split(" = ").includes(item["prerequisite"])){
+                    newRelation["prerequisite"]=node
+            }
+            if  (node.split(" = ").includes(item["target"])){   
+                newRelation["target"]=node
+            }
+        }
+        relationsWithSynonyms.push(newRelation)
+    }
+
+    let n = showNetwork(graphNodes, relationsWithSynonyms, "network")
     n.fit()
 
 }

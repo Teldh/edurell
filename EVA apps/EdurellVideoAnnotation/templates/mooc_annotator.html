@@ -315,14 +315,20 @@
                 <div id="add-syn-selection" class="spaced-text">
                   <div class="row">
                       <label for="newSynonym">New Synonym:</label>
-                      <input type="text" class="form-control" autocomplete="off" id="newSynonym"  placeholder="Enter new synonym">
+                      <input type="text" class="form-control" autocomplete="off" id="synonymWord"  placeholder="Enter synonym to add/remove">
                   </div>
                     <br>
                   <div class="row">
                       <button  onclick="addSynonym()" class="btn btn-primary">Add Synonym Relation</button>
                   </div>
+                  <div class="row">
+                    <button  onclick="removeSynonym()" class="btn btn-primary">Remove Synonym Relation</button>
+                  </div>
                     <br>
                   <div class="row" id="errorNewSynonym" style="display:none">
+                  </div>
+                    <br>
+                  <div class="row" id="errorRemoveSynonym" style="display:none">
                   </div>
                 </div>
               </div>
@@ -359,9 +365,9 @@
       let $concepts = {{ concepts|tojson }};
       $concepts.sort()
       //let $synonyms = {"run":["go" , "move", "proceed"],"go":["proceed","run", "move"],"proceed":["move", "run","go"], "move":["run" , "go", "proceed"], "orbit":["eye_socket"],"eye_socket":["orbit"],"a":["go" , "move", "proceed"],"b":["proceed","run", "move"],"c":["move", "run","go"], "d":["run" , "go", "proceed"], "e":["eye_socket"],"eye_socket":["orbit"]};
-      let $synonyms = {};
+      let $conceptVocabulary = {};
       for(let i in $concepts) {
-        $synonyms[$concepts[i]] = [];
+        $conceptVocabulary[$concepts[i]] = [];
       }
       let $synonymList = [];
       let $lemmatizedSubs = {{ lemmatized_subtitles|tojson }};
