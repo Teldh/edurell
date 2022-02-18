@@ -232,6 +232,8 @@ def video_selection():
                 lemmatized_concepts = lemmatize(concepts)
 
 
+
+
             db_mongo.insert_video({"video_id":vid_id, "title":title, "creator":creator, "segment_starts":start_times,
                                    "segment_ends": end_times, "extracted_keywords": lemmatized_concepts})
 
@@ -255,14 +257,37 @@ def video_selection():
                     lemmatized_concepts.append(rel["target"])
 
             return render_template('mooc_annotator.html', result=subtitles, vid_id=vid_id, start_times=start_times,
-                                   images_path=images_path, concepts=lemmatized_concepts, video_duration=video_duration,
-                                   lemmatized_subtitles=lemmatized_subtitles, annotator=annotator, title=title,
-                                    all_lemmas=all_lemmas, relations=relations, definitions=definitions)
+                                   images_path=images_path, concepts=lemmatized_concepts,video_duration=video_duration, 
+                                   lemmatized_subtitles=lemmatized_subtitles, annotator=annotator,
+                                   title=title, all_lemmas=all_lemmas, relations=relations, definitions=definitions)
         except Exception as e:
             print(e)
             flash(e, "danger")
 
     return render_template('video_selection.html', form=form, videos=videos)
+
+
+# Get concept Vocabulary with synonyms (NLTK-WORDNET)
+@app.route('/get_concept_vocabulary', methods=["GET", "POST"])
+def get_concept_vocabulary():
+    data = request.json
+    concepts = data["concepts"]
+
+    #print(concepts)
+
+    # Finding synonyms with NLTK Wordnet
+    conceptVocabulary = get_synonyms_from_list(concepts)
+    
+    # Skos dictionary
+    #skos_dict = create_skos_dictionary(conceptVocabulary)
+    #try_query(skos_dict)
+
+    json = {
+        #"concepts": concepts,
+        "conceptVocabulary": conceptVocabulary
+    }
+
+    return json
 
 
 @app.route('/lemmatize_word/<path:word>')
@@ -444,15 +469,6 @@ def burst_launch():
 
     #print(concepts)
 
-    #INIZIO PARTE EDO-RIC
-
-    conceptVocabulary = get_synonyms_from_list(concepts)
-    skos_dict = create_skos_dictionary(conceptVocabulary)
-    try_query(skos_dict)
-
-    #FINE 
-
-
     concept_map, definitions = burst_extraction(video_id, concepts)
     results = data_summary(concept_map, definitions, video_id)
 
@@ -462,7 +478,6 @@ def burst_launch():
         "definitions": definitions,
         "data_summary": results,
         "agreement": None,
-        "conceptVocabulary": conceptVocabulary
     }
 
     graphs = db_mongo.get_graphs_info(video_id)
