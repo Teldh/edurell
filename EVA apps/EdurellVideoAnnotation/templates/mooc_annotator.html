@@ -58,7 +58,7 @@
               Add description
             </button>
 
-            <button type="button" onclick="showSynonyms()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#conceptsModal">
+            <button type="button" onclick="showVocabulary()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#conceptsModal">
               Concepts & Synonyms
             </button>
 
@@ -364,7 +364,6 @@
       let $imagesPath = {{ images_path|tojson }};
       let $concepts = {{ concepts|tojson }};
       $concepts.sort()
-      //let $synonyms = {"run":["go" , "move", "proceed"],"go":["proceed","run", "move"],"proceed":["move", "run","go"], "move":["run" , "go", "proceed"], "orbit":["eye_socket"],"eye_socket":["orbit"],"a":["go" , "move", "proceed"],"b":["proceed","run", "move"],"c":["move", "run","go"], "d":["run" , "go", "proceed"], "e":["eye_socket"],"eye_socket":["orbit"]};
       let $conceptVocabulary = {};
       for(let i in $concepts) {
         $conceptVocabulary[$concepts[i]] = [];
@@ -414,7 +413,7 @@
   <script src="{{ url_for('static', filename='graph_visualization.js') }}"></script>
   <script src="{{ url_for('static', filename='video_range_slider.js') }}"></script>
   <!--<script src="{{ url_for('static', filename='concepts.js') }}"></script>-->
-  <script src="{{ url_for('static', filename='synonyms.js') }}"></script>
+  <script src="{{ url_for('static', filename='conceptVocabulary.js') }}"></script>
   <script src="{{ url_for('static', filename='descriptions.js') }}"></script>
   <script src="{{ url_for('static', filename='subtitles.js') }}"></script>
   <script src="{{ url_for('static', filename='segmentation.js') }}"></script>

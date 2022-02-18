@@ -2,7 +2,7 @@ let definingSynonyms = []
 
 //console.log($concepts)
 
-  function showSynonyms(){
+  function showVocabulary(){
 
     document.getElementById("newConcept").value = ""
     document.getElementById("errorConcept").style.display = "none"
@@ -95,7 +95,7 @@ let definingSynonyms = []
                     $conceptVocabulary[lemma]=[];
                     highlightConcept(lemma, "transcript")
                     $concepts.sort()
-                    showSynonyms()
+                    showVocabulary()
                     console.log($concepts)
                     console.log("--------------------")
                    // $('#conceptsModal').modal('hide')
@@ -200,7 +200,7 @@ let definingSynonyms = []
               for (let word of $synonymList) {
                 $conceptVocabulary[lemma].push(word);
               }
-              showSynonyms();
+              showVocabulary();
               //console.log("synonyms")
               //console.log($synonyms);
               $synonymList = [];
@@ -242,7 +242,7 @@ let definingSynonyms = []
                 }
               }
 
-              showSynonyms();
+              showVocabulary();
               //console.log("synonyms")
               //console.log($synonyms);
               $synonymList = [];
@@ -276,7 +276,7 @@ let definingSynonyms = []
         }
     }
 
-    showSynonyms();
+    showVocabulary();
     
 
     //rimuovo relazioni e definizioni del concetto
