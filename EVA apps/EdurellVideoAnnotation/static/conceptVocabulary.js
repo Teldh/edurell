@@ -316,17 +316,16 @@ let definingSynonyms = []
         document.getElementById(concept+"Defined").remove()
 
   }
-  
 
   /* highlight a concept in a div with id div_id */
 
-  function highlightConcept(concept, div_id){
+  function highlightConcept(concept, div_id) {
 
   let words = concept.split(" ")
 
-  if(words.length == 1)
+  if(words.length == 1) {
        $("#"+div_id+" [lemma='" + words[0]+ "']").addClass("concept");
-
+  }
   else{
 
     $("#"+div_id+" [lemma='" + words[0] + "']").each(function () {

@@ -77,9 +77,33 @@ function addSubtitles(){
 
   }
 
+  $(document).on("click", ".concept", function (e) {
+    
+    var target = e.currentTarget;
+
+    document.getElementById("transcript-selected-concept").innerHTML = target.getAttribute('lemma');
+
+    let syns = $conceptVocabulary[target.getAttribute('lemma')];
+
+    let synsText = "";
+
+    for(let i in syns) {
+
+      if (i===0) {
+        synsText = syns[i];
+      }
+      else {
+        synsText += ", " + syns[i];
+      }
+    }
+
+    document.getElementById("transcript-selected-concept-synonym").innerHTML = synsText;
+
+    //console.log(target.getAttribute('lemma'));
+  });
+
   for(let i in $concepts)
     highlightConcept($concepts[i], "transcript")
-
 
 }
 
