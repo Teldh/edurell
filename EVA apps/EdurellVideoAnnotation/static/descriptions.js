@@ -6,7 +6,7 @@ function showDescriptionDiv(){
     $('#videoSlider').show();
     $('#videoSlider').dimBackground();
     $('#add-concept-description').show();
-    $('#transcript').hide();
+    $('#right-body').hide();
     $('#add-concept-description').dimBackground();
     document.getElementById("conceptDefined").value = ""
     player.controls(false)
@@ -24,7 +24,7 @@ function closeDescriptionDiv(){
     $('#videoSlider').hide();
     $('#videoSlider').undim();
     $('#add-concept-description').hide();
-    $('#transcript').show();
+    $('#right-body').show();
     $('#add-concept-description').undim();
     $('#canvas-wrap').undim();
     player.controls(true)

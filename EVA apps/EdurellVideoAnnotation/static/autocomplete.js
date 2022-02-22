@@ -1,15 +1,17 @@
-autocomplete(document.getElementById("prerequisite"), $concepts);
-autocomplete(document.getElementById("target"), $concepts);
-autocomplete(document.getElementById("conceptDefined"), $concepts);
-autocomplete(document.getElementById("selectSynonymSet"), $concepts);
+autocomplete(document.getElementById("prerequisite"), $concepts, []);
+autocomplete(document.getElementById("target"), $concepts, []);
+autocomplete(document.getElementById("conceptDefined"), $concepts, []);
+autocomplete(document.getElementById("selectSynonymSet"), $concepts, ["autocomplete-items-custom1"]);
+autocomplete(document.getElementById("synonymWord"), $concepts, ["autocomplete-items-custom2"]);
 
 
-function autocomplete(inp, arr) {
+function autocomplete(inp, arr, classes) {
   /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
   var currentFocus;
   /*execute a function when someone writes in the text field:*/
-  inp.addEventListener("input", function(e) {
+  if(inp !== null) {
+    inp.addEventListener("input", function(e) {
       var a, b, i, val = this.value;
       /*close any already open lists of autocompleted values*/
       closeAllLists();
@@ -19,12 +21,18 @@ function autocomplete(inp, arr) {
       a = document.createElement("DIV");
       a.setAttribute("id", this.id + "autocomplete-list");
       a.setAttribute("class", "autocomplete-items");
+      for(let cls of classes) {
+        a.className += " " + cls;
+      } 
       /*append the DIV element as a child of the autocomplete container:*/
       this.parentNode.appendChild(a);
       /*for each item in the array...*/
+      let counter = 0;
       for (i = 0; i < arr.length; i++) {
         /*check if the item starts with the same letters as the text field value:*/
         if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+
+          counter++;
           /*create a DIV element for each matching element:*/
           b = document.createElement("DIV");
           /*make the matching letters bold:*/
@@ -43,32 +51,37 @@ function autocomplete(inp, arr) {
           a.appendChild(b);
         }
       }
-  });
-  /*execute a function presses a key on the keyboard:*/
-  inp.addEventListener("keydown", function(e) {
-      var x = document.getElementById(this.id + "autocomplete-list");
-      if (x) x = x.getElementsByTagName("div");
-      if (e.keyCode == 40) {
-        /*If the arrow DOWN key is pressed,
-        increase the currentFocus variable:*/
-        currentFocus++;
-        /*and and make the current item more visible:*/
-        addActive(x);
-      } else if (e.keyCode == 38) { //up
-        /*If the arrow UP key is pressed,
-        decrease the currentFocus variable:*/
-        currentFocus--;
-        /*and and make the current item more visible:*/
-        addActive(x);
-      } else if (e.keyCode == 13) {
-        /*If the ENTER key is pressed, prevent the form from being submitted,*/
-        e.preventDefault();
-        if (currentFocus > -1) {
-          /*and simulate a click on the "active" item:*/
-          if (x) x[currentFocus].click();
-        }
+
+      if (counter === 0) {
+        a.style.display = 'none'; 
       }
-  });
+    });
+    /*execute a function presses a key on the keyboard:*/
+    inp.addEventListener("keydown", function(e) {
+        var x = document.getElementById(this.id + "autocomplete-list");
+        if (x) x = x.getElementsByTagName("div");
+        if (e.keyCode == 40) {
+          /*If the arrow DOWN key is pressed,
+          increase the currentFocus variable:*/
+          currentFocus++;
+          /*and and make the current item more visible:*/
+          addActive(x);
+        } else if (e.keyCode == 38) { //up
+          /*If the arrow UP key is pressed,
+          decrease the currentFocus variable:*/
+          currentFocus--;
+          /*and and make the current item more visible:*/
+          addActive(x);
+        } else if (e.keyCode == 13) {
+          /*If the ENTER key is pressed, prevent the form from being submitted,*/
+          e.preventDefault();
+          if (currentFocus > -1) {
+            /*and simulate a click on the "active" item:*/
+            if (x) x[currentFocus].click();
+          }
+        }
+    });
+  }
   function addActive(x) {
     /*a function to classify an item as "active":*/
     if (!x) return false;

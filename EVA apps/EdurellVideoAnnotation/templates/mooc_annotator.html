@@ -73,19 +73,19 @@
             </button>
          </div>
 
-
-
      </div>
-
-      <div id="transcript" class="transcript"></div>
-      <br>
-      <div id="selectedConceptBox" class="selected-concept-box">
-        <p class="padding-left">Selected Concept:<span id="transcript-selected-concept" class="selected-concept">--</span></p>
-        <div class="padding-left">
-            <p class="description-selected-concept same-line">Synonyms: </p>
-            <p id="transcript-selected-concept-synonym" class="m-synonym-text2 margin-left same-line">--</p>
+     
+      <div id="right-body" class="right-body-class">
+        <div id="transcript" class="transcript"></div>
+        <br>
+        <div id="selectedConceptBox" class="selected-concept-box">
+          <p class="padding-left">Selected Concept:<span id="transcript-selected-concept" class="selected-concept">--</span></p>
+          <div class="padding-left">
+              <p class="description-selected-concept same-line">Synonyms: </p>
+              <p id="transcript-selected-concept-synonym" class="m-synonym-text2 margin-left same-line">--</p>
+          </div>
         </div>
-        </div>
+      </div>
 
       <div id="relation" class="add-relation-box" style="display:none">
 
@@ -238,7 +238,7 @@
 <!-- Modal concepts -->
 <div style="top:40px;" class="modal fade" id="conceptsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="right:100px" role="document">
-    <div class="modal-content">
+    <div class="modal-content custom-modal">
       <!--<div class="modal-header">
         <h5 class="modal-title" id="conceptsModalLabel">Concepts</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -266,10 +266,10 @@
           </ul>
 
           <!-- Body of the modal Concepts & Synonyms -->
-          <div class="tab-content" id="myTabContent">
+          <div class="tab-content tab-body" id="myTabContent">
 
             <!-- TAB 1 - Concepts Vocabulary -->
-            <div class="tab-pane fade show active" id="concepts" role="tabpanel" aria-labelledby="concepts-tab" style="max-height:400px;overflow:auto;">
+            <div class="tab-pane fade show active tab-body-1" id="concepts" role="tabpanel" aria-labelledby="concepts-tab" style="max-height:400px;overflow:auto;">
                 <!--<table class="table">
                   <tbody id="conceptsTable"></tbody>
                 </table>-->
@@ -279,11 +279,11 @@
             </div>
 
             <!-- TAB 2 - Add Concepts -->
-            <div class="tab-pane fade" id="add-concept" role="tabpanel" aria-labelledby="add-tab">
-              <div style="padding:7%;">
+            <div class="tab-pane fade tab-body-2" id="add-concept" role="tabpanel" aria-labelledby="add-tab">
+              <div>
 
                 <div class="row">
-                    <label for="newConcept">Concept:</label>
+                    <label for="newConcept"> Add Concept:</label>
                     <input type="text" class="form-control" autocomplete="off" id="newConcept"  placeholder="Enter new concept">
                 </div>
                   <br>
@@ -291,53 +291,48 @@
                     <button  onclick="addConcept()" class="btn btn-primary">Add new concept</button>
                 </div>
                   <br>
-                <div class="row" id="errorConcept" style="display:none">
+                <div class="row tab-error" id="errorConcept" style="display:none">
                 </div>
               </div>
             </div>
 
             <!-- TAB 3 - Manage Synonyms -->
-            <div class="tab-pane fade" id="add-synonyms" role="tabpanel" aria-labelledby="add-tab">
-              <div style="padding:7%;">
+            <div class="tab-pane fade tab-body-3" id="add-synonyms" role="tabpanel" aria-labelledby="add-tab">
+              <div  class="main-vocabulary-body">
 
                 <!-- Synonym set selected -->
-                <div class="row">
-                  <p class="spaced-text">Selected synonym set: </p><p class="synonym-set-class" id="synonymSet"></p>
+                <div class="row selected-synset-show">
+                  <p class="spaced-text same-line">Selected Synonym Set: </p><p class="synonym-set-class same-line" id="synonymSet"></p>
                 </div>
 
                 <!-- Synonym set selection -->
-                <div id="synset-selection" class="spaced-text">
+                <div id="synset-selection" class="spaced-text synset-selection-class row">
                   <div class="row">
-                    <label for="selectSynonymSet">Synonym Set:</label>
-                    <input type="text" class="form-control" autocomplete="off" id="selectSynonymSet"  placeholder="Select one of the synonym list word">
+                    <label for="selectSynonymSet">Word of Synonym Set:</label>
+                    <input type="text" class="form-control" autocomplete="off" id="selectSynonymSet"  placeholder="Select one of the synonym set word">
                   </div>
-                    <br>
-                  <div class="row">
-                      <button onclick="selectSynonymSet()" class="btn btn-primary">Select Synonym Set</button>
+                  <div class="row button-center">
+                      <button onclick="selectSynonymSet()" class="btn btn-primary button-select-synset">Select Synonym Set</button>
                   </div>
-                  <div class="row" id="errorSynonymSet" style="display:none">
-                  </div>
+                  <div class="row tab-error" id="errorSynonymSet" style="display:none"></div>
                 </div>
 
                 <!-- Add new synonym -->
-                <div id="add-syn-selection" class="spaced-text">
+                <div id="add-syn-selection" class="spaced-text add-syn-selection-class row">
                   <div class="row">
-                      <label for="newSynonym">New Synonym:</label>
+                      <label for="newSynonym">Add/Remove Synonym:</label>
                       <input type="text" class="form-control" autocomplete="off" id="synonymWord"  placeholder="Enter synonym to add/remove">
                   </div>
-                    <br>
                   <div class="row">
-                      <button  onclick="addSynonym()" class="btn btn-primary">Add Synonym Relation</button>
+                    <div class="col-6">
+                        <button  onclick="addSynonym()" class="btn btn-primary button-add-syn">Add Synonym</button>
+                    </div>
+                    <div class="col-6">
+                      <button  onclick="removeSynonym()" class="btn btn-primary button-rem-syn">Remove Synonym</button>
+                    </div>
                   </div>
-                  <div class="row">
-                    <button  onclick="removeSynonym()" class="btn btn-primary">Remove Synonym Relation</button>
-                  </div>
-                    <br>
-                  <div class="row" id="errorNewSynonym" style="display:none">
-                  </div>
-                    <br>
-                  <div class="row" id="errorRemoveSynonym" style="display:none">
-                  </div>
+                  <div class="row tab-error" id="errorNewSynonym" style="display:none"></div>
+                  <div class="row tab-error" id="errorRemoveSynonym" style="display:none"></div>
                 </div>
               </div>
             </div>

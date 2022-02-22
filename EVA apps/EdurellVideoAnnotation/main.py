@@ -267,19 +267,21 @@ def video_selection():
     return render_template('video_selection.html', form=form, videos=videos)
 
 
-# Get concept Vocabulary with synonyms (NLTK-WORDNET)
+'''
+Get concept vocabulary (dict: word -> synonyms)
+'''
 @app.route('/get_concept_vocabulary', methods=["GET", "POST"])
 def get_concept_vocabulary():
     data = request.json
+
+    # Getting concepts:
     concepts = data["concepts"]
-
-    #print(concepts)
-
-    # Finding synonyms with NLTK Wordnet
+    # Finding synonyms with NLTK Wordnet:
     conceptVocabulary = get_synonyms_from_list(concepts)
     
-    # Skos dictionary
+    # Skos dictionary:
     #skos_dict = create_skos_dictionary(conceptVocabulary)
+    # Trying some queries on skos dictionary:
     #try_query(skos_dict)
 
     json = {

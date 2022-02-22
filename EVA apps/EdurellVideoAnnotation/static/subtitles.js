@@ -30,7 +30,7 @@ function showRelationDiv(){
   $('#drawButton').dimBackground();
   $('#relation').show();
   $('#relationText').show();
-  $('#transcript').hide();
+  $('#right-body').hide();
   $('#relation').dimBackground();
   $('#relationText').dimBackground();
 
@@ -48,7 +48,7 @@ function closeRelationDiv(){
   $('#canvas-wrap').undim();
   $('#drawButton').undim();
   $('#relation').hide();
-  $('#transcript').show();
+  $('#right-body').show();
   $('#relation').undim();
   $('#relationText').hide();
   $('#relationText').undim();
@@ -87,7 +87,9 @@ function addSubtitles(){
 
     let synsText = "";
 
-    for(let i in syns) {
+
+
+    for(let i=0; i<syns.length; i++) {
 
       if (i===0) {
         synsText = syns[i];

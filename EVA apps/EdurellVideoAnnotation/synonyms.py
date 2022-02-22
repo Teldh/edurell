@@ -5,13 +5,14 @@ from rdflib import Graph, URIRef, Literal, BNode, Namespace, RDF
 from rdflib.namespace import FOAF, NamespaceManager
 from rdflib.namespace import SKOS, XSD
 
-
-#trovare i sinonimi da una lista di parole, ritorna un dizionario (keyword : lista sinonimi)
+'''
+Find synonyms from a list of words.
+Returns a dict (word: [list of synonyms]).
+'''
 def get_synonyms_from_list(concepts): 
     synonyms=dict()
 
-
-    keywords = copy.copy(concepts) # ricorda che word1 deve essere tutto minuscolo
+    keywords = copy.copy(concepts)
     converter = lambda x: x.replace(' ', '_')
     keywords = list(map(converter, keywords))
 
@@ -34,20 +35,20 @@ def get_synonyms_from_list(concepts):
         synonymsFoundTemp=list(set(synonymsFoundTemp))
 
         synonyms[starting_keyword.replace('_',' ')]=synonymsFoundTemp
-    
 
     return synonyms 
 
 
-
-#create skos dictionary
+'''
+Create skos dictionary from a dict with synonyms (word: [list of synonyms]).
+Returns the graph with the skos dictionary structure.
+'''
 def create_skos_dictionary(synonyms):
     
     graph = Graph()
     skos = Namespace('http://www.w3.org/2004/02/skos/core#')
     graph.bind('skos', skos)
     uri_edurell = 'http://edurell.com/'
-
 
     for concept in synonyms.keys():
         
@@ -57,11 +58,8 @@ def create_skos_dictionary(synonyms):
         for synonym in synonyms[concept]:
             graph.add((uri_concept, skos['altLabel'], Literal(synonym, lang='en')))
 
-
+    # Save graph in file
     graph.serialize(destination='output.txt', format='pretty-xml')
-
-
     #print graph.serialize(format='json-ld').decode('utf-8')
-
 
     return (graph)

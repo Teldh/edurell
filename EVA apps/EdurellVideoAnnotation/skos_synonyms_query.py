@@ -1,7 +1,9 @@
 import rdflib
 
+'''
+Trying some queries on skos graph
+'''
 def try_query(synonym_graph) :
-
 
     # Get concept uri from query
     query1 = """
@@ -11,7 +13,6 @@ def try_query(synonym_graph) :
                 ?c skos:prefLabel ?label .
             }
     """
-
     # !!! https://derwen.ai/docs/kgl/ex4_0/
 
     # Get only literal from query
@@ -48,28 +49,24 @@ def try_query(synonym_graph) :
     """
     
     print("-------------\n")
-
     qres = synonym_graph.query(query1)
 
     for row in qres:
         print(row["c"].n3())
 
     print("-------------\n")
-
     qres = synonym_graph.query(query2)
 
     for row in qres:
         print(row["stripped_label"].n3())
 
     print("-------------\n")
-
     qres = synonym_graph.query(query3)
 
     for row in qres:
         print(row["alt_label"].n3())
 
     print("-------------\n")
-
     label_name = rdflib.Literal('orbit', lang='en')
     qres = synonym_graph.query(query4, initBindings={'name': label_name})
 
@@ -77,5 +74,4 @@ def try_query(synonym_graph) :
         print(row["alt_label"].n3())
 
     print("-------------\n")
-
     return 0

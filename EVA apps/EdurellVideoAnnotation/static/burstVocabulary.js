@@ -155,7 +155,11 @@ function addConcept(){
 
     let concept = document.getElementById("newConcept").value
 
-    if(!$concepts.includes(concept)) {
+    if(concept === "") {
+      document.getElementById("errorConcept").innerHTML ="empty field !"
+      document.getElementById("errorConcept").style.display = "block"
+    }
+    else if(!$concepts.includes(concept)) {
 
         fetch('/annotator/lemmatize_word/' + concept).then(function (response) {
 
@@ -173,7 +177,7 @@ function addConcept(){
                     }
 
                 if (!present){
-                    document.getElementById("errorConcept").innerHTML ="'" + concept +"' is not present in the text"
+                    document.getElementById("errorConcept").innerHTML ="the word is not present in the text !"
                     document.getElementById("errorConcept").style.display = "block"
                 }
 
@@ -187,13 +191,14 @@ function addConcept(){
                     console.log("--------------------")
                    // $('#conceptsModal').modal('hide')
                     document.getElementById("newConcept").value = ""
-                    document.getElementById("errorConcept").style.display = "none"
+                    document.getElementById("errorConcept").innerHTML = "word succesfully added to the concepts"
+                    document.getElementById("errorConcept").style.display = "block"
                 }
 
             })
         })
     }else{
-        document.getElementById("errorConcept").innerHTML ="'" + concept +"' is already a concept"
+        document.getElementById("errorConcept").innerHTML ="the word is already a concept !"
         document.getElementById("errorConcept").style.display = "block"
     }
 }
@@ -447,50 +452,62 @@ function selectSynonymSet(){
     //console.log("synonymSetString")
     //console.log(synonymSetString)
 
-    document.getElementById("errorSynonymSet").style.display = "none"
-    document.getElementById("synonymSet").innerHTML = "";
+    document.getElementById("errorNewSynonym").style.display = "none"
+    document.getElementById("errorRemoveSynonym").style.display = "none"
 
-    fetch('/annotator/lemmatize_word/' + wordOfSynonymSet).then(function (response) {
+    if(wordOfSynonymSet === "") {
+      document.getElementById("errorSynonymSet").innerHTML ="empty field !"
+      document.getElementById("errorSynonymSet").style.display = "block"
+      document.getElementById("synonymSet").style.display = "none"
+    }
+    else {
 
-      response.json().then(function (data) {
+      document.getElementById("errorSynonymSet").style.display = "none"
+      document.getElementById("synonymSet").innerHTML = "";
 
-        let lemma = data.lemma
-        //console.log("lemma")
-        //console.log(lemma)
+      fetch('/annotator/lemmatize_word/' + wordOfSynonymSet).then(function (response) {
 
-        let present = true
+        response.json().then(function (data) {
 
-        if(!$concepts.includes(lemma)) {
-            //console.log("concepts")
-            //console.log($concepts) 
-            present = false
-        }
+          let lemma = data.lemma
+          //console.log("lemma")
+          //console.log(lemma)
 
-        if (!present) {
-          
-          document.getElementById("errorSynonymSet").innerHTML ="the word is not a concept"
-          document.getElementById("errorSynonymSet").style.display = "block"
-          document.getElementById("synonymSet").style.display = "none"
-          $synonymList = [];
+          let present = true
 
-        }
-        else if (present) {
-          
-          let listOfSynonymsOfLemma = $conceptVocabulary[lemma];
-          let synonymSetText = lemma;
-          for (let i=0; i<listOfSynonymsOfLemma.length; i++) {
-            synonymSetText += ", " + listOfSynonymsOfLemma[i];
+          if(!$concepts.includes(lemma)) {
+              //console.log("concepts")
+              //console.log($concepts) 
+              present = false
           }
-          $synonymList = [lemma];
-          for (let i=0; i<listOfSynonymsOfLemma.length; i++) {
-            $synonymList.push(listOfSynonymsOfLemma[i]);
+
+          if (!present) {
+            
+            document.getElementById("errorSynonymSet").innerHTML ="the word is not a concept !"
+            document.getElementById("errorSynonymSet").style.display = "block"
+            document.getElementById("synonymSet").style.display = "none"
+            $synonymList = [];
+
           }
-          document.getElementById("synonymSet").style.display = "block"
-          document.getElementById("synonymSet").innerHTML = synonymSetText;
-        }
-        
+          else if (present) {
+            
+            let listOfSynonymsOfLemma = $conceptVocabulary[lemma];
+            let synonymSetText = lemma;
+            for (let i=0; i<listOfSynonymsOfLemma.length; i++) {
+              synonymSetText += ", " + listOfSynonymsOfLemma[i];
+            }
+            $synonymList = [lemma];
+            for (let i=0; i<listOfSynonymsOfLemma.length; i++) {
+              $synonymList.push(listOfSynonymsOfLemma[i]);
+            }
+            document.getElementById("synonymSet").style.display = "block"
+            document.getElementById("synonymSet").innerHTML = synonymSetText;
+            document.getElementById("selectSynonymSet").value = "";
+          }
+          
+        })
       })
-    })
+    }
   }
 
   // Create and add Synonym sets (vocabualary)
@@ -499,8 +516,21 @@ function selectSynonymSet(){
     let newSynonym = document.getElementById("synonymWord").value
     
     document.getElementById("errorNewSynonym").style.display = "none"
+    document.getElementById("errorRemoveSynonym").style.display = "none"
 
-    fetch('/annotator/lemmatize_word/' + newSynonym).then(function (response) {
+    if($synonymList.length === 0) {
+      document.getElementById("errorNewSynonym").innerHTML ="select a synonym set !"
+      document.getElementById("errorNewSynonym").style.display = "block"
+    }
+    else if (newSynonym === "") {
+      document.getElementById("errorNewSynonym").innerHTML ="empty field !"
+      document.getElementById("errorNewSynonym").style.display = "block"
+    }
+    else {
+
+      document.getElementById("errorNewSynonym").style.display = "none"
+
+      fetch('/annotator/lemmatize_word/' + newSynonym).then(function (response) {
 
         response.json().then(function (data) {
 
@@ -508,11 +538,11 @@ function selectSynonymSet(){
             //console.log(lemma)
 
             if($synonymList.includes(lemma)) {  // already present
-              document.getElementById("errorNewSynonym").innerHTML ="'" + lemma +"' is already present in the synonym set"
+              document.getElementById("errorNewSynonym").innerHTML ="the word typed is already present in the synonym set !"
               document.getElementById("errorNewSynonym").style.display = "block"
             }
             else if (!$concepts.includes(lemma)){ // not a concept
-                document.getElementById("errorNewSynonym").innerHTML ="'" + lemma +"' is not a concept, add it first"
+                document.getElementById("errorNewSynonym").innerHTML ="the word typed is not a concept !"
                 document.getElementById("errorNewSynonym").style.display = "block"
             }
             else {  // all good !
@@ -528,10 +558,17 @@ function selectSynonymSet(){
               //console.log("synonyms")
               //console.log($synonyms);
               $synonymList = [];
+              document.getElementById("synonymSet").innerHTML = "";
+              document.getElementById("synonymSet").style.display = "none"
+              document.getElementById("selectSynonymSet").value = "";
+              document.getElementById("synonymWord").value = "";
+              document.getElementById("errorNewSynonym").innerHTML = "word succesfully added to the synonyms set"
+              document.getElementById("errorNewSynonym").style.display = "block"
             }
 
         })
       })
+    }
   }
 
  
@@ -539,9 +576,22 @@ function selectSynonymSet(){
 
     let synonymToRemove = document.getElementById("synonymWord").value
     
+    document.getElementById("errorNewSynonym").style.display = "none"
     document.getElementById("errorRemoveSynonym").style.display = "none"
 
-    fetch('/annotator/lemmatize_word/' + synonymToRemove).then(function (response) {
+    if($synonymList.length === 0) {
+      document.getElementById("errorRemoveSynonym").innerHTML ="select a synonym set !"
+      document.getElementById("errorRemoveSynonym").style.display = "block"
+    }
+    else if (synonymToRemove === "") {
+      document.getElementById("errorRemoveSynonym").innerHTML ="empty field !"
+      document.getElementById("errorRemoveSynonym").style.display = "block" 
+    }
+    else {
+
+      document.getElementById("errorRemoveSynonym").style.display = "none"
+
+      fetch('/annotator/lemmatize_word/' + synonymToRemove).then(function (response) {
 
         response.json().then(function (data) {
 
@@ -549,11 +599,11 @@ function selectSynonymSet(){
             console.log(lemma)
 
             if (!$concepts.includes(lemma)){ // not a concept
-                document.getElementById("errorRemoveSynonym").innerHTML ="'" + lemma +"' is not a concept"
+                document.getElementById("errorRemoveSynonym").innerHTML ="the word typed is not a concept !"
                 document.getElementById("errorRemoveSynonym").style.display = "block"
             }
             else if(!$synonymList.includes(lemma)) {  // not a synonym
-              document.getElementById("errorRemoveSynonym").innerHTML ="'" + lemma +"' is not in the synonym set selected"
+              document.getElementById("errorRemoveSynonym").innerHTML ="the word typed is not in the selected synonym set !"
               document.getElementById("errorRemoveSynonym").style.display = "block"     
             }
             else if($synonymList.includes(lemma)) {  // present in the synonymset, to remove
@@ -570,9 +620,15 @@ function selectSynonymSet(){
               //console.log("synonyms")
               //console.log($synonyms);
               $synonymList = [];
-
+              document.getElementById("synonymSet").innerHTML = "";
+              document.getElementById("synonymSet").style.display = "none"
+              document.getElementById("selectSynonymSet").value = "";
+              document.getElementById("synonymWord").value = "";
+              document.getElementById("errorRemoveSynonym").innerHTML = "word succesfully removed to the synonyms set"
+              document.getElementById("errorNewSynonym").style.display = "block"
             }
             
         })
       })
+    }
   }

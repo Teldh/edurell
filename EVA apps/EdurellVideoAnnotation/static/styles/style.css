@@ -85,11 +85,30 @@ input[type=submit] {
   border-bottom: none;
   border-top: none;
   z-index: 99;
-  /*position the autocomplete items to be the same width as the container:*/
-  top: 100%;
-  left: 0;
-  right: 0;
 }
+
+.autocomplete-items-custom1 {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  z-index: 99;
+  top: 222px;
+  left: 20px;
+  width: 560px;
+  max-height: 148px;
+  overflow-y: scroll;
+}
+
+.autocomplete-items-custom2 {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  z-index: 99;
+  top: 382px;
+  left: 20px;
+  width: 560px;
+  max-height: 148px;
+  overflow-y: scroll;
+}
+
 .autocomplete-items div {
   padding: 10px;
   cursor: pointer;
@@ -191,22 +210,22 @@ tr {
 
 .m-concept-text {
   color: #007bff;
-  font-size: 12px;
+  font-size: 15px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: bold;
-  margin-bottom: 0px;
+  margin-bottom: 2px;
 }
 
 .m-synonym-text {
   color: yellowgreen;
-  font-size: 12px;
+  font-size: 15px;
   font-family: 'Times New Roman', Times, serif;
   font-weight: normal;
   margin-bottom: 10px;
 }
 .m-synonym-text2 {
   color: yellowgreen;
-  font-size: 16px;
+  font-size: 15px;
   font-family: 'Times New Roman', Times, serif;
   font-weight: normal;
   margin-top:2px ;
@@ -221,9 +240,14 @@ tr {
   color: yellowgreen;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: bold;
-  margin-top: 6px;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 264px;
+  margin-top: 0.5px;
+  margin-bottom: 0px !important;
 }
-
 
 .selected-concept {
 margin-left: 6px;
@@ -237,10 +261,12 @@ color: #007bff;
 .selected-concept-box {
   border: 1px solid #c8c8c8;
   padding: 10px;
+  height: 90px;
+  border-radius: 10px;
 }
 
 .description-selected-concept {
-  margin-right: 5px;
+  margin-right: 3px;
 }
 
 .margin-left {
@@ -252,6 +278,99 @@ color: #007bff;
 }
 
 .same-line{
-display: inline-block;
-vertical-align: top;
+display: inline-block !important;
+vertical-align: top !important;
+}
+
+.selected-synset-show {
+  margin-bottom: 30px;
+  display: block !important;
+}
+
+.synset-selection-class {
+  margin-bottom: 30px;
+  height: 130px;
+  display: block !important;
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+}
+
+.add-syn-selection-class {
+  margin-bottom: 30px;
+  height: 130px;
+  display: block !important;
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+}
+
+.button-select-synset {
+  margin-top: 10px;
+  margin-bottom: 8px;
+  width: 50%;
+}
+
+.button-add-syn {
+  margin-top: 10px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.button-rem-syn {
+  margin-top: 10px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.main-vocabulary-body {
+  max-height: 340px;
+}
+
+.conceptList {
+  max-height: 340px;
+}
+
+.tab-body {
+  height: 400px;
+}
+
+.tab-body-1, .tab-body-2, .tab-body-3 {
+  height: 100%
+}
+
+.tab-body-2, .tab-body-3 {
+  padding-top: 30px;
+  padding-left: 40px;
+  padding-right: 40px;
+  padding-bottom: 30px;
+}
+
+.tab-error {
+  color: red;
+  font-style: italic;
+  text-align: center;
+}
+
+#conceptsTable {
+  margin-top: 15px;
+}
+
+.custom-modal {
+  width: 600px;
+  height: 550px;
+}
+
+#conceptsTable .list-group-item:first-child {
+  border-top-width: 2px;
+}
+
+#conceptsTable .list-group-item:last-child {
+  border-bottom-width: 2px;
+}
+
+#conceptsTable .list-group-item {
+  padding: 10px 20px !important;
+}
+
+.button-center {
+  justify-content: center;
 }
