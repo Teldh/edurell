@@ -374,3 +374,11 @@ vertical-align: top !important;
 .button-center {
   justify-content: center;
 }
+
+.selected-concept-text{
+  background-color: rgb(172, 197, 252) !important;
+}
+
+.selected-synonyms-text{
+  background-color: rgb(218, 243, 169) !important;
+}

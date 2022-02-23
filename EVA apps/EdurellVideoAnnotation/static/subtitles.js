@@ -78,19 +78,22 @@ function addSubtitles(){
   }
 
   $(document).on("click", ".concept", function (e) {
-    
+
+    let conceptElements =  document.getElementsByClassName("concept");
+
+    // reset classes for the elements
+    for(let el of conceptElements) {
+      el.className = "concept";
+    }
+
     var target = e.currentTarget;
+    var selectedWord = target.getAttribute('lemma').replaceAll("_"," ");
+    document.getElementById("transcript-selected-concept").innerHTML = selectedWord;
 
-    document.getElementById("transcript-selected-concept").innerHTML = target.getAttribute('lemma');
-
-    let syns = $conceptVocabulary[target.getAttribute('lemma')];
-
+    let syns = $conceptVocabulary[selectedWord];
     let synsText = "";
 
-
-
     for(let i=0; i<syns.length; i++) {
-
       if (i===0) {
         synsText = syns[i];
       }
@@ -100,6 +103,15 @@ function addSubtitles(){
     }
 
     document.getElementById("transcript-selected-concept-synonym").innerHTML = synsText;
+
+    for(let el of conceptElements) {
+      if(el.getAttribute('lemma').replaceAll("_"," ") === selectedWord) {
+          el.className += " " + "selected-concept-text";
+      }
+      else if(syns.includes(el.getAttribute('lemma').replaceAll("_"," "))) {
+          el.className += " " + "selected-synonyms-text";
+      }
+    }
 
     //console.log(target.getAttribute('lemma'));
   });

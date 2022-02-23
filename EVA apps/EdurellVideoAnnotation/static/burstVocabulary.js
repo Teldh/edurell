@@ -548,6 +548,16 @@ function selectSynonymSet(){
             else {  // all good !
               //console.log("synonyms")
               //console.log($synonyms);
+
+              for(let syn of $conceptVocabulary[lemma]) {
+                for (let word of $synonymList) {
+                  $conceptVocabulary[word].push(syn);          
+                }
+                for (let word of $synonymList) {
+                  $conceptVocabulary[syn].push(word);
+                }
+              }
+
               for (let word of $synonymList) {
                 $conceptVocabulary[word].push(lemma);          
               }
