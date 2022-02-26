@@ -1,12 +1,14 @@
 from rdflib import Graph, URIRef, RDF, BNode, ConjunctiveGraph, Namespace
 from rdflib.namespace import SKOS, XSD
 from rdflib.term import Literal
+from rdflib.serializer import Serializer
 
 import json
 import pyld
 import time
 from datetime import datetime
 import db_mongo
+
 
 oa = Namespace("http://www.w3.org/ns/oa#")
 dctypes = Namespace("http://purl.org/dc/dcmitype/")
