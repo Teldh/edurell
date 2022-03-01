@@ -249,6 +249,13 @@ def video_selection():
             relations = db_mongo.get_concept_map(current_user.mongodb_id, vid_id)
             definitions = db_mongo.get_definitions(current_user.mongodb_id, vid_id)
 
+            conceptVocabulary  = db_mongo.get_concept_vocabulary(vid_id, current_user.mongodb_id)
+
+            if(conceptVocabulary == None) :
+                conceptVocabulary = {}
+                for i in lemmatized_concepts :
+                    conceptVocabulary[i] = [];
+
             for rel in relations:
                 if rel["prerequisite"] not in lemmatized_concepts:
                     lemmatized_concepts.append(rel["prerequisite"])
@@ -258,7 +265,7 @@ def video_selection():
 
             return render_template('mooc_annotator.html', result=subtitles, vid_id=vid_id, start_times=start_times,
                                    images_path=images_path, concepts=lemmatized_concepts,video_duration=video_duration, 
-                                   lemmatized_subtitles=lemmatized_subtitles, annotator=annotator,
+                                   lemmatized_subtitles=lemmatized_subtitles, annotator=annotator, conceptVocabulary=conceptVocabulary,
                                    title=title, all_lemmas=all_lemmas, relations=relations, definitions=definitions)
         except Exception as e:
             print(e)
@@ -320,6 +327,7 @@ def jsonld():
     data["annotator_id"] = current_user.mongodb_id
     data["annotator_name"] = current_user.complete_name
     data["email"] = current_user.email
+    data["conceptVocabulary"] = annotations["conceptVocabulary"]
 
     db_mongo.insert_graph(data)
     return json

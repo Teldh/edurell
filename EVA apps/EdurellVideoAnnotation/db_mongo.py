@@ -60,7 +60,7 @@ def insert_graph(data):
     if collection.find_one(query) is None:
         collection.insert_one(data)
     else:
-        new_graph = {"$set": {"graph": data["graph"]}}
+        new_graph = {"$set": {"graph": data["graph"], "conceptVocabulary": data["conceptVocabulary"]}}
         collection.update_one(query, new_graph)
 
 
@@ -318,6 +318,18 @@ def get_definitions(annotator, video_id):
         d["start"] = d["start"].replace("^^xsd:dateTime", "")
 
     return definitions
+
+def get_concept_vocabulary(video_id, annotator_id, title=False):
+    collection = db.graphs
+
+    if collection.find_one({"video_id":video_id, "annotator_id": annotator_id}) is not None:
+        video = collection.find_one({"video_id":video_id, "annotator_id": annotator_id})
+        if title:
+            return video["title"], video[""]
+
+        return video["conceptVocabulary"]
+    else:
+        return None
 
 
 def get_segments_times(video_id):

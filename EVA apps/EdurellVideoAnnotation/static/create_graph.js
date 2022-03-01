@@ -215,8 +215,12 @@ function downloadJson(){
         "id": $video_id,
         "relations":relations,
         "definitions": definitions,
-        "annotator": $annotator
+        "annotator": $annotator,
+        "conceptVocabulary": $conceptVocabulary,
     }
+
+    console.log("annotations")
+    console.log(annotations)
 
     var js_data = JSON.stringify(annotations);
 
