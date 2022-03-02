@@ -209,6 +209,8 @@ def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
         "graph":jsonld
     }
 
+    #print(data)
+
     return g, data
 
 

@@ -319,7 +319,55 @@ def get_definitions(annotator, video_id):
 
     return definitions
 
+
 def get_concept_vocabulary(video_id, annotator_id, title=False):
+    collection = db.graphs
+
+    pipeline = [
+        {"$unwind": "$conceptVocabulary.@graph"},
+        {
+            "$match":
+                {
+                    "video_id": str(video_id),
+                    "annotator_id": str(annotator_id),
+                    "conceptVocabulary.@graph.type": "skos:Concept"
+                }
+        },
+
+        {"$project":
+            {
+                "prefLabel": "$conceptVocabulary.@graph.skos:prefLabel.@value",
+                "altLabel": "$conceptVocabulary.@graph.skos:altLabel.@value",
+                "_id": 0
+            }
+        }
+
+    ]
+
+    aggregation = collection.aggregate(pipeline)
+    results = list(aggregation)
+
+    print("results MONGODB")
+    print(results)
+
+    conceptVocabulary = {}
+
+    if len(results) == 0:
+        return None
+
+    for concept in results: 
+ 
+        if "altLabel" in concept:
+            conceptVocabulary[concept["prefLabel"]]=list(concept["altLabel"])
+        else:
+            conceptVocabulary[concept["prefLabel"]]=[]
+
+    print("CONCEPT VOCABULARY MONGODB")
+    print(conceptVocabulary)
+    return conceptVocabulary
+
+'''
+def get_concept_vocabulary2(video_id, annotator_id, title=False):
     collection = db.graphs
 
     if collection.find_one({"video_id":video_id, "annotator_id": annotator_id}) is not None:
@@ -330,7 +378,7 @@ def get_concept_vocabulary(video_id, annotator_id, title=False):
         return video["conceptVocabulary"]
     else:
         return None
-
+'''
 
 def get_segments_times(video_id):
     collection = db.videos

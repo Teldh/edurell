@@ -15,12 +15,14 @@ let definingSynonyms = []
     let vocabulary = $conceptVocabulary
 
     for(let c in vocabulary) {
+      console.log(c)
 
       let conceptX = c.replaceAll("_"," ")
       let synonymsX = ""
 
       for(let i=0; i<vocabulary[c].length; i++) {
 
+        console.log(vocabulary[c][i])
         let syn = vocabulary[c][i].replaceAll("_"," ")
         synonymsX = synonymsX + syn
         if(i < vocabulary[c].length -1) {

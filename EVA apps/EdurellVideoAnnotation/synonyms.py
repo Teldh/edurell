@@ -1,5 +1,10 @@
 import copy
+import pickle
+import pprint
 import nltk
+import json
+import pyld
+from rdflib.serializer import Serializer
 from nltk.corpus import wordnet as wn
 from rdflib import Graph, URIRef, Literal, BNode, Namespace, RDF
 from rdflib.namespace import FOAF, NamespaceManager
@@ -52,14 +57,21 @@ def create_skos_dictionary(synonyms):
 
     for concept in synonyms.keys():
         
-        uri_concept = URIRef(uri_edurell + 'Ann/' + concept.replace(" ", "_"))
+        uri_concept = URIRef(uri_edurell + concept.replace(" ", "_"))
         graph.add((uri_concept, RDF['type'], skos['Concept']))
         graph.add((uri_concept, skos['prefLabel'], Literal(concept, lang='en')))
         for synonym in synonyms[concept]:
             graph.add((uri_concept, skos['altLabel'], Literal(synonym, lang='en')))
 
     # Save graph in file
-    graph.serialize(destination='output.txt', format='pretty-xml')
+    #graph.serialize(destination='output.txt', format='json-ld')
     #print graph.serialize(format='json-ld').decode('utf-8')
 
-    return (graph)
+    context = ["http://www.w3.org/ns/anno.jsonld", {"edu": uri_edurell}]
+
+    jsonld = json.loads(graph.serialize(format='json-ld'))
+    jsonld = pyld.jsonld.compact(jsonld, context)
+
+    print(jsonld)
+
+    return jsonld

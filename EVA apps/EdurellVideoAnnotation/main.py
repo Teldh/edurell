@@ -255,6 +255,8 @@ def video_selection():
                 conceptVocabulary = {}
                 for i in lemmatized_concepts :
                     conceptVocabulary[i] = [];
+            print("CONCEPTVOCABULARY MAIN.PY")
+            print(conceptVocabulary)
 
             for rel in relations:
                 if rel["prerequisite"] not in lemmatized_concepts:
@@ -327,10 +329,16 @@ def jsonld():
     data["annotator_id"] = current_user.mongodb_id
     data["annotator_name"] = current_user.complete_name
     data["email"] = current_user.email
-    data["conceptVocabulary"] = annotations["conceptVocabulary"]
+    data["conceptVocabulary"] = create_skos_dictionary(annotations["conceptVocabulary"])
 
     db_mongo.insert_graph(data)
-    return json
+
+    result = {
+        "graph": json,
+        "conceptVocabulary": data["conceptVocabulary"]
+    }
+
+    return result
 
 
 @app.route('/analysis', methods=['GET', 'POST'])
