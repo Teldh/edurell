@@ -249,14 +249,14 @@ def video_selection():
             relations = db_mongo.get_concept_map(current_user.mongodb_id, vid_id)
             definitions = db_mongo.get_definitions(current_user.mongodb_id, vid_id)
 
+            # Obtaining concept vocabulary from DB
             conceptVocabulary  = db_mongo.get_concept_vocabulary(vid_id, current_user.mongodb_id)
 
+            # If the concept vocabulary is new (empty) in DB then initialize it to empty synonyms
             if(conceptVocabulary == None) :
                 conceptVocabulary = {}
                 for i in lemmatized_concepts :
                     conceptVocabulary[i] = [];
-            print("CONCEPTVOCABULARY MAIN.PY")
-            print(conceptVocabulary)
 
             for rel in relations:
                 if rel["prerequisite"] not in lemmatized_concepts:
@@ -287,11 +287,6 @@ def get_concept_vocabulary():
     concepts = data["concepts"]
     # Finding synonyms with NLTK Wordnet:
     conceptVocabulary = get_synonyms_from_list(concepts)
-    
-    # Skos dictionary:
-    #skos_dict = create_skos_dictionary(conceptVocabulary)
-    # Trying some queries on skos dictionary:
-    #try_query(skos_dict)
 
     json = {
         #"concepts": concepts,
@@ -331,6 +326,7 @@ def jsonld():
     data["email"] = current_user.email
     data["conceptVocabulary"] = create_skos_dictionary(annotations["conceptVocabulary"])
 
+    # inserting annotations on DB
     db_mongo.insert_graph(data)
 
     result = {

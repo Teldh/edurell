@@ -347,23 +347,24 @@ def get_concept_vocabulary(video_id, annotator_id, title=False):
     aggregation = collection.aggregate(pipeline)
     results = list(aggregation)
 
-    print("results MONGODB")
-    print(results)
-
+    # define new concept vocabulary
     conceptVocabulary = {}
 
+    # if there is none on DB
     if len(results) == 0:
         return None
 
+    # iterate for each concept and build the vocabulary basing on the number of synonyms
     for concept in results: 
  
-        if "altLabel" in concept:
-            conceptVocabulary[concept["prefLabel"]]=list(concept["altLabel"])
+        if "altLabel" in concept :
+            if isinstance(concept["altLabel"], list):
+                conceptVocabulary[concept["prefLabel"]] = concept["altLabel"]
+            else:
+                conceptVocabulary[concept["prefLabel"]] = [concept["altLabel"]]
         else:
             conceptVocabulary[concept["prefLabel"]]=[]
 
-    print("CONCEPT VOCABULARY MONGODB")
-    print(conceptVocabulary)
     return conceptVocabulary
 
 '''
