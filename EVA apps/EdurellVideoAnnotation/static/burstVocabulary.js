@@ -23,8 +23,8 @@ function highlightConcept(concept, div_id){
 
         if(nextSpan[0] !== undefined){
 
-          nextWord = nextSpan[0].attributes[0].nodeValue
-          currentSpan = nextSpan[0]
+          //nextWord = nextSpan[0].attributes[0].nodeValue
+          //currentSpan = nextSpan[0]
 
         }else{
 
@@ -67,10 +67,51 @@ function addSubtitles(){
   let transcriptDiv = document.getElementById("transcript");
 
   for (let x in $captions){
+
     transcriptDiv.innerHTML +=
         '<p class="youtube-marker" data-start="' + $captions[x].start + '" data-end="' + $captions[x].end + '">' +
         $lemmatizedSubs[x].text + '</p>';
   }
+
+  $(document).on("click", ".concept", function (e) {
+
+    let conceptElements =  document.getElementsByClassName("concept");
+
+    // reset classes for the elements
+    for(let el of conceptElements) {
+      el.className = "concept";
+    }
+
+    var target = e.currentTarget;
+    var selectedWord = target.getAttribute('lemma').replaceAll("_"," ");
+    document.getElementById("transcript-selected-concept").innerHTML = selectedWord;
+
+    let syns = $conceptVocabulary[selectedWord];
+    let synsText = "";
+
+    for(let i=0; i<syns.length; i++) {
+      if (i===0) {
+        synsText = syns[i];
+      }
+      else {
+        synsText += ", " + syns[i];
+      }
+    }
+
+    document.getElementById("transcript-selected-concept-synonym").innerHTML = synsText;
+
+    for(let el of conceptElements) {
+      if(el.getAttribute('lemma').replaceAll("_"," ") === selectedWord) {
+          el.className += " " + "selected-concept-text";
+      }
+      else if(syns.includes(el.getAttribute('lemma').replaceAll("_"," "))) {
+          el.className += " " + "selected-synonyms-text";
+      }
+    }
+
+    //console.log(target.getAttribute('lemma'));
+  });
+
   for(let i in $concepts)
     highlightConcept($concepts[i], "transcript")
 }
@@ -433,7 +474,6 @@ function playDefinition(start){
 }
 
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-  console.log("pls")
     var target = $(e.target).attr("href")
     console.log(target)
     fitNetwork();

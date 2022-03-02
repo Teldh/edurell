@@ -394,7 +394,6 @@ function playDefinition(start){
 }
 
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-  console.log("pls")
     var target = $(e.target).attr("href")
     console.log(target)
     fitNetwork();
