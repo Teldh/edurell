@@ -616,6 +616,7 @@ class Graphs(db.Document):
     annotator_id = db.StringField()
     email = db.StringField()
     graph = db.DynamicField()
+    conceptVocabulary = db.DynamicField()
 
 
 #get the complete json graph from a video (put the video_id in the route)

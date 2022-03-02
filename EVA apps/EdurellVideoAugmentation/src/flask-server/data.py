@@ -78,6 +78,9 @@ def get_concept_list(annotator, video_id):
     concept_list = list(aggregation)
     for c in concept_list:
         c["id"] = c["id"].replace("edu:","").replace("_"," ")
+
+    get_concept_vocabulary(annotator, video_id)
+    
     return concept_list
 
 
@@ -128,6 +131,59 @@ def get_concept_map(annotator,video_id):
             rel["xywh"] = "None"
 
      return concept_map
+
+
+def get_concept_vocabulary(annotator, video_id):
+    collection = db.graphs
+
+    pipeline = [
+        {"$unwind": "$conceptVocabulary.@graph"},
+        {
+            "$match":
+                {
+                    "video_id": str(video_id),
+                    "annotator_id": str(annotator),
+                    "conceptVocabulary.@graph.type": "skos:Concept"
+                }
+        },
+
+        {"$project":
+            {
+                "prefLabel": "$conceptVocabulary.@graph.skos:prefLabel.@value",
+                "altLabel": "$conceptVocabulary.@graph.skos:altLabel.@value",
+                "_id": 0
+            }
+        }
+
+    ]
+
+    aggregation = collection.aggregate(pipeline)
+    results = list(aggregation)
+
+    # define new concept vocabulary
+    conceptVocabulary = {}
+
+    # if there is none on DB
+    if len(results) == 0:
+        print(conceptVocabulary)
+        return None
+
+    # iterate for each concept and build the vocabulary basing on the number of synonyms
+    for concept in results: 
+ 
+        if "altLabel" in concept :
+            if isinstance(concept["altLabel"], list):
+                conceptVocabulary[concept["prefLabel"]] = concept["altLabel"]
+            else:
+                conceptVocabulary[concept["prefLabel"]] = [concept["altLabel"]]
+        else:
+            conceptVocabulary[concept["prefLabel"]]=[]
+
+    print(conceptVocabulary)
+
+    return conceptVocabulary
+
+
 
 def get_concept_instants(annotator, video_id):
    pipeline = [
