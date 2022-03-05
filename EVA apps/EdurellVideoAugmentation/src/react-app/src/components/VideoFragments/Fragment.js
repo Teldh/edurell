@@ -49,6 +49,8 @@ export default class VideoFragments extends React.Component {
     let tooltipTitle
 
     /* Just for now the keywords are static --> TODO find automatically keywords*/ 
+    
+    /*
     //if ( this.props.videoId == 'sXLhYStO0m8'){
 
         let k =this.props.keyword.split(",")
@@ -66,7 +68,7 @@ export default class VideoFragments extends React.Component {
         }
 
 
-    /*}else
+    }else
         tooltipTitle = "go to "+ this.props.start*/
 
    
