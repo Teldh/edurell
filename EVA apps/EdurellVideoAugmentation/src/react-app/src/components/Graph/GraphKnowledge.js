@@ -110,11 +110,45 @@ export default class GraphKnowledge extends React.Component {
    * Therefor, a Map Object this.descriptionTimestamps has been created to store these informations
    * @param graphData json object 
    */
-  initGraph = (graphData)=> {
+  initGraph = (graphData, conceptVocabulary)=> {
     this.linkingTimestamps = new Map();
     this.descriptionTimestamps = new Map();
 
+    console.log(conceptVocabulary)
 
+    let conceptVocabularyMap = {}
+
+    /*
+    if len(results) == 0:
+        return None
+
+    # iterate for each concept and build the vocabulary basing on the number of synonyms
+    for concept in results: 
+ 
+        if "altLabel" in concept :
+            if isinstance(concept["altLabel"], list):
+                conceptVocabulary[concept["prefLabel"]] = concept["altLabel"]
+            else:
+                conceptVocabulary[concept["prefLabel"]] = [concept["altLabel"]]
+        else:
+            conceptVocabulary[concept["prefLabel"]]=[]
+    */
+
+    for(let concept of conceptVocabulary["@graph"]) {
+      if ('skos:altLabel' in concept) {
+        if (typeof concept['skos:altLabel']['@value'] === "object") {
+          conceptVocabularyMap[concept['skos:prefLabel']['@value']] = concept['skos:altLabel']['@value']
+        }
+        else {
+          conceptVocabularyMap[concept['skos:prefLabel']['@value']] = [concept['skos:altLabel']['@value']]
+        }
+      }
+      else {
+        conceptVocabularyMap[concept['skos:prefLabel']['@value']]=[]
+      }
+    }
+
+    console.log(conceptVocabularyMap)
 
     for (const node of graphData["@graph"]){
     
@@ -502,7 +536,7 @@ export default class GraphKnowledge extends React.Component {
         return
       }
       else{
-        return response.graph;
+        return {"graph": response.graph, "conceptVocabulary": response.conceptVocabulary};
     }
   }
 
@@ -540,8 +574,8 @@ export default class GraphKnowledge extends React.Component {
     this._isMounted = true
 
     var fetchedGraph = await this.getGraphRequest()
-    if(fetchedGraph){
-        this.initGraph(fetchedGraph)
+    if(fetchedGraph.graph){
+        this.initGraph(fetchedGraph.graph, fetchedGraph.conceptVocabulary)
         this.setState({isGraphLoaded: true })
     }
     else{

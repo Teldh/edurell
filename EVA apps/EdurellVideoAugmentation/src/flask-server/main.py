@@ -631,7 +631,7 @@ def get_graph(video_id=None):
     if graph_object is None:
         abort(409, "Unexisting graph for this video id")    # the video doesn't exist in the graphs collection
 
-    return (jsonify({'email': student.email, 'graph' : graph_object.graph}), 201)
+    return (jsonify({'email': student.email, 'graph' : graph_object.graph, 'conceptVocabulary': graph_object.conceptVocabulary}), 201)
 
 
 # return the image of a fragment, the image is stored on the local files of the server
