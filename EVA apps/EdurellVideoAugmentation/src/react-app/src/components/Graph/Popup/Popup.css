@@ -9,10 +9,14 @@
     list-style-type: none;
     margin: 0;
     outline: none;
-    padding: 0;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
     position: absolute;
     z-index: 1;
     text-align: left;
+    min-width: 200px;
     top: 0px;
     overflow: hidden;
     -webkit-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -30,6 +34,29 @@
     transition: all .3s;
     white-space: nowrap;
     -webkit-transition: all .3s;
+  }
+
+  .popup-li {
+    margin-bottom: 2px;
+  }
+
+  .text-concept-popup {
+    /* font-style: italic; */
+    padding-left: 3px;
+    font-weight: 600;
+    font-family: sans-serif;
+    color: #4a4a4a;
+  }
+
+  .popup-button {
+    padding: 3px;
+    margin: 1px;
+  }
+
+  .ul-popup {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 0px;
   }
   
   .popup text:hover {
