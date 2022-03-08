@@ -87,7 +87,7 @@ def insert_gold(data):
     if collection.find_one(query) is None:
         collection.insert_one(data)
     else:
-        new_graph = {"$set": {"graph": data["graph"]}}
+        new_graph = {"$set": {"graph": data["graph"], "conceptVocabulary": data["conceptVocabulary"]}}
         collection.update_one(query, new_graph)
 
 
@@ -320,7 +320,7 @@ def get_definitions(annotator, video_id):
     return definitions
 
 
-def get_concept_vocabulary(video_id, annotator_id, title=False):
+def get_vocabulary(annotator, video_id):
     collection = db.graphs
 
     pipeline = [
@@ -329,7 +329,7 @@ def get_concept_vocabulary(video_id, annotator_id, title=False):
             "$match":
                 {
                     "video_id": str(video_id),
-                    "annotator_id": str(annotator_id),
+                    "annotator_id": str(annotator),
                     "conceptVocabulary.@graph.type": "skos:Concept"
                 }
         },
@@ -368,7 +368,7 @@ def get_concept_vocabulary(video_id, annotator_id, title=False):
     return conceptVocabulary
 
 '''
-def get_concept_vocabulary2(video_id, annotator_id, title=False):
+def get_vocabulary2(video_id, annotator_id, title=False):
     collection = db.graphs
 
     if collection.find_one({"video_id":video_id, "annotator_id": annotator_id}) is not None:
