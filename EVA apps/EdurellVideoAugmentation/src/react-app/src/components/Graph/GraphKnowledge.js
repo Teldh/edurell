@@ -116,25 +116,10 @@ export default class GraphKnowledge extends React.Component {
 
     console.log(conceptVocabulary)
 
+    let concepts = []
     let conceptVocabularyMap = {}
 
-    /*
-    if len(results) == 0:
-        return None
-
-    # iterate for each concept and build the vocabulary basing on the number of synonyms
-    for concept in results: 
- 
-        if "altLabel" in concept :
-            if isinstance(concept["altLabel"], list):
-                conceptVocabulary[concept["prefLabel"]] = concept["altLabel"]
-            else:
-                conceptVocabulary[concept["prefLabel"]] = [concept["altLabel"]]
-        else:
-            conceptVocabulary[concept["prefLabel"]]=[]
-    */
-
-    for(let concept of conceptVocabulary["@graph"]) {
+    for(let concept of conceptVocabulary['@graph']) {
       if ('skos:altLabel' in concept) {
         if (typeof concept['skos:altLabel']['@value'] === "object") {
           conceptVocabularyMap[concept['skos:prefLabel']['@value']] = concept['skos:altLabel']['@value']
@@ -150,8 +135,10 @@ export default class GraphKnowledge extends React.Component {
 
     console.log(conceptVocabularyMap)
 
+    let tempSyn = [];
+
     for (const node of graphData["@graph"]){
-    
+
       //creating a node if it's a a concept
       if(node.type==='skos:Concept'){
         let nodelabel
@@ -161,39 +148,77 @@ export default class GraphKnowledge extends React.Component {
         else{
           nodelabel= node.id.replaceAll("_"," ")
         }
-        this.state.graph.nodes.push({id: node.id, label: nodelabel, color: baseColor, shadow:true, font: {color : 'black' , face: 'monospace'} })
+        if(! tempSyn.includes(nodelabel)) {
+          
+          let nodeWithSyns = [nodelabel];
+          for(let synonym of conceptVocabularyMap[nodelabel]) {
+            nodeWithSyns.push(synonym);
+            tempSyn.push(synonym)
+          }
+          let synonymsId = conceptVocabularyMap[nodelabel].map(el => "edu:" + el);
+          nodeWithSyns.sort();
+          let nodeName = "";
+          for(let i=0; i<nodeWithSyns.length; i++) {
+            if(i===0) {
+                nodeName = nodeWithSyns[i];
+            }
+            else {
+                nodeName += " = " + nodeWithSyns[i];
+            }   
+          }
+          this.state.graph.nodes.push({id: node.id, synonymsId: synonymsId, label: nodeName, color: baseColor, shadow:true, font: {color : 'black' , face: 'monospace'} })
+        }
       }
+    }
+
+    for (const node of graphData["@graph"]){
       if(node.type==='oa:annotation'){
         if(node.body!=null){
           //creating an edge if the motivation is linking
+        
+
           if(node.motivation==='edu:linkingPrerequisite'){
             if(node.target!=null && node.target["dcterms:subject"]!=null && node.target["dcterms:subject"].id!=null){
 
-                if(!this.state.graph.edges.some(e => e.from === node.body && e.to === node.target["dcterms:subject"].id)){
-                  this.state.graph.edges.push({from: node.body, to: node.target["dcterms:subject"].id/*, label:node["skos:note"]*/})
-                  
-                  var conceptTimeBegin = node.target.selector.value.replace("^^xsd:dateTime","");
-                  let t = node.target["dcterms:subject"].id//.replace("edu:", "")
-                  let p = node.body//.replace("edu:","")
-                  
-                  this.linkingTimestamps.set(p+"-.-"+t, 
-                    {
-                      id: p+"-.-"+t,
-                      prerequisite: p,
-                      target: t,
-                      beginTime: conceptTimeBegin, 
-                      beginTimeInSec: this.convertTimeInSeconds(conceptTimeBegin), 
-                      alreadyColored: false 
-                      
-                    })
+              let nodePrereq = node.body;
+              let nodeTarget = node.target["dcterms:subject"].id;
+
+              for (let n of this.state.graph.nodes) {
+                if(n.synonymsId.includes(node.body)) {
+                  nodePrereq = n.id;
                 }
+                else if(n.synonymsId.includes(node.target["dcterms:subject"].id)) {
+                  nodeTarget = n.id;
+                }
+              }
+
+              if(!this.state.graph.edges.some(e => e.from === node.body && e.to === node.target["dcterms:subject"].id)){
+                this.state.graph.edges.push({from: nodePrereq, to: nodeTarget})
+                
+                var conceptTimeBegin = node.target.selector.value.replace("^^xsd:dateTime","");
+                let t = node.target["dcterms:subject"].id//.replace("edu:", "")
+                let p = node.body//.replace("edu:","")
+                
+                this.linkingTimestamps.set(nodePrereq+"-.-"+nodeTarget, 
+                  {
+                    id: nodePrereq+"-.-"+nodeTarget,
+                    prerequisite: nodePrereq,
+                    target: nodeTarget,
+                    beginTime: conceptTimeBegin, 
+                    beginTimeInSec: this.convertTimeInSeconds(conceptTimeBegin), 
+                    alreadyColored: false 
+                    
+                  })
+              }
                        
             }
           }
+          
           //add the timestamps in the descriptionTimestamps Map
           //each concept can have more descriptions in different times
           //a description can be a "definition" or "in depth"
 
+          
           else if(node.motivation==='describing'){
  
             
@@ -204,29 +229,36 @@ export default class GraphKnowledge extends React.Component {
             var beginSeconds = this.convertTimeInSeconds(conceptTimeBegin)
             var endSeconds = this.convertTimeInSeconds(conceptTimeEnd)
 
+            let nodeD = node.body;
+            for (let n of this.state.graph.nodes) {
+              if(n.synonymsId.includes(node.body)) {
+                nodeD = n.id;
+              }
+            }
 
-            if(this.descriptionTimestamps.has(node.body)){
+            if(this.descriptionTimestamps.has(nodeD)){
               
-              let newOBj = this.descriptionTimestamps.get(node.body)
+              let newOBj = this.descriptionTimestamps.get(nodeD)
+              newOBj.word.push(node.body)
               newOBj.beginTime.push(conceptTimeBegin)
               newOBj.endTime.push(conceptTimeEnd)
               newOBj.beginTimeInSec.push(beginSeconds)
               newOBj.endTimeInSec.push(endSeconds)
               newOBj.descriptionType.push(node["skos:note"])
 
-              this.descriptionTimestamps.set(node.body, newOBj)
+              this.descriptionTimestamps.set(nodeD, newOBj)
 
             }else{
-              this.descriptionTimestamps.set(node.body, 
+              this.descriptionTimestamps.set(nodeD, 
                 {
-                  id: node.body, 
+                  id: nodeD, 
+                  word: [node.body],
                   descriptionType: [node["skos:note"]],
                   beginTime: [conceptTimeBegin], 
                   beginTimeInSec: [beginSeconds],  
                   endTime: [conceptTimeEnd], 
                   endTimeInSec:  [endSeconds]
                 })
-
             }
             
             
@@ -248,7 +280,9 @@ export default class GraphKnowledge extends React.Component {
           - send a message to the Video Component to show or hide the Dots Overlay
       */
       select: ({ nodes, edges , pointer: { DOM } }) => {
+
         const result = this.descriptionTimestamps.get(nodes[0]);
+        console.log(result)
         if(result!==undefined){
 
           if(result.beginTime!=null){
@@ -269,8 +303,10 @@ export default class GraphKnowledge extends React.Component {
                     showPopup: true ,
                     xPopup : DOM.x +10, 
                     yPopup : DOM.y+10, 
-                    conceptNamePopup: result.id.slice(4).replaceAll("_"," ") ,
-                    conceptTimeBeginPopup: result.beginTime[i]
+                    //conceptNamePopup: result.id.slice(4).replaceAll("_"," ") ,
+                    conceptList: result.word.map(el => el.slice(4).replaceAll("_"," ")),
+                    //conceptTimeBeginPopup: result.beginTime[i]
+                    conceptTimeBeginList: result.beginTime
                   })
                   first_def = false
                 }
@@ -594,8 +630,8 @@ export default class GraphKnowledge extends React.Component {
           visible={this.state.showPopup} 
           x={this.state.xPopup} 
           y={this.state.yPopup}
-          conceptName={this.state.conceptNamePopup}
-          conceptTimeBegin={this.state.conceptTimeBeginPopup}
+          conceptList={this.state.conceptList}
+          conceptTimeBeginList={this.state.conceptTimeBeginList}
           goToTimestamp = {(time) => this.channel.postMessage({to: 'Video', msg: time})}
         />
         {this.state.isGraphLoaded
