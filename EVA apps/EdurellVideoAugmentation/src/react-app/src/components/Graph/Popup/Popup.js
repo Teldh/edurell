@@ -10,18 +10,22 @@ export default class Popup extends React.Component{
     channel = new BroadcastChannel('react-connect'); //create a boradcast channel
 
     render(){
+        let temp = [];
         return(this.props.visible &&
             <div className="popup" style={{left: `${this.props.x}px`, top: `${this.props.y}px`, display: 'inline-block'}}>
-                { this.props.conceptList && this.props.conceptList.map((value, id) => 
+                { this.props.popupMap && Object.keys(this.props.popupMap).sort().map((word, id) =>
                 <ul className="ul-popup">
                     <li className="popup-li">
-                        Concept: <span className="text-concept-popup">{value}</span> 
+                        Concept: <span className="text-concept-popup">{word}</span> 
                     </li>
+                    { this.props.popupMap[word].sort().map((time, id) =>
+                        <div className="row">
+                            <button className="popup-button" onClick={()=>this.props.goToTimestamp(time)} > GoToConcept : {time}</button>
+                        </div>
+                    )
+                    }
                     <div className="row">
-                        <button className="popup-button" onClick={()=>this.props.goToTimestamp(this.props.conceptTimeBeginList[id])} > GoToConcept : {this.props.conceptTimeBeginList[id]}</button>
-                    </div>
-                    <div className="row">
-                        <button className="popup-button" onClick={()=>this.channel.postMessage({to: 'App', msg: this.props.conceptList[id]})} > Open detailed description </button>
+                            <button className="popup-button" onClick={()=>this.channel.postMessage({to: 'App', msg: word})} > Open detailed description </button>
                     </div>
                 </ul>) 
                 }

@@ -119,19 +119,31 @@ export default class GraphKnowledge extends React.Component {
     let concepts = []
     let conceptVocabularyMap = {}
 
-    for(let concept of conceptVocabulary['@graph']) {
-      if ('skos:altLabel' in concept) {
-        if (typeof concept['skos:altLabel']['@value'] === "object") {
-          conceptVocabularyMap[concept['skos:prefLabel']['@value']] = concept['skos:altLabel']['@value']
+    /*if(conceptVocabulary.keys == undefined || conceptVocabulary === undefined) {
+      for (const node of graphData["@graph"]){
+        if(node.id.startsWith("edu:")){
+          conceptVocabularyMap[node.id.slice(4).replaceAll("_"," ")] = [];
+        }
+        else{
+          conceptVocabularyMap[node.id.replaceAll("_"," ")] = [];
+        }
+      }
+    }*/
+    
+      for(let concept of conceptVocabulary['@graph']) {
+        if ('skos:altLabel' in concept) {
+          if (typeof concept['skos:altLabel']['@value'] === "object") {
+            conceptVocabularyMap[concept['skos:prefLabel']['@value']] = concept['skos:altLabel']['@value']
+          }
+          else {
+            conceptVocabularyMap[concept['skos:prefLabel']['@value']] = [concept['skos:altLabel']['@value']]
+          }
         }
         else {
-          conceptVocabularyMap[concept['skos:prefLabel']['@value']] = [concept['skos:altLabel']['@value']]
+          conceptVocabularyMap[concept['skos:prefLabel']['@value']]=[]
         }
       }
-      else {
-        conceptVocabularyMap[concept['skos:prefLabel']['@value']]=[]
-      }
-    }
+    
 
     console.log(conceptVocabularyMap)
 
@@ -150,21 +162,36 @@ export default class GraphKnowledge extends React.Component {
         }
         if(! tempSyn.includes(nodelabel)) {
           
-          let nodeWithSyns = [nodelabel];
-          for(let synonym of conceptVocabularyMap[nodelabel]) {
-            nodeWithSyns.push(synonym);
-            tempSyn.push(synonym)
-          }
-          let synonymsId = conceptVocabularyMap[nodelabel].map(el => "edu:" + el);
-          nodeWithSyns.sort();
+          let synonymsId = [];
           let nodeName = "";
-          for(let i=0; i<nodeWithSyns.length; i++) {
-            if(i===0) {
-                nodeName = nodeWithSyns[i];
+
+          console.log(conceptVocabularyMap)
+          console.log(nodelabel)
+          console.log(conceptVocabularyMap[nodelabel])
+
+          let nodeWithSyns = [nodelabel];
+          if(conceptVocabularyMap[nodelabel].length > 0) {
+            for(let synonym of conceptVocabularyMap[nodelabel]) {
+              nodeWithSyns.push(synonym);
+              tempSyn.push(synonym)
             }
-            else {
-                nodeName += " = " + nodeWithSyns[i];
-            }   
+        
+            synonymsId = conceptVocabularyMap[nodelabel].map(el => "edu:" + el);
+            nodeWithSyns.sort();
+
+            nodeName = "";
+            for(let i=0; i<nodeWithSyns.length; i++) {
+              if(i===0) {
+                  nodeName = nodeWithSyns[i];
+              }
+              else {
+                  nodeName += " = " + nodeWithSyns[i];
+              }   
+            }
+          }
+          else {
+            synonymsId = []
+            nodeName = nodelabel;
           }
           this.state.graph.nodes.push({id: node.id, synonymsId: synonymsId, label: nodeName, color: baseColor, shadow:true, font: {color : 'black' , face: 'monospace'} })
         }
@@ -299,14 +326,29 @@ export default class GraphKnowledge extends React.Component {
               if(result.descriptionType[i] == "Definition"){
                 dotArray.push({ time: result.beginTime[i] , backgroundColor: '#228B22', size: 15})
                 if(first_def){
+
+                  // Select concept to show in popup
+                  let words = result.word.map(el => el.slice(4).replaceAll("_"," "))
+                  let timestamps = result.beginTime
+                  let popupMap = {}
+ 
+                  for(let i=0; i<words.length; i++) {
+                    popupMap[words[i]] = []
+                  }
+
+                  for(let i=0; i<words.length; i++) {
+                    popupMap[words[i]].push(timestamps[i])
+                  }
+
                   this.setState({
                     showPopup: true ,
                     xPopup : DOM.x +10, 
                     yPopup : DOM.y+10, 
                     //conceptNamePopup: result.id.slice(4).replaceAll("_"," ") ,
-                    conceptList: result.word.map(el => el.slice(4).replaceAll("_"," ")),
+                    //conceptList: result.word.map(el => el.slice(4).replaceAll("_"," ")),
                     //conceptTimeBeginPopup: result.beginTime[i]
-                    conceptTimeBeginList: result.beginTime
+                    //conceptTimeBeginList: result.beginTime
+                    popupMap: popupMap
                   })
                   first_def = false
                 }
@@ -630,8 +672,9 @@ export default class GraphKnowledge extends React.Component {
           visible={this.state.showPopup} 
           x={this.state.xPopup} 
           y={this.state.yPopup}
-          conceptList={this.state.conceptList}
-          conceptTimeBeginList={this.state.conceptTimeBeginList}
+          //conceptList={this.state.conceptList}
+          //conceptTimeBeginList={this.state.conceptTimeBeginList}
+          popupMap={this.state.popupMap}
           goToTimestamp = {(time) => this.channel.postMessage({to: 'Video', msg: time})}
         />
         {this.state.isGraphLoaded

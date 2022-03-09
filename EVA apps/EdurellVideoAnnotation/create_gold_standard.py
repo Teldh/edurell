@@ -1,4 +1,4 @@
-from EdurellVideoAnnotation.synonyms import create_skos_dictionary
+from synonyms import create_skos_dictionary
 import db_mongo
 from ontology import create_graph_jsonld
 from pprint import pprint
@@ -20,7 +20,8 @@ def create_gold(video, annotators, combination_criteria, name):
         for annotator in annotators:
             relations += db_mongo.get_concept_map(annotator, video)
             definitions += db_mongo.get_definitions(annotator, video)
-            db_conceptVocabulary = db_mongo.get_vocabulary(annotator, video)
+            #db_conceptVocabulary = db_mongo.get_vocabulary(annotator, video) take from db
+            db_conceptVocabulary = None # to start empty
             if(db_conceptVocabulary != None):
                 conceptVocabulary = mergeDictionary(conceptVocabulary, db_conceptVocabulary)
 
