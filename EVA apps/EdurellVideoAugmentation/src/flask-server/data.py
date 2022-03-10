@@ -79,7 +79,7 @@ def get_concept_list(annotator, video_id):
     for c in concept_list:
         c["id"] = c["id"].replace("edu:","").replace("_"," ")
 
-    get_concept_vocabulary(annotator, video_id)
+    #get_concept_vocabulary(annotator, video_id)
     
     return concept_list
 

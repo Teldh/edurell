@@ -632,7 +632,7 @@ def get_graph(video_id=None):
         abort(409, "Unexisting graph for this video id")    # the video doesn't exist in the graphs collection
 
     if graph_object.conceptVocabulary is None:
-        graph_object.conceptVocabulary = {}
+        graph_object.conceptVocabulary = False
 
     return (jsonify({'email': student.email, 'graph' : graph_object.graph, 'conceptVocabulary': graph_object.conceptVocabulary}), 201)
 

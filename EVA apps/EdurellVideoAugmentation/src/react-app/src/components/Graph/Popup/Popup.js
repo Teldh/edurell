@@ -18,14 +18,20 @@ export default class Popup extends React.Component{
                     <li className="popup-li">
                         Concept: <span className="text-concept-popup">{word}</span> 
                     </li>
-                    { this.props.popupMap[word].sort().map((time, id) =>
+                    { this.props.popupMap[word]["Definition"].sort().map((time, id) =>
                         <div className="row">
-                            <button className="popup-button" onClick={()=>this.props.goToTimestamp(time)} > GoToConcept : {time}</button>
+                            <button className="popup-button" onClick={()=>this.props.goToTimestamp(time)} > Definition: {time}</button>
+                        </div>
+                    )
+                    }
+                    { this.props.popupMap[word]["In depth"].sort().map((time, id) =>
+                        <div className="row">
+                            <button className="popup-button" onClick={()=>this.props.goToTimestamp(time)} > In depth: {time}</button>
                         </div>
                     )
                     }
                     <div className="row">
-                            <button className="popup-button" onClick={()=>this.channel.postMessage({to: 'App', msg: word})} > Open detailed description </button>
+                            <button className="popup-button" onClick={()=>this.channel.postMessage({to: 'App', msg: word})} > Detailed description </button>
                     </div>
                 </ul>) 
                 }

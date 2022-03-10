@@ -102,6 +102,7 @@ export default class GraphKnowledge extends React.Component {
     
   }
 
+
   /**
    * Contruct the network graph data that will be used by the Graph component,
    * this function parse the json object to create the node and the edges.
@@ -114,12 +115,11 @@ export default class GraphKnowledge extends React.Component {
     this.linkingTimestamps = new Map();
     this.descriptionTimestamps = new Map();
 
-    console.log(conceptVocabulary)
-
     let concepts = []
     let conceptVocabularyMap = {}
 
-    /*if(conceptVocabulary.keys == undefined || conceptVocabulary === undefined) {
+    // check if concept vocabulary is absent in the db (old versions), if so build it as empty
+    if(!conceptVocabulary) {
       for (const node of graphData["@graph"]){
         if(node.id.startsWith("edu:")){
           conceptVocabularyMap[node.id.slice(4).replaceAll("_"," ")] = [];
@@ -128,8 +128,8 @@ export default class GraphKnowledge extends React.Component {
           conceptVocabularyMap[node.id.replaceAll("_"," ")] = [];
         }
       }
-    }*/
-    
+    }
+    else {
       for(let concept of conceptVocabulary['@graph']) {
         if ('skos:altLabel' in concept) {
           if (typeof concept['skos:altLabel']['@value'] === "object") {
@@ -143,9 +143,9 @@ export default class GraphKnowledge extends React.Component {
           conceptVocabularyMap[concept['skos:prefLabel']['@value']]=[]
         }
       }
-    
+    }
 
-    console.log(conceptVocabularyMap)
+    //console.log(conceptVocabularyMap)
 
     let tempSyn = [];
 
@@ -322,9 +322,14 @@ export default class GraphKnowledge extends React.Component {
             // for the first definition a popup is needed
 
             for(let i = 0; i<result.beginTimeInSec.length; i++){
+
+              console.log("--")
+              console.log(result.descriptionType[i])
               
               if(result.descriptionType[i] == "Definition"){
                 dotArray.push({ time: result.beginTime[i] , backgroundColor: '#228B22', size: 15})
+                
+                /*
                 if(first_def){
 
                   // Select concept to show in popup
@@ -352,11 +357,31 @@ export default class GraphKnowledge extends React.Component {
                   })
                   first_def = false
                 }
+                */
               }
                 
               else
                 dotArray.push({ time: result.beginTime[i] , backgroundColor: '	#686868', size: 10})
               
+              // Select concept to show in popup
+              let words = result.word.map(el => el.slice(4).replaceAll("_"," "))
+              let timestamps = result.beginTime
+              let popupMap = {}
+
+              for(let i=0; i<words.length; i++) {
+                popupMap[words[i]] = {"Definition": [], "In depth": []}
+              }
+
+              for(let i=0; i<words.length; i++) {
+                popupMap[words[i]][result.descriptionType[i]].push(timestamps[i])
+              }
+
+              this.setState({
+                showPopup: true ,
+                xPopup : DOM.x +10, 
+                yPopup : DOM.y+10, 
+                popupMap: popupMap
+              })
               
               
               this.resetEdgesWidth()
