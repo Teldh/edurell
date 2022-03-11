@@ -71,6 +71,10 @@ export default class App extends React.Component {
       loading: true,
       // knowledge graph for the video (JSON format) 
       conceptsAndGraph: null, 
+      // graph of synonyms dictionary
+      conceptVocabulary: {},
+      // the concept info of the synonyms
+      conceptSyn: [],
       // list of the concepts of the video
       conceptsList: [], 
       // ID of the annotator of the video
@@ -86,7 +90,11 @@ export default class App extends React.Component {
     this.channel.onmessage = res => {
       if(res.data.to === 'App'){
         try{
-          this.setState({concept: this.state.conceptsAndGraph.find(concept => concept.conceptName===res.data.msg)})
+          let conceptSyn = [];
+          for (let syn of this.state.conceptVocabulary[res.data.msg]) {
+            conceptSyn.push(this.state.conceptsAndGraph.find(concept => concept.conceptName===syn));
+          }
+          this.setState({concept: this.state.conceptsAndGraph.find(concept => concept.conceptName===res.data.msg), conceptSyn: conceptSyn})
           console.log("concept", this.state.concept)
           this.channel.postMessage({to: 'Video', msg: this.state.concept.startTimestamp})
           this.show()
@@ -214,7 +222,8 @@ export default class App extends React.Component {
       }
       else{
         let list = []
-        this.setState({conceptsAndGraph: response.conceptsList, loading: false})
+        console.log(response.conceptVocabulary)
+        this.setState({conceptsAndGraph: response.conceptsList, conceptVocabulary: response.conceptVocabulary, loading: false})
         response.conceptsList.forEach(concept => list.push(concept.conceptName))
         this.setState({conceptsList: list})
     }
@@ -262,7 +271,7 @@ export default class App extends React.Component {
 
   render(){
     const { nameSurname } = this.context;
-    const { loading, notes, lastWatchTime, conceptsList, overlap, concept } = this.state;
+    const { loading, notes, lastWatchTime, conceptsList, conceptVocabulary, overlap, concept, conceptSyn } = this.state;
     const { videoTitle, videoUrl, videoId} = this.props;
     return (
       <div className="app">
@@ -313,7 +322,7 @@ export default class App extends React.Component {
                 width={1000}
                 height={500}
               >
-                <Concept close={()=>this.hide()} concept={concept ? concept : ''} />
+                <Concept close={()=>this.hide()} concept={concept ? concept : ''} conceptSyn={conceptSyn ? conceptSyn : ''} conceptVocabulary={conceptVocabulary}  />
               </Rodal>
             </div>
             <div className="TranscAndGraphContainer">

@@ -257,7 +257,7 @@ def video_selection():
             if(conceptVocabulary == None) :
                 conceptVocabulary = {}
                 for i in lemmatized_concepts :
-                    conceptVocabulary[i] = [];
+                    conceptVocabulary[i] = []
 
             for rel in relations:
                 if rel["prerequisite"] not in lemmatized_concepts:

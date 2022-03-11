@@ -48,21 +48,71 @@ export default class SubGraph extends React.Component {
         try{}   catch{}
     }
 
+// this next function will change node-names to include synonyms in the detailed description visualization.
+    getNameWithSynonyms = (label) => {
+
+      var conceptVocabulary = this.props.conceptVocabulary;
+      let nodeName = "";
+
+      let nodeWithSyns = [label];
+      if(conceptVocabulary[label].length > 0) {
+        for(let synonym of conceptVocabulary[label]) {
+          nodeWithSyns.push(synonym);
+        }
+    
+        nodeWithSyns.sort();
+
+        nodeName = "";
+        for(let i=0; i<nodeWithSyns.length; i++) {
+          if(i===0) {
+              nodeName = nodeWithSyns[i];
+          }
+          else {
+              nodeName += " = " + nodeWithSyns[i];
+          }   
+        }
+      }
+      else {
+        nodeName = label; 
+      }
+
+      return nodeName;
+    }
+
+// this function will include synonyms to the relations.
+    getRelationTargets = (word) => {
+
+      var conceptVocabulary = this.props.conceptVocabulary;
+      return conceptVocabulary[word];
+    }
+
     /**
      * function triggered when the concept change, and redraw the graph focused on the updated concept
      */
     componentDidUpdate = ()=> {
-        try{this.state.networkEdges.clear();}   catch{}
-        try{this.state.networkNodes.clear();}   catch{}
+      try{this.state.networkEdges.clear();}   catch{}
+      try{this.state.networkNodes.clear();}   catch{}
       var conceptObject = this.props.concept;
+      var conceptSyn = this.props.conceptSyn;
 
       if(conceptObject){
           let addedRels = []
-          try{this.state.networkNodes.add({id: conceptObject.conceptName, label: conceptObject.conceptName, color: "#B85450", shadow:true ,font: {color : 'black' , face: 'monospace'} })
-            }   catch{}
+          
+          let label = conceptObject.conceptName;
+
+          let newLabel = this.getNameWithSynonyms(label)
+
+          try{
+            this.state.networkNodes.add({id: conceptObject.conceptName, label: newLabel, color: "#B85450", shadow:true ,font: {color : 'black' , face: 'monospace'} })
+          }   catch{}
 
           for(const target of conceptObject.subgraph.targets){
-            try{this.state.networkNodes.add({id: target.conceptName, label: target.conceptName, color: "#C0BAC0", shadow:true ,font: {color : 'black' , face: 'monospace'} })
+            
+            let label = target.conceptName;
+            let newTargetLabel = this.getNameWithSynonyms(label)
+
+            try{
+              this.state.networkNodes.add({id: target.conceptName, label: newTargetLabel, color: "#C0BAC0", shadow:true ,font: {color : 'black' , face: 'monospace'} })
             }   catch{}
 
             try{
@@ -75,34 +125,77 @@ export default class SubGraph extends React.Component {
                   this.state.networkEdges.add({from: conceptObject.conceptName, to: target.conceptName})
                   addedRels.push({from: conceptObject.conceptName, to: target.conceptName})
                 }
-
-                
               }
+              
                 
             }   catch{}
           }
+
+          // Adding synonyms relations
+          for(let concept of conceptSyn) {
+
+            for(const target of concept.subgraph.targets){
+            
+              let label = target.conceptName;
+              let newTargetLabel = this.getNameWithSynonyms(label)
+  
+              try{
+                this.state.networkNodes.add({id: target.conceptName, label: newTargetLabel, color: "#C0BAC0", shadow:true ,font: {color : 'black' , face: 'monospace'} })
+              }   catch{}
+  
+              try{
+  
+                if (concept.subgraph.relations.some(e => e.prerequisite === concept.conceptName && e.target === target.conceptName)){
+                  
+                  let edge = {from: conceptObject.conceptName, to: target.conceptName}
+  
+                  if(!addedRels.some(e => e.from === edge.from && e.to === edge.to)){
+                    this.state.networkEdges.add({from: conceptObject.conceptName, to: target.conceptName})
+                    addedRels.push({from: conceptObject.conceptName, to: target.conceptName})
+                  }
+                }
+                    
+              }   catch{}
+            }
+          }
           
           this.addPrerequisiteTree(conceptObject, conceptObject.subgraph.relations, addedRels)
-          try{this.state.networkNodes.update({id: conceptObject.conceptName, label: conceptObject.conceptName, color: "#B85450", shadow:true ,font: {color : 'black' , face: 'monospace'} })
+          for(let concept of conceptSyn) {
+            this.addPrerequisiteTree(concept, concept.subgraph.relations, addedRels, conceptObject)
+          }
+
+          try{this.state.networkNodes.update({id: conceptObject.conceptName, label: newLabel, color: "#B85450", shadow:true ,font: {color : 'black' , face: 'monospace'} })
             }   catch{}
+            
       }
     }
 
     // recursive function used to draw the graph
-    addPrerequisiteTree  = (conceptObject, relations, addedRels) => {
+    addPrerequisiteTree  = (conceptObject, relations, addedRels, synonymOf = false) => {
+
+      let target = conceptObject.conceptName;
+
+      if(synonymOf) {
+        target = synonymOf.conceptName;
+      }
 
       for(const prerequisite of conceptObject.subgraph.prerequisites){
-        try{this.state.networkNodes.add({id: prerequisite.conceptName, label: prerequisite.conceptName, color: "#E0B7DF", shadow:true, font: {color : 'black' , face: 'monospace'} })
+        
+        let label = prerequisite.conceptName;
+        let newPrereqLabel = this.getNameWithSynonyms(label)
+
+        try{
+          this.state.networkNodes.add({id: prerequisite.conceptName, label: newPrereqLabel, color: "#E0B7DF", shadow:true, font: {color : 'black' , face: 'monospace'} })
         }   catch{}
         try{
           if (relations.some(e => e.prerequisite === prerequisite.conceptName && e.target === conceptObject.conceptName)){
 
-              let edge = {from: prerequisite.conceptName, to: conceptObject.conceptName}
+              let edge = {from: prerequisite.conceptName, to: target}
 
               console.log(addedRels)
               if(!addedRels.some(e => e.from === edge.from && e.to === edge.to)){
-                this.state.networkEdges.add({from: prerequisite.conceptName, to: conceptObject.conceptName})
-                addedRels.push({from: prerequisite.conceptName, to: conceptObject.conceptName})
+                this.state.networkEdges.add({from: prerequisite.conceptName, to: target})
+                addedRels.push({from: prerequisite.conceptName, to: target})
               }
 
           }
@@ -110,8 +203,13 @@ export default class SubGraph extends React.Component {
         }   catch{}
         this.addPrerequisiteTree(prerequisite, relations, addedRels)
       }
-      if(!conceptObject.subgraph.prerequisites.length){
-        try{this.state.networkNodes.update({id: conceptObject.conceptName, label: conceptObject.conceptName, color: "#A9ACEA", shadow:true, font: {color : 'black' , face: 'monospace'} })
+      if(!conceptObject.subgraph.prerequisites.length && !synonymOf){
+
+        let label = conceptObject.conceptName;
+        let newlabel = this.getNameWithSynonyms(label)
+
+        try{
+          this.state.networkNodes.update({id: conceptObject.conceptName, label: newlabel, color: "#A9ACEA", shadow:true, font: {color : 'black' , face: 'monospace'} })
         }   catch{}
       }
     }
@@ -123,7 +221,7 @@ export default class SubGraph extends React.Component {
       return (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
     }
   
-    render(){
+    render() {
       return (
           <Graph
             getNodes = {nodes => {this.setState({networkNodes: nodes})} }

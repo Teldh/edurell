@@ -67,13 +67,13 @@ const Legend = (props) => {
 
 export default class Concept extends React.Component {
     render () {
-       const { concept } = this.props;
+       const { concept, conceptSyn, conceptVocabulary } = this.props;
        return(
         <div className="conceptContainer">
                <div className="subGraphContainer">
                     <text className="conceptTitle">{concept.conceptName}</text>
                     <div id="myNetwork" >
-                        <SubGraph concept={concept} />
+                        <SubGraph concept={concept} conceptSyn={conceptSyn} conceptVocabulary={conceptVocabulary} />
                     </div>
                     <div className="downloadContainer">
                         <BsDownload size={25} onClick={()=>downloadObjectAsJson(concept, `${concept.conceptName}`)}/>

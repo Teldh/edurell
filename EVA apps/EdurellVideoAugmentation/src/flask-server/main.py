@@ -674,7 +674,21 @@ def graph_id(video_id):
 @auth.login_required
 def graph(annotator_id, video_id):
     concept_graph = data.build_array(annotator_id, video_id)
-    return {"conceptsList": concept_graph }
+    
+    # old: return {"conceptsList": concept_graph }
+    
+    conceptVocabulary = data.get_concept_vocabulary(annotator_id, video_id)
+
+    # If the concept vocabulary is new (empty) in DB then initialize it to empty synonyms
+    if(conceptVocabulary == None) :
+        conceptVocabulary = {}
+        concept_list = data.get_concept_list(annotator_id, video_id)
+        for c in concept_list:
+            conceptVocabulary[c["name"][4:].replace("_", " ")] = []
+
+    print(conceptVocabulary)
+
+    return {"conceptsList": concept_graph, "conceptVocabulary": conceptVocabulary}
 
 if __name__ == '__main__':
     app.run(debug=True)
