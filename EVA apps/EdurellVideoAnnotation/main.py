@@ -250,8 +250,15 @@ def video_selection():
             definitions = db_mongo.get_definitions(current_user.mongodb_id, vid_id)
 
             # Obtaining concept vocabulary from DB
-            #conceptVocabulary  = db_mongo.get_vocabulary(current_user.mongodb_id, vid_id)
-            conceptVocabulary = None
+            conceptVocabulary  = db_mongo.get_vocabulary(current_user.mongodb_id, vid_id)
+            #conceptVocabulary = None
+            
+            # If the concept vocabulary is in the DB then initialize concept to the ones of the vocabulary
+            if(conceptVocabulary != None) :
+                lemmatized_concepts = []
+                for key in conceptVocabulary:
+                    lemmatized_concepts.append(key)
+                
 
             # If the concept vocabulary is new (empty) in DB then initialize it to empty synonyms
             if(conceptVocabulary == None) :
