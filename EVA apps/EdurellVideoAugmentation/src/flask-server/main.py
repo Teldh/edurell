@@ -564,12 +564,27 @@ def get_fragments(video_id):
 
             video_fragment_progress = i.fragments_progress
     graph_object = Graphs.objects(video_id = video_id, email = student.email).first()
+    
+    #if user first time on this video open first available video
+    if(graph_object is None):
+        graph_object = Graphs.objects(video_id = video_id).first()
+
+    #if then graph still not exist show msg
+    if graph_object is None:
+        abort(409, "Unexisting graph for this video id")    # the video doesn't exist in the graphs collection
+
     keywords = handle_data.get_definitions_fragments(graph_object.email, video_id, video_fragment_progress)
-    print(keywords)
+    #print(keywords)
 
 
     if(video_fragment_progress is None or not len(video_fragment_progress)):
         video = Videos.objects(video_id = video_id, email = student.email).first()
+        
+        #if user first time on this video open first available video
+        if(video is None):
+            video = Videos.objects(video_id = video_id).first()
+        
+        #if then video still not exist show msg
         if video is None:
             abort(409, "video not in the catalog")    # the video is not in the catalog
 
@@ -627,17 +642,12 @@ def get_graph(video_id=None):
         abort(400, "The video id is missing")    # missing arguments
     student= g.student
     graph_object = Graphs.objects(video_id = video_id, email=student.email).first()
-    print("graph_object.annotator_name :")
-    print(graph_object.annotator_name)
-    print("graph_object.annotator_id :")
-    print(graph_object.annotator_id)
-    print("graph_object.email :")
-    print(graph_object.email)
-    print("student Email:")
-    print(student.email)
-    print("student ID :")
-    print(student.id)
 
+    #if user first time on this video open first available video
+    if(graph_object is None):
+        graph_object = Graphs.objects(video_id = video_id).first()
+
+    #if then graph still not exist show msg
     if graph_object is None:
         abort(409, "Unexisting graph for this video id")    # the video doesn't exist in the graphs collection
 
@@ -672,12 +682,17 @@ def get_image(video_id=None, fragment_index=None ):
     except FileNotFoundError:
         abort
 
-#return the graph of a given video
+#return the graph user ids of a given video
 @app.route('/api/graph_id/<video_id>')
 @auth.login_required
 def graph_id(video_id):
     student= g.student
-    graph_list = handle_data.get_graphs(video_id,student.email)
+    graph_list = handle_data.check_graphs(video_id,student.email)
+
+    # if user first time on this video, select all available graph ids
+    if not len(graph_list):
+        graph_list = handle_data.get_graphs(video_id)
+
     return {"graphs_id_list": graph_list }
 
 #return the graph of a given video

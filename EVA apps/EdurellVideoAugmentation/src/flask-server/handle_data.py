@@ -20,7 +20,17 @@ edu = Namespace("http://edurell.com/")
 skos = Namespace("http://www.w3.org/2004/02/skos#")
 
 
-def get_graphs(video_id, email):
+def get_graphs(video_id):
+    db = data.load_db()
+    collection = db.graphs
+    q = collection.find({"video_id":video_id})
+    res = []
+    for graph in q:
+        res.append({"annotator_id": graph["annotator_id"], "video_id": video_id})
+    return res
+
+# check if exist video annotated by user (email)
+def check_graphs(video_id, email):
     db = data.load_db()
     collection = db.graphs
     q = collection.find({"video_id":video_id,"email":email})
@@ -28,7 +38,6 @@ def get_graphs(video_id, email):
     for graph in q:
         res.append({"annotator_id": graph["annotator_id"], "video_id": video_id})
     return res
-
 
 def get_definitions_fragments(email, video_id, fragments):
     db = data.load_db()
