@@ -627,6 +627,16 @@ def get_graph(video_id=None):
         abort(400, "The video id is missing")    # missing arguments
     student= g.student
     graph_object = Graphs.objects(video_id = video_id).first()
+    print("graph_object.annotator_name :")
+    print(graph_object.annotator_name)
+    print("graph_object.annotator_id :")
+    print(graph_object.annotator_id)
+    print("graph_object.email :")
+    print(graph_object.email)
+    print("student Email:")
+    print(student.email)
+    print("student ID :")
+    print(student.id)
 
     if graph_object is None:
         abort(409, "Unexisting graph for this video id")    # the video doesn't exist in the graphs collection

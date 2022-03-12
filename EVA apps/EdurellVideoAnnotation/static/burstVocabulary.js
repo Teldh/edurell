@@ -232,7 +232,7 @@ function addConcept(){
                     console.log("--------------------")
                    // $('#conceptsModal').modal('hide')
                     document.getElementById("newConcept").value = ""
-                    document.getElementById("errorConcept").innerHTML = "word succesfully added to the concepts"
+                    document.getElementById("errorConcept").innerHTML = "word successfully added to the concepts"
                     document.getElementById("errorConcept").style.display = "block"
                 }
 
@@ -612,7 +612,7 @@ function selectSynonymSet(){
               document.getElementById("synonymSet").style.display = "none"
               document.getElementById("selectSynonymSet").value = "";
               document.getElementById("synonymWord").value = "";
-              document.getElementById("errorNewSynonym").innerHTML = "word succesfully added to the synonyms set"
+              document.getElementById("errorNewSynonym").innerHTML = "word successfully added to the synonyms set"
               document.getElementById("errorNewSynonym").style.display = "block"
             }
 
@@ -674,8 +674,8 @@ function selectSynonymSet(){
               document.getElementById("synonymSet").style.display = "none"
               document.getElementById("selectSynonymSet").value = "";
               document.getElementById("synonymWord").value = "";
-              document.getElementById("errorRemoveSynonym").innerHTML = "word succesfully removed to the synonyms set"
-              document.getElementById("errorNewSynonym").style.display = "block"
+              document.getElementById("errorRemoveSynonym").innerHTML = "word successfully removed from the synonyms set"
+              document.getElementById("errorRemoveSynonym").style.display = "block"
             }
             
         })
