@@ -407,8 +407,8 @@ let definingSynonyms = []
 
         if(nextSpan[0] !== undefined){
 
-          //nextWord = nextSpan[0].attributes[0].nodeValue
-          //currentSpan = nextSpan[0]
+          nextWord = nextSpan[0].attributes[0].nodeValue
+          currentSpan = nextSpan[0]
 
         }else{
 

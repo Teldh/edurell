@@ -86,6 +86,8 @@ def get_definitions_fragments(email, video_id, fragments):
         d["end"] = d["end"].replace("^^xsd:dateTime","")
         d["start"] = d["start"].replace("^^xsd:dateTime", "")
 
+    
+
     for f in fragments:
 
         start_time = f['start']

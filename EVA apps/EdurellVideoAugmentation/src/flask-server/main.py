@@ -564,7 +564,7 @@ def get_fragments(video_id):
 
             video_fragment_progress = i.fragments_progress
     graph_object = Graphs.objects(video_id = video_id, email = student.email).first()
-    
+
     #if user first time on this video open first available video
     if(graph_object is None):
         graph_object = Graphs.objects(video_id = video_id).first()
@@ -576,15 +576,11 @@ def get_fragments(video_id):
     keywords = handle_data.get_definitions_fragments(graph_object.email, video_id, video_fragment_progress)
     #print(keywords)
 
-
     if(video_fragment_progress is None or not len(video_fragment_progress)):
-        video = Videos.objects(video_id = video_id, email = student.email).first()
         
-        #if user first time on this video open first available video
-        if(video is None):
-            video = Videos.objects(video_id = video_id).first()
+        video = Videos.objects(video_id = video_id).first()
         
-        #if then video still not exist show msg
+        #if then video not exist show msg
         if video is None:
             abort(409, "video not in the catalog")    # the video is not in the catalog
 
