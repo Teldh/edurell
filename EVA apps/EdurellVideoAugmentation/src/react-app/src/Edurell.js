@@ -25,7 +25,7 @@ export default class AuthExample extends React.Component {
   initToken = () => {
     const tokenString = sessionStorage.getItem('token');
     const userToken = JSON.parse(tokenString);
-    console.log(userToken)
+    //console.log(userToken)
     if(userToken != null)
       return userToken?.token
 
@@ -54,7 +54,7 @@ export default class AuthExample extends React.Component {
 
   initNameSurname = () => {
     const nameSurnameString = sessionStorage.getItem('nameSurname');
-    console.log("log",nameSurnameString)
+    //console.log("log",nameSurnameString)
     const userNameSurname = JSON.parse(nameSurnameString);
     if(userNameSurname != null){
       let result = userNameSurname ? userNameSurname.name+' '+userNameSurname.surname : ''

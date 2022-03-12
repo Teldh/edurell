@@ -91,7 +91,7 @@ export default class VideoFragments extends React.Component {
                     <ImageBackground
                         source={{uri: "/api/get_image/"+this.props.videoId+'/'+this.props.index}}
                         style={{flex:1, resizeMode: "cover", justifyContent: "center"}}>
-                        <text style={{flex:1, resizeMode: "none", justifyContent: "none", color: '#fff', 'text-shadow': '1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000'}}>{this.props.start}</text>
+                        <text style={{flex:1, resizeMode: "none", justifyContent: "none", color: '#fff', 'textShadow': '1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000'}}>{this.props.start}</text>
                     </ImageBackground>    
                 </TouchableOpacity>
             </Tooltip>

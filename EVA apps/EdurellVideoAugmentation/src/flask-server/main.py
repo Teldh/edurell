@@ -563,13 +563,13 @@ def get_fragments(video_id):
                 print(e.name)'''
 
             video_fragment_progress = i.fragments_progress
-    graph_object = Graphs.objects(video_id = video_id).first()
+    graph_object = Graphs.objects(video_id = video_id, email = student.email).first()
     keywords = handle_data.get_definitions_fragments(graph_object.email, video_id, video_fragment_progress)
     print(keywords)
 
 
     if(video_fragment_progress is None or not len(video_fragment_progress)):
-        video = Videos.objects(video_id = video_id).first()
+        video = Videos.objects(video_id = video_id, email = student.email).first()
         if video is None:
             abort(409, "video not in the catalog")    # the video is not in the catalog
 
@@ -626,7 +626,7 @@ def get_graph(video_id=None):
     if video_id is None:
         abort(400, "The video id is missing")    # missing arguments
     student= g.student
-    graph_object = Graphs.objects(video_id = video_id).first()
+    graph_object = Graphs.objects(video_id = video_id, email=student.email).first()
     print("graph_object.annotator_name :")
     print(graph_object.annotator_name)
     print("graph_object.annotator_id :")
@@ -676,7 +676,8 @@ def get_image(video_id=None, fragment_index=None ):
 @app.route('/api/graph_id/<video_id>')
 @auth.login_required
 def graph_id(video_id):
-    graph_list = handle_data.get_graphs(video_id)
+    student= g.student
+    graph_list = handle_data.get_graphs(video_id,student.email)
     return {"graphs_id_list": graph_list }
 
 #return the graph of a given video
@@ -695,8 +696,6 @@ def graph(annotator_id, video_id):
         concept_list = data.get_concept_list(annotator_id, video_id)
         for c in concept_list:
             conceptVocabulary[c["name"][4:].replace("_", " ")] = []
-
-    print(conceptVocabulary)
 
     return {"conceptsList": concept_graph, "conceptVocabulary": conceptVocabulary}
 

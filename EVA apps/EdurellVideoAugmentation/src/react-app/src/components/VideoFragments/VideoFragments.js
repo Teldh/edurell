@@ -97,7 +97,7 @@ export default class VideoFragments extends React.Component {
                 return
             }
           }
-          console.log(response)
+          //console.log(response)
           if(response===undefined){
             alert('Unknown Server Error')
             return
@@ -125,7 +125,7 @@ export default class VideoFragments extends React.Component {
         if(fetchedFragment.fragments && fetchedFragment.fragments.length){
             this.fragmentsInput= fetchedFragment.fragments
             this.keywords = fetchedFragment.keywords
-            console.log(this.keywords)
+            //console.log(this.keywords)
             this.setState({fragments: fetchedFragment.fragments ,areFragmentsLoaded: true })
         }
         else{
@@ -183,6 +183,7 @@ export default class VideoFragments extends React.Component {
                                         />
                             else*/
                                 return <Fragment 
+                                    key={"Fragment__"+index}
                                     name={f.name}
                                     start={f.start}
                                     end={f.end}

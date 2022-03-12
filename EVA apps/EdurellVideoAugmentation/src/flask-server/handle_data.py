@@ -20,10 +20,10 @@ edu = Namespace("http://edurell.com/")
 skos = Namespace("http://www.w3.org/2004/02/skos#")
 
 
-def get_graphs(video_id):
+def get_graphs(video_id, email):
     db = data.load_db()
     collection = db.graphs
-    q = collection.find({"video_id":video_id})
+    q = collection.find({"video_id":video_id,"email":email})
     res = []
     for graph in q:
         res.append({"annotator_id": graph["annotator_id"], "video_id": video_id})

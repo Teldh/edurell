@@ -108,7 +108,7 @@ export default class VideoTranscript extends React.Component {
                          ? loading
                            ? <Spinner/>
                            : <ScrollView ref={this.ref} style={{height: '100%', width: '100%'}}>
-                            { transcript.map(f => { 
+                            { transcript.map((f,i) => { 
                                 var startDate = new Date(null);
                                 // turn the amount of seconds in a event
                                 startDate.setSeconds(f.start);
@@ -122,11 +122,11 @@ export default class VideoTranscript extends React.Component {
                                     console.log(error)
                                 }
                         return (
-                                <div className="textContainer" style={{opacity: integerCurrentTime >= f.start && integerCurrentTime <= f.end ? 1 : 0.5}}>
-                                    <Tooltip title={"go to "+start}>
-                                        <TouchableOpacity style={{display: 'flex', flexDirection: 'column'}} onPress={()=>this.sendMessage(start)}>
-                                            <text style={{fontWeight: 'bold'}}>{start}</text>
-                                            <text>{f.text}</text>
+                                <div key={"div__"+i} className="textContainer" style={{opacity: integerCurrentTime >= f.start && integerCurrentTime <= f.end ? 1 : 0.5}}>
+                                    <Tooltip key={"Tooltip__"+i} title={"go to "+start}>
+                                        <TouchableOpacity key={"TouchableOpacity__"+i} style={{display: 'flex', flexDirection: 'column'}} onPress={()=>this.sendMessage(start)}>
+                                            <text key={"text1__"+i} style={{fontWeight: 'bold'}}>{start}</text>
+                                            <text key={"text2__"+i} >{f.text}</text>
                                         </TouchableOpacity>
                                     </Tooltip>
                                 </div>

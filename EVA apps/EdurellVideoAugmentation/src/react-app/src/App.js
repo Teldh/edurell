@@ -92,10 +92,13 @@ export default class App extends React.Component {
         try{
           let conceptSyn = [];
           for (let syn of this.state.conceptVocabulary[res.data.msg]) {
-            conceptSyn.push(this.state.conceptsAndGraph.find(concept => concept.conceptName===syn));
+            let synonymGraph = this.state.conceptsAndGraph.find(concept => concept.conceptName===syn);
+            if(synonymGraph !== undefined) {
+              conceptSyn.push(synonymGraph);
+            }
           }
           this.setState({concept: this.state.conceptsAndGraph.find(concept => concept.conceptName===res.data.msg), conceptSyn: conceptSyn})
-          console.log("concept", this.state.concept)
+          //console.log("concept", this.state.concept)
           this.channel.postMessage({to: 'Video', msg: this.state.concept.startTimestamp})
           this.show()
         } catch(error) {
@@ -132,7 +135,7 @@ export default class App extends React.Component {
             return
         }
       }
-      console.log(response)
+      //console.log(response)
       if(response===undefined){
         alert('Unknown Server Error')
         return
@@ -174,15 +177,15 @@ export default class App extends React.Component {
           return
       }
     }
-    console.log(response)
+    //console.log(response)
     if(response===undefined){
       alert('Unknown Server Error')
       return
     }
     else if (response.graphs_id_list.length) {
-      console.log("annot",response.graphs_id_list[0])
+      //console.log("annot",response.graphs_id_list[0])
       this.setState({annotatorId: response.graphs_id_list[0].annotator_id})
-      console.log("state annot", this.state.annotatorId)
+      //console.log("state annot", this.state.annotatorId)
       this.getGraphAndConcepts();
     } else {return}
   }
@@ -193,6 +196,7 @@ export default class App extends React.Component {
     const { videoId } = this.props;
     let response=null
       try{
+        //console.log(annotatorId)
         response = await fetch(`/api/graph/${annotatorId}/${videoId}`, {
             method: 'GET',
             headers: {
@@ -215,14 +219,14 @@ export default class App extends React.Component {
             return
         }
       }
-      console.log(response)
+      //console.log(response)
       if(response===undefined){
         alert('Unknown Server Error')
         return
       }
       else{
         let list = []
-        console.log(response.conceptVocabulary)
+        //console.log(response.conceptVocabulary)
         this.setState({conceptsAndGraph: response.conceptsList, conceptVocabulary: response.conceptVocabulary, loading: false})
         response.conceptsList.forEach(concept => list.push(concept.conceptName))
         this.setState({conceptsList: list})

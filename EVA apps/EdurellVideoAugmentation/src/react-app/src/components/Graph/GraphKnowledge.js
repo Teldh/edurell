@@ -118,6 +118,8 @@ export default class GraphKnowledge extends React.Component {
     let concepts = []
     let conceptVocabularyMap = {}
 
+    //console.log(conceptVocabulary)
+
     // check if concept vocabulary is absent in the db (old versions), if so build it as empty
     if(!conceptVocabulary) {
       for (const node of graphData["@graph"]){
@@ -132,11 +134,24 @@ export default class GraphKnowledge extends React.Component {
     else {
       for(let concept of conceptVocabulary['@graph']) {
         if ('skos:altLabel' in concept) {
-          if (typeof concept['skos:altLabel']['@value'] === "object") {
-            conceptVocabularyMap[concept['skos:prefLabel']['@value']] = concept['skos:altLabel']['@value']
+          
+          let altLabels;
+
+          if ('@value' in concept['skos:altLabel']) {
+            altLabels = [concept['skos:altLabel']]
           }
           else {
-            conceptVocabularyMap[concept['skos:prefLabel']['@value']] = [concept['skos:altLabel']['@value']]
+            altLabels = concept['skos:altLabel']
+          }
+          
+          for (let i=0; i<altLabels.length; i++) {
+            
+            if(i === 0) {
+              conceptVocabularyMap[concept['skos:prefLabel']['@value']] = [altLabels[i]['@value']]
+            }
+            else {
+              conceptVocabularyMap[concept['skos:prefLabel']['@value']].push(altLabels[i]['@value'])
+            }  
           }
         }
         else {
@@ -309,7 +324,7 @@ export default class GraphKnowledge extends React.Component {
       select: ({ nodes, edges , pointer: { DOM } }) => {
 
         const result = this.descriptionTimestamps.get(nodes[0]);
-        console.log(result)
+        //console.log(result)
         if(result!==undefined){
 
           if(result.beginTime!=null){
@@ -323,8 +338,8 @@ export default class GraphKnowledge extends React.Component {
 
             for(let i = 0; i<result.beginTimeInSec.length; i++){
 
-              console.log("--")
-              console.log(result.descriptionType[i])
+              //console.log("--")
+              //console.log(result.descriptionType[i])
               
               if(result.descriptionType[i] == "Definition"){
                 dotArray.push({ time: result.beginTime[i] , backgroundColor: '#228B22', size: 15})
@@ -633,7 +648,7 @@ export default class GraphKnowledge extends React.Component {
             return
         }
       }
-      console.log(response)
+      //console.log(response)
       if(response===undefined){
         alert('Unknown Server Error')
         return

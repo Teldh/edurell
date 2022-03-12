@@ -192,7 +192,7 @@ export default class SubGraph extends React.Component {
 
               let edge = {from: prerequisite.conceptName, to: target}
 
-              console.log(addedRels)
+              //console.log(addedRels)
               if(!addedRels.some(e => e.from === edge.from && e.to === edge.to)){
                 this.state.networkEdges.add({from: prerequisite.conceptName, to: target})
                 addedRels.push({from: prerequisite.conceptName, to: target})
