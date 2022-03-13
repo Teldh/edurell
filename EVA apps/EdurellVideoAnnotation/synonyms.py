@@ -11,7 +11,7 @@ from rdflib.namespace import FOAF, NamespaceManager
 from rdflib.namespace import SKOS, XSD
 
 '''
-Find synonyms from a list of words.
+Find synonyms from a list of words using wordnet NLTK.
 Returns a dict (word: [list of synonyms]).
 '''
 def get_synonyms_from_list(concepts): 
@@ -71,7 +71,7 @@ def create_skos_dictionary(synonyms):
 
     jsonld = json.loads(graph.serialize(format='json-ld'))
     jsonld = pyld.jsonld.compact(jsonld, context)
-
-    print(jsonld)
+    #print(jsonld)
 
     return jsonld
+

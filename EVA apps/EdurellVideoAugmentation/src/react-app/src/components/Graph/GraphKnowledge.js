@@ -163,6 +163,7 @@ export default class GraphKnowledge extends React.Component {
     //console.log(conceptVocabularyMap)
 
     let tempSyn = [];
+    let finalNodes = [];
 
     for (const node of graphData["@graph"]){
 
@@ -191,7 +192,7 @@ export default class GraphKnowledge extends React.Component {
               tempSyn.push(synonym)
             }
         
-            synonymsId = conceptVocabularyMap[nodelabel].map(el => "edu:" + el);
+            synonymsId = conceptVocabularyMap[nodelabel].map(el => "edu:" + el.replace(" ", "_"));
             nodeWithSyns.sort();
 
             nodeName = "";
@@ -208,6 +209,7 @@ export default class GraphKnowledge extends React.Component {
             synonymsId = []
             nodeName = nodelabel;
           }
+          finalNodes.push(node.id)
           this.state.graph.nodes.push({id: node.id, synonymsId: synonymsId, label: nodeName, color: baseColor, shadow:true, font: {color : 'black' , face: 'monospace'} })
         }
       }

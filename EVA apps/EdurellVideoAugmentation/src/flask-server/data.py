@@ -179,7 +179,7 @@ def get_concept_vocabulary(annotator, video_id):
         else:
             conceptVocabulary[concept["prefLabel"]]=[]
 
-    print(conceptVocabulary)
+    #print(conceptVocabulary)
 
     return conceptVocabulary
 
