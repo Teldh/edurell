@@ -24,7 +24,7 @@ import random
 import string
 import json
 from conll import get_text
-from burst_class import burst_extraction
+from burst_class import burst_extraction, burst_extraction_with_synonyms
 from metrics import calculate_metrics
 from synonyms import create_skos_dictionary, get_synonyms_from_list
 from skos_synonyms_query import try_query
@@ -316,7 +316,7 @@ def lemmatize_word(word):
         if i < len(splitted_word)-1:
             lemma += " "
 
-    print(lemma)
+    #print(lemma)
     return jsonify({'lemma': lemma.lower()})
 
 
@@ -463,7 +463,6 @@ def burst():
             title = k[0]
             keywords = k[1]
 
-
         # semi-automatic extraction
         if form.type.data == "semi":
 
@@ -486,12 +485,21 @@ def burst():
 @app.route('/burst_launch', methods=["GET", "POST"])
 def burst_launch():
     data = request.json
+
     video_id = data["id"]
     concepts = data["concepts"]
+    conceptVocabulary = data["conceptVocabulary"]
+    syn_burst = data["syn_burst"]
 
     #print(concepts)
 
-    concept_map, definitions = burst_extraction(video_id, concepts)
+    if syn_burst:
+        print("Starting Burst with synonyms")
+        concept_map, definitions = burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary)
+    else:
+        print("Starting Burst")
+        concept_map, definitions = burst_extraction(video_id, concepts)
+    
     results = data_summary(concept_map, definitions, video_id)
 
     json = {

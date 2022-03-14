@@ -264,7 +264,7 @@ async function getConceptVocabulary(){
         dataType : 'json',
         data : js_data,
         success: function(result) {
-          console.log(result)
+          //console.log(result)
           data = result["conceptVocabulary"];
           resolve(data)
         },
@@ -279,10 +279,17 @@ function launchBurstAnalysis(){
 
     loading()
 
+    // Activate to use advanced synonym burst
+    const SYN_BURST = $burstSynonym; 
+ 
     let data = {
         "id": $video_id,
         "concepts":$concepts,
+        "conceptVocabulary":$conceptVocabulary,
+        "syn_burst":SYN_BURST,
     }
+
+    //console.log(data);
 
     var js_data = JSON.stringify(data);
 
@@ -330,17 +337,25 @@ function showResults(result){
     let graphNodes = [...new Set(conceptsWithSynonyms)];
     //console.log(graphNodes)
 
+    let checkDuplicateArray = []
+
     for (let item of result.concept_map){
         let newRelation = {}
         for (let node of graphNodes){
             if  (node.split(" = ").includes(item["prerequisite"])){
-                    newRelation["prerequisite"]=node
+                newRelation["prerequisite"]=node
             }
             if  (node.split(" = ").includes(item["target"])){   
                 newRelation["target"]=node
             }
         }
-        relationsWithSynonyms.push(newRelation)
+
+        let strOfRelation = newRelation["prerequisite"] + "--" + newRelation["target"];
+
+        if(checkDuplicateArray.includes(strOfRelation) === false) {
+          relationsWithSynonyms.push(newRelation)
+          checkDuplicateArray.push(strOfRelation)
+        }
     }
 
     network = showNetwork(graphNodes, relationsWithSynonyms, "network")

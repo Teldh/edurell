@@ -13,6 +13,7 @@ from burst_weight_normalizer import WeightsNormalizer
 import burst_results_processor as burst_proc
 from audio_transcription import speech_from_youtube
 import sys
+import copy
 from conllu import parse
 from conll import lemmatize, get_text
 import agreement
@@ -31,13 +32,43 @@ def burst_extraction(video_id, concepts, n=90):
 
     return concept_map_burst, burst_definitions
 
+# Get mapping of concepts and synonyms to selected word (alphabetically)
+def get_synonyms_mappings(conceptVocabulary):
+    
+    syn_map = {}
+    new_concepts = []
+
+    # get unique id for each syn set
+    for concept in conceptVocabulary:
+        synset = [concept]
+        synset = synset + conceptVocabulary[concept]
+        synset.sort()
+        syn_map[concept] = synset[0]
+        new_concepts.append(synset[0])
+
+    new_concepts = list(set(new_concepts))
+    
+    return syn_map, new_concepts
+
+def burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary, n=90):
+
+    text, conll = get_text(video_id, return_conll=True)
+    text = text.replace("-", " ")
+
+    syn_map, new_concepts = get_synonyms_mappings(conceptVocabulary)
+
+    concept_map_burst, burst_definitions = Burst(text, new_concepts, video_id, conll, syn_map, threshold=0.7,
+                                                 top_n=n, max_gap=1).launch_burst_analysis()
+
+    return concept_map_burst, burst_definitions
 
 class Burst:
 
-    def __init__(self, text, words, video_id, conll,  threshold=0,  top_n=None, s=1.05, gamma=0.0001, level=1, allen_weights=None,
+    def __init__(self, text, words, video_id, conll, syn_map=False, threshold=0,  top_n=None, s=1.05, gamma=0.0001, level=1, allen_weights=None,
                  use_inverses=False, max_gap=4, norm_formula="modified"):#occ, f,
         self.text = text
         self.words = words
+
         self.conll = parse(conll)
         self.video_id = video_id
         self.threshold = threshold
@@ -106,10 +137,15 @@ class Burst:
                     else:
                         break
 
-
-        self.occurrences = pd.DataFrame(data=occurrences_index, columns=["Lemma", "idFrase", "idParolaStart"])
-
-
+        
+        if syn_map == False:
+            self.occurrences = pd.DataFrame(data=occurrences_index, columns=["Lemma", "idFrase", "idParolaStart"])
+        else:
+            occur = pd.DataFrame(data=occurrences_index, columns=["Lemma", "idFrase", "idParolaStart"])
+            new_occur = []
+            for o in occur.itertuples(): 
+                new_occur.append([syn_map[o.Lemma], o.idFrase, o.idParolaStart])
+            self.occurrences = pd.DataFrame(new_occur, columns=['Lemma', 'idFrase', 'idParolaStart'])
 
 
         # weights for Allen and type of normalization formula
@@ -135,6 +171,13 @@ class Burst:
         try:
             # FIRST PHASE: extract bursts
             #print("Extracting bursts...\n")
+
+            #print("text")
+            #print(self.text)
+            #print("words")
+            #print(self.words)
+            #print("occurrences")
+            #print(self.occurrences[0:50])
 
             burst_extr = BurstExtractor(text=self.text, wordlist=self.words)
             burst_extr.find_offsets(words=self.words, occ_index_file=self.occurrences)

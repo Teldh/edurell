@@ -39,6 +39,27 @@
       {% endif %}
     {% endwith %}
 
+    <script>
+    function popup() {
+
+      const setPopup = false;
+      var withSyn;
+
+      if(setPopup) {
+        if (confirm("Do you want to use synonyms in burst procedure!")) {
+          withSyn = true;
+        } else {
+          withSyn = false;
+        }
+      }
+      else {
+        withSyn = false;
+      }
+      
+      return withSyn;
+    }
+    </script>
+
     <div style="padding-left: 5%; padding-right: 5%;" >
         <div id="checkConcepts">
             <p class="title"> Launch burst analysis </p>
@@ -152,7 +173,7 @@
               </div>
 
             </div>
-            <button  onclick="launchBurstAnalysis()" class="btn btn-primary" style="float: right;margin-top: 1%">Launch burst Analysis</button>
+            <button  onclick="runSemiBurst()" class="btn btn-primary" style="float: right;margin-top: 1%">Launch burst Analysis</button>
 
 
         </div>
@@ -272,6 +293,11 @@
     let $typeAnalysis = {{ type|tojson }};
     let $title = {{ title|tojson }};
 
+    async function runSemiBurst() {
+      $burstSynonym = await popup(); 
+      launchBurstAnalysis()
+    }
+
     async function getVocabulary() {
       $conceptVocabulary = await getConceptVocabulary();
       if($typeAnalysis == "semi"){
@@ -280,6 +306,7 @@
         showVocabularyBurst();
       }
       else{
+        $burstSynonym = await popup();
         console.log($typeAnalysis)
         launchBurstAnalysis();
       }

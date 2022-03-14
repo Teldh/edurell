@@ -379,17 +379,25 @@ function startVisualization(){
     let graphNodes = [...new Set(conceptsWithSynonyms)];
     //console.log(graphNodes)
 
+    let checkDuplicateArray = []
+
     for (let item of relations){
         let newRelation = {}
         for (let node of graphNodes){
             if  (node.split(" = ").includes(item["prerequisite"])){
-                    newRelation["prerequisite"]=node
+                newRelation["prerequisite"]=node
             }
             if  (node.split(" = ").includes(item["target"])){   
                 newRelation["target"]=node
             }
         }
-        relationsWithSynonyms.push(newRelation)
+
+        let strOfRelation = newRelation["prerequisite"] + "--" + newRelation["target"];
+
+        if(checkDuplicateArray.includes(strOfRelation) === false) {
+          relationsWithSynonyms.push(newRelation)
+          checkDuplicateArray.push(strOfRelation)
+        }
     }
 
     let n = showNetwork(graphNodes, relationsWithSynonyms, "network")

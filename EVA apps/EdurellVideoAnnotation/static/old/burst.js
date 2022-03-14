@@ -1,6 +1,7 @@
 let network;
 
 
+
 /* highlight a concept in a div with id div_id */
 function highlightConcept(concept, div_id){
 
@@ -190,7 +191,7 @@ function addConcept(){
     }
 }
 
-
+/*
 function launchBurstAnalysis(){
 
     loading()
@@ -216,6 +217,7 @@ function launchBurstAnalysis(){
 
     })
 }
+*/
 
 function showResults(result){
     document.getElementById("loading").style.display = "none"
@@ -398,5 +400,3 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     console.log(target)
     fitNetwork();
 });
-
-
