@@ -490,16 +490,20 @@ def burst_launch():
     concepts = data["concepts"]
     conceptVocabulary = data["conceptVocabulary"]
     syn_burst = data["syn_burst"]
+    burstType = data["burst_type"]
 
     #print(concepts)
 
+    # select burst type
+
     if syn_burst:
-        print("Starting Burst with synonyms")
+        print("Starting Burst " + burstType + " with synonyms")
         concept_map, definitions = burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary)
     else:
-        print("Starting Burst")
+        print("Starting Burst " + burstType)
         concept_map, definitions = burst_extraction(video_id, concepts)
-    
+    # ---------------------
+
     results = data_summary(concept_map, definitions, video_id)
 
     json = {
@@ -527,7 +531,35 @@ def burst_launch():
             "LO": round(LO, 3),
             "PN": round(PN, 3)
         }
+    
+    # Save burst graph into DB
+    '''
+    burst_annotations = {
+        "id": video_id,
+        "definitions": definitions,
+        "relations": concept_map,
+    }
+    g, jsonldGraph = create_graph_jsonld(burst_annotations, isBurst=True)
+    
+    if burstType == "auto":
+        ann_id = "burst"
+        ann_name = "burst"
+        ann_email = "burst"
+    elif burstType == "semi": 
+        ann_id = "burst-|" + current_user.mongodb_id + "|-"
+        ann_name = "burst-|" + current_user.complete_name + "|-"
+        ann_email = "burst-|" + current_user.email + "|-"
 
+    data = jsonldGraph.copy()
+    data["video_id"] = video_id
+    data["annotator_id"] = ann_id
+    data["annotator_name"] = ann_name
+    data["email"] = ann_email
+    data["conceptVocabulary"] = create_skos_dictionary(conceptVocabulary)
+
+    db_mongo.insert_graph(data)
+    '''
+    # ---------------------------
 
     return json
 

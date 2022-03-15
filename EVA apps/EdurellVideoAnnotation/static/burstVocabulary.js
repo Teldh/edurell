@@ -275,7 +275,7 @@ async function getConceptVocabulary(){
   })
 }
 
-function launchBurstAnalysis(){
+function launchBurstAnalysis(burstType){
 
     loading()
 
@@ -287,6 +287,7 @@ function launchBurstAnalysis(){
         "concepts":$concepts,
         "conceptVocabulary":$conceptVocabulary,
         "syn_burst":SYN_BURST,
+        "burst_type": burstType
     }
 
     //console.log(data);

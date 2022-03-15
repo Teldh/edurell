@@ -295,7 +295,7 @@
 
     async function runSemiBurst() {
       $burstSynonym = await popup(); 
-      launchBurstAnalysis()
+      launchBurstAnalysis("semi")
     }
 
     async function getVocabulary() {
@@ -308,7 +308,7 @@
       else{
         $burstSynonym = await popup();
         console.log($typeAnalysis)
-        launchBurstAnalysis();
+        launchBurstAnalysis("auto");
       }
 
       
