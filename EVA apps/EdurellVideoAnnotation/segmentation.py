@@ -1,7 +1,16 @@
 from nltk import tokenize
-
 import db_mongo
+
+#################################################################################
+# Issue with online server (incompatibility with gunicorn)
+# Edited import to fix issue: (https://github.com/chrisspen/punctuator2/issues/3)
+import sys
+incompatible_path = '/home/anaconda3/envs/myenv/bin'
+if incompatible_path in sys.path:
+    sys.path.remove(incompatible_path)
 from punctuator import Punctuator
+#################################################################################
+
 from sentence_transformers import SentenceTransformer, util
 from Cluster import create_cluster_list, aggregate_short_clusters
 from audio_transcription import speech_from_youtube, get_timed_sentences

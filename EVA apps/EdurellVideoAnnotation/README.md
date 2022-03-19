@@ -45,15 +45,26 @@ Installation completed, with the environment activated launch the project with:
 
     python main.py
     
+
     
+- Note 1:  
+
+    YouTube just removed the dislike count, for this reason the pafy package returns an error. 
+    Until there is a patch use:
+
+        pip uninstall -y pafy
+        pip install git+https://github.com/Cupcakus/pafy
+
+- Note 2:  
+
+    Updated python version to 3.7.11
+    Packeges must be adapted to that version
+
+- Note 3:   
+
+    If you change the name of the virtual-environment 
+    then you have to change the path in the first rows of segmentation.py:
     
-    
-    
-    
-    
- Note:
- YouTube just removed the dislike count, for this reason the pafy package returns an error. 
- Until there is a patch use:
- 
-     pip uninstall -y pafy
-     pip install git+https://github.com/Cupcakus/pafy
+    ```python
+    incompatible_path = '/home/anaconda3/envs/{ENV NAME}/bin'
+    ```
