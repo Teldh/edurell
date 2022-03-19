@@ -27,6 +27,7 @@ Install requirements:
 Create a folder "punctuator" (lowercase) in the same level of the .py files, and put inside the file downloaded at the link:
 https://drive.google.com/drive/folders/1NYyehpB5fAlL42_TwTnXLokLz8K-TS3W?usp=sharing
 
+
 Open the python console and type:
 
     import nltk
@@ -45,8 +46,9 @@ Installation completed, with the environment activated launch the project with:
 
     python main.py
     
+   
+email account of this app is written in the sendmail.py file
 
-    
 - Note 1:  
 
     YouTube just removed the dislike count, for this reason the pafy package returns an error. 
