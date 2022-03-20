@@ -25,7 +25,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'random_key'
 
 #segment images directory
-app.config["CLIENT_IMAGES"] = "../../../edurell/edurell/static/videos"
+app.config["CLIENT_IMAGES"] = "/var/www/edurell/EVA_apps/EdurellVideoAnnotation/static/videos"
 
 
 #mongo db config

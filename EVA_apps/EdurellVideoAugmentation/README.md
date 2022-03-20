@@ -90,6 +90,16 @@ Activate the environment:
   
 <br>
 
+- Videos folder
+
+  the videos folder inside main.py (line ~28) has to be arranged basing on the server folder structure.
+
+  ```python
+    app.config["CLIENT_IMAGES"] = 
+    "/var/www/edurell/EVA_apps/EdurellVideoAnnotation/static/videos"
+  ```
+<br>
+
 - Email 
 
     After some months the email sender could stop working and you can find errors on register or forgot password:
