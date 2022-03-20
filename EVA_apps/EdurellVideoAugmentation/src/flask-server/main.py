@@ -37,13 +37,16 @@ app.config['MONGODB_SETTINGS'] = {
 }
 
 #mail server config (gmail account date of birth : 01/01/1900)
+#old: <project.edurell@gmail.com> <work$package>
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'project.edurell@gmail.com'
-app.config['MAIL_PASSWORD'] = 'work$package'
+app.config['MAIL_USERNAME'] = 'edurellannotator@gmail.com'
+app.config['MAIL_PASSWORD'] = 'edurell2021'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_DEFAULT_SENDER'] = 'project.edurell@gmail.com'
+app.config['MAIL_DEFAULT_SENDER'] = 'edurellannotator@gmail.com'
+
+#recovery of email project.edurell thomas.neveux@etu.utc.fr
 
 # extensions
 auth = HTTPBasicAuth(scheme='Custom')
