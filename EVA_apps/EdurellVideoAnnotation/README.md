@@ -126,4 +126,4 @@ With the environment activated launch the app locally with:
 # Deploy and run on server
 
 Follow this guide:
-https://drive.google.com/file/d/1BaBYjWEZQpeNCRy-OM74rfmW3NCP2S4u/view?usp=sharing
+https://drive.google.com/file/d/1ST-BZPppwrAWwb_fYFOcBa8HWmYOB0hG/view?usp=sharing
