@@ -58,7 +58,7 @@
               Add description
             </button>
 
-            <button type="button" onclick="showVocabulary()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#conceptsModal">
+            <button type="button" onclick="showVocabulary($conceptVocabulary)" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#conceptsModal">
               Concepts & Synonyms
             </button>
 
@@ -79,7 +79,7 @@
         <div id="transcript" class="transcript"></div>
         <br>
         <div id="selectedConceptBox" class="selected-concept-box">
-          <p class="padding-left">Selected Concept:<span id="transcript-selected-concept" class="selected-concept">--</span></p>
+          <p class="padding-left same-line">Selected Concept:<span id="transcript-selected-concept" class="selected-concept same-line">--</span></p>
           <div class="padding-left">
               <p class="description-selected-concept same-line">Synonyms: </p>
               <p id="transcript-selected-concept-synonym" class="m-synonym-text2 margin-left same-line">--</p>
@@ -184,7 +184,7 @@
                     </div>
                     <div class="col">
                       <button type="button" onclick="startVisualization()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#graphModal" style="
-                            float: right;">
+                            float: right; padding:5px;">
                       Graph
                       </button>
                     </div>
@@ -391,7 +391,6 @@
       var options = {
             fluid: true
       };
-
 
       let player = videojs('video-active', options, function onPlayerReady() {
 

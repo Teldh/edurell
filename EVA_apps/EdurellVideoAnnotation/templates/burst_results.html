@@ -164,7 +164,7 @@
                 </div>
                 <br>
                 <div id="selectedConceptBox" class="selected-concept-box">
-                  <p class="padding-left">Selected Concept:<span id="transcript-selected-concept" class="selected-concept">--</span></p>
+                  <p class="padding-left same-line">Selected Concept:<span id="transcript-selected-concept" class="selected-concept same-line">--</span></p>
                   <div class="padding-left">
                       <p class="description-selected-concept same-line">Synonyms: </p>
                       <p id="transcript-selected-concept-synonym" class="m-synonym-text2 margin-left same-line">--</p>
@@ -303,7 +303,7 @@
       if($typeAnalysis == "semi"){
         addSubtitles();
         //printConcepts();
-        showVocabularyBurst();
+        showVocabularyBurst($conceptVocabulary);
       }
       else{
         $burstSynonym = await popup();

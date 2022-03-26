@@ -209,7 +209,7 @@ tr {
 */
 
 .m-concept-text {
-  color: #007bff;
+  color: #2b73bf;
   font-size: 15px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: bold;
@@ -217,18 +217,22 @@ tr {
 }
 
 .m-synonym-text {
-  color: yellowgreen;
-  font-size: 15px;
-  font-family: 'Times New Roman', Times, serif;
+  color: #51ae28;
+  font-size: 16px;
+  font-family: serif;
   font-weight: normal;
   margin-bottom: 10px;
 }
 .m-synonym-text2 {
-  color: yellowgreen;
-  font-size: 15px;
-  font-family: 'Times New Roman', Times, serif;
+  color: #51ae28;
+  font-size: 16px;
+  font-family: serif;
   font-weight: normal;
-  margin-top:2px ;
+  margin-top:1px;
+  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
 }
 
 .spaced-text{
@@ -237,32 +241,40 @@ tr {
 }
 
 .synonym-set-class{
-  color: yellowgreen;
-  font-family: Arial, Helvetica, sans-serif;
+  color: #51ae28;
+  font-family: serif, Helvetica, sans-serif;
   font-weight: bold;
+  font-size: 18px;
   overflow-wrap: break-word;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 264px;
-  margin-top: 0.5px;
+  width: 334px;
+  margin-top: -1.5px !important;
   margin-bottom: 0px !important;
 }
 
 .selected-concept {
-margin-left: 6px;
-font-weight: 600;
-font-size: 16 px;
-font-family: Arial, Helvetica, sans-serif;
-font-weight: bold;
-color: #007bff;
+  margin-left: 9px;
+  font-weight: 600;
+  font-size: 16px;
+  font-family: serif;
+  font-weight: bold;
+  color: #2b73bf;
+  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  margin-top: 1px;
 }
 
 .selected-concept-box {
   border: 1px solid #c8c8c8;
   padding: 10px;
-  height: 90px;
+  height: 75px;
   border-radius: 10px;
+  width: 360px;
+  overflow: auto;
 }
 
 .description-selected-concept {
@@ -278,8 +290,9 @@ color: #007bff;
 }
 
 .same-line{
-display: inline-block !important;
-vertical-align: top !important;
+  display: inline-block !important;
+  vertical-align: top !important;
+  margin-bottom: 1px !important;
 }
 
 .selected-synset-show {
@@ -348,6 +361,10 @@ vertical-align: top !important;
   color: red;
   font-style: italic;
   text-align: center;
+  border-bottom: 1px solid red;
+  width: max-content;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #conceptsTable {
@@ -376,9 +393,18 @@ vertical-align: top !important;
 }
 
 .selected-concept-text{
-  background-color: rgb(172, 197, 252) !important;
+  background-color: #1c7ade63 !important;
 }
 
 .selected-synonyms-text{
-  background-color: rgb(218, 243, 169) !important;
+  background-color: #26c30d45 !important;
+}
+
+.trash-concept:hover {
+  color: #ff01017a;
+}
+
+.filter-vocabulary-class {
+  margin: 5px !important;
+  width: auto !important;
 }
