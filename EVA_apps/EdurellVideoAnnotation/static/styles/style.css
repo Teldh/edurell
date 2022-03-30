@@ -338,8 +338,20 @@ tr {
   max-height: 340px;
 }
 
-.conceptList {
-  max-height: 340px;
+.conceptList:hover {
+  background-color: white;
+}
+
+.concept-row {
+  display: table;
+}
+
+#conceptVocabularyContent {
+  margin: 15px 0px;
+}
+
+#conceptVocabularyContentBurst {
+  margin: 15px 0px;
 }
 
 .tab-body {
@@ -377,11 +389,11 @@ tr {
 }
 
 #conceptsTable .list-group-item:first-child {
-  border-top-width: 2px;
+  border-top-width: 1px;
 }
 
 #conceptsTable .list-group-item:last-child {
-  border-bottom-width: 2px;
+  border-bottom-width: 1px;
 }
 
 #conceptsTable .list-group-item {
@@ -405,6 +417,8 @@ tr {
 }
 
 .filter-vocabulary-class {
-  margin: 5px !important;
-  width: auto !important;
+  margin-top: 5px !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+  width: 95% !important;
 }

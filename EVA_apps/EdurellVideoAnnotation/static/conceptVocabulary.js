@@ -13,26 +13,23 @@ async function showMsg(id, color) {
   });
 }
 
-function filterVocabulary(filterText, reset) {
+function filterVocabulary(filterText) {
 
     let vocabulary = $conceptVocabulary
     let newVocabulary = {}
 
     if(filterText === "") {
       newVocabulary = vocabulary
-
       showVocabulary(newVocabulary)
     }
-    else if(filterText !== "" && reset === false) {
+    else if(filterText !== "") {
       for(let concept in vocabulary) {
         if(concept.includes(filterText.toString())) {
           newVocabulary[concept] = vocabulary[concept]
         }
       }
-
       showVocabulary(newVocabulary)
     }
-    
 }
 
 function showVocabulary(inputVocabulary) {
@@ -41,8 +38,8 @@ function showVocabulary(inputVocabulary) {
   document.getElementById("errorConcept").style.display = "none"
 
   video.pause()
-  document.getElementById("conceptsTable").innerHTML = "<div class=\" list-group-item list-group-item-action conceptList \"> </div>"
-  document.getElementById("conceptsTable").innerHTML += '<input type="text" oninput="filterVocabulary(this.value, true)" onchange="filterVocabulary(this.value, false)" class="form-control filter-vocabulary-class" autocomplete="off" id="filter-vocabulary"  placeholder="Search concept...">'
+
+  document.getElementById("conceptVocabularyContent").innerHTML = ""
 
   let vocabulary = inputVocabulary
 
@@ -63,7 +60,7 @@ function showVocabulary(inputVocabulary) {
     }
 
     let href = "sub" + c
-    let row ="<div class=\" list-group-item list-group-item-action conceptList toRemove\"> " +
+    let row ="<div class=\" list-group-item list-group-item-action concept-row toRemove\"> " +
         "<a href=\"#"+href+"\" data-toggle=\"collapse\" aria-expanded=\"false\" id='menu_"+c+"' >"
 
     row += "<p id='concept_"+c+"' class=\" m-concept-text\">"+ conceptX +": </p>"
@@ -94,7 +91,7 @@ function showVocabulary(inputVocabulary) {
   
     row += "</div>"
 
-    document.getElementById("conceptsTable").innerHTML += row
+    document.getElementById("conceptVocabularyContent").innerHTML += row
   }
 }
 

@@ -274,7 +274,10 @@
                   <tbody id="conceptsTable"></tbody>
                 </table>-->
                 <div class="list-group list-group-flush" id="conceptsTable">
-
+                  <div class="list-group-item list-group-item-action conceptList">
+                    <input type="text" oninput="filterVocabulary(this.value)" class="form-control filter-vocabulary-class" autocomplete="off" id="filter-vocabulary"  placeholder="Search concept...">
+                    <div id="conceptVocabularyContent"></div> 
+                  </div>
                 </div>
             </div>
 
@@ -399,7 +402,6 @@
           });
 
       });
-
 
   </script>
   <!--<script src="../static/video_range_slider.js"></script>

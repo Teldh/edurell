@@ -136,24 +136,25 @@ function filterVocabulary(filterText) {
 
   if(filterText === "") {
     newVocabulary = vocabulary
+
+    showVocabularyBurst(newVocabulary)
   }
-  else {
+  else if(filterText !== "") {
     for(let concept in vocabulary) {
       if(concept.includes(filterText.toString())) {
         newVocabulary[concept] = vocabulary[concept]
       }
     }
-  }
 
-  showVocabularyBurst(newVocabulary)
+    showVocabularyBurst(newVocabulary)
+  }
 }
 
 function showVocabularyBurst(inputVocabulary){
 
     document.getElementById("newConcept").value = ""
     document.getElementById("errorConcept").style.display = "none"
-    document.getElementById("conceptsTable").innerHTML = "<div class=\" list-group-item list-group-item-action conceptList \"> </div>"
-    document.getElementById("conceptsTable").innerHTML += '<input type="text" onchange="filterVocabulary(this.value)" class="form-control filter-vocabulary-class" autocomplete="off" id="filter-vocabulary-burst"  placeholder="Search concept...">'
+    document.getElementById("conceptVocabularyContentBurst").innerHTML = ""
 
     //let synonyms = [["run","go"],["orbit","eye socket"]];
 
@@ -174,7 +175,7 @@ function showVocabularyBurst(inputVocabulary){
       }
 
       let href = "sub" + c
-      let row ="<div class=\" list-group-item list-group-item-action conceptList toRemove\"> " +
+      let row ="<div class=\" list-group-item list-group-item-action concept-row toRemove\"> " +
           "<a href=\"#"+href+"\" data-toggle=\"collapse\" aria-expanded=\"false\" id='menu_"+c+"' >"
 
       row += "<p id='concept_"+c+"' class=\" m-concept-text\">"+ conceptX +": </p>"
@@ -184,7 +185,7 @@ function showVocabularyBurst(inputVocabulary){
     
       row += "</div>"
 
-      document.getElementById("conceptsTable").innerHTML += row
+      document.getElementById("conceptVocabularyContentBurst").innerHTML += row
     }
 }
 
