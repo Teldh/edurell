@@ -78,7 +78,7 @@ function addSubtitles(){
   }
 
   $(document).on("click", ".concept", function (e) {
-
+    
     let conceptElements =  document.getElementsByClassName("concept");
 
     // reset classes for the elements

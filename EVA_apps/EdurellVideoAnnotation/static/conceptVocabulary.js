@@ -358,6 +358,8 @@ function deleteConcept(button,concept) {
     $(this).remove();
   });
 
+
+  let synonymsToDel = $conceptVocabulary[concept];
   //cancello concetto e i sinonimi
   delete $conceptVocabulary[concept];
   
@@ -373,8 +375,6 @@ function deleteConcept(button,concept) {
           break
       }
   }
-
-  showVocabulary($conceptVocabulary);
   
 
   //rimuovo relazioni e definizioni del concetto
@@ -408,6 +408,22 @@ function deleteConcept(button,concept) {
   }
 
   $("[lemma=" + concept + "]").removeClass("concept");
+  $("[lemma=" + concept + "]").removeClass("selected-concept-text");
+  for(let wtd of synonymsToDel) {
+    $("[lemma=" + wtd.replaceAll(" ", "_") + "]").removeClass("selected-synonyms-text");
+  }
+  document.getElementById("transcript-selected-concept").innerHTML = "--";
+  document.getElementById("transcript-selected-concept-synonym").innerHTML = "--";
+  
+  let oldConceptElements =  document.getElementsByClassName("old-concept");
+
+  for(let el of oldConceptElements) {
+    if(concept.replaceAll(" ","_").split("_").includes(el.getAttribute('lemma').replaceAll(" ","_"))) {
+      el.className = "concept";
+    }
+  }
+
+  showVocabulary($conceptVocabulary);
 
   //rimuovo il div a lato
   if(document.getElementById(concept+"Defined") != null)
@@ -471,6 +487,14 @@ function highlightConcept(concept, div_id) {
         $(allSpan).wrapAll("<span class='concept' lemma='"+ concept.replaceAll(" ", "_") +"'>")
       }
     })
+  }
+
+  let conceptElements =  document.getElementsByClassName("concept");
+
+  for(let el of conceptElements) {
+    if(el.parentElement.classList.contains("concept")) {
+      el.className = "old-concept";
+    }
   }
 
 }
