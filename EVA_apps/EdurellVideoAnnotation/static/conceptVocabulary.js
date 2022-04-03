@@ -4,6 +4,22 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function sortVocabulary(dictionary) {
+  
+  var orderedDict = {}
+  var keys = Object.keys(dictionary);
+  var i, len = keys.length;
+
+  keys.sort();
+
+  for (i = 0; i < len; i++) {
+    k = keys[i];
+    orderedDict[k] = dictionary[k];
+  }
+
+  return orderedDict;
+}
+
 async function showMsg(id, color) {
   document.getElementById(id).style.color = color;
   document.getElementById(id).style.borderColor = color;
@@ -41,10 +57,9 @@ function showVocabulary(inputVocabulary) {
 
   document.getElementById("conceptVocabularyContent").innerHTML = ""
 
-  let vocabulary = inputVocabulary
+  let vocabulary = sortVocabulary(inputVocabulary);
 
   for(let c in vocabulary) {
-    console.log(c)
 
     let conceptX = c.replaceAll("_"," ")
     let synonymsX = ""
