@@ -55,6 +55,9 @@ export default class SubGraph extends React.Component {
       let nodeName = "";
 
       let nodeWithSyns = [label];
+      if(!(label in conceptVocabulary)) {
+        conceptVocabulary[label] = [];
+      }
       if(conceptVocabulary[label].length > 0) {
         for(let synonym of conceptVocabulary[label]) {
           nodeWithSyns.push(synonym);

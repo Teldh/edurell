@@ -186,6 +186,12 @@ export default class GraphKnowledge extends React.Component {
           //console.log(conceptVocabularyMap[nodelabel])
 
           let nodeWithSyns = [nodelabel];
+
+          if(!(nodelabel in conceptVocabularyMap)) {
+            //console.log("building " + nodelabel)
+            conceptVocabularyMap[nodelabel] = [];
+          }
+          //console.log("considering " + nodelabel)
           if(conceptVocabularyMap[nodelabel].length > 0) {
             for(let synonym of conceptVocabularyMap[nodelabel]) {
               nodeWithSyns.push(synonym);
