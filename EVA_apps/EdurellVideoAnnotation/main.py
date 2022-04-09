@@ -258,13 +258,21 @@ def video_selection():
                 lemmatized_concepts = []
                 for key in conceptVocabulary:
                     lemmatized_concepts.append(key)
-                
 
-            # If the concept vocabulary is new (empty) in DB then initialize it to empty synonyms
+            # If the concept vocabulary is new (empty) in DB then initialize it
             if(conceptVocabulary == None) :
+
+                #-----------------------------------------------------------------
+                # 1) Automatically obtain synonyms using wordnet NLTK
+                #
+                #conceptVocabulary = get_synonyms_from_list(lemmatized_concepts)
+
+                # 2) Start with empty synonyms in concept vocabulary
+                #
                 conceptVocabulary = {}
                 for i in lemmatized_concepts :
                     conceptVocabulary[i] = []
+                #-----------------------------------------------------------------
 
             for rel in relations:
                 if rel["prerequisite"] not in lemmatized_concepts:

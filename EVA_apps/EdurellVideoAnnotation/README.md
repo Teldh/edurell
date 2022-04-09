@@ -104,6 +104,12 @@ Installation completed, with the environment activated launch the project with:
 
     * (More info -> https://support.google.com/accounts/answer/6010255?hl=en)
 
+    If still not working:
+
+    * after log in with the google account open this link:  
+      https://accounts.google.com/DisplayUnlockCaptcha
+
+    * (More info -> https://stackoverflow.com/questions/16512592/login-credentials-not-working-with-gmail-smtp)
 
 # Run locally
 
