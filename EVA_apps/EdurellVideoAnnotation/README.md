@@ -79,6 +79,15 @@ Installation completed, with the environment activated launch the project with:
 
         > pip uninstall -y pafy
         > pip install git+https://github.com/Cupcakus/pafy
+    
+    If still not working you may addictionally do:
+
+        > python -m spacy download en_core_web_lg
+        > python -m spacy download en_core_web_sm
+    
+    And have a look on this:
+
+    https://exerror.com/oserror-e050-cant-find-model-en_core_web_sm-it-doesnt-seem-to-be-a-shortcut-link-a-python-package-or-a-valid-path-to-a-data-directory/
 
 - Python Version:  
 
