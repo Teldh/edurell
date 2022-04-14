@@ -88,21 +88,22 @@ def get_definitions_fragments(email, video_id, fragments):
 
     
 
-    for f in fragments:
+    if fragments is not None:
+        for f in fragments:
 
-        start_time = f['start']
-        end_time = f['end']
+            start_time = f['start']
+            end_time = f['end']
 
-        concepts = ""
-        added = []
+            concepts = ""
+            added = []
 
-        for d in definitions:   
-            if d["start"] < end_time and d["start"] > start_time and d["concept"] not in added:
-                concepts += d["concept"] + ","
-                added.append(d["concept"])
-        
-        
-        defs.append(concepts[0:-1])
+            for d in definitions:   
+                if d["start"] < end_time and d["start"] > start_time and d["concept"] not in added:
+                    concepts += d["concept"] + ","
+                    added.append(d["concept"])
+            
+            
+            defs.append(concepts[0:-1])
 
 
     return defs
