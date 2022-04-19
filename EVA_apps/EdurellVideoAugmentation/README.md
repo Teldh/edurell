@@ -100,31 +100,6 @@ Activate the environment:
   ```
 <br>
 
-- Get synonyms from wordnet NLTK (manual annotator)
-
-  to get synonyms automatically at the start change the commented lines on:   
-  main.py - (line 265-273)
-
-  there we have 2 ways: 
-    * 1) - starting from empty
-    * 2) - getting from wordnet   
-
-  leave not commented only the choosen one.
-
-<br>
-
-- Synonyms on burst mode
-
-  to select the way to proceed in the burst (auto or semiauto) you can either:
-  - activate the popup to select the procedure (line 43-60 of burst_result.html file)  
-    * .. by turning setPopup = true;
-  - have a look and edit (burst type) on the code at:
-    * burst_result (line 43-60 [popup], 300, 312)
-    * burst_vocabulary (line 349-378 [launchBurstAnalysis])
-    * main.py (line 494-572 [burst])   
-
-<br>
-
 - Email 
 
     After some months the email sender could stop working and you can find errors on register or forgot password:

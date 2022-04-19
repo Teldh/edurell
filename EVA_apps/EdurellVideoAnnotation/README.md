@@ -94,6 +94,27 @@ Installation completed, with the environment activated launch the project with:
     Updated python version to 3.7.11
     Packeges must be adapted to that version
 
+- Get synonyms from wordnet NLTK (manual annotator)
+
+  to get synonyms automatically at the start change the commented lines on:   
+  main.py - (line 265-273)
+
+  there we have 2 ways: 
+    * 1) - starting from empty
+    * 2) - getting from wordnet   
+
+  leave not commented only the choosen one.
+
+- Synonyms on burst mode
+
+  to select the way to proceed in the burst (auto or semiauto) you can either:
+  - activate the popup to select the procedure (line 43-60 of burst_result.html file)  
+    * .. by turning setPopup = true;
+  - have a look and edit (burst type) on the code at:
+    * burst_result (line 43-60 [popup], 300, 312)
+    * burst_vocabulary (line 349-378 [launchBurstAnalysis])
+    * main.py (line 494-572 [burst])   
+
 - Variables:   
 
     If you change the name of the virtual-environment 
