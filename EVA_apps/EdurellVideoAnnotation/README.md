@@ -94,6 +94,10 @@ Installation completed, with the environment activated launch the project with:
     Updated python version to 3.7.11
     Packeges must be adapted to that version
 
+- Save burst auto and semiauto on DB
+
+    To save into db the burst results decomment the lines of code (544-569) of main.py
+
 - Get synonyms from wordnet NLTK (manual annotator)
 
   to get synonyms automatically at the start change the commented lines on:   
@@ -162,4 +166,4 @@ With the environment activated launch the app locally with:
 # Deploy and run on server
 
 Follow this guide:
-https://drive.google.com/file/d/1ST-BZPppwrAWwb_fYFOcBa8HWmYOB0hG/view?usp=sharing
+https://drive.google.com/file/d/1hta5qeYVr-2U9mcQdjT0-a_NacvhYUPC/view?usp=sharing

@@ -90,6 +90,22 @@ Activate the environment:
   
 <br>
 
+- Change annotation to display/consider:
+
+  To change annotations have a look on this part of the code:
+
+  * data.py (get_concept_instants, get_concept_vocabulary, get_concept_map, get_concept_list)
+
+  * handle_data.py (get_definitions_fragments)
+
+  * main.py (get_fragments, class Graphs, get_graph, graph)
+
+  Atm on each of thoose functions the email or annotatorId fields/var are used as a filter to the DB.
+  Change user informations to update the filter and obtain other annotations as result.
+  This can be done also with burst or gold annotations.
+
+<br>
+
 - Videos folder
 
   the videos folder inside main.py (line ~28) has to be arranged basing on the server folder structure.
@@ -140,5 +156,5 @@ The app should start automatically in the default browser at this point..
 # Deploy and run on server
 
 Follow this guide:
-https://drive.google.com/file/d/1ST-BZPppwrAWwb_fYFOcBa8HWmYOB0hG/view?usp=sharing
+https://drive.google.com/file/d/1hta5qeYVr-2U9mcQdjT0-a_NacvhYUPC/view?usp=sharing
 
