@@ -90,6 +90,14 @@ Activate the environment:
   
 <br>
 
+- To make graphs the same in 1st and this app we commented the call to the function for removing transitivity.
+
+  * to reactivate transitivity go to line 452 of GraphKnowledge.js and decomment the line with the call.
+
+  * // this.removeTransitivity(this.state.graph)
+
+<br>
+
 - Change annotation to display/consider:
 
   To change annotations have a look on this part of the code:

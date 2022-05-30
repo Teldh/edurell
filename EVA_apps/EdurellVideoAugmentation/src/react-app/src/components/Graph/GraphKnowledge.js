@@ -445,7 +445,7 @@ export default class GraphKnowledge extends React.Component {
       }*/
     }
 
-    this.removeTransitivity(this.state.graph)
+    //this.removeTransitivity(this.state.graph)
 
     this.currentVideoTimeChannel = new BroadcastChannel("videoCurrentTime");
 
