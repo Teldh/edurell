@@ -198,7 +198,7 @@ export default class GraphKnowledge extends React.Component {
               tempSyn.push(synonym)
             }
         
-            synonymsId = conceptVocabularyMap[nodelabel].map(el => "edu:" + el.replace(" ", "_"));
+            synonymsId = conceptVocabularyMap[nodelabel].map(el => "edu:" + el.replaceAll(" ", "_"));
             nodeWithSyns.sort();
 
             nodeName = "";
@@ -237,12 +237,12 @@ export default class GraphKnowledge extends React.Component {
                 if(n.synonymsId.includes(node.body)) {
                   nodePrereq = n.id;
                 }
-                else if(n.synonymsId.includes(node.target["dcterms:subject"].id)) {
+                if(n.synonymsId.includes(node.target["dcterms:subject"].id)) {
                   nodeTarget = n.id;
                 }
               }
 
-              if(!this.state.graph.edges.some(e => e.from === node.body && e.to === node.target["dcterms:subject"].id)){
+              if(!this.state.graph.edges.some(e => e.from === nodePrereq && e.to === nodeTarget)){
                 this.state.graph.edges.push({from: nodePrereq, to: nodeTarget})
                 
                 var conceptTimeBegin = node.target.selector.value.replace("^^xsd:dateTime","");
