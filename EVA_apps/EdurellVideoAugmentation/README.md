@@ -16,7 +16,7 @@ Students.
 
 ### Short description of the project:
 
-This project is a web application developped in React (JS) for the front-end and with Flask for the back-end (Python). The aim of the application is to help student learn through videos, contextual help and an interactive knowledge graph gathering all the concepts explainend in the video and the relationships with each other.
+This project is a web application developped in React (JS) for the front-end and with Flask for the back-end (Python). The aim of the application is to help students learn through videos, contextual help and an interactive knowledge graph gathering all the concepts explainend in the video and the relationships with each other.
 
 <br>
 
@@ -32,7 +32,7 @@ https://drive.google.com/drive/folders/1o9WdAvNopdtUSw5h2tq0q5QBMCZbrNIk?usp=sha
 
 <br>
 
-To organize the projecty is better to create and use a virtual env as Annotator app, but you can skip this step.
+To organize the projecty it is better to create and use a virtual env as Annotator app, but you can skip this step.
 
 #### Prerequisites: Anaconda  
 
@@ -40,7 +40,7 @@ To organize the projecty is better to create and use a virtual env as Annotator 
 
 Start by running Anaconda/Conda terminal:
 
-Create the virtual environment (if first time, or not already done for annotator app):
+Create the virtual environment (if you do not have it yet):
 
     > conda create -n myenv python=3.7 pip pytorch
     
@@ -48,7 +48,7 @@ Activate the environment:
 
     > conda activate myenv
 
-(Facoltative) Open VSCode with conda (if dev using VScode ide)
+(Optional) Open VSCode with conda (if dev using VScode ide)
 
     > code
 
