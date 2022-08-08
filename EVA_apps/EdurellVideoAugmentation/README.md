@@ -14,7 +14,7 @@ Students.
 
 <br>
 
-### Small description of the project:
+### Short description of the project:
 
 This project is a web application developped in React (JS) for the front-end and with Flask for the back-end (Python). The aim of the application is to help student learn through videos, contextual help and an interactive knowledge graph gathering all the concepts explainend in the video and the relationships with each other.
 
