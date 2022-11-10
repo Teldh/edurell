@@ -1,0 +1,8 @@
+
+/* Style for a public "Working Draft" */
+
+@import "https://www.w3.org/StyleSheets/TR/2016/base.css";
+
+body {
+  background-image: url(https://teldh.github.io/edurell/images/background.jpg);
+}
