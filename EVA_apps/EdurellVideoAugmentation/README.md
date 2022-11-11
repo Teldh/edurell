@@ -1,19 +1,5 @@
 # Video augmentation and graph exploration
 
-Prof.
-
-- Ilaria Torre
-
-- Ilenia Galluccio
-
-Students.
-
-- Thomas Neveux
-
-- Julie Massari
-
-<br>
-
 ### Short description of the project:
 
 This project is a web application developped in React (JS) for the front-end and with Flask for the back-end (Python). The aim of the application is to help students learn through videos, contextual help and an interactive knowledge graph gathering all the concepts explainend in the video and the relationships with each other.
@@ -165,4 +151,10 @@ The app should start automatically in the default browser at this point..
 
 Follow this guide:
 https://drive.google.com/file/d/1hta5qeYVr-2U9mcQdjT0-a_NacvhYUPC/view?usp=sharing
+
+# Credits:
+
+- Thomas Neveux
+- Julie Massari
+
 
