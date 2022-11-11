@@ -1,4 +1,4 @@
-#PREREQUISITE CONCEPT MAPS based on Topic Maps
+# PREREQUISITE CONCEPT MAPS based on Topic Maps
 # Encode Server
 Encode is the server side of the application Encode on Web
 
