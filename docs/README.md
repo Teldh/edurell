@@ -1,5 +1,5 @@
-This folder includes documents for:
-- EVA apps installation 
-- Encode server and client installation
+
+- EVA apps  
+- Encode server and client 
 - Summarization
 
