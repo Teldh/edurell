@@ -1,5 +1,7 @@
 
 - EVA apps  
-- Encode server and client 
-- Summarization
+- PRerequisites interactive editing (Encode web)
+- Documents
+- Evaluations
+- Misc and work in progress
 
