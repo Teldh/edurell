@@ -1,6 +1,6 @@
 # EncodeWeb
 Encode on Web
-Encode on Web is an Application that give to user the opportunity to project and manage Educational Concept Maps via browser.
+Encode on Web is an Application that supports the editing and management of Prerequisite Concept Maps, via browser.
 
 # Installation
 
