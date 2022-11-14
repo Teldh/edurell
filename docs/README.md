@@ -1,5 +1,5 @@
 
-- EVA apps  
+- EVA apps: Edurell Video Annotation and Edurell Video Annotation
 - PRerequisites interactive editing (Encode web)
 - Documents
 - Evaluations
