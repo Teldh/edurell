@@ -1219,7 +1219,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 
     <p>To solve this problem, the first step is to have an effective representation of the content of the video, with a data model which is able to encode both concepts which are explained in it and evolving relations between them, relating concepts with their prerequisite (weak or strong).</p>
 
-    <p>The Edurell Data Model describes a structured model to annotate video resources with the concepts which are explained and with prerequisite relationships between those concepts. This data model is mainly based on the use of the Web Annotation Ontology [<cite><a class="bibref" href="#bib-annotation-ontology">annotation-ontology</a></cite>], extended with some classes and properties belonging to the newly-developed Edurell Ontology [<cite><a class="bibref" href="#bib-edu-ontology">edu-ontology</a></cite>].</p>
+    <p>The Edurell Data Model describes a structured model to annotate video resources with the concepts which are explained and with prerequisite relationships between those concepts. This data model is mainly based on the use of the Web Annotation Ontology [<cite><a class="bibref" href="#bib-annotation-ontology">annotation-ontology</a></cite>], extended with some classes and properties belonging to the newly-developed Edurell Vocabulary [<cite><a class="bibref" href="#bib-edu-ontology">edu-ontology</a></cite>].</p>
 
   </section>
 
@@ -1297,7 +1297,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
     <p><em>This section is non-normative.</em></p>
 
     <p>
-      The specification is divided into two major sections: the terms defined in the Edurell Ontology, and terms from other ontologies used in the model.
+      The specification is divided into two major sections: the terms defined in the Edurell Vocabulary, and terms from other ontologies used in the model.
     </p>
 
     <p>
@@ -1859,14 +1859,14 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
     </h2>
 
     <p>
-      The Edurell Data Model makes use of two Selectors: <a href="#selector-instant"><code>edu:InstantSelector</code></a>, declared by the Edurell Ontology, which is used to select a specific instant in the video (and, optionally, a specific word in the associated ConLL file and a region in a video frame), and <a href="#selector-range"><code>oa:RangeSelector</code></a>, which combines two InstantSelectors to identify a segment of the video.
+      The Edurell Data Model makes use of two Selectors: <a href="#selector-instant"><code>edu:InstantSelector</code></a>, declared by the Edurell Vocabulary, which is used to select a specific instant in the video (and, optionally, a specific word in the associated ConLL file and a region in a video frame), and <a href="#selector-range"><code>oa:RangeSelector</code></a>, which combines two InstantSelectors to identify a segment of the video.
 
     <!-- 3.1 InstantSelector -->
     <section id="selector-instant" typeof="bibo:Chapter" resource="#selector-instant" property="bibo:hasPart">
       <h3 id="h-selector-instant" resource="#h-selector-instant"><span property="xhv:role" resource="xhv:heading"><span class="secno">3.1 </span>InstantSelector</span>
       </h3>
       <p>
-        The Edurell Ontology declares a custom <code>edu:InstantSelector</code> to select a specific instant in the video. The custom selector also has additional optional properties that may be used to link a time instant of the video with the corresponding word in a ConLL file associated to the video resource through a <a href="#annotation-conll">ConLL Annotation</a>.
+        The Edurell Vocabulary declares a custom <code>edu:InstantSelector</code> to select a specific instant in the video. The custom selector also has additional optional properties that may be used to link a time instant of the video with the corresponding word in a ConLL file associated to the video resource through a <a href="#annotation-conll">ConLL Annotation</a>.
       </p>
 
       <div class="tech">
@@ -2010,7 +2010,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
     </p>
 
     <p>
-      The Edurell Ontology uses the <a href="#motivation-describing"><code>oa:describing</code></a> Motivation from the Web Annotation Ontology [<cite><a class="bibref" href="#bib-annotation-ontology">annotation-ontology</a></cite>] an extends the original <a href="https://www.w3.org/TR/annotation-vocab/#linking"><code>oa:linking</code></a> ontology with two newly declared Motivations, <a href="#motivation-linkingconll"><code>edu:linkingConll</code></a> and <a href="#motivation-linkingprerequisite"><code>edu:linkingPrerequisite</code></a>.
+      The Edurell Vocabulary uses the <a href="#motivation-describing"><code>oa:describing</code></a> Motivation from the Web Annotation Ontology [<cite><a class="bibref" href="#bib-annotation-ontology">annotation-ontology</a></cite>] an extends the original <a href="https://www.w3.org/TR/annotation-vocab/#linking"><code>oa:linking</code></a> ontology with two newly declared Motivations, <a href="#motivation-linkingconll"><code>edu:linkingConll</code></a> and <a href="#motivation-linkingprerequisite"><code>edu:linkingPrerequisite</code></a>.
     </p>
 
     <!-- 4.1 linkingConll -->
