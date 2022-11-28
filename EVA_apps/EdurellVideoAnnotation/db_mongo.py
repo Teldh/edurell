@@ -403,12 +403,22 @@ def get_extracted_keywords(video_id, title=False):
     else:
         return None
 
+def remove_account(email):
+    query = {"email": email}
 
+    if users.find_one(query) is not None:
+        try: 
+            users.delete_one(query)
+        except:
+            return "Error"
+        return "Done"
+    return "Not Found"
 
 if __name__ == '__main__':
 
-    pprint(get_definitions("60d2e89014ff4217f4f50559", "sXLhYStO0m8"))
-
+    #pprint(get_definitions("60d2e89014ff4217f4f50559", "sXLhYStO0m8"))
+    print(remove_account('gabriele.romano121297@gmail.com'))
+    
 
     # collection = db.graphs
     # query = {

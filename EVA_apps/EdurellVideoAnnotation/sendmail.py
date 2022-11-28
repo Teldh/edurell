@@ -164,9 +164,11 @@ class MailSender:
 
 
 def send_mail(To, subject, html):
-
-    #ourmailsender = MailSender('educationalRelationsLearning@gmail.com', 'edurell2021', ('smtp.gmail.com', 587))
-    ourmailsender = MailSender('edurellannotator@gmail.com', 'edurell2021', ('smtp.gmail.com', 587))
+    
+    generated_per_app_password = 'qyzlabajrvwxlbfs'
+    #account_password = 'Edurell2022!'
+    ourmailsender = MailSender('educationalRelationsLearning@gmail.com', generated_per_app_password, ('smtp.gmail.com', 587))
+    #ourmailsender = MailSender('edurellannotator@gmail.com', 'edurell2021', ('smtp.gmail.com', 587))
 
     ourmailsender.set_message("edurell", subject, "Edurell Annotations", html)
 
@@ -218,17 +220,13 @@ if __name__ == "__main__":
     #
     # html = "<h1> Ciao! </h1>"
     #
-    # ourmailsender = MailSender('educationalRelationsLearning@gmail.com', 'edurell2021', ('smtp.gmail.com', 587))
-    #
+    # ourmailsender = MailSender('educationalRelationsLearning@gmail.com', 'qyzlabajrvwxlbfs', ('smtp.gmail.com', 587))
     # ourmailsender.set_message(plaintext, "This is a test", "Edurell Annotations", html)
     #
-    # ourmailsender.set_recipients(['mirenda_luca@yahoo.com'])
+    # ourmailsender.set_recipients(['gaggioaxel@gmail.com'])
     #
     # ourmailsender.connect()
     # ourmailsender.send_all()
-
-    token = generate_confirmation_token("mirenda_luca@yahoo.com")
+    #
+    token = generate_confirmation_token("gaggioaxel@gmail.com")
     print(token)
-
-
-
