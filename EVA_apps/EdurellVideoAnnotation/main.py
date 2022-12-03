@@ -580,13 +580,13 @@ def burst_launch():
 #     return render_template('test_image.html', img_data=encoded_img_data.decode('utf-8'))
 #
 
-def open_application_on_browser(address):
+def open_application_in_browser(address):
     from webbrowser import open as open_page
     open_page('http://'+address+':5000/', new=2)
 
 if __name__ == '__main__':
     address = '127.0.0.1'
-    open_application_on_browser(address)
+    open_application_in_browser(address)
     app.run(host=address, threaded=True, debug=False) #, port=5050\
     
     
