@@ -40,8 +40,10 @@ app.config['MONGODB_SETTINGS'] = {
 #old: <project.edurell@gmail.com> <work$package>
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'edurellannotator@gmail.com'
-app.config['MAIL_PASSWORD'] = 'edurell2021'
+#app.config['MAIL_USERNAME'] = 'edurellannotator@gmail.com'
+#app.config['MAIL_PASSWORD'] = 'edurell2021'
+app.config['MAIL_USERNAME'] = 'educationalRelationsLearning@gmail.com'
+app.config['MAIL_PASSWORD'] = 'qyzlabajrvwxlbfs'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEFAULT_SENDER'] = 'edurellannotator@gmail.com'

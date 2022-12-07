@@ -164,10 +164,10 @@ class MailSender:
 
 
 def send_mail(To, subject, html):
-    
-    generated_per_app_password = 'qyzlabajrvwxlbfs'
+    sender_account = "educationalRelationsLearning@gmail.com"
+    sender_password = "qyzlabajrvwxlbfs"
     #account_password = 'Edurell2022!'
-    ourmailsender = MailSender('educationalRelationsLearning@gmail.com', generated_per_app_password, ('smtp.gmail.com', 587))
+    ourmailsender = MailSender(sender_account, sender_password, ('smtp.gmail.com', 587))
     #ourmailsender = MailSender('edurellannotator@gmail.com', 'edurell2021', ('smtp.gmail.com', 587))
 
     ourmailsender.set_message("edurell", subject, "Edurell Annotations", html)

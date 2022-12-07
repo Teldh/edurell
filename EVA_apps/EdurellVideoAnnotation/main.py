@@ -97,7 +97,7 @@ def register():
 def confirm_code():
     form = ConfirmCodeForm()
     email = json.loads(request.args['mail'])
-
+    
     if form.validate_on_submit():
 
         code = form.code.data
@@ -588,5 +588,3 @@ if __name__ == '__main__':
     address = '127.0.0.1'
     open_application_in_browser(address)
     app.run(host=address, threaded=True, debug=False) #, port=5050\
-    
-    

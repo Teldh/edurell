@@ -411,14 +411,21 @@ def remove_account(email):
             users.delete_one(query)
         except:
             return "Error"
-        return "Done"
+        return "Done verified removed"
+    elif unverified_users.find_one(query) is not None:
+        try: 
+            unverified_users.delete_one(query)
+        except:
+            return "Error"
+        return "Done unverified removed"
     return "Not Found"
 
 if __name__ == '__main__':
 
     #pprint(get_definitions("60d2e89014ff4217f4f50559", "sXLhYStO0m8"))
     print(remove_account('gabriele.romano121297@gmail.com'))
-    
+    print(remove_account('gaggioaxel@gmail.com'))
+    print(remove_account('gaggioaxel@yahoo.it'))
 
     # collection = db.graphs
     # query = {

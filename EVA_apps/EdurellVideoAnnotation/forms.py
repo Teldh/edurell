@@ -29,8 +29,7 @@ class PasswordResetForm(FlaskForm):
 
 
 class ConfirmCodeForm(FlaskForm):
-
-    code = StringField("Insert code received ", validators=[InputRequired()])
+    code = StringField("Insert the code received by email", validators=[InputRequired()])
     submit = SubmitField('Reset password')
 
 class RegisterForm(FlaskForm):
