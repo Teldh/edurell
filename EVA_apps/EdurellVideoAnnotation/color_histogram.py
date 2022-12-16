@@ -129,13 +129,22 @@ def color_histogram_on_clusters(video_url, cluster_starts, cluster_ends, S, seco
     :param seconds_range: aggiustare inizio e fine dei segmenti in base a differenza nel color histogram
     """
 
-    video_id = video_url.split('&')[0].split("=")[1]
+    if "watch?v=" in video_url:
+        video_id = video_url.split("?v=")[-1]
+        #print(video_id)
+        #video_id = video_url.split('&')[0].split("=")[1]
+    else:
+        video_id = video_url.split("/")[-1]
+    #video_id = video_url.split('&')[0].split("=")[1]
 
     current_path = os.path.dirname(os.path.abspath(__file__))
     video_path = os.path.join(current_path, "static", "videos", video_id, video_id + ".mp4")
-    print(video_path)
     #cap = get_youtube_cap(video_url)
     cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        video_path = video_path.replace(".mp4",".mkv")
+        cap = cv2.VideoCapture(video_path)
+    print(video_path)
     fps = cap.get(cv2.CAP_PROP_FPS)
     print("fps:", fps)
 

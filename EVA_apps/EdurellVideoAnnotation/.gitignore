@@ -1,2 +1,3 @@
-static/videos/
-punctuator/
+static/videos/*/
+punctuator/*/
+__pycache__/
