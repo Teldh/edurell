@@ -47,7 +47,7 @@ def get_youtube_cap(url):
     # https://stackoverflow.com/questions/70297028/i-have-a-problem-with-dislike-error-when-creating-an-pafy-new-url-perhaps-its
     # go to your env installation folder /lib/python3.7/site-packages/pafy/backend_youtube_dl.py and comment lines 53 and 54
     # comment line with self._likes and self._dislikes
-    print('\033[91m'+"REMAINDER FROM get_youtube_cap() TO COMMENT LINES"+'\033[0m')
+    # print('\033[91m'+"REMAINDER FROM get_youtube_cap() TO COMMENT LINES"+'\033[0m')
     play = pafy.new(url).streams[0]  # we will take the lowest quality stream
     assert play is not None  # makes sure we get an error if the video failed to load
     return cv2.VideoCapture(play.url)
