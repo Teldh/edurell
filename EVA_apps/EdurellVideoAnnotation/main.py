@@ -28,7 +28,7 @@ from burst_class import burst_extraction, burst_extraction_with_synonyms
 from metrics import calculate_metrics
 from synonyms import create_skos_dictionary, get_synonyms_from_list
 from skos_synonyms_query import try_query
-
+#
 @app.route('/')
 def index():
     return render_template('index.html')
