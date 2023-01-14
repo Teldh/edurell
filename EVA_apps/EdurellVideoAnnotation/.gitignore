@@ -1,3 +1,6 @@
 static/videos/*
 punctuator/*
 __pycache__/
+src/
+svm_dataset/
+local.py

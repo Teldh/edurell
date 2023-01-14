@@ -7,29 +7,16 @@ import spacy
 
 
 
-
-def extract_keywords(text):
+def extract_keywords(text,minFrequency=1):
 
     text = text.replace("'ve", " have")
     text = text.replace("'re", " are")
     text = text.replace("'s", " is")
     text = text.replace("'ll", " will")
 
-    concepts = rake_phrasemachine(text)
-
-    for i, concept in enumerate(concepts):
-        concepts[i] = concept.replace("-", " ").replace("/", " / ")
-
-    return concepts
-
-
-
-
-
-def rake_phrasemachine(text):
     Rake = RAKE.Rake(RAKE.SmartStopList())
-    concepts = [j[0] for j in Rake.run(text, maxWords=3, minFrequency=3)[0:15]]
 
+    concepts = [j[0] for j in Rake.run(text, maxWords=3, minFrequency=minFrequency)[0:15]]
     nlp = spacy.load("en_core_web_sm")  # en_core_sci_scibert
     doc = nlp(text.lower())
 
@@ -41,10 +28,18 @@ def rake_phrasemachine(text):
         if len(c[0].split(" ")) < 3:
             concepts.append(c[0])
 
-    return lemmatize(concepts)
+    concepts = lemmatize(concepts)
+
+    for i, concept in enumerate(concepts):
+        concepts[i] = concept.replace("-", " ").replace("/", " / ")
+
+    return concepts
 
 
-
+def extract_title(text:str):
+    first_sentence = text.split("\n\n")[0].lstrip().rstrip()
+    if first_sentence:
+        return first_sentence
 
 
 def get_real_keywords(video_id, title=False, defs=True):
@@ -73,13 +68,3 @@ def get_real_keywords(video_id, title=False, defs=True):
 
         return keywords
     return None
-
-
-
-
-
-
-
-
-
-

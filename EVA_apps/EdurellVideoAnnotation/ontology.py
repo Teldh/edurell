@@ -204,7 +204,7 @@ def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
                                         break
 
 
-    #pprint(jsonld)
+    #print(jsonld)
     data = {
         "graph":jsonld
     }

@@ -11,7 +11,7 @@ import segmentation
 from ontology import create_graph_jsonld
 from werkzeug.urls import url_parse
 from forms import addVideoForm, RegisterForm, LoginForm, GoldStandardForm, ForgotForm, PasswordResetForm, ConfirmCodeForm, BurstForm
-from keywords import extract_keywords, get_real_keywords
+from words import extract_keywords, get_real_keywords
 from conll import conll_gen, lemmatize,create_text
 from nltk import WordNetLemmatizer
 from audio_transcription import speech_from_youtube
@@ -225,11 +225,8 @@ def video_selection():
 
             lemmatized_concepts = db_mongo.get_extracted_keywords(vid_id)
             if lemmatized_concepts is None:
-                print("Extracting main concepts..")
-                concepts = extract_keywords(text)
-
-                print("Lemmatizing concepts..")
-                lemmatized_concepts = lemmatize(concepts)
+                print("Extracting and lemmatizing main concepts..")
+                lemmatized_concepts = extract_keywords(text,minFrequency=3)
 
 
 

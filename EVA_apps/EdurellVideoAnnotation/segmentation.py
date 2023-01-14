@@ -49,6 +49,13 @@ mooc_5 = "https://www.youtube.com/watch?v=wbqpzILKENI&list=PLV8Xi2CnRCUm0QOaRfPu
 
 mooc = mooc_1
 
+from video import LocalVideo
+
+def frames_segmentation(video:LocalVideo):
+    return None
+#TODO implement
+
+
 def segmentation(video, c_threshold, sec_min, S, frame_range, subtitles, video_id):
     """
     :param video: youtube url

@@ -1,7 +1,7 @@
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.lex_rank import LexRankSummarizer
-from keywords import extract_keywords, rake_top
+from words import rake_top
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, BartTokenizer, BartForConditionalGeneration, BartConfig
 #pip install bert-extractive-summarizer
 from summarizer import Summarizer
