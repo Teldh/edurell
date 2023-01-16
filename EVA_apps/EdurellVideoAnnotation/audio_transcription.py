@@ -53,7 +53,7 @@ def get_youtube_cap(url):
     return cv2.VideoCapture(play.url)
 
 
-def speech_from_youtube(url):
+def speech_from_youtube(url:str):
     """Get the speech from a youtube video URL"""
     video_id = url.split("watch?v=")[1]
 

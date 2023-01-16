@@ -1,3 +1,12 @@
+from dataclasses import dataclass
+
+@dataclass
+class TimedAndFramedText:
+    text: str
+    frames_window: 'tuple[(int,int)]'
+    xywh: 'tuple[(int,int,int,int)]'
+
+
 from nltk import tokenize
 import db_mongo
 
@@ -14,7 +23,7 @@ from punctuator import Punctuator
 from sentence_transformers import SentenceTransformer, util
 from Cluster import create_cluster_list, aggregate_short_clusters
 from audio_transcription import speech_from_youtube, get_timed_sentences
-from color_histogram import color_histogram_on_clusters
+from image import color_histogram_on_clusters
 import os, sys
 from conll import get_text
 
@@ -53,10 +62,10 @@ from video import LocalVideo
 
 def frames_segmentation(video:LocalVideo):
     return None
-#TODO implement
+#TODO copy from video __main__
 
 
-def segmentation(video, c_threshold, sec_min, S, frame_range, subtitles, video_id):
+def segmentation(video:str, c_threshold, sec_min, S, frame_range, subtitles, video_id):
     """
     :param video: youtube url
     :param c_threshold: threshold per la similarità tra frasi
