@@ -169,7 +169,7 @@ if __name__ == '__main__':
             #print("beginning frame section");plt.imshow(curr_frame.get_img());plt.title("curr frame");plt.show();plt.imshow(prev_frame.get_img());plt.title("prev frame");plt.show()
             start_frame_num = vid.get_num_curr_frame()
         #if start frame is set and there's statistical difference from the last frame -> scene changed
-        elif start_frame_num is not None and not np.all(cosine_sim >= 0.999):
+        elif start_frame_num is not None and ( not np.all(cosine_sim >= 0.999) or vid.get_num_curr_frame() == vid.get_num_frames()-1):
             #if the window is above treshold -> save window, then reset start frame
             curr_frame_num = vid.get_num_curr_frame()
             if curr_frame_num - start_frame_num >= min_frames_threshold:
@@ -182,8 +182,6 @@ if __name__ == '__main__':
                     x,y,w,h = xywh[0],xywh[1],xywh[2],xywh[3]
                     vid_text = TFText(text=text,frames_window=(start_frame_num,curr_frame_num),xywh=(x,y,w,h))
                     text_frames.append(vid_text)
-                pprint(text_frames)
-                input()
                 
             start_frame_num = None
 
@@ -194,11 +192,7 @@ if __name__ == '__main__':
             print(f"progression... {vid.get_percentage_progression()}%")
             printed_progress = curr_percentage
 
-    #video ended, if there's a segment -> append last frame
-    if start_frame_num is not None:
-        slide_text_frames_cluster.append((start_frame_num,int(vid.get_num_frames()-1)))
-
-    pprint(slide_text_frames_cluster)
+    pprint(text_frames)
 
 
     #TODO   probably most efficient way is to firstly scan all the video with a 1 second coarse-grained window to find all text images
