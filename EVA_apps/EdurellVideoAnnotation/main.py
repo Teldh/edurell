@@ -1,5 +1,4 @@
 import copy
-
 import rdflib
 from config import app
 import db_mongo
