@@ -4,8 +4,22 @@ from conll import lemmatize
 import db_mongo
 import phrasemachine
 import spacy
+from numpy import dot, round, array
+from numpy.linalg import norm
 
-
+def text_cosine_dist(text1:str,text2:str,rounding_decimals:int=3):
+    words_set = set()
+    text1_split, text2_split = text1.split(), text2.split()
+    max_len = max(len(text1_split),len(text2_split))
+    words_set = set(text1_split+text2_split)
+    words_dict = dict(zip(words_set,list(range(1,len(words_set)+1))))
+    text1_binarized = list(map(lambda key: words_dict[key], text1_split))
+    text2_binarized = list(map(lambda key: words_dict[key], text2_split))
+    text1_binarized.extend([0]*(max_len-len(text1_binarized)))
+    text2_binarized.extend([0]*(max_len-len(text2_binarized)))
+    text1_binarized = array(text1_binarized)
+    text2_binarized = array(text2_binarized)
+    return round(dot(text1_binarized,text2_binarized)/(norm(text1_binarized)*norm(text2_binarized)),decimals=rounding_decimals)
 
 def extract_keywords(text,minFrequency=1):
 
@@ -33,6 +47,7 @@ def extract_keywords(text,minFrequency=1):
     for i, concept in enumerate(concepts):
         concepts[i] = concept.replace("-", " ").replace("/", " / ")
 
+    print(concepts)
     return concepts
 
 

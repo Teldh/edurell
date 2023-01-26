@@ -97,7 +97,7 @@ def insert_conll_MongoDB(data):
         collection.insert_one(data)
 
 
-def insert_video(data):
+def insert_video_data(data):
     collection = db.videos
     if collection.find_one({"video_id": data["video_id"]}) is None:
         collection.insert_one(data)
@@ -421,11 +421,11 @@ def remove_account(email):
     return "Not Found"
 
 if __name__ == '__main__':
-
+    pass
     #pprint(get_definitions("60d2e89014ff4217f4f50559", "sXLhYStO0m8"))
-    print(remove_account('gabriele.romano121297@gmail.com'))
-    print(remove_account('gaggioaxel@gmail.com'))
-    print(remove_account('gaggioaxel@yahoo.it'))
+    #print(remove_account('gabriele.romano121297@gmail.com'))
+    #print(remove_account('gaggioaxel@gmail.com'))
+    #print(remove_account('gaggioaxel@yahoo.it'))
 
     # collection = db.graphs
     # query = {
