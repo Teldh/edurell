@@ -172,6 +172,7 @@ class BurstExtractor:
                     if word.upper() in sent.upper():
                         # add the index of the sentence in the list of offsets of that word
                         self._offsets[word].append(index)
+        #print(f"offsets: {self._offsets}")
         return self._offsets
 
     def generate_bursts(self, s=2, gamma=1) -> pd.DataFrame or None:

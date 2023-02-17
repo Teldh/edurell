@@ -3,65 +3,181 @@ import pytesseract
 import os
 
 import mediapipe as mp
-import numpy as np
-from numpy.linalg import norm
+from mediapipe.framework.formats.detection_pb2 import Detection
 
-class ImageClassificator:
-    
+from numpy import round, dot, diag, reshape, zeros, uint8, array, inf, mean, var, transpose
+from numpy.linalg import norm
+from enum import Enum
+from typing_extensions import Literal
+
+class ColorScheme(Enum):
+    GRAY = cv2.COLOR_BGR2GRAY
+    RGB = cv2.COLOR_BGR2RGB
+    BGR = cv2.COLOR_BGR2GRAY + cv2.COLOR_BGR2RGB + 1
+
+mp_face_detection = mp.solutions.face_detection
+mp_drawing = mp.solutions.drawing_utils
+
+class ImageClassifier:
     """
     Wraps an image to find patterns in it
 
-    Arguments:
-        image: the image in RGB or GRAYSCALE mode
+    ----------
+    Parameters:
+    ----------
+        image_and_scheme : a tuple of the image in RGB - BGR - GRAYSCALE mode and the color_scheme
 
+        image_shape : alternatively can set shape of a total black image
     """
 
-    text_contours = None
-    face_results = None
-    _mp_face_detection = mp.solutions.face_detection
+    _texts_with_contour:'list[tuple[str,tuple[int,int,int,int]]] | None' = None
+    _faces:'list[Detection] | None' = None
     
-    def __init__(self,image=None, image_shape=None) -> None:
+    def __init__(self,image_and_scheme=None, image_shape=None) -> None:
+        self._init_params_ = (image_and_scheme,image_shape)
         if image_shape is not None:
-            self._image = np.zeros(image_shape, dtype=np.uint8)
-        elif image is not None:
-            self._image = image
+            self._image = zeros(image_shape, dtype=uint8)
+            self._color_scheme = None
+        elif image_and_scheme is not None:
+            self._image = image_and_scheme[0]
+            self._color_scheme = image_and_scheme[1]
         else:
             self._image = None
+            self._color_scheme = None
 
-    def detect_faces(self, model=1,min_conf=0.5) -> bool:
-        with self._mp_face_detection.FaceDetection(model_selection=model, min_detection_confidence=min_conf) as face_detection:
-            self.face_results = face_detection.process(self._image)
-            return bool(self.face_results.detections)
+    def copy(self):
+        '''
+        makes copy of itself
+        '''
+        color_scheme = self._color_scheme
+        if color_scheme is not None: return ImageClassifier([self._image,color_scheme])
+        else: return ImageClassifier(self._init_params_)
+
+    def detect_faces(self, model:int=1, min_conf=0.2, return_contours=False):
+        '''
+        Search and save faces internally
+        
+        Parameters
+        -----------
+        
+        model : int 0 for short range detection (2 meters from camera), 1 for long range detection (> 5 meters)
+        min_conf: minimum confidence for the recognition
+
+        Returns
+        -----------
+        True if at least one face has been found and return_contours is False
+        otherwise returns the full array of contours for every face
+        '''
+        assert isinstance(model,int) and 0 <= model <= 1 and 0 <= min_conf <= 1
+        if self._image is not None:
+            with mp_face_detection.FaceDetection(model_selection=model, min_detection_confidence=min_conf) as face_detection:
+                self._image.flags.writeable = False
+                if self._color_scheme == ColorScheme.BGR:
+                    self._image = cv2.cvtColor(self._image, cv2.COLOR_BGR2RGB)
+                    self._faces = face_detection.process(self._image)
+                    self._image.flags.writeable = True
+                    self._image = cv2.cvtColor(self._image, cv2.COLOR_RGB2BGR)
+                else:
+                    self._faces = face_detection.process(self._image)
+                    self._image.flags.writeable = True
+                if return_contours:
+                    return self._faces.detections
+                return bool(self._faces.detections)
 
     def detect_text(self,only_title=False,return_text=False,with_contours=False):
         '''
-        search and save text internally
-        returns True if text has been found
+        Search and save text internally
+        
+        Returns
+        -----------
+        TODO improve
+        -----------
+        if only_title returns the text with biggest bounding boxes 
+        
+
+        True if at least one face has been found and return_contours is False
+        otherwise returns the full array of contours for every face
         '''
-        if self._image is not None:
-            self.text_contours = extract_text(self._image, only_title)
-            if return_text and with_contours:
-                return self.text_contours
-            elif return_text and not with_contours:
-                return [elem[0] for elem in self.text_contours]
-            return bool(self.text_contours)
-        return False
+        assert self._image is not None and len(self._image.shape) == 3
+        self._texts_with_contour = self._extract_text(only_title)
+        if return_text and with_contours:
+            return self._texts_with_contour
+        elif return_text and not with_contours:
+            return [elem[0] for elem in self._texts_with_contour]
+        return bool(self._texts_with_contour)
+
+    def draw_detected_faces(self):
+        '''
+        Draws detected faces on image and returns the image with contours
+        '''
+        assert self._faces is not None
+        detections = self._faces
+        image = self._image.copy()
+        for detection in detections:
+            mp_drawing.draw_detections(image, detection)
+        return image
+
+    def _extract_text(self, only_title:bool):
+        '''
+        RGB, BGR or GRAYSCALED but with len(image_shape) == 3 always
+        '''
+        img = self._image
+        if self._color_scheme==ColorScheme.BGR:
+            img_bw = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+        elif self._color_scheme==ColorScheme.RGB:
+            img_bw = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
+        else:
+            img = self._image
+            img = reshape(img,(img.shape[0],img.shape[1]))
+            img_bw = img.copy()
+        cv2.threshold(img_bw, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV,img_bw)
+        cv2.dilate(img_bw, cv2.getStructuringElement(cv2.MORPH_RECT, (12, 12)), img_bw,iterations = 3)
+        contours, hierarchy = cv2.findContours(img_bw, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+        texts_with_contour = []
+        for cnt in contours:
+            x, y, w, h = cv2.boundingRect(cnt)
+            img_cropped = img[y:y + h, x:x + w]
+            text = pytesseract.image_to_string(img_cropped)
+            text = text.replace('\x0c','').lstrip().rstrip()
+            if text:
+                texts_with_contour.append((text,(x,y,w,h)))
+        if only_title and len(texts_with_contour) > 0: # finds max norm bounding boxes
+            max_index = -1
+            max_norm = -1
+            for indx, text_with_contour in enumerate(texts_with_contour):
+                curr_norm = norm(array([text_with_contour[1][2],text_with_contour[1][3]]))
+                if max_norm < curr_norm:
+                    max_index = indx
+                    max_norm = curr_norm
+            return [texts_with_contour[max_index]]
+
+        return texts_with_contour
 
     def get_detected_text(self, with_contours=False):
-        if self.text_contours is not None:
-            if with_contours:
-                return self.text_contours
-            else:
-                return [elem[0] for elem in self.text_contours]
-        return None
+        assert self._texts_with_contour is not None
+        if with_contours:
+            return self._texts_with_contour
+        else:
+            return [elem[0] for elem in self._texts_with_contour]
+
+    def get_detected_faces(self,with_contours=False):
+        assert self._faces is not None
+        if with_contours:
+            return self._faces
+        else:
+            return len(self._faces)
+
+    def get_img_shape(self):
+        assert self._image is not None
+        return self._image.shape
 
     def get_max_size_text(self, return_index = False):
-        texts_with_contour = self.text_contours
+        texts_with_contour = self._texts_with_contour
         if texts_with_contour is not None:
             max_index = -1
             max_norm = -1
             for indx, text_with_contour in enumerate(texts_with_contour):
-                curr_norm = norm(np.array([text_with_contour[1][2],text_with_contour[1][3]]))
+                curr_norm = norm(array([text_with_contour[1][2],text_with_contour[1][3]]))
                 if max_norm < curr_norm:
                     max_index = indx
                     max_norm = curr_norm
@@ -75,17 +191,17 @@ class ImageClassificator:
             return -1, None
 
     def get_smaller_text(self):
-        texts_with_contour = self.text_contours.copy()
+        texts_with_contour = self._texts_with_contour.copy()
         texts_with_contour.remove(self.get_max_size_text(return_index=True)[0])
         return [elem[0] for elem in texts_with_contour]
 
     def get_min_size_text(self):
-        texts_with_contour = self.text_contours
+        texts_with_contour = self._texts_with_contour
         if texts_with_contour is not None:
             min_index = -1
-            min_norm = np.inf
+            min_norm = inf
             for indx, text_with_contour in enumerate(texts_with_contour):
-                curr_norm = norm(np.array([text_with_contour[1][2],text_with_contour[1][3]]))
+                curr_norm = norm(array([text_with_contour[1][2],text_with_contour[1][3]]))
                 if min_norm > curr_norm:
                     min_index = indx
                     min_norm = curr_norm
@@ -95,116 +211,99 @@ class ImageClassificator:
     def get_stat_params(self):
         if self._image is not None:
             flatten = self._image.flatten()
-            return (np.mean(flatten),np.var(flatten))
+            return (mean(flatten),var(flatten))
         return (0,0)
     
     def is_empty_transition_image(self,var_threshold=1e-2):
         return self.get_stat_params()[1] < var_threshold
 
-    def get_cosine_similarity(self,other_image:'ImageClassificator',on_histograms=True,rounding_decimals:int= 8):
+    def get_cosine_similarity(self,other:'ImageClassifier',on_histograms=True,rounding_decimals:int= 10):
         '''
-        Compute cosine similarity between two images histograms, if not on_histograms 
-        it computes between pixel value and position (may be faster)
+        Compute cosine similarity between two images histograms
+        (on pixels it's much more expensive)
+        
+        :returns: 1xN array with N as the number of color channels (3 for RGB and 1 for GRAYSCALE)
         '''
-        if self._image is None:
-            return 0
-        assert self._image.shape == other_image._image.shape
-        round = np.round; norm = np.linalg.norm; dot = np.dot; diag = np.diag
+        assert self._image is not None and other._image is not None and self._image.shape == other._image.shape
         
         if on_histograms:   # looks like it's faster
-            this_mat = self.get_hists()
-            other_mat = other_image.get_hists()
-            cv2.normalize(this_mat,this_mat)
-            cv2.normalize(other_mat,other_mat)
-        else:
-            img_shape = self._image.shape
-            if len(img_shape) == 3 and img_shape[2] == 3:
-                this_mat_uint8 = np.reshape(self._image, (img_shape[0]*img_shape[1],img_shape[2]))
-                other_mat_uint8 = np.reshape(other_image._image, (img_shape[0]*img_shape[1],img_shape[2]))
-            else:
-                this_mat_uint8 = np.reshape(self._image, (1,img_shape[0]*img_shape[1])).astype(np.float32,copy=False)
-                other_mat_uint8 = np.reshape(other_image._image, (1,img_shape[0]*img_shape[1])).astype(np.float32,copy=False)
-            this_mat = np.zeros(this_mat_uint8.shape,dtype='f')
-            other_mat = this_mat.copy()
-            cv2.normalize(this_mat_uint8,this_mat)
-            cv2.normalize(other_mat_uint8,other_mat)
+            this_mat = self.get_hists(normalize=True)
+            other_mat = other.get_hists(normalize=True)
+        else:   # reshape to num_colors flatten rows, one for each color channel and normalize
+            this_image = self._image
+            other_image = other._image
+            this_mat = reshape(this_image,(this_image.shape[2],this_image.shape[0]*this_image.shape[1])).astype(float)
+            other_mat = reshape(other_image,(other_image.shape[2],other_image.shape[0]*other_image.shape[1])).astype(float)
+            cv2.normalize(this_mat,this_mat,0,1,cv2.NORM_MINMAX)
+            cv2.normalize(other_mat,other_mat,0,1,cv2.NORM_MINMAX)
         cosine_sim = round( diag(dot(this_mat,other_mat.T))/(norm(this_mat,axis=1)*norm(other_mat,axis=1)), 
                             decimals=rounding_decimals)
         return cosine_sim
 
+    def _get_grayscaled_img(self):
+        if self._color_scheme == ColorScheme.BGR:
+            return cv2.cvtColor(self._image, cv2.COLOR_BGR2GRAY)
+        elif self._color_scheme == ColorScheme.RGB:
+            return cv2.cvtColor(self._image, cv2.COLOR_RGB2GRAY)
+        else:
+            return self._image
 
-    def get_hists(self):
+    def get_hists(self,normalize:bool=False,bins:int=256,grayscaled=False):
         '''
         generate image histogram
         '''
-        img = self._image
-        if not img is None:
-            num_colors = 1 if len(self._image.shape) == 2 or self._image.shape[-1] == 1 else 3
-            hists = np.zeros((num_colors,256),dtype='f')
-            for channel in range(num_colors):
-                hists[channel,:] = cv2.calcHist([img],channels=[channel],mask=None,histSize=[256],ranges=[0,256]).T/(np.prod(img.shape))
-            return hists
-        return None
+        assert self._image is not None
+        if grayscaled:
+            img = self._get_grayscaled_img()
+        else:
+            img = self._image
+        img = cv2.split(img)
+        num_channels = len(img)
+        hists = []
+        for col_chan in range(num_channels):
+            hist = cv2.calcHist(img,channels=[col_chan],mask=None,histSize=[bins],ranges=[0,256])
+            if normalize:
+                cv2.normalize(hist,hist,0,1,cv2.NORM_MINMAX)
+            hists.append(hist)
+        hists = cv2.merge(hists)
+        if len(hists.shape) > 2: hists = transpose(hists,(2,0,1))
+        return reshape(hists,(num_channels,bins))
     
     def get_img(self, text_bounding_boxes=False):
-        if not text_bounding_boxes or not self.text_contours:
+        if not text_bounding_boxes or not self._texts_with_contour:
             return self._image
-        return draw_bounding_boxes(self._image,[elem[1] for elem in self.text_contours])
+        return draw_bounding_boxes_on_image(self._image,[elem[1] for elem in self._texts_with_contour])
 
     def set_img(self,img):
         self._image = img
-        self.text_contours = None
+        self._texts_with_contour = None
+        self._faces = None
         return self
 
+    def set_color_scheme(self,color_scheme:Literal[ColorScheme.RGB, ColorScheme.BGR]):
+        assert color_scheme == ColorScheme.BGR or color_scheme == ColorScheme.RGB or color_scheme == ColorScheme.GRAY 
+        self._color_scheme = color_scheme
+        return self
+    
+    def reset(self):
+        return self.set_img(None)
 
-def draw_bounding_boxes(img, contours:'list[tuple[(int,int,int,int)]]'):
+
+def draw_bounding_boxes_on_image(img, bounding_boxes:'list[tuple[(int,int,int,int)]]'):
     img = img.copy()
-    img.flags.writeable = True
-    for xywh in contours:
+    for xywh in bounding_boxes:
         x = xywh[0]; y = xywh[1]; w = xywh[2]; h = xywh[3]
-        img=cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
-    img.flags.writeable = False
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
     return img
-
-
-def extract_text(img,only_title:bool):
-    '''RGB or GRAYSCALED with grayscaled'''
-    img_bw = img.copy()
-    img_bw.flags.writeable = True
-    if len(img.shape) > 2 and img.shape[2] == 3:
-        img_bw = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
-    ret, img_thresholded = cv2.threshold(img_bw, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV)
-    rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (12, 12))
-    img_dilated = cv2.dilate(img_thresholded, rect_kernel, iterations = 3)
-    contours, hierarchy = cv2.findContours(img_dilated, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-    texts_with_contour = []
-    for cnt in contours:
-        x, y, w, h = cv2.boundingRect(cnt)
-        img_cropped = img[y:y + h, x:x + w]
-        text = pytesseract.image_to_string(img_cropped)
-        text = text.replace('\x0c','').lstrip().rstrip()
-        if text:
-            texts_with_contour.append((text,(x,y,w,h)))
-    if only_title and len(texts_with_contour) > 0:
-        max_index = -1
-        max_norm = -1
-        for indx, text_with_contour in enumerate(texts_with_contour):
-            curr_norm = norm(np.array([text_with_contour[1][2],text_with_contour[1][3]]))
-            if max_norm < curr_norm:
-                max_index = indx
-                max_norm = curr_norm
-        return [texts_with_contour[max_index]]
-
-    return texts_with_contour
-
         
 
-import os
+
 #from words import extract_keywords, extract_title
 
 if __name__ == '__main__':
+    import os
     img = cv2.cvtColor(cv2.imread(os.path.join(os.path.dirname(os.path.abspath(__file__)), "svm_dataset","slide","PPLop4L2eGk_6.png")), cv2.COLOR_BGR2RGB)
-    classif = ImageClassificator(img)
+    classif = ImageClassifier([img,ColorScheme.RGB])
     print(classif.detect_faces())
     text = classif.detect_text(return_text=True)
     print(f"text: {text}")

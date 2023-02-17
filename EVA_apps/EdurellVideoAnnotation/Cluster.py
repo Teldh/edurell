@@ -167,7 +167,7 @@ def aggregate_short_clusters(clusters, seconds):
             # if the last cluster is too short, I merge it with the last second-last
             merge_times[-1] = ({"start":merge_times[-1]["start"], "end":e})
 
-    print(f"merge times: {merge_times}")
+    #print(f"merge times: {merge_times}")
 
     refined_clusters = []
     for m in merge_times:
