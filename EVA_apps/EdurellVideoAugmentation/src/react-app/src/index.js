@@ -6,7 +6,7 @@ import Edurell from './Edurell';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Edurell />
+      <Edurell />
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -14,7 +14,8 @@ import EditProfile from './components/EditProfile/EditProfile'
 
 import {TokenContext} from './components/account-management/TokenContext'
 import LoginPage from './components/account-management/LoginPage'
-
+import Comparison from './components/Comparison/Comparison.js'
+import Test from './components/Comparison/test.js'
 /**
  * This React component is the Top Component of the app, showing the appropriate component for each http url
  */
@@ -120,6 +121,8 @@ export default class AuthExample extends React.Component {
               <PrivateRoute path="/dashboard" children= {<Dashboard />}/>
               <PrivateRoute path="/app/:id/:title" children={<AppPage/>}/>
               <PrivateRoute path="/editProfile/:user" children={<EditProfilePage/>}/>
+              <PrivateRoute path="/comparison" children={<Comparison/>}/>
+              <Route path="/test" element={<Test/>}></Route>
             </Switch>
           </div>
         </Router>
