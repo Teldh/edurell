@@ -10,18 +10,20 @@ def _pairwise_linked_reversed(iterable,None_tail):
         yield iterable[0], None
     return
 
-def pairwise_linked(iterable, None_tail=True,reversed=False) -> 'Generator[Iterable, Iterable or None]':
+def pairwise_linked_iterator(iterable, None_tail=True,reversed=False) -> 'Generator[Iterable, Iterable or None]':
     '''
-    Iterator over a list of elements
+    Generator of a list of tuple of linked elements
+    (s0,s1)->(s1,s2)->(s2,s3)-> ... -> (sN-1,sN) and optionally (sN,None)\n
+
     Params
     ------
+    iterator : the iterable object
     None_tail : if True returns also the (last element, None) tuple
-    reversed : if True elemens are returned in reverse order (sN, sN-1)->...->(s1,s0) and optionally also (s0,None)
+    reversed : if True elemens are returned in reverse order (sN, sN-1)->...->(s1,s0) and optionally also (s0,None) if none_tail is set
 
     Returns
     --------
     An iterator of tuples
-    
     '''
     if not reversed:
         a,b = tee(iterable)
@@ -30,7 +32,20 @@ def pairwise_linked(iterable, None_tail=True,reversed=False) -> 'Generator[Itera
     else: return _pairwise_linked_reversed(iterable,None_tail)
 
 
-def pairwise(iterable,None_tail=True,reversed=False) -> 'Generator[Iterable, Iterable or None]':
+def pairwise_iterator(iterable,None_tail=True,reversed=False) -> 'Generator[Iterable, Iterable or None]':
+    '''
+    Generator of a list of tutples of elements
+    (s0,s1)->(s2,s3)->(s4,s5)-> ... -> (sN-1,sN) and optionally (sN,None)\n
+    
+    Params
+    ------
+    None_tail : if True returns also the (last element, None) tuple if the list is odd
+    reversed : if True elemens are returned in reverse order (sN, sN-1)->...->(s1,s0) and optionally also (s0,None)
+
+    Returns
+    --------
+    An iterator of tuples
+    '''
     if not reversed:
         iterable = iter(iterable)
         while True:
@@ -50,3 +65,20 @@ def pairwise(iterable,None_tail=True,reversed=False) -> 'Generator[Iterable, Ite
         if None_tail and curr_index == 0:
             yield iterable[0], None
         return
+
+def double_iterator(iterable,enumerated:bool=False) -> 'Generator[Iterable,Iterable] or Generator[int,int,Iterable,Iterable]':
+    '''
+    Generates an iterator of both the upper and lower triangular matrix of every pair (diag not included) of elements from the given iterable:\n
+    
+    Parameters
+    ----------
+    enumerated : if true returns (i,j) (x,y) with i index of x in iterable, j index of y
+
+    Returns
+    -------
+    every (x,y) where index(x) != index(y) belonging to iterable or (i,j),(x,y)
+    '''
+    if not enumerated:
+        return ((x, y) for i, x in enumerate(iter(iterable)) for j, y in enumerate(iter(iterable)) if i != j)
+    else:
+        return (( i, j, x, y) for i, x in enumerate(iter(iterable)) for j, y in enumerate(iter(iterable)) if i != j)

@@ -11,7 +11,7 @@ from burst_extractor import BurstExtractor
 from burst_weight_assigner import WeightAssigner
 from burst_weight_normalizer import WeightsNormalizer
 import burst_results_processor as burst_proc
-from segmentation import Segmentator
+from segmentation import VideoAnalyzer
 import sys
 import copy
 from conllu import parse
@@ -256,7 +256,7 @@ class Burst:
         concept_map = []
         definitions = []
 
-        subtitles, _ = Segmentator(self.video_id).get_transcript()
+        subtitles, _ = VideoAnalyzer(self.video_id).get_transcript()
         if not use_conll:
             sentences = tokenize.sent_tokenize(self.text)
         else:

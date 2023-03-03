@@ -1,45 +1,66 @@
 from dataclasses import dataclass
 from bisect import insort_left
-from words import is_partially_in
+from words import TextSimilarityClassifier, ComparisonMethod
+from typing_extensions import Literal
+from typing import List,Tuple
 
 @dataclass
 class TimedAndFramedText:
     text: str
-    start_end_frames: 'list[tuple[(int,int)]]'
-    xywh: 'tuple[(int,int,int,int)]'
+    start_end_frames: List[Tuple[(int,int)]]
+    xywh: Tuple[(int,int,int,int)]
+
+    def clean_copy(self,txt_cleaner: TextSimilarityClassifier) -> 'TimedAndFramedText':
+        return TimedAndFramedText(txt_cleaner.clean_text(self.text),self.start_end_frames,self.xywh)
     
-    def merge_adjacent_frames(self,tol:int=15) -> None:
+    def merge_adjacent_startend_frames(self,max_dist:int=15) -> 'TimedAndFramedText':
         '''
         Merges adjacent (within a tolerance of frames) frame times a TimedAndFramedText structure
         '''
         start_end_frames = self.start_end_frames
         merged_start_end_frames = []
-        curr_end = None
-        curr_start = None
+        curr_start,curr_end = start_end_frames[0]
         for new_start,new_end in start_end_frames:
-            if curr_end is None:
-                curr_start = new_start
-                curr_end = new_end
-            elif new_start <= curr_end+tol:
-                curr_end = new_end
+            if new_start-curr_end <= max_dist:
+                curr_end = max(curr_end,new_end)
             else:
                 merged_start_end_frames.append((curr_start,curr_end))
-                curr_end = new_end
                 curr_start = new_start
+                curr_end = new_end
         merged_start_end_frames.append((curr_start,curr_end))
         self.start_end_frames = merged_start_end_frames
+        return self
     
-    def extend_frames(self, other_start_end_list:'list[tuple[(int,int)]]'):
+    def extend_frames(self, other_start_end_list:List[Tuple[(int,int)]]) -> None:
         for other_start_end_elem in other_start_end_list:
             insort_left(self.start_end_frames,other_start_end_elem)
     
-    def is_partial_text_of(self, other:'TimedAndFramedText'):
-        return  other is not None and   \
-                ((len(self.text) > 4 and self.text.strip()[2:-2] in other.text) or   \
-                    (self.text in other.text) or is_partially_in(self.text,other.text))
+    def extend_text_and_bounding_boxes(self, other_text:str,other_xywh:Tuple[int,int,int,int]) -> None:
+        this_is_prev = self.xywh[1] < other_xywh[1]
+        this_text = self.text
+        this_xywh = self.xywh
+        if this_is_prev:    self.text = this_text + '\n' + other_text
+        else:               self.text = other_text + '\n' + this_text
+        self.xywh = (   min(this_xywh[0],other_xywh[0]), 
+                        min(this_xywh[1],other_xywh[1]), 
+                        max(this_xywh[2],other_xywh[2]),
+                        max(this_xywh[3],other_xywh[3]) )
+
+
+    def is_partial_text_of(self, other:'TimedAndFramedText',text_classifier:TextSimilarityClassifier):
+        if other is not None:
+            this_startend_frames = self.start_end_frames
+            other_startend_frames = other.start_end_frames
+            return text_classifier.is_partially_in( self.text,
+                                                    other.text,
+                                                    (this_startend_frames[0][0],this_startend_frames[-1][1]),
+                                                    (other_startend_frames[0][0],other_startend_frames[-1][1]),
+                                                    self.xywh,
+                                                    other.xywh)
+        return False
 
     def __lt__(self, other:'TimedAndFramedText'):
-        return self.start_end_frames[-1][1] < other.start_end_frames[0][0]
+        return self.start_end_frames[0][0] < other.start_end_frames[0][0]
     
     def __repr__(self) -> str:
         return 'TimedAndFramedText(txt={0}, start_end_arr={1}, xywh={2})'.format(
@@ -101,20 +122,22 @@ import cv2
 
 from youtube_transcript_api import YouTubeTranscriptApi as YTTranscriptApi
 from math import floor, ceil
-from numpy import clip, all, array, empty, average,var,zeros
+from numpy import clip, all, array, empty, average, var, zeros, where
 from image import ImageClassifier, ColorScheme, draw_bounding_boxes_on_image
-from segmentation import TimedAndFramedText
-from words import TextSimilarityClassifier
 from pprint import pprint
 from xgboost_model import XGBoostModelAdapter
 from collections import deque
-from video import VideoSpeedManager
+from video import VideoSpeedManager, LocalVideo
 from matplotlib import pyplot as plt
 import time
-from itertools_extension import pairwise_linked
+from itertools_extension import double_iterator, pairwise_linked_iterator
+from collections_extension import LiFoStack
 
 
-class Segmentator:
+class VideoAnalyzer:
+
+    _text_in_video: List[TimedAndFramedText] or None = None
+    _video_slidishness = None
 
     def __init__(self,video_id:str,from_youtube:bool=True) -> None:
         if from_youtube:
@@ -235,10 +258,24 @@ class Segmentator:
 
         return subs_dict, autogenerated
 
-    def _extract_analysis_frames_and_estimate_cos_sim_threshold(self, vsm:VideoSpeedManager, color_scheme_for_analysis:ColorScheme,num_segments:int=70):
+    def is_slide_video(self,threshold:float=0.5):
+        if self._video_slidishness is None:
+            self._extract_analysis_frames_and_estimate_threshold(   vsm=VideoSpeedManager(self._video_id,ColorScheme.RGB),
+                                                                    num_segments=50,
+                                                                    _debug=False    )
+        self._video_slidishness:float
+        return self._video_slidishness > threshold
+
+    def _set_video_slidishness(self,slidish_frames: List[Tuple[int,int]],num_frames:int):
+        counter:float = 0.0
+        for frame_window in slidish_frames:
+            counter += (frame_window[1] - frame_window[0])
+        self._video_slidishness = counter/(num_frames-1)
+
+    def _extract_analysis_frames_and_estimate_threshold(self, vsm:VideoSpeedManager,num_segments:int=150,_debug=True):
         '''
-        Split the video into num_segments windows frames, for every segment it's taken the first and the second frame\n
-        The first is analyzed by XGBoost model to recognize the scene\n
+        Split the video into `num_segments` windows frames, for every segment it's taken the frame that's far enough to guarantee a minimum sensibility\n
+        The current frame is analyzed by XGBoost model to recognize the scene\n
         If there are two non-slide frames consecutively the resulting frame window is cut\n
         Bounds are both upper and lower inclusive to avoid a miss as much as possible\n
         Then both are compared in terms of cosine distance of their histograms (it's faster than flattening the images)\n\n
@@ -253,23 +290,24 @@ class Segmentator:
         results in segmentation = [(0,4),(5,7)(8,10)]\n
         with holes between segments 4-5 and 7-8
         '''
-        seconds_per_frame = floor(vsm.get_video().get_count_frames() / vsm.get_video().get_fps() / num_segments)
-        speed = floor(vsm.get_video().get_fps()*seconds_per_frame)
-        num_frames_analyzed = ceil(vsm.get_video().get_count_frames() / speed)
+        num_frames = vsm.get_video().get_count_frames()
+        speed = floor(num_frames / (num_segments))
         vsm.lock_speed(speed)
         iterations_counter:int = 0
-        cos_sim_values = empty((num_frames_analyzed,vsm.get_video().get_dim_frame()[2]))
+        #cos_sim_values = empty((num_segments,vsm.get_video().get_dim_frame()[2]))
+        dists = empty((num_segments,vsm.get_video().get_dim_frame()[2]))
 
-        # Optimization can be performed by doing a first coarse-grained analysis with the XGBoost model predictor
+
+        # Optimization is performed by doing a first coarse-grained analysis with the XGBoost model predictor
         # then set those windows inside the VideoSpeedManager
         scene_model = XGBoostModelAdapter(os.path.dirname(os.path.realpath(__file__))+"/xgboost/model/xgboost500.sav")
 
         start_frame_num = None
         frames_to_analyze = []
         answ_queue = deque([False,False])
-        curr_frame = ImageClassifier([None,color_scheme_for_analysis])
+        curr_frame = ImageClassifier(image_and_scheme=[None,vsm._color_scheme])
         prev_frame = curr_frame.copy()
-        while not vsm.is_video_ended():
+        while iterations_counter < num_segments:
             prev_frame.set_img(vsm.get_frame())
             curr_frame.set_img(vsm.get_following_frame())
             answ_queue.appendleft(scene_model.is_enough_slidish_like(prev_frame)); answ_queue.pop()
@@ -281,52 +319,73 @@ class Segmentator:
                 frames_to_analyze.append((start_frame_num,iterations_counter*speed))
                 start_frame_num = None
 
-            cos_sim_values[iterations_counter,:] = prev_frame.get_cosine_similarity(curr_frame)
+            #cos_sim_values[iterations_counter,:] = prev_frame.get_cosine_similarity(curr_frame)
+            dists[iterations_counter,:] = curr_frame.get_mean_distance(prev_frame)
             iterations_counter+=1
             #print(answ_queue[0]);plt.imshow(curr_frame.get_img(),cmap='gray');plt.show()
-            print(f" Estimating cosine_similarity_threshold: {ceil((iterations_counter)/num_frames_analyzed * 100)}%",end='\r')
+            #print(f" Estimating cosine_similarity_threshold: {ceil((iterations_counter)/num_segments * 100)}%",end='\r')
+            if _debug: print(f" Coarse-grained analysis percentage: {ceil((iterations_counter)/num_segments * 100)}%",end='\r')
+        
+        if start_frame_num is not None:
+            frames_to_analyze.append((start_frame_num,num_frames-1))
+        #cos_sim_img_threshold = clip(average(cos_sim_values,axis=0),0.9,0.99999)
+        #   can't estimate corretly the cosine similarity threshold with average, too dependant from the segments chosen and also too low
+        #   neither can set to max because it's almost always the highest
+        #cos_sim_img_threshold = clip(cos_sim_values.min(axis=0),0.9,0.99999)
+        #diff_threshold = average(diffs,axis=0)+3*var(diffs,axis=0)
+        dist_threshold = (dists.max(axis=0) - dists.min(axis=0)) / 2
+        #print(f"Estimated cosine_similarity_threshold: {cos_sim_img_threshold}")
+        if _debug:
+            print(f"Estimated mean_dist_threshold: {dist_threshold}")
+            print(f"Frames to analyze: {frames_to_analyze} of {num_frames} total frames")
+        frames_to_analyze.sort(reverse=True)
+        #return cos_sim_img_threshold, frames_to_analyze
+        self._set_video_slidishness(frames_to_analyze,num_frames)
+        return dist_threshold, frames_to_analyze
 
-        else:
-            
-            if start_frame_num is not None:
-                frames_to_analyze.append((start_frame_num,vsm.get_video().get_count_frames()-1))
-            vsm.reset()
-            cos_sim_img_threshold = clip(average(cos_sim_values,axis=0) + var(cos_sim_values,axis=0),0.9,0.99999)
-            print(f"Estimating cosine_similarity_threshold: Done -> {cos_sim_img_threshold}")
-            print(f"Frames to analyze: {frames_to_analyze} of {vsm.get_video().get_count_frames()} total frames")
-            frames_to_analyze.sort(reverse=True)
-            return cos_sim_img_threshold, frames_to_analyze
-
-    def _shrink_englobe_partial_words(self,TFT_list: 'list[TimedAndFramedText]',_reverse_list:bool=False):
+    def _compact_embedding_partial_words(self,TFT_list:'list[TimedAndFramedText]',text_classifier:TextSimilarityClassifier,frames_max_dist:int):
         '''
-        Merge near TimedAndFramedText elements of the list where words are contained in the neighbour element.\n
-        Goes in both directions with a recursive call
+        Merge near TimedAndFramedText elements of the list\n
+        Goes in both directions reversing the array and lastly iterates over all the elements with an (optimized) nested for loop\n
 
         ----------
         Parameters
         ----------
         TFT_list : list of texts
-        _reverse_list : is a trigger for internal purposes
+        text_classifier : utility class for text similarity comparison used by TimedAndFramedText for finding partial texts
         
         Returns
         -------
-        Same length or shorter list with frames merged 
+        Same length or shorter list with elements merged
         '''
-        out_list:'list[TimedAndFramedText]' = []
+        input_list = TFT_list
         elem1:TimedAndFramedText
         elem2:TimedAndFramedText
-        for elem1, elem2 in pairwise_linked(TFT_list,reversed=_reverse_list):
-            if elem1.is_partial_text_of(elem2): elem2.extend_frames(elem1.start_end_frames)
-            else: out_list.append(elem1)
-        if _reverse_list:
-            # end of recursion -> reversing the list to return in the correct order
-            out_list.reverse()
-            return out_list
-        else:
-            # recursive call
-            return self._shrink_englobe_partial_words(out_list,_reverse_list=True)
+        for _reverse in [False, True]:
+            output_list:'list[TimedAndFramedText]' = []
+            for elem1, elem2 in pairwise_linked_iterator(input_list,reversed=_reverse):
+                if elem1.is_partial_text_of(elem2,text_classifier): elem2.extend_frames(elem1.start_end_frames)
+                else: output_list.append(elem1)
+            input_list = output_list
 
-    def extract_text_from_video(self,color_scheme_for_analysis:ColorScheme=ColorScheme.BGR,debug:bool=False):
+        deleted:'list[int]' = []
+        for i1,i2, elem1,elem2 in double_iterator(input_list,enumerated=True):
+            if not i1 in deleted and not i2 in deleted and elem1.is_partial_text_of(elem2,text_classifier):
+                elem2.extend_frames(elem1.start_end_frames)
+                deleted.append(i1)
+        return sorted([elem.merge_adjacent_startend_frames(max_dist=frames_max_dist) for indx, elem in enumerate(input_list) if not indx in deleted])
+
+    def _compact_embedding_same_frames(self,TFT_list:'list[TimedAndFramedText]',text_classifier:TextSimilarityClassifier):
+        deleted:'list[int]' = []
+        elem1:TimedAndFramedText
+        elem2:TimedAndFramedText
+        for i1,i2, elem1,elem2 in double_iterator(TFT_list,enumerated=True):
+            if not i1 in deleted and not i2 in deleted and elem1.is_partial_text_of(elem2,text_classifier):
+                elem2.extend_text_and_bounding_boxes(elem1.text,elem1.xywh)
+                deleted.append(i1)
+        return sorted([elem for indx, elem in enumerate(TFT_list) if not indx in deleted])
+
+    def extract_text_from_video(self,color_scheme_for_analysis:ColorScheme=ColorScheme.BGR,_debug:bool=False):
         '''
         Firstly the video is analized in coarse-grained way, by a ML model to recognize frames of slides
         and the threshold for the difference between two frames is concurrently estimated. \n
@@ -339,20 +398,22 @@ class Segmentator:
         start_time = time.time()   
 
         vsm = VideoSpeedManager(self._video_id,color_scheme_for_analysis)
-        cos_sim_img_threshold, frames_to_analyze = self._extract_analysis_frames_and_estimate_cos_sim_threshold(vsm, color_scheme_for_analysis)
+        img_threshold, frames_to_analyze = self._extract_analysis_frames_and_estimate_threshold(vsm)
+        vsm.reset()
         if frames_to_analyze is None:
             return []
-        
-        curr_frame = ImageClassifier(image_and_scheme=[None,color_scheme_for_analysis])
+        #frames_to_analyze = [(0,3000)]
+        curr_frame = ImageClassifier(   threshold = img_threshold,
+                                        comp_method = 'mean-abs-diff',
+                                        image_and_scheme = [None,color_scheme_for_analysis]   )
         prev_frame = curr_frame.copy()
 
-        output_TFT_list:'list[TimedAndFramedText]' = []
-        printed_progress:int = -1
+        output_TFT_stack:LiFoStack[TimedAndFramedText] = LiFoStack()
         iterations_counter:int = 0
         #max_speed:int = 0
-        collisions_TFT_stack:'list[TimedAndFramedText]' = []
-        txt_classif = TextSimilarityClassifier()
-        vsm.lock_speed()
+        collisions_TFT_list:'list[TimedAndFramedText]' = []
+        txt_classif = TextSimilarityClassifier(comp_methods=[ComparisonMethod.TXT_LEN,ComparisonMethod.TXT_SIM])
+        #vsm.lock_speed()
         if not (len(frames_to_analyze) == 1 and frames_to_analyze[0][0] == 0 and frames_to_analyze[0][1] == vsm.get_video().get_count_frames()-1):
             vsm.set_analysis_frames(frames_to_analyze)
 
@@ -360,81 +421,86 @@ class Segmentator:
         
             curr_frame.set_img(vsm.get_frame())
 
-            #   if collision stack is empty search for text in the current frame and then put it in the stack
             #   collide() function sets the speed cap of the video to the minimum and returns the num frame of the first frame with text within this the last iteration
-            if len(collisions_TFT_stack) == 0:
-                if curr_frame.detect_text():
-                    num_start_frame = vsm.collide_and_get_fixed_num_frame()
-                    curr_frame.set_img(vsm.get_frame_from_num(num_start_frame))
+
+            #   if collision stack is empty search for text in the current frame and then put it in the stack
+            if len(collisions_TFT_list) == 0 and curr_frame.detect_text():
+                num_start_frame = vsm.collide_and_get_fixed_num_frame()
+                curr_frame.set_img(vsm.get_frame_from_num(num_start_frame))
+                texts_with_cnt = curr_frame.detect_text(return_text=True,with_contours=True)
+                for text,xywh in texts_with_cnt:
+                    collisions_TFT_list.append(
+                        TimedAndFramedText( text=text,
+                                            start_end_frames=[(num_start_frame,-1)],
+                                            xywh=xywh))
+
+            #   otherwise put the text not visible any more in the output stack
+            elif len(collisions_TFT_list) > 0 and \
+                    (not curr_frame.is_similar_to(prev_frame) or vsm.is_video_ended()):
+                
+                coll_TFT_stack_mask = zeros(len(collisions_TFT_list,),dtype=bool)
+                #   create a mask for the text that's still on screen
+                if not vsm.is_video_ended():
                     texts_with_cnt = curr_frame.detect_text(return_text=True,with_contours=True)
-                    for text,xywh in texts_with_cnt:
-                        collisions_TFT_stack.append(
-                            TimedAndFramedText( text=text,
-                                                start_end_frames=[(num_start_frame,-1)],
-                                                xywh=xywh))
+                    for text,_ in texts_with_cnt:
+                        for indx_in_stack, coll_elem in enumerate(collisions_TFT_list):
+                            if text == coll_elem.text:
+                                coll_TFT_stack_mask[indx_in_stack] = True
+                                break
 
-            # if there are collisions in the queue
-            else: # we are in a collision window
-                # if there's statistical difference from the last frame or video is ended -> scene changed
-                if not all(curr_frame.get_cosine_similarity(prev_frame,on_histograms=True) >= cos_sim_img_threshold) \
-                    or vsm.is_video_ended():
-
-                    #   detect the different text in the new frame with respect to the already present in the collision stack
-                    #   save diffs in a mask
-                    texts_with_cnt = curr_frame.detect_text(return_text=True,with_contours=True)
-                    mask = zeros(len(collisions_TFT_stack),dtype=bool)
-                    if not vsm.is_video_ended():
-                        for text_in_image,_ in texts_with_cnt:
-                            for indx_in_stack, timedText_coll in enumerate(collisions_TFT_stack):
-                                if text_in_image == timedText_coll.text:
-                                    mask[indx_in_stack] = True
-
-                    #   get number of the last same frame to save it in the output structure
-                    num_last_same_frame = vsm.get_prev_num_frame()
-                    #   for every changed text of the collision stack (False in the mask), find if already in the list
-                    for indx_in_stack,found_this_text_in_new_frame in sorted(enumerate(mask),reverse=True): # converted to stack to pop elements from it
-                        if not found_this_text_in_new_frame:
-                            coll_TFT_elem = collisions_TFT_stack.pop(indx_in_stack)
-                            coll_TFT_elem_text = coll_TFT_elem.text
-                            coll_TFT_elem_start_frame = coll_TFT_elem.start_end_frames[0][0]
-                            inserted = False
-                            for output_TFT_elem in sorted(output_TFT_list,reverse=True): #  sorted reversed because coul be modified
-                                #   if already in the list append the starting and ending frames to the field in the struct 
-                                if txt_classif.cosine_sim_SKL(output_TFT_elem.text, coll_TFT_elem_text) > 0.8:
-                                    output_TFT_elem.start_end_frames.append((coll_TFT_elem_start_frame,num_last_same_frame))
-                                    inserted = True
-                                    break
-                            #   else append the whole structure to the list
-                            if not inserted:
-                                coll_TFT_elem.start_end_frames[0] = (coll_TFT_elem_start_frame,num_last_same_frame)
-                                output_TFT_list.append(coll_TFT_elem)
-
-                    if len(collisions_TFT_stack)==0:
-                        vsm.end_collision()
+                #   get number of the last same frame to save it in the output structure
+                num_last_same_frame = vsm.get_prev_num_frame()
+                for indx_in_stack in sorted(where(~coll_TFT_stack_mask)[0],reverse=True):
+                    coll_TFT_elem = collisions_TFT_list.pop(indx_in_stack)
+                    coll_TFT_elem_text = coll_TFT_elem.text
+                    coll_TFT_elem_start_frame = coll_TFT_elem.start_end_frames[0][0]
+                    inserted = False
+                    output_TFT_elem:TimedAndFramedText  # hinting variables for the IDE 
+                    #  match on every element of the list sorted reversed because highly possible that 
+                    for output_TFT_elem in output_TFT_stack: 
+                        #   if already in the list append the starting and ending frames to the field in the struct 
+                        if txt_classif.are_cosine_similar(output_TFT_elem.text, coll_TFT_elem_text) \
+                                and txt_classif.is_partially_in(coll_TFT_elem_text,output_TFT_elem.text):
+                            output_TFT_elem.start_end_frames.append((coll_TFT_elem_start_frame,num_last_same_frame))
+                            inserted = True
+                            break
+                    if not inserted:
+                        #   append the whole structure to the list
+                        coll_TFT_elem.start_end_frames[0] = (coll_TFT_elem_start_frame,num_last_same_frame)
+                        output_TFT_stack.push(coll_TFT_elem)
+                if len(collisions_TFT_list) == 0:
+                    vsm.end_collision()
 
             prev_frame.set_img(curr_frame.get_img())
 
             #   print percentage and measure max speed
-            curr_percentage = vsm.get_percentage_progression()
-            #max_speed = max(max_speed, vsm._debug_get_speed())
-            print("  video analysis "+str(curr_percentage)+'%'+" progress"+"."*(iterations_counter%12)+" "*12,end="\r")
-            if curr_percentage > printed_progress:
-                printed_progress = curr_percentage
+            #max_speed = max(max_speed,vsm._debug_get_speed())
+            #print("  video analysis "+str(vsm.get_percentage_progression())+'%'+" progress"+" max_speed = "+str(max_speed)+" "+"."*(iterations_counter%12)+" "*12,end="\r")
+            print("  video analysis "+str(vsm.get_percentage_progression())+'%'+" progress"+"."*(iterations_counter%12)+" "*12,end="\r")
             iterations_counter += 1
 
+        output_TFT_list = list(output_TFT_stack)
+        frames_dist_tol = vsm.get_video().get_fps()*20
+        #TODO check if TXT_LEN is a reasonable comparison method (i think it is not)
+        txt_classif.set_comparison_methods([ComparisonMethod.TXT_SIM,ComparisonMethod.TXT_LEN,ComparisonMethod.MEANINGFUL_WORDS_NUM])
+        output_TFT_list = self._compact_embedding_partial_words(output_TFT_list,txt_classif,frames_dist_tol)
         
-        output_TFT_list = self._shrink_englobe_partial_words(output_TFT_list)
-        [TFT_elem.merge_adjacent_frames(tol=vsm.get_video().get_fps()*2) for TFT_elem in output_TFT_list]
+        txt_classif.set_comparison_methods([ComparisonMethod.TXT_SIM,ComparisonMethod.TIME_PROXIMITY])
+        output_TFT_list = self._compact_embedding_partial_words(output_TFT_list,txt_classif,frames_dist_tol)
+        
+        txt_classif.set_comparison_methods([ComparisonMethod.TIME_PROXIMITY,ComparisonMethod.POSITION_NOT_COLLIDING])
+        output_TFT_list = self._compact_embedding_same_frames(output_TFT_list,txt_classif)
 
-        # TODO before merge remove all the useless words found
-
+        txt_classif.set_comparison_methods([ComparisonMethod.TIME_PROXIMITY])
+        output_TFT_list = self._compact_embedding_partial_words(output_TFT_list,txt_classif,frames_dist_tol)
+        
         print()
         print(f"total time = {round(time.time()-start_time,ndigits=3)}"+" "*20)
 
-        if debug:
+        if _debug:
             video = vsm.get_video()
             for output_TFT_elem in output_TFT_list:
-                #print(output_TFT_elem)
+                pprint(output_TFT_elem)
                 for start_end in output_TFT_elem.start_end_frames:
                     text = ''.join(list(output_TFT_elem.text)[:80]).replace('\n',' ')
                     frames = []
@@ -477,7 +543,27 @@ class Segmentator:
                         plt.title(f"'{text}'\n frame after the end ({start_end[1]+1})")
                         plt.show()
 
-        return output_TFT_list
+        self._text_in_video = output_TFT_list
+
+    def get_extracted_text(self,format:Literal['str','list','list[timed-tuple]','list[text_id, timed-tuple]']='list[text_id, timed-tuple]'):
+        txt_cleaner = TextSimilarityClassifier()
+        if self._text_in_video is None:
+            return None
+        if format=='list':
+            return [elem.clean_copy(txt_cleaner) for elem in self._text_in_video]
+        elif format=='str':
+            return ' '.join([tft.text for tft in self._text_in_video])
+        elif format=='list[timed-tuple]':
+            video = LocalVideo(self._video_id)
+            return [((video.get_time_from_num_frame(startend[0]),video.get_time_from_num_frame(startend[1])), txt_cleaner.clean_text(tft.text)) 
+                        for tft in self._text_in_video for startend in tft.start_end_frames]
+        elif format=='list[text_id, timed-tuple]':
+            video = LocalVideo(self._video_id)
+            return [(id,(video.get_time_from_num_frame(startend[0]),video.get_time_from_num_frame(startend[1])), txt_cleaner.clean_text(tft.text)) 
+                        for id, tft in enumerate(self._text_in_video) 
+                        for startend in tft.start_end_frames]
+        else:
+            return None
 
     def transcript_segmentation(self, subtitles, c_threshold=0.22, sec_min=0.35, S=1, frame_range=15):
         """
@@ -588,16 +674,22 @@ class Segmentator:
 from words import extract_keywords
 
 if __name__ == '__main__':
-    #segmentator = Segmentator('yN7ypxC7838')
-    segmentator = Segmentator('PPLop4L2eGk')
+    video = VideoAnalyzer('yN7ypxC7838') #TODO try again with this video and measure cv2.resize() performances against pure analysis
+    #video = VideoAnalyzer('PPLop4L2eGk')
+    #video = VideoAnalyzer('rFRO8IwB8aY') # Lesson Med 33 minutes low score and very slow
+    #print(video.is_slide_video())
     
-    subtitles, autogenerated = segmentator.get_transcript()
+    #subtitles, autogenerated = video.get_transcript()
+    
     # segment the video with semantic similarity
-    print("Entering segmentation")
-    #start_times, end_times, images_path, text = segmentator.transcript_segmentation(subtitles)
-    out_list = segmentator.extract_text_from_video()
-    pprint(out_list)
+    #print("Entering segmentation")
+    #start_times, end_times, images_path, text = video.transcript_segmentation(subtitles)
+    
+    video.extract_text_from_video()
+    pprint(video.get_extracted_text())
+    
     #lemmatized_concepts = extract_keywords(text, minFrequency=2)
     #print(lemmatized_concepts)
     #segmentation("https://www.youtube.com/watch?v=TpcbfxtdoI8", 0.19, 20, 1, 375)
     #segmentation("https://www.youtube.com/watch?v=KkgkZwQ9HgQ", 0.22, 40, 1, 375)
+    # https://youtu.be/gbg89EJHtk0

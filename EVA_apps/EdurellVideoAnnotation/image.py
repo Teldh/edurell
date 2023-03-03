@@ -5,7 +5,7 @@ import os
 import mediapipe as mp
 from mediapipe.framework.formats.detection_pb2 import Detection
 
-from numpy import round, dot, diag, reshape, zeros, uint8, array, inf, mean, var, transpose
+from numpy import round, dot, diag, reshape, zeros, uint8, array, inf, mean, var, transpose, all, empty, abs
 from numpy.linalg import norm
 from enum import Enum
 from typing_extensions import Literal
@@ -14,6 +14,10 @@ class ColorScheme(Enum):
     GRAY = cv2.COLOR_BGR2GRAY
     RGB = cv2.COLOR_BGR2RGB
     BGR = cv2.COLOR_BGR2GRAY + cv2.COLOR_BGR2RGB + 1
+
+class _DistanceMeasMethods(Enum):
+        COSINE_SIM = 0
+        MEAN_ABSOLUTE_DIST = 1
 
 mp_face_detection = mp.solutions.face_detection
 mp_drawing = mp.solutions.drawing_utils
@@ -32,9 +36,11 @@ class ImageClassifier:
 
     _texts_with_contour:'list[tuple[str,tuple[int,int,int,int]]] | None' = None
     _faces:'list[Detection] | None' = None
+    _threshold: 'tuple[float,float,float] or float or None'
+    _comp_method:_DistanceMeasMethods or None
     
-    def __init__(self,image_and_scheme=None, image_shape=None) -> None:
-        self._init_params_ = (image_and_scheme,image_shape)
+    def __init__(self,threshold:'tuple[float,float,float] or float or None'=None,comp_method:Literal['cos-sim','mean-abs-dist'] or None=None,image_and_scheme=None, image_shape=None) -> None:
+        self._init_params_ = (threshold,comp_method,image_and_scheme,image_shape)
         if image_shape is not None:
             self._image = zeros(image_shape, dtype=uint8)
             self._color_scheme = None
@@ -44,14 +50,20 @@ class ImageClassifier:
         else:
             self._image = None
             self._color_scheme = None
+        self._threshold = threshold
+        if comp_method == 'cos-dist':
+            self._comp_method = _DistanceMeasMethods.COSINE_SIM.value
+        else:
+            self._comp_method = _DistanceMeasMethods.MEAN_ABSOLUTE_DIST.value
 
     def copy(self):
         '''
         makes copy of itself
         '''
-        color_scheme = self._color_scheme
-        if color_scheme is not None: return ImageClassifier([self._image,color_scheme])
-        else: return ImageClassifier(self._init_params_)
+        new_img = ImageClassifier(*self._init_params_)
+        if self._image is not None:
+            new_img._image = self._image
+        return new_img
 
     def detect_faces(self, model:int=1, min_conf=0.2, return_contours=False):
         '''
@@ -90,11 +102,7 @@ class ImageClassifier:
         
         Returns
         -----------
-        TODO improve
-        -----------
-        if only_title returns the text with biggest bounding boxes 
-        
-
+        if only_title returns the text with biggest bounding boxes\n
         True if at least one face has been found and return_contours is False
         otherwise returns the full array of contours for every face
         '''
@@ -132,6 +140,7 @@ class ImageClassifier:
             img_bw = img.copy()
         cv2.threshold(img_bw, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV,img_bw)
         cv2.dilate(img_bw, cv2.getStructuringElement(cv2.MORPH_RECT, (12, 12)), img_bw,iterations = 3)
+        
         contours, hierarchy = cv2.findContours(img_bw, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
         texts_with_contour = []
         for cnt in contours:
@@ -141,6 +150,7 @@ class ImageClassifier:
             text = text.replace('\x0c','').lstrip().rstrip()
             if text:
                 texts_with_contour.append((text,(x,y,w,h)))
+        # TODO improve
         if only_title and len(texts_with_contour) > 0: # finds max norm bounding boxes
             max_index = -1
             max_norm = -1
@@ -217,12 +227,26 @@ class ImageClassifier:
     def is_empty_transition_image(self,var_threshold=1e-2):
         return self.get_stat_params()[1] < var_threshold
 
+    def is_similar_to(self,other_image:'ImageClassifier'):
+        comp_method = self._comp_method
+        if comp_method == _DistanceMeasMethods.COSINE_SIM.value:
+            return all(self.get_cosine_similarity(other_image) >= self._threshold)
+        elif comp_method == _DistanceMeasMethods.MEAN_ABSOLUTE_DIST.value:
+            return all(self.get_mean_distance(other_image) <= self._threshold)
+
+
     def get_cosine_similarity(self,other:'ImageClassifier',on_histograms=True,rounding_decimals:int= 10):
         '''
-        Compute cosine similarity between two images histograms
-        (on pixels it's much more expensive)
+        Compute cosine similarity between two images
+
+        Params
+        ------ 
+        on_histograms : FASTER if True analysis is performed on histograms
+        rounding_decimals : number of decimals of precision
         
-        :returns: 1xN array with N as the number of color channels (3 for RGB and 1 for GRAYSCALE)
+        Returns
+        --------
+        1xN numpy array with N as the number of color channels (3 for RGB-BGR and 1 for GRAYSCALE)
         '''
         assert self._image is not None and other._image is not None and self._image.shape == other._image.shape
         
@@ -240,6 +264,19 @@ class ImageClassifier:
                             decimals=rounding_decimals)
         return cosine_sim
 
+    def get_mean_distance(self,other:'ImageClassifier',on_histograms=True):
+        assert self._image is not None and other._image is not None
+        if on_histograms:
+            this_mat = self.get_hists(normalize=True)
+            other_mat = other.get_hists(normalize=True)
+            dists = abs(this_mat - other_mat)
+            return mean(dists,axis=1)
+        else:
+            this_mat = self._image.astype(int)
+            other_mat = other._image
+            dists = abs(this_mat - other_mat)
+            return mean(reshape(dists,(dists.shape[0]*dists.shape[1],dists.shape[2])),axis=0)
+
     def _get_grayscaled_img(self):
         if self._color_scheme == ColorScheme.BGR:
             return cv2.cvtColor(self._image, cv2.COLOR_BGR2GRAY)
@@ -250,9 +287,16 @@ class ImageClassifier:
 
     def get_hists(self,normalize:bool=False,bins:int=256,grayscaled=False):
         '''
-        generate image histogram
+        Generate image histogram\n
+        
+        Parameters
+        ----------
+        normalize : if true normalizes on minmax
+        grayscaled : if true the image is processed to grayscale
         '''
         assert self._image is not None
+        # CV2 calcHist is fast but can't calculate 3 channels at once 
+        # so the fastest way is making a list of arrays and merging with cv2 merge
         if grayscaled:
             img = self._get_grayscaled_img()
         else:
@@ -302,8 +346,8 @@ def draw_bounding_boxes_on_image(img, bounding_boxes:'list[tuple[(int,int,int,in
 
 if __name__ == '__main__':
     import os
-    img = cv2.cvtColor(cv2.imread(os.path.join(os.path.dirname(os.path.abspath(__file__)), "svm_dataset","slide","PPLop4L2eGk_6.png")), cv2.COLOR_BGR2RGB)
-    classif = ImageClassifier([img,ColorScheme.RGB])
+    img = cv2.cvtColor(cv2.imread(os.path.join(os.path.dirname(os.path.abspath(__file__)),"svm_dataset","screen01.png")), cv2.COLOR_BGR2RGB)
+    classif = ImageClassifier(image_and_scheme=[img,ColorScheme.RGB])
     print(classif.detect_faces())
     text = classif.detect_text(return_text=True)
     print(f"text: {text}")

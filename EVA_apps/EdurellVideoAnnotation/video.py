@@ -1,7 +1,7 @@
 import youtube_dl
 import os
 import cv2
-from numpy import clip, reshape
+from numpy import clip, reshape, divmod, array
 
 from image import ImageClassifier, ColorScheme
 from math import floor, ceil, log2
@@ -22,7 +22,7 @@ class LocalVideo:
     video_id : string to load video: /static/videos/{video_id}/{video_id}.mp4
     output_colors : must be a value from the ``class(Enum) ColorScheme``and is used for format conversions
     '''
-    def __init__(self,video_id:str,output_colors:Literal[ColorScheme.RGB, ColorScheme.BGR],forced_frame_size:'tuple[int,int] | None'= None):
+    def __init__(self,video_id:str,output_colors:Literal[ColorScheme.RGB, ColorScheme.BGR]=ColorScheme.BGR,forced_frame_size:'tuple[int,int] | None'= None):
         if output_colors!=ColorScheme.GRAY and output_colors!=ColorScheme.RGB and output_colors!=ColorScheme.BGR:
             raise Exception(f"Wrong parameter ouput_color value: {output_colors}")
         else:
@@ -35,18 +35,12 @@ class LocalVideo:
         class_path = os.path.dirname(os.path.abspath(getfile(self.__class__)))
         self._vid_id = video_id
         self._vidcap = cv2.VideoCapture(os.path.join(class_path, "static", "videos", video_id,f"{video_id}.mp4"))
+        #self._vidcap = cv2.VideoCapture(os.path.join(class_path, "static", "videos", video_id,f"{video_id}.mkv"))
         if not self._vidcap.isOpened():
             raise Exception(f"Can't find video: {video_id}")
-        
-    def __enter__(self):
-        return self
     
     def __exit__(self, exc_type, exc_value, traceback):
         self._vidcap.relase()
-    
-    def close(self):
-        self._vidcap.release()
-        del self
 
     def extract_next_frame(self):
         '''
@@ -57,7 +51,7 @@ class LocalVideo:
         if not has_frame:
             return None
         if self._frame_size is not None:
-            image = cv2.resize(image,self._frame_size)
+            image = cv2.resize(image,self._frame_size,interpolation=cv2.INTER_AREA)
         if self._output_colors != ColorScheme.BGR:
             image = cv2.cvtColor(image, self._output_colors.value)
         return reshape(image,(image.shape[0],image.shape[1],self._num_colors))
@@ -66,8 +60,8 @@ class LocalVideo:
         return int(self._vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     def get_dim_frame(self):
-        return  int(self._vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT)), \
-                int(self._vidcap.get(cv2.CAP_PROP_FRAME_WIDTH)), \
+        return  int(self._vidcap.get(cv2.CAP_PROP_FRAME_WIDTH)), \
+                int(self._vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT)), \
                 self._num_colors
 
     def get_fps(self) -> int:
@@ -76,11 +70,11 @@ class LocalVideo:
     def get_id_vid(self) -> str:
         return self._vid_id
 
-    def get_time_from_num_frame(self, num_frame:int):       #fr / (fr / s) = s
+    def get_time_from_num_frame(self,num_frame:int,decimals:int=1):       #fr / (fr / s) = s
         '''
         In seconds
         '''
-        return round(num_frame/self.get_fps(), ndigits=2)
+        return round(num_frame/self.get_fps(), ndigits=decimals)
 
     def get_num_frame_from_time(self,seconds:float):
         return round(seconds*self.get_fps())
@@ -90,6 +84,9 @@ class LocalVideo:
     
     def set_num_frame(self,num_frame:int):
         self._vidcap.set(cv2.CAP_PROP_POS_FRAMES,num_frame)
+    
+    def set_frame_size(self,value:'tuple[int,int]'):
+        self._frame_size = value
 
 
 def download(url):
@@ -119,43 +116,40 @@ class VideoSpeedManager:
     '''
     LocalVideo wrapper\n
     Based on an adaptation of "TCP fast retransmit and fast recovery" algorithm\n
-    https://encyclopedia.pub/media/common/202107/blobid20-60f5467ae42de.jpeg\n
+    https://encyclopedia.pub/media/common/202107/blobid20-60f5467ae42de.jpeg \n
     edited such that on collision (found text in the current frame)
     in whichever phase (slow start or congestion avoidance)
     it rolls back the video frame by frame to the first colliding frame,
     proceeds min_sample_rate_frame each until there's no collision anymore
     and then restarts with congestion avoidance 
     because this is a textual video overall
-
-    ``min sample rate`` is defined as the minimum speed to reach a sensibility of 10^(-time_decimals_accuracy)
-
-    In this project speed is locked
     
     Parameters
     ---------
 
-    vid_ref : reference to the video
-
-    time_decimals_accuracy : guarantes sampling of one frame every 10**(-decimals) seconds
-
-    exp_base : base for the exponential increase of slow start
-
-    lin_factor : m factor of the linear equation of the congestion avoidance increments
-
-    max_exp_window_seconds : ssthresh in seconds 
-
-    ratio_lin_exp_window_size : coeff of max_exp_window_factor that sets the clipping max speed
+        - vid_id : UID of the video
+        - output_colors : color scheme for the output frame must be `RGB` or `BGR`
+        - max_dim_frame : maximum size of the scaled frame (if same of the output it is not applied)
+        - time_decimals_accuracy : guarantes sampling of one frame every 10^(-decimals) seconds
+        - exp_base : base for the exponential increase of slow start
+        - lin_factor : m factor of the linear equation of the congestion avoidance increments
+        - max_exp_window_seconds : ssthresh in seconds 
+        - ratio_lin_exp_window_size : coeff of max_exp_window_factor that sets the clipping max speed overall
 
     '''
-    def __init__(self,video_id:str,output_colors:Literal[ColorScheme.RGB, ColorScheme.BGR],out_frame_size:'tuple[int,int]'=(640,320),time_decimals_accuracy:int=1,exp_base:float=1.4,lin_factor:float=2,max_seconds_exp_window:float=5,ratio_lin_exp_window_size:float=1.5):
-        self._init_params = (video_id,output_colors,out_frame_size,time_decimals_accuracy,exp_base,lin_factor,max_seconds_exp_window,ratio_lin_exp_window_size)
+    def __init__(self,video_id:str,output_colors:Literal[ColorScheme.RGB, ColorScheme.BGR],max_dim_frame:'tuple[int,int]'=(640,360),time_decimals_accuracy:int=1,exp_base:float=1.4,lin_factor:float=2,max_seconds_exp_window:float=5,ratio_lin_exp_window_size:float=1.5):
+        self._init_params = (video_id,output_colors,max_dim_frame,time_decimals_accuracy,exp_base,lin_factor,max_seconds_exp_window,ratio_lin_exp_window_size)
+        vid_ref = LocalVideo(video_id=video_id,output_colors=output_colors)
+        frame_dim = vid_ref.get_dim_frame()[:2]
+        max_scale_factor = max(divmod(frame_dim,max_dim_frame)[0])
+        if max_scale_factor > 1: vid_ref.set_frame_size(tuple((array(frame_dim)/max_scale_factor).astype(int)))
         
-        vid_ref = LocalVideo(video_id=video_id,output_colors=output_colors,forced_frame_size=out_frame_size)
         max_size_exp_window_frames = int(vid_ref.get_fps()*max_seconds_exp_window)
         max_size_lin_window_frames = int(max_size_exp_window_frames*ratio_lin_exp_window_size)
-        start_sample_rate = int(clip(vid_ref.get_fps()*(10**(-time_decimals_accuracy)),1,vid_ref.get_fps()))
+        start_sample_rate = ceil(clip(vid_ref.get_fps()*(10**(-time_decimals_accuracy)),1,vid_ref.get_fps()))
 
         self.vid_ref = vid_ref
+        self._color_scheme = output_colors
         self._curr_num_frame = -start_sample_rate
         self._curr_x = 0
         self._frames = None
@@ -223,6 +217,13 @@ class VideoSpeedManager:
             return self._curr_window_frame_size
         return 0
 
+    def _get_num_last_frame(self,vid_ref: LocalVideo):
+        curr_start_end_frames = self._curr_start_end_frames
+        if curr_start_end_frames is not None:
+            return curr_start_end_frames[1] - 1
+        else:
+            return vid_ref.get_count_frames() - 1
+
     def _get_frame_from_internal_frames(self):
         curr_num_frame = self._curr_num_frame
         curr_start_end_frames = self._curr_start_end_frames
@@ -230,10 +231,11 @@ class VideoSpeedManager:
             try:
                 assert self._frames is not None
                 self._curr_start_end_frames = self._frames.pop()
+                return self._curr_start_end_frames[0]
             except IndexError:
-                self._frames = None
-                return self.get_video().get_count_frames()
-            return self._curr_start_end_frames[0]
+                self._frames = []
+                return self.vid_ref.get_count_frames()
+            
         return self._curr_num_frame
 
     def get_frame(self):
@@ -272,7 +274,7 @@ class VideoSpeedManager:
         frame = vid_ref.extract_next_frame()
         if frame is None:
             self._is_video_ended = True
-            num_last_frame = vid_ref.get_count_frames()-1
+            num_last_frame = self._get_num_last_frame(vid_ref)
             vid_ref.set_num_frame(num_last_frame)
             frame = vid_ref.extract_next_frame()
             self._curr_num_frame = num_last_frame + 1 
@@ -298,6 +300,8 @@ class VideoSpeedManager:
     def collide_and_get_fixed_num_frame(self):
         curr_num_frame = self._curr_num_frame
         max_rollback_frame = int(clip(curr_num_frame - self._curr_window_frame_size, 0, curr_num_frame))
+        if self._curr_start_end_frames is not None:
+            max_rollback_frame = int(clip(max_rollback_frame, self._curr_start_end_frames[0], max_rollback_frame + self._curr_window_frame_size))
         self._curr_num_frame = self._bin_search(    max_rollback_frame,
                                                     curr_num_frame,
                                                     self._min_window_frame_size )
@@ -329,12 +333,14 @@ class VideoSpeedManager:
     def reset(self):
         self.__init__(*self._init_params)
 
-    def lock_speed(self,num_frames_skipped:int or None= None):
+    def lock_speed(self,num_frames_skipped:'int | None'= None):
         self._is_forced_speed = True
         if num_frames_skipped is None:
             self._curr_window_frame_size = self._min_window_frame_size
         else:
             self._curr_window_frame_size = num_frames_skipped
+            if self._curr_num_frame < 0:
+                self._curr_num_frame = -num_frames_skipped
     
     def _get_frame_offset(self,offset:int):
         prev_speed = self._curr_window_frame_size
@@ -347,14 +353,14 @@ class VideoSpeedManager:
         return frame
 
     def get_previous_frame(self):
-        if self._curr_num_frame < 0:
-            self._curr_num_frame = 1
-        return self._get_frame_offset(-1)
+        if self._curr_num_frame - self._min_window_frame_size < 0:
+            self._curr_num_frame = 0
+        return self._get_frame_offset(self._min_window_frame_size)
 
     def get_following_frame(self):
-        if self._is_video_ended:
-            self._curr_num_frame -= 2
-        return self._get_frame_offset(1)
+        if self._is_video_ended or self._curr_num_frame + self._min_window_frame_size > self.get_video().get_count_frames()-1:
+            self._curr_num_frame -= (self._min_window_frame_size+1)
+        return self._get_frame_offset(self._min_window_frame_size)
 
     def set_analysis_frames(self,frames:'list[tuple[int,int]]'):
         self._frames = frames
