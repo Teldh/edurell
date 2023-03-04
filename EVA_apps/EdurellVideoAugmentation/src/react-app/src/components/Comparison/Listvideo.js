@@ -5,6 +5,8 @@ import { TextField } from '@material-ui/core';
 import './Querybar.css';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
+import Videoavailable from "./Videoavailable.js"
+
 
 export default function Listvideo(){
 
@@ -13,10 +15,7 @@ export default function Listvideo(){
     <Container maxWidth = "xl" >
 
         <RowVideo/>
-        <br/>
-        <RowVideo/>
-        <br/>
-        <RowVideo/>
+ 
     </Container>
     </>
     );
@@ -25,74 +24,33 @@ export default function Listvideo(){
 
 function RowVideo(){
     return (
-        <Grid container spacing={2}>
-            <Grid item xs={2}>
-                <Paper
-                    sx={{
-                    height: 300,
-                    width: 200,
-                    backgroundColor: (theme) =>
-                        theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-                    }}
-                />        
-            </Grid>
-
-            <Grid item xs={2}>
-                <Paper
-                    sx={{
-                    height: 300,
-                    width: 200,
-                    backgroundColor: (theme) =>
-                        theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-                    }}
-                />        
-            </Grid>
-
-            <Grid item xs={2}>
-                <Paper
-                    sx={{
-                    height: 300,
-                    width: 200,
-                    backgroundColor: (theme) =>
-                        theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-                    }}
-                />        
-            </Grid>
-
-            <Grid item xs={2}>
-                <Paper
-                    sx={{
-                    height: 300,
-                    width: 200,
-                    backgroundColor: (theme) =>
-                        theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-                    }}
-                />        
-            </Grid>
-
-            <Grid item xs={2}>
-                <Paper
-                    sx={{
-                    height: 300,
-                    width: 200,
-                    backgroundColor: (theme) =>
-                        theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-                    }}
-                />        
-            </Grid>
-
-            <Grid item xs={2}>
-                <Paper
-                    sx={{
-                    height: 300,
-                    width: 200,
-                    backgroundColor: (theme) =>
-                        theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-                    }}
-                />        
-            </Grid>
-            
+        <>
+  
+        <Grid  align = "center" justify = "center" alignItems = "center" container spacing={2}>
+        <Grid  item xs={12} xl={2} md={3} >
+            <Videoavailable/>
+        </Grid>
+        <Grid  item xs={12} xl={2} md={3} >
+            <Videoavailable/>
+        </Grid>
+        <Grid  item xs={12} xl={2} md={3} >
+            <Videoavailable/>
+        </Grid>
+        <Grid  item xs={12} xl={2} md={3} >
+            <Videoavailable/>
+        </Grid>
+        <Grid  item xs={12} xl={2} md={3} >
+            <Videoavailable/>
+        </Grid>
+        <Grid  item xs={12} xl={2} md={3} >
+            <Videoavailable/>
+        </Grid>
+       
+        
       
         </Grid>
+        
+
+        </>
     );
 }

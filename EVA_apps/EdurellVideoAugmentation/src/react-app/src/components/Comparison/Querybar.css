@@ -3,3 +3,12 @@
     margin: 0px;
     padding: 50px;
   }
+
+
+.buttonCenter{
+  display: flex;
+  justify-content: left;
+  align-items: left;
+  background-color: blanchedalmond;
+  color:aqua;
+}
