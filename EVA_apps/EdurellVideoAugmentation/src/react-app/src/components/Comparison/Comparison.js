@@ -12,7 +12,8 @@ import {
     Link,
     Redirect,
   } from "react-router-dom";
-let checker = (arr, target) => target.every(v => arr.includes(v));
+
+
 export default function Comparison(){
     const [listvideo, setListVideo]= useState([]);
     const [loading,setLoading]=useState(true);
