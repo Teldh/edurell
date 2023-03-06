@@ -14,16 +14,15 @@ import IconButton from '@mui/material/IconButton';
 import { useContext } from 'react';
 import { ContextComparison } from './ContextComparison';
 
-export default function Videoselected({image,title,idx}) {
-    const removevideo = useContext(ContextComparison);
-    const index=idx;
-  
+export default function Videoselected({imageurl,title,idx,setAdd}) {
+    const removevideo = useContext(ContextComparison)[1];
+    console.log("select: "+imageurl+" "+title+" "+idx)
     return (
         
         <Badge badgeContent={
             <IconButton size="small" color="closexenter">
             <CancelIcon 
-                        onClick={()=>removevideo(index)}
+                        onClick={()=>{removevideo(idx); setAdd(false)}}
                    
                         color="closexenter"
                         
@@ -36,8 +35,8 @@ export default function Videoselected({image,title,idx}) {
       <Card sx={{ maxWidth: 200 }}>
         <CardMedia
           sx={{ height: 110 }}
-          image={image}
-          title="green iguana"
+          image={"http://img.youtube.com/vi/"+imageurl+"/mqdefault.jpg"}
+          title={title}
         />
         <CardActions disableSpacing>
         <Typography noWrap variant="subtitle2" gutterBottom>

@@ -143,6 +143,7 @@ export default class Dashboard extends React.Component {
         }
         else{
           this.setState({catalog: response.catalog})
+          console.log("HERE: "+JSON.stringify(response.catalog[0]))
       }
     }
 

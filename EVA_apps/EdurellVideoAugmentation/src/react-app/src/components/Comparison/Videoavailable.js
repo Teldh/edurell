@@ -25,8 +25,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse';
 import { useContext } from 'react';
 import { ContextComparison } from './ContextComparison';
-
-
+import {TokenContext} from '../account-management/TokenContext';
 
 const ExpandMore = styled((props) => {
     const { expand, ...other } = props;
@@ -40,13 +39,16 @@ const ExpandMore = styled((props) => {
   }));
 
 
-export default function Videoavailable() {
-    const addvideo = useContext(ContextComparison);
+export default function Videoavailable({titleurl,imageurl,idxurl,concepts,creator}) {
+
+
+    const addvideo = useContext(ContextComparison)[0];
+    const removevideo = useContext(ContextComparison)[1];
     const [shadow, setshadow] = useState(0);
     const [open, setOpen] = useState(0);
     const [expanded, setExpanded] = useState(false);
     const [add, setAdd] = useState(false);
-    const title="Kurzesgast - The power of loveKurzesgast ";
+    //const title="Kurzesgast - The power of loveKurzesgast ";
     const handleExpandClick = () => {
       setExpanded(!expanded);
     };
@@ -67,20 +69,35 @@ export default function Videoavailable() {
                 margin: 2,
                 marginBottom:0,
                 }}
-        image={imag}
-        title="green iguana"
+        image={"http://img.youtube.com/vi/"+imageurl+"/mqdefault.jpg"}
+        title={titleurl}
       />
         <CardContent disableSpacing >
 
-        <Typography noWrap variant="subtitle2" gutterBottom>
-        Kurzesgast - The power of loveKurzesgast 
+        <Typography noWrap variant="subtitle2" gutterBottom sx={{margin:0}}>
+        <b>{titleurl}</b>
         </Typography>
-        <Stack direction="row" spacing={1}>
-        <Chip label="Concepts: 2" size="small" color="primary"/>
-        <Chip label="Prerequisites: 2" size="small" color="secondary"/>
+        <Typography noWrap variant="subtitle2" gutterBottom sx={{marginTop:0}}>
+        {creator}
+        </Typography>
         
-        </Stack>
         </CardContent>
+        <CardActions disableSpacing>
+            
+            
+            <Chip label={"Concepts: "+concepts.length} size="small" color="primary"/>
+
+            {
+                add?
+                
+                <Chip color="error" sx={{marginLeft: 'auto'}} size="small" label="remove" onClick={(e)=>{ e.stopPropagation();setAdd(!add);removevideo(idxurl);}} />
+                :
+                
+                <Chip color="success" sx={{marginLeft: 'auto'}} size="small" label="add" onClick={(e)=>{ e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);}} />
+            }
+            
+           
+        </CardActions>
       </Card>
         {/*start of modal*/}
 
@@ -118,20 +135,19 @@ export default function Videoavailable() {
                 
                 >
         
-                    <img src={imag} alt="Girl in a jacket" width="100%" height="auto"/>
+                    <img src={"http://img.youtube.com/vi/"+imageurl+"/mqdefault.jpg"} alt={titleurl} width="100%" height="auto"/>
                 
                     <CardContent disableSpacing sx={{marginBottom:0, paddingBottom:0}}>
 
                     <Typography  variant="h5" gutterBottom sx={{margin:0, padding:0}}>
-                    Kurzesgast - The power of loveKurzesgast 
+                    {titleurl}
                     </Typography>
                     
                     </CardContent>
                     <CardContent >
                       
                         <Stack direction="row" spacing={1} >
-                        <Chip label="Concepts: 2" size="small" color="primary"/>
-                        <Chip label="Prerequisites: 2" size="small" color="secondary"/>
+                        <Chip label={"Concepts: "+concepts.length} size="small" color="primary"/>
                         
                         </Stack>
 
@@ -141,11 +157,11 @@ export default function Videoavailable() {
                     <CardActions disableSpacing>
                         {
                             add?
-                            <Button variant="contained" color="error" onClick={()=>{setAdd(!add);addvideo(imag,title);}}>
+                            <Button variant="contained" color="error" onClick={()=>{setAdd(!add);removevideo(idxurl);}}>
                             <b>REMOVE</b>
                             </Button>
                             :
-                            <Button variant="contained" color="success" onClick={()=>{setAdd(!add); addvideo(imag,title);}}>
+                            <Button variant="contained" color="success" onClick={()=>{addvideo(imageurl,titleurl,setAdd,idxurl);}}>
                             <b>ADD</b>
                             </Button>
                         }
@@ -162,26 +178,20 @@ export default function Videoavailable() {
                     </CardActions>
                     <Collapse in={expanded} timeout="auto" unmountOnExit>
                         <CardContent>
-                        <Divider/>
-                        <br/>
-                        <Typography>
-                            Concepts
-                        </Typography>
-                        <Stack direction="row" spacing={1} >
-                        <Chip label="Rock" size="small" color="primary"/>
-                        <Chip label="wifi" size="small" color="primary"/>
-                        </Stack>
-                        <br/>
-                        <br/>
-                        <Divider/>
-                        <br/>
-                        <Typography>
-                            Prerequisites
-                        </Typography>
-                        <Stack direction="row" spacing={1} >
-                        <Chip label="il tuo cervello" size="small" color="secondary"/>
-                        <Chip label="usa la materia grigia" size="small" color="secondary"/>
-                        </Stack>
+                            <Divider/>
+                            <br/>
+                            <Typography>
+                                Concepts
+                            </Typography>
+                            <Grid container spacing={1}>
+                            {concepts.map(keyword=>
+                                <Grid item xs="auto">
+                                    <Chip label={keyword} size="small" color="primary"/>
+                                </Grid>
+                                )}
+                   
+                            </Grid>
+                        
                         </CardContent>
                     </Collapse>
                 </Card>

@@ -10,11 +10,11 @@ import Secondarybutton from './Buttonsecondary.js'
 import Videoselected from './Videoselected';
 import Divider from '@mui/material/Divider';
 
-export default function Querybar({listvideo}){
-    listvideo = listvideo.map((video,idx) =>
+export default function Querybar({listvideo, listconcepts, AddQueryElement, nomatch}){
+    listvideo = listvideo.map(video =>
     
         <>
-        <Videoselected image={video.img} title={video.title} idx={idx}/>
+        <Videoselected imageurl={video.img} title={video.title} idx={video.idx} setAdd={video.setAdd}/>
         <Divider orientation="vertical" flexItem>
                             vs
                         </Divider>
@@ -30,7 +30,7 @@ export default function Querybar({listvideo}){
                     alignItems="center"
                     spacing={2}
                 >
-                <Queryinput/>
+                <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch}/>
                 <Secondarybutton/>
                 </Stack>
             </Container>
