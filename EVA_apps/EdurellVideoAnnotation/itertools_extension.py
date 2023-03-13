@@ -69,7 +69,10 @@ def pairwise_iterator(iterable,None_tail=True,reversed=False) -> 'Generator[Iter
 def double_iterator(iterable,enumerated:bool=False) -> 'Generator[Iterable,Iterable] or Generator[int,int,Iterable,Iterable]':
     '''
     Generates an iterator of both the upper and lower triangular matrix of every pair (diag not included) of elements from the given iterable:\n
-    
+    Example: 
+        this: [1,2,3]
+        returns: (1,2)->(1,3)->(2,1)->(2,3)->(3,1)->(3,2)
+
     Parameters
     ----------
     enumerated : if true returns (i,j) (x,y) with i index of x in iterable, j index of y

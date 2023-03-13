@@ -76,6 +76,7 @@ pytest
 python-igraph
 python-rake
 pytorch-pretrained-bert==0.6.2
+pytube
 #rdflib-jsonld==0.5.0
 rdflib-jsonld==0.6.2
 #rdflib==5.0.0
@@ -109,5 +110,5 @@ werkzeug~=1.0.1
 wikipedia~=1.4.0
 wrapt==1.12.1
 wtforms==2.3.3
-youtube-dl
+# youtube-dl    switched to pytube since not working or downloading slow
 youtube-transcript-api

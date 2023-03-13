@@ -1,12 +1,12 @@
-import youtube_dl
+from pytube import YouTube
 import os
 import cv2
-from numpy import clip, reshape, divmod, array
+from numpy import clip,reshape,divmod,array,round
 
-from image import ImageClassifier, ColorScheme
+from image import ImageClassifier,COLOR_BGR,COLOR_RGB,COLOR_GRAY
 from math import floor, ceil, log2
 from inspect import getfile
-from typing_extensions import Literal
+from typing import Tuple
 
 
 class LocalVideo:
@@ -22,12 +22,12 @@ class LocalVideo:
     video_id : string to load video: /static/videos/{video_id}/{video_id}.mp4
     output_colors : must be a value from the ``class(Enum) ColorScheme``and is used for format conversions
     '''
-    def __init__(self,video_id:str,output_colors:Literal[ColorScheme.RGB, ColorScheme.BGR]=ColorScheme.BGR,forced_frame_size:'tuple[int,int] | None'= None):
-        if output_colors!=ColorScheme.GRAY and output_colors!=ColorScheme.RGB and output_colors!=ColorScheme.BGR:
-            raise Exception(f"Wrong parameter ouput_color value: {output_colors}")
+    def __init__(self,video_id:str,output_colors:int=COLOR_BGR,forced_frame_size:'tuple[int,int] | None'= None):
+        if output_colors!=COLOR_BGR and output_colors!=COLOR_RGB and output_colors!=COLOR_GRAY:
+            raise Exception(f"Wrong parameter ouput_color value must be a COLOR_ value present in image.py")
         else:
             self._output_colors = output_colors
-            if output_colors == ColorScheme.GRAY:
+            if output_colors == COLOR_GRAY:
                 self._num_colors = 1
             else:
                 self._num_colors = 3
@@ -42,6 +42,9 @@ class LocalVideo:
     def __exit__(self, exc_type, exc_value, traceback):
         self._vidcap.relase()
 
+    def close(self):
+        self._vidcap.release()
+
     def extract_next_frame(self):
         '''
         Retrieve current frame and proceedes to the next\n
@@ -52,8 +55,8 @@ class LocalVideo:
             return None
         if self._frame_size is not None:
             image = cv2.resize(image,self._frame_size,interpolation=cv2.INTER_AREA)
-        if self._output_colors != ColorScheme.BGR:
-            image = cv2.cvtColor(image, self._output_colors.value)
+        if self._output_colors != COLOR_BGR:
+            image = cv2.cvtColor(image, self._output_colors)
         return reshape(image,(image.shape[0],image.shape[1],self._num_colors))
     
     def get_count_frames(self) -> int:
@@ -74,7 +77,7 @@ class LocalVideo:
         '''
         In seconds
         '''
-        return round(num_frame/self.get_fps(), ndigits=decimals)
+        return round(num_frame/self.get_fps(), decimals=decimals)
 
     def get_num_frame_from_time(self,seconds:float):
         return round(seconds*self.get_fps())
@@ -88,29 +91,32 @@ class LocalVideo:
     def set_frame_size(self,value:'tuple[int,int]'):
         self._frame_size = value
 
-
 def download(url):
+    video_link = url.split('&')[0]
+    if '=' in video_link:
+        video_id = video_link.split('=')[-1]
+    else:
+        video_id = video_link.split('/')[-1]
 
-    url_parsed = url.split('&')[0]
-    video_id = url_parsed.split("=")[1]
+    youtube_video = YouTube(video_link)
+    # video_streams.get_highest_resolution() not working properly
+    all_video_streams = youtube_video.streams.filter(mime_type='video/mp4')
+    res_video_streams = []
+    for resolution in ['720p','480p','360p']:
+        res_video_streams = all_video_streams.filter(res=resolution)
+        if len(res_video_streams) > 0:
+            break
+    if len(res_video_streams) == 0: raise Exception("Can't find video stream with enough resolution")
 
-    #"creo cartella"
     current_path = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(current_path, "static", "videos", video_id)
     if not os.path.exists(path):
         os.mkdir(path)
+    if not os.path.isfile(os.path.join(path,video_id+'.mp4')):
+        res_video_streams[0].download(output_path=path,filename=video_id+'.mp4')
 
-    video_path = os.path.join(path, '%(id)s.%(ext)s')
-    print(path)
-    #ydl = youtube_dl.YoutubeDL({'outtmpl': current_path + '\\static\\videos\\'+video_id+'\\%(id)s.%(ext)s'})
-    ydl = youtube_dl.YoutubeDL({'outtmpl': video_path})
-
-    with ydl:
-        result = ydl.extract_info(url_parsed, download=True)
-
-    #print(result)
-
-    return video_id, result["title"], result["channel"], result["duration"]
+    title,channel,duration = youtube_video.title,youtube_video.author,youtube_video.length
+    return video_id, title, channel, duration
 
 class VideoSpeedManager:
     '''
@@ -137,7 +143,7 @@ class VideoSpeedManager:
         - ratio_lin_exp_window_size : coeff of max_exp_window_factor that sets the clipping max speed overall
 
     '''
-    def __init__(self,video_id:str,output_colors:Literal[ColorScheme.RGB, ColorScheme.BGR],max_dim_frame:'tuple[int,int]'=(640,360),time_decimals_accuracy:int=1,exp_base:float=1.4,lin_factor:float=2,max_seconds_exp_window:float=5,ratio_lin_exp_window_size:float=1.5):
+    def __init__(self,video_id:str, output_colors:int, max_dim_frame:Tuple[int,int]=(640,360),time_decimals_accuracy:int=1,exp_base:float=1.4,lin_factor:float=2,max_seconds_exp_window:float=5,ratio_lin_exp_window_size:float=1.5):
         self._init_params = (video_id,output_colors,max_dim_frame,time_decimals_accuracy,exp_base,lin_factor,max_seconds_exp_window,ratio_lin_exp_window_size)
         vid_ref = LocalVideo(video_id=video_id,output_colors=output_colors)
         frame_dim = vid_ref.get_dim_frame()[:2]
@@ -288,14 +294,13 @@ class VideoSpeedManager:
         while L <= R:
             m = floor((L+R)/2)
             vid_ref.set_num_frame(m)
-            if frame.set_img(vid_ref.extract_next_frame()).detect_text():
+            if frame.set_img(vid_ref.extract_next_frame()).extract_text():
                 R = m - 1
             else:
                 L = m + 1
         else:
             m = ceil((L+R)/2)
         return m + m%step_size # align to the step_size
-
 
     def collide_and_get_fixed_num_frame(self):
         curr_num_frame = self._curr_num_frame
@@ -370,6 +375,8 @@ if __name__ == '__main__':
     #vid_id = "YI3tsmFsrOg" # not slide video
     #vid_id = "UuzKYffpxug" # slide + person video
     #vid_id = "g8w-IKUFoSU" # forensic arch
+    #download('https://youtu.be/ujutUfgebdo')
+    download('https://www.youtube.com/watch?v=GdPVu6vn034')
     pass
     #color_scheme_for_analysis = ColorScheme.BGR
     #   BGR: is the most natural for Opencv video reader, so we avoid some matrix transformations
@@ -379,8 +386,6 @@ if __name__ == '__main__':
     #extract_text_from_video(vid_id,color_scheme_for_analysis)
     #video.close()
 
-#TODO   PROBABILMENTE COSÌ NON FUNZIONA CON VIDEO MOLTO MOVIMENTATI, DEVO SEGMENTARE CON COSINE DIST SUI BOUNDING BOXES O RISCHIO CHE UN MOVIMENTO IN WEBCAM A BORDO SCHERMO MI TRIGGERI IL CAMBIO SCENA
-#       prima provo a farlo funzionare semplice
 
     
     
