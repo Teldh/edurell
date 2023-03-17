@@ -98,6 +98,8 @@ def download(url):
     else:
         video_id = video_link.split('/')[-1]
 
+    # [NOTE] if returns NoneType accessing 'span' field, fix -> https://github.com/pytube/pytube/issues/1499#issuecomment-1473022893
+    # directory is /home/{user}/anaconda3/envs/myenv/lib/python3.7/site-packages/pytube/cipher.py
     youtube_video = YouTube(video_link)
     # video_streams.get_highest_resolution() not working properly
     all_video_streams = youtube_video.streams.filter(mime_type='video/mp4')
@@ -246,7 +248,7 @@ class VideoSpeedManager:
 
     def get_frame(self):
         '''
-        Returns next frame based on current speed and collision status
+        Returns next frame based on current speed and collision status\n
         if video is ended returns the last frame sets a flag
         '''
         if self._is_forced_speed:
@@ -368,7 +370,7 @@ class VideoSpeedManager:
         return self._get_frame_offset(self._min_window_frame_size)
 
     def set_analysis_frames(self,frames:'list[tuple[int,int]]'):
-        self._frames = frames
+        self._frames = sorted(frames,reverse=True)
     
 if __name__ == '__main__':
     #vid_id = "PPLop4L2eGk" # slide video

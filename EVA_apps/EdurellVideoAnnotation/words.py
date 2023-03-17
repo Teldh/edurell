@@ -34,25 +34,6 @@ def extract_keywords(text:str,maxWords=3,minFrequency=1):
     #print(concepts)
     return concepts
 
-
-def extract_title(text:str):
-    """
-    Need rework
-    """
-    assert False, "not implemented"
-    if '\n\n' in text:
-        first_sentence = text.split('\n\n')[0].lstrip().rstrip()
-        return first_sentence if not '\n' in first_sentence else None
-    has_keywords = False
-    i = 0
-    text_split = text.split('\n')
-    len_text_split = len(text_split)
-    while not has_keywords and i < len_text_split:
-        has_keywords = bool(extract_keywords(text_split[i]))
-    if i == len_text_split: return None
-    else:
-        return text_split[i]
-
 def get_real_keywords(video_id, title=False, defs=True):
     graphs = db_mongo.get_graphs_info(video_id)
     if graphs is not None:
@@ -84,5 +65,5 @@ if __name__ == '__main__':
     text1 = 'Forensic Archaeology and Anthropology\nPart.4\nEstimating Stature'
     text2 = 'an\nA Ablinerrin\ni oy\n\nThis example: (2.47 x [bone measurement 45.4cm]) + 54.10cm'
     text3 = 'YY\nS [ 2blteeretiny\n\nLeaves'
-    print(extract_title(text))
+    #print(extract_title(text))
     #print(TextSimilarityClassifier().is_partially_in(text1,text2))
