@@ -564,8 +564,6 @@ function downloadBurstGraph(){
     "conceptVocabulary":$conceptVocabulary
   } 
 
-  print(data)
-
   var js_data = JSON.stringify(data);
 
   $.ajax({
@@ -590,6 +588,32 @@ function downloadObjectAsJson(exportObj, exportName){
   downloadAnchorNode.click();
   downloadAnchorNode.remove();
 }
+
+function saveBurstGraph(){
+  console.log("***** EDURELL - Video Annotation: burstVocabulary.js::saveBurstGraph() ******");
+  var data = {
+    "id": $video_id,
+    "concepts": $concepts,
+    "conceptVocabulary":$conceptVocabulary
+  } 
+
+  console.log(data)
+
+  var js_data = JSON.stringify(data);  
+
+  console.log(js_data)
+
+  $.ajax({
+    url: '/annotator/save_burst_json',
+    type : 'post',
+    contentType: 'application/json',
+    dataType : 'json',
+    data: js_data
+}).done(function(result) {
+    console.log(result)
+})     
+}
+
 
 function hmsToSeconds(time){
     let hms = time.split(":")
