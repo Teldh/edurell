@@ -5,10 +5,14 @@ import time
 import random
 import string
 import math
+import json
+from rdflib import Graph, RDF, URIRef
+from rdflib.namespace import SKOS
 
 from datetime import datetime
 from flask_httpauth import HTTPBasicAuth
 import jwt
+import pymongo
 import bcrypt
 from flask_mongoengine import MongoEngine
 from flask_mail import Mail, Message
@@ -55,6 +59,7 @@ auth = HTTPBasicAuth(scheme='Custom')
 db = MongoEngine()
 db.init_app(app)
 mail = Mail(app)
+
 
 # generate a random string of lenght N composed of lowercase letters and numbers
 def generate_code(N=6):
@@ -579,7 +584,6 @@ def get_fragments(video_id):
         abort(409, "Unexisting graph for this video id")    # the video doesn't exist in the graphs collection
 
     keywords = handle_data.get_definitions_fragments(graph_object.email, video_id, video_fragment_progress)
-    #print(keywords)
 
     if(video_fragment_progress is None or not len(video_fragment_progress)):
         
@@ -687,6 +691,7 @@ def get_image(video_id=None, fragment_index=None ):
 @app.route('/api/graph_id/<video_id>')
 @auth.login_required
 def graph_id(video_id):
+    print("***** EDURELL - Video Augmentation: main.py::graph_id(): Inizio ******")
     student= g.student
     graph_list = handle_data.check_graphs(video_id,student.email)
 
@@ -694,14 +699,17 @@ def graph_id(video_id):
     if not len(graph_list):
         graph_list = handle_data.get_graphs(video_id)
 
+    print("***** EDURELL - Video Augmentation: main.py::graph_id(): Inizio ******")
+
     return {"graphs_id_list": graph_list }
+
 
 #return the graph of a given video
 @app.route('/api/graph/<annotator_id>/<video_id>')
 @auth.login_required
 def graph(annotator_id, video_id):
     concept_graph = data.build_array(annotator_id, video_id)
-    
+
     # old: return {"conceptsList": concept_graph }
     
     conceptVocabulary = data.get_concept_vocabulary(annotator_id, video_id)
@@ -711,11 +719,210 @@ def graph(annotator_id, video_id):
         conceptVocabulary = {}
         concept_list = data.get_concept_list(annotator_id, video_id)
         for c in concept_list:
-            conceptVocabulary[c["name"][4:].replace("_", " ")] = []
+            conceptVocabulary[c["name"][4:].replace("_", " ")] = []    
 
     return {"conceptsList": concept_graph, "conceptVocabulary": conceptVocabulary}
 
+
+def sparql_query_concepts(video_id, annotator_id):
+    user = "luca"
+    password = "vSmAZ6c1ZOg2IEVw"
+
+    client = pymongo.MongoClient(
+        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+
+    db = client.edurell
+    collection = db.graphs
+
+    query = {
+        "annotator_id": annotator_id,
+        "video_id": video_id
+    }
+
+    general_query = {
+        "video_id": video_id
+    }
+
+    #se trova un grafo qualunque con quel video_id, salva il risultato della query
+    if collection.find_one(general_query) is not None:
+        risultato = collection.find_one(general_query)["conceptVocabulary"]
+    #ma se trova il grafo con quel video_id e proprio con quell'annotator_id, sovrascrive risultato
+    if collection.find_one(query) is not None:
+        risultato = collection.find_one(query)["conceptVocabulary"]    
+
+    #se almeno una delle due query è andata a buon fine
+    if risultato is not None:
+        gr = Graph()\
+        .parse(data=json.dumps(risultato), format='json-ld')
+
+        tic = time.time()
+
+        # Seleziona tutti i nodi concetto ed eventuali sinonimi
+        query3 = """
+            PREFIX oa: <http://www.w3.org/ns/oa#>
+            PREFIX edu: <https://teldh.github.io/edurell#>
+            PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+            
+            SELECT ?concept ?synonym
+            WHERE {
+                    ?concetto skos:prefLabel ?concept.
+                    OPTIONAL {
+                        ?concetto skos:altLabel ?synonym
+                    }
+                    FILTER (!BOUND(?altLabel))
+                }"""
+
+        qres = gr.query(query3)
+
+        toc = time.time()
+
+        #print per i concetti
+        print("Results: - obtained in %.4f seconds" % (toc - tic))
+        for row in qres: 
+            print(f"Concept: {row.concept} || Synonym: {row.synonym}")
+
+
+def sparql_query_prerequisite(video_id, annotator_id):
+    user = "luca"
+    password = "vSmAZ6c1ZOg2IEVw"
+
+    client = pymongo.MongoClient(
+        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+
+    db = client.edurell
+    collection = db.graphs
+
+    query = {
+        "annotator_id": annotator_id,
+        "video_id": video_id
+    }
+
+    general_query = {
+        "video_id": video_id
+    }
+
+    #se trova un grafo qualunque con quel video_id, salva il risultato della query
+    if collection.find_one(general_query) is not None:
+        risultato = collection.find_one(general_query)["graph"]
+    #ma se trova il grafo con quel video_id e proprio con quell'annotator_id, sovrascrive risultato
+    if collection.find_one(query) is not None:
+        risultato = collection.find_one(query)["graph"]    
+
+    #se almeno una delle due query è andata a buon fine
+    if risultato is not None:
+        gr = Graph()\
+        .parse(data=json.dumps(risultato), format='json-ld')
+
+        tic = time.time()
+
+        #query per i prerequisiti
+        query2 = """
+            PREFIX oa: <http://www.w3.org/ns/oa#>
+            PREFIX edu: <https://teldh.github.io/edurell#>
+
+            SELECT ?prerequisite_concept ?created ?creator ?prerequisite_type ?target_concept
+            WHERE {
+                    ?concept_prerequisite oa:motivatedBy edu:linkingPrerequisite.
+                    ?concept_prerequisite dcterms:created ?created.
+                    ?concept_prerequisite dcterms:creator ?creator.
+                    ?concept_prerequisite oa:hasBody ?prerequisite_concept.
+                    ?concept_prerequisite skos:note ?prerequisite_type.
+                    ?concept_prerequisite oa:hasTarget ?target.
+                    ?target dcterms:subject ?target_concept.
+                }"""
+
+
+        qres = gr.query(query2)
+
+        toc = time.time()
+
+        #print per i prerequisiti
+        print("Results: - obtained in %.4f seconds" % (toc - tic))
+        for row in qres: 
+            print(f"Prerequisite concept: {row.prerequisite_concept}")
+            print(f"Created: {row.created}")
+            print(f"Creator: {row.creator}")
+            print(f"Prerequisite Type: {row.prerequisite_type}")
+            print(f"Target concept: {row.target_concept}")
+
+
+def sparql_query_definitions(video_id, annotator_id):
+    user = "luca"
+    password = "vSmAZ6c1ZOg2IEVw"
+
+    client = pymongo.MongoClient(
+        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+
+    db = client.edurell
+    collection = db.graphs
+
+    query = {
+        "annotator_id": annotator_id,
+        "video_id": video_id
+    }
+
+    general_query = {
+        "video_id": video_id
+    }
+
+    #se trova un grafo qualunque con quel video_id, salva il risultato della query
+    if collection.find_one(general_query) is not None:
+        risultato = collection.find_one(general_query)["graph"]
+    #ma se trova il grafo con quel video_id e proprio con quell'annotator_id, sovrascrive risultato
+    if collection.find_one(query) is not None:
+        risultato = collection.find_one(query)["graph"]    
+
+    #se almeno una delle due query è andata a buon fine
+    if risultato is not None:
+        gr = Graph()\
+        .parse(data=json.dumps(risultato), format='json-ld')
+
+        tic = time.time()
+
+        # Seleziona i concetti che sono spiegati nel video
+        query1 = """
+            PREFIX oa: <http://www.w3.org/ns/oa#>
+            PREFIX edu: <https://teldh.github.io/edurell#>
+            PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+            SELECT ?explained_concept ?created ?creator ?description_type
+            WHERE {
+                    ?concept_definition oa:motivatedBy oa:describing.
+                    ?concept_definition dcterms:created ?created.
+                    ?concept_definition dcterms:creator ?creator.
+                    ?concept_definition oa:hasBody ?explained_concept.
+                    ?concept_definition skos:note ?description_type.
+                    ?concept_definition oa:hasTarget ?target.
+                    ?target oa:hasSelector ?selector.
+                    ?selector oa:hasStartSelector ?startSelector
+
+                }"""
+
+
+        qres = gr.query(query1)
+
+        toc = time.time()
+        
+        #print per le definizioni
+        print("Results: - obtained in %.4f seconds" % (toc - tic))
+        for row in qres:
+            print(f"Explained concept: {row.explained_concept}")
+            print(f"Created: {row.created}")
+            print(f"Creator: {row.creator}")
+            print(f"Description Type: {row.description_type}")
+
+
+
+
 if __name__ == '__main__':
+
+    print("***** EDURELL - Video Augmentation: main.py::__main__: Inizio ******")
+
+    
+
+    print("***** EDURELL - Video Augmentation: main.py::__main__: Fine ******")
+
     app.run(debug=True)
 
 
