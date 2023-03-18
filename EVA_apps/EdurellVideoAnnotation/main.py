@@ -415,6 +415,46 @@ def download_burst_json():
     return result      
 
 
+@app.route('/save_burst_json', methods=["GET", "POST"])
+def save_burst_json():
+
+    print("***** EDURELL - Video Annotation: main.py::save_burst_json(): Inizio ******")
+
+    data = request.json
+    conceptVocabulary = data["conceptVocabulary"]
+
+    mongo_data=dict()
+
+    mongo_data["video_id"]=data["id"]
+    mongo_data["annotator_id"]="Burst Analysis"
+    mongo_data["annotator_name"]="Burst Analysis"
+    mongo_data["email"]="Burst Analysis"
+
+    result = get_burst_graph(conceptVocabulary)
+
+    for item in result["@graph"]:
+        if item["id"] == "localVocabulary":
+            localVocabulary = item["skos:member"]
+            result["@graph"].remove(item)
+            break
+
+    for item in data["concepts"]:
+        my_dict={"id": "concept_"+item, "type": "skos:Concept"}
+        result["@graph"].append(my_dict)
+
+    mongo_data["graph"] = result 
+
+    vocabulary_dict = {"@context": result["@context"], "@graph": localVocabulary}
+
+    mongo_data["conceptVocabulary"] = vocabulary_dict
+
+    db_mongo.insert_graph(mongo_data)
+
+    print("***** EDURELL - Video Annotation: main.py::save_burst_json(): Fine ******")
+
+    return result   
+
+
 @app.route('/analysis', methods=['GET', 'POST'])
 @login_required
 def analysis():
