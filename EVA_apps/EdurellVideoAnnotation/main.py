@@ -226,7 +226,7 @@ def video_selection():
                 start_times,end_times,images_path = vid_analyzer.create_thumbnails()
                 _, _, _, text = vid_analyzer.transcript_segmentation(subtitles)
             else:
-                start_times,end_times,text = vid_analyzer.transcript_segmentation(subtitles)
+                start_times,end_times,images_path,text = vid_analyzer.transcript_segmentation(subtitles)
 
             lemmatized_concepts = db_mongo.get_extracted_keywords(vid_id)
             if lemmatized_concepts is None:
