@@ -6,6 +6,7 @@ from mediapipe.framework.formats.detection_pb2 import Detection
 from numpy import round, dot, diag, reshape, zeros, uint8, array, inf, mean, var, transpose, all, empty, abs,ones
 from numpy.linalg import norm
 from typing import List, Tuple
+from bisect import insort_left
 
 mp_face_detection = mp.solutions.face_detection
 mp_drawing = mp.solutions.drawing_utils
@@ -150,14 +151,15 @@ class ImageClassifier:
         RGB, BGR or GRAYSCALED but with len(image_shape) == 3 always
         '''
         img_bw = self._convert_grayscale()
-        
         contours = self._preprocess_image(img_bw)
-        texts_with_bb = []
+        y_and_texts_with_bb = []
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
             img_cropped = img_bw[y:y + h, x:x + w]
-            texts_with_bb.extend(self._read_text_with_bbs(img_cropped))
-        self._texts_with_contour = texts_with_bb
+            insort_left(y_and_texts_with_bb,(y,self._read_text_with_bbs(img_cropped)))
+        self._texts_with_contour = [text_with_bb 
+                                    for (_,texts_with_bb) in y_and_texts_with_bb
+                                    for text_with_bb in texts_with_bb]
 
     def extract_text(self,return_text=False,with_contours=False):
         '''
@@ -173,7 +175,7 @@ class ImageClassifier:
         if return_text and with_contours:
             return self._texts_with_contour
         elif return_text and not with_contours:
-            return [elem[0] for elem in self._texts_with_contour]
+            return ''.join([elem[0] for elem in self._texts_with_contour])
         return bool(self._texts_with_contour)
 
     def draw_detected_faces(self):
@@ -355,7 +357,11 @@ class ImageClassifier:
     def _debug_show_image(self):
         from matplotlib import pyplot as plt
         if self._image is not None:
-            plt.imshow(self._image)
+            if self._color_scheme == COLOR_BGR:
+                image = self._image.copy()
+                plt.imshow(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
+            else:
+                plt.imshow(self._image)
             plt.show()
     
     def reset(self):

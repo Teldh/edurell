@@ -10,17 +10,18 @@ class TextCleaner:
         self.pattern = re.compile('[^a-zA-Z\d &-]')
     
     def clean_text(self,text:str):
-        return self.pattern.sub(' ',text).lower()
+        return ' '.join(self.pattern.sub(' ',text).split()).lower()
 
 class TimedAndFramedText:
     """
     Structure made of:
         - _framed_sentences: list of portions of a full_text composed field and their absolute location on the screen 
+        - _full_text: full string built for comparison purposes
         - start_end_frames: list of tuples of num start and num end frames of this text
-        - full_text: full string built for comparison purposes
+        
     """
     _framed_sentences: List[Tuple[Tuple[int,int],Tuple[int,int,int,int]]]
-    full_text: str
+    _full_text: str
     start_end_frames: List[Tuple[(int,int)]]
 
     def __init__(self,framed_sentences:List[Tuple[str,Tuple[int,int,int,int]]],startend_frames:List[Tuple[(int,int)]]) -> None:
@@ -34,22 +35,27 @@ class TimedAndFramedText:
             converted_framed_sentence.append(((curr_start,curr_start+len_sent),bb))
             curr_start += len_sent
         self._framed_sentences = converted_framed_sentence
-        self.full_text = full_text
+        self._full_text = full_text
  
     def copy(self):
         tft_copy = TimedAndFramedText(framed_sentences=None,start_end_frames=self.start_end_frames)
         tft_copy._framed_sentences=self._framed_sentences
-        tft_copy.full_text = self.full_text
+        tft_copy._full_text = self._full_text
         return tft_copy
     
     def extend_frames(self, other_start_end_list:List[Tuple[(int,int)]]) -> None:
         for other_start_end_elem in other_start_end_list:
             insort_left(self.start_end_frames,other_start_end_elem)
 
-    def get_framed_sentences(self):
-        full_text = self.full_text
-        return [((full_text[start_char_pos:end_char_pos]),bb) for (start_char_pos,end_char_pos),bb in self._framed_sentences]
+    def get_full_text(self):
+        return self._full_text
+    
+    def get_split_text(self):
+        return self._full_text.split("(?<=\n)")
 
+    def get_framed_sentences(self):
+        full_text = self._full_text
+        return [((full_text[start_char_pos:end_char_pos]),bb) for (start_char_pos,end_char_pos),bb in self._framed_sentences]
 
     def merge_adjacent_startend_frames(self,max_dist:int=15) -> 'TimedAndFramedText':
         '''
@@ -90,7 +96,7 @@ class TimedAndFramedText:
     
     def __repr__(self) -> str:
         return 'TFT(txt={0}, on_screen_in_frames={1}, text_portions_with_bb={2})'.format(
-            repr(self.full_text),repr(self.start_end_frames),repr(self._framed_sentences))
+            repr(self._full_text),repr(self.start_end_frames),repr(self._framed_sentences))
     
 from sklearn.feature_extraction.text import CountVectorizer
 from difflib import ndiff
@@ -98,30 +104,36 @@ import re
 from nltk.corpus import words
 from numpy import dot,round,empty,prod,sum,array
 from numpy.linalg import norm
-
 from transformers import pipeline
+from collections import Counter
 
-COMPARISON_METHOD_TXT_SIM:int=0
-COMPARISON_METHOD_TXT_MISSING:int=1
-COMPARISON_METHOD_MEANINGFUL_WORDS_NUM:int=2
-COMPARISON_METHOD_TIME_PROXIMITY:int=3
+COMPARISON_METHOD_TXT_SIM_RATIO:int=0
+COMPARISON_METHOD_TXT_MISS_RATIO:int=1
+COMPARISON_METHOD_MEANINGFUL_WORDS_COUNT:int=2
+COMPARISON_METHOD_FRAMES_TIME_PROXIMITY:int=3
 COMPARISON_METHOD_POSITION_NOT_COLLIDING:int=4
 
 class TextSimilarityClassifier:
     """
-    Text diffences classifier
-    Using various methods can check if some text is part of other text
+    Text diffences classifier\n
+    Using various methods can check if some text is part of other text\n
     or if two texts are similar
     """
 
-    def __init__(self,comp_methods:List[int] or None=None,max_removed_chars_over_total_diff:float=0.1,min_common_chars_ratio:float=0.8,max_removed_chars_over_txt:float=0.3,time_frames_tol = 10  ) -> None:
+    def __init__(self,comp_methods:List[int] or None=None,
+                 max_removed_chars_over_total_diff:float=0.1,
+                 min_common_chars_ratio:float=0.8,
+                 max_removed_chars_over_txt:float=0.3,
+                 max_added_chars_over_total:float= 0.2,
+                 time_frames_tol = 10  ) -> None:
         self._CV = CountVectorizer()
         self._txt_cleaner:TextCleaner = TextCleaner()
         if comp_methods is None:
-            self._comp_methods = {COMPARISON_METHOD_TXT_MISSING,COMPARISON_METHOD_TXT_SIM}
+            self._comp_methods = {COMPARISON_METHOD_TXT_MISS_RATIO,COMPARISON_METHOD_TXT_SIM_RATIO}
         else:
             self.set_comparison_methods(comp_methods)
         self.removed_chars_diff_ratio_thresh = max_removed_chars_over_total_diff
+        self.added_chars_diff_ratio_thresh = max_added_chars_over_total
         self.common_chars_txt_ratio_thresh = min_common_chars_ratio
         self.removed_chars_txt_ratio_thresh = max_removed_chars_over_txt
         self.time_frames_tol = time_frames_tol
@@ -168,15 +180,14 @@ class TextSimilarityClassifier:
 
     def is_partially_in(self,TFT1:TimedAndFramedText,TFT2:TimedAndFramedText) -> bool:
         '''
-        Finds if text1 is partial text of text2
-        texts are cleaned of all non alphanumeric characters.
+        Finds if the framed_text1 is part of the framed_text2
 
         Then are compared in terms of one or more predefined methods: 
-            - diffs percentage of all the merged texts with respect to a threshold\n
-            - diffs percentage of the first text with respect to another threshold empirically estimated\n
             - time proximity of their frames within a tolerance\n
-            - collision of their bounding boxes #TODO improve adding a tol
+            - NOT IMPLEMENTED ANYMORE { collision of their bounding boxes [improve adding a tol] }
         
+        Then it is passed to is_partially_in_txt_version(), check that documentation
+
         Order is based on performance maximization
             
         ### No checks are performed on input
@@ -189,9 +200,9 @@ class TextSimilarityClassifier:
 
         '''
         comp_methods = self._comp_methods
-        checks:list[bool] = [TFT1 is not None and TFT2 is not None]
+        checks:list[bool] = [bool(TFT1) and bool(TFT2)]
 
-        if all(checks) and COMPARISON_METHOD_TIME_PROXIMITY in comp_methods:
+        if all(checks) and COMPARISON_METHOD_FRAMES_TIME_PROXIMITY in comp_methods:
             frames_tol = self.time_frames_tol
             startends1 = TFT1.start_end_frames; startends2 = TFT2.start_end_frames
             found_all = True
@@ -204,7 +215,6 @@ class TextSimilarityClassifier:
                 if not found: found_all = False; break
             checks.append(found_all)
             
-              
         if all(checks) and COMPARISON_METHOD_POSITION_NOT_COLLIDING in comp_methods:
             assert False, 'Not implemented'
             xywh1 = TFT1.xywh; xywh2 = TFT2.xywh
@@ -212,21 +222,53 @@ class TextSimilarityClassifier:
                             or  xywh2[0] + xywh2[2] < xywh1[0] 
                             or  xywh1[1] + xywh1[3] < xywh2[1] 
                             or  xywh2[1] + xywh2[3] < xywh1[1])
+        
+        return all(checks) and self.is_partially_in_txt_version(TFT1.get_full_text(),TFT2.get_full_text())
+        
+    def is_partially_in_txt_version(self,text1:str,text2:str) -> bool:
+        '''
+        Finds if text1 is partial text of text2
+        texts are cleaned of all non alphanumeric characters.
 
-        if all(checks) and COMPARISON_METHOD_TXT_SIM in comp_methods:
+        Then are compared in terms of one or more predefined methods: 
+            - diffs percentage of all the merged texts with respect to 3 thresholds:\n
+                removed chars from txt1 with respect to txt2 over the total diff\n
+                common chars of both texts\n
+                added chars in txt1 to reach txt2 over the total diff\n
+            - most rich and meaningful text\n
+            - removed chars percentage over the string
+
+        
+        Order is based on performance maximization
+            
+        ### No checks are performed on input
+
+        -------
+
+        Returns
+        -------
+        True if text1 is part of the text2
+
+        '''
+        checks = [bool(text1) and bool(text2)]
+        comp_methods = self._comp_methods
+
+        if all(checks) and COMPARISON_METHOD_TXT_SIM_RATIO in comp_methods:
             cleaner = self._txt_cleaner
-            text1_cleaned = cleaner.clean_text(TFT1.full_text); text2_cleaned = cleaner.clean_text(TFT2.full_text)
-            diffs = [change[0] for change in ndiff(text1_cleaned,text2_cleaned)]
-            removed_chars_count = diffs.count('-')
-            common_chars_count = diffs.count(' ')
-            diffs_len = len(diffs)
+            text1_cleaned = cleaner.clean_text(text1); text2_cleaned = cleaner.clean_text(text2)
+            counter = Counter([change[0] for change in ndiff(text1_cleaned,text2_cleaned)])
+            removed_chars_count = 0 if not '-' in counter.keys() else counter['-']
+            common_chars_count = 0 if not ' ' in counter.keys() else counter[' ']
+            added_chars_count = 0 if not '+' in counter.keys() else counter['+']
+            diffs_len = removed_chars_count+common_chars_count+added_chars_count
             text1_len = len(text1_cleaned)
             checks.append(  diffs_len > 0 and 
                             text1_len > 0 and 
                             removed_chars_count/diffs_len < self.removed_chars_diff_ratio_thresh and 
-                            common_chars_count/text1_len > self.common_chars_txt_ratio_thresh  )
-
-        if all(checks) and COMPARISON_METHOD_MEANINGFUL_WORDS_NUM in comp_methods:
+                            common_chars_count/text1_len > self.common_chars_txt_ratio_thresh  and
+                            added_chars_count/diffs_len < self.added_chars_diff_ratio_thresh)
+        
+        if all(checks) and COMPARISON_METHOD_MEANINGFUL_WORDS_COUNT in comp_methods:
             all_words = self._words
             txt1_split = text1_cleaned.split(); txt2_split = text2_cleaned.split()
             len_txt1_split = len(txt1_split); len_txt2_split = len(txt2_split) 
@@ -235,29 +277,8 @@ class TextSimilarityClassifier:
                                         <= 
                                       len([word for word in txt2_split if word in all_words]) / len(txt2_split)) ) 
                             or len_txt1_split <= len_txt2_split )
-
-        if all(checks) and COMPARISON_METHOD_TXT_MISSING in comp_methods:
-            checks.append(  text1_len > 0 and 
-                            removed_chars_count/len(text1_cleaned) < self.removed_chars_txt_ratio_thresh)
-
-        return all(checks)
         
-    def is_partially_in_txt_version(self,text1:str,text2:str) -> bool:
-        checks = []
-        if COMPARISON_METHOD_TXT_SIM in self._comp_methods:
-            cleaner = self._txt_cleaner
-            text1_cleaned = cleaner.clean_text(text1); text2_cleaned = cleaner.clean_text(text2)
-            diffs = [change[0] for change in ndiff(text1_cleaned,text2_cleaned)]
-            removed_chars_count = diffs.count('-')
-            common_chars_count = diffs.count(' ')
-            diffs_len = len(diffs)
-            text1_len = len(text1_cleaned)
-            checks.append(  diffs_len > 0 and 
-                            text1_len > 0 and 
-                            removed_chars_count/diffs_len < self.removed_chars_diff_ratio_thresh and 
-                            common_chars_count/text1_len > self.common_chars_txt_ratio_thresh  )
-        
-        if all(checks) and COMPARISON_METHOD_TXT_MISSING in self._comp_methods:
+        if all(checks) and COMPARISON_METHOD_TXT_MISS_RATIO in comp_methods:
             checks.append(  text1_len > 0 and 
                             removed_chars_count/len(text1_cleaned) < self.removed_chars_txt_ratio_thresh)
         
@@ -311,8 +332,10 @@ class TextSimilarityClassifier:
         return self._noise_classifier(TFT.full_text)[0]['label'] == 'LABEL_0'
 
 
-    def set_comparison_methods(self,values:List[int]):
-        self._comp_methods = set(values)
+    def set_comparison_methods(self,methods:List[int]):
+        assert not COMPARISON_METHOD_TXT_MISS_RATIO in methods or COMPARISON_METHOD_TXT_SIM_RATIO in methods, \
+                "Too low granularity in setting txt_missing and not txt_similarity"
+        self._comp_methods = set(methods)
 
 TxSmCl = TextSimilarityClassifier
 
@@ -385,6 +408,8 @@ class VideoAnalyzer:
 
     _text_in_video: List[TimedAndFramedText] or None = None
     _video_slidishness = None
+    _cos_sim_img_threshold = None
+    _frames_to_analyze = None
 
     def __init__(self,video_id:str,from_youtube:bool=True) -> None:
         if from_youtube:
@@ -392,7 +417,7 @@ class VideoAnalyzer:
         else:
             raise Exception("not implemented!")
     
-    def create_keyframes(self,start_times,end_times,S,seconds_range, image_scale:float=0.5):
+    def _create_keyframes(self,start_times,end_times,S,seconds_range, image_scale:float=0.5):
         """
         Take a list of clusters and compute the color histogram on end and start of the cluster
         
@@ -596,7 +621,7 @@ class VideoAnalyzer:
         path = os.path.join(current_path, "static", "videos", video_id)
 
         if not any(File.endswith(".jpg") for File in os.listdir(path)):
-            images_path, start_times, end_times = self.create_keyframes(start_times, end_times, S, frame_range)
+            images_path, start_times, end_times = self._create_keyframes(start_times, end_times, S, frame_range)
             print("Done creating keyframes")
         else:
             print("keyframes already present")
@@ -613,17 +638,17 @@ class VideoAnalyzer:
 
     def _remove_classification_errors(self,lst: List[TimedAndFramedText],vsm: VideoSpeedManager,img_classif:ImageClassifier,txt_classif: TextSimilarityClassifier):
         for i, elem in reversed(list(enumerate(lst))):
-            text_in_lst = elem.full_text
+            text_in_lst = elem.get_full_text()
             start_end_frames = elem.start_end_frames
             for j, startend in reversed(list(enumerate(start_end_frames))):
                 img_classif.set_img(vsm.get_frame_from_num(startend[0]))
-                text_in_frame = ''.join(img_classif.extract_text(return_text=True))
-                if len(text_in_frame) == 0 or \
-                 startend[0] == startend[1] or \
-                 len(text_in_lst) == 0 or \
-                 (not txt_classif.is_partially_in_txt_version(text_in_frame,text_in_lst) and \
-                  not txt_classif.is_partially_in_txt_version(text_in_lst,text_in_frame)): 
-                    start_end_frames.pop(j)
+                text_in_frame = img_classif.extract_text(return_text=True)
+                if  len(text_in_frame) == 0 or \
+                    startend[0] == startend[1] or \
+                    len(text_in_lst) == 0 or \
+                    (not txt_classif.is_partially_in_txt_version(text_in_frame,text_in_lst) and \
+                    not txt_classif.is_partially_in_txt_version(text_in_lst,text_in_frame)): 
+                        start_end_frames.pop(j)
             elem.start_end_frames = start_end_frames
             if len(elem.start_end_frames) == 0: lst.pop(i)
         return lst
@@ -712,7 +737,8 @@ class VideoAnalyzer:
             counter += (frame_window[1] - frame_window[0])
         self._video_slidishness = counter/(num_frames-1)
 
-        return cos_sim_img_threshold, frames_to_analyze #dist_threshold, frames_to_analyze
+        self._cos_sim_img_threshold = cos_sim_img_threshold 
+        self._frames_to_analyze = frames_to_analyze #dist_threshold, frames_to_analyze
 
     def _compact_embedding_partial_words(self,TFT_list:'list[TimedAndFramedText]',text_classifier:TextSimilarityClassifier,frames_max_dist:int):
         '''
@@ -785,7 +811,9 @@ class VideoAnalyzer:
         assert color_scheme_for_analysis is not None and (color_scheme_for_analysis == COLOR_BGR or color_scheme_for_analysis == COLOR_RGB)
         start_time = time.time()
         vsm = VideoSpeedManager(self._video_id,color_scheme_for_analysis)
-        img_diff_threshold, frames_to_analyze = self._preprocess_video(vsm,_show_info=_show_info)
+        if self._cos_sim_img_threshold is None:
+            self._preprocess_video(vsm,_show_info=_show_info)
+        img_diff_threshold, frames_to_analyze = self._cos_sim_img_threshold, self._frames_to_analyze
         vsm.reset()
         if frames_to_analyze is None:
             self._text_in_video = []
@@ -800,10 +828,10 @@ class VideoAnalyzer:
         iterations_counter:int = 0
         collisions_TFT_list:'list[TimedAndFramedText]' = []
        #max_speed = 0
-        txt_classif = TxSmCl(comp_methods=[COMPARISON_METHOD_TXT_SIM,
-                                           COMPARISON_METHOD_TXT_MISSING])
+        txt_classif = TxSmCl(comp_methods=[COMPARISON_METHOD_TXT_SIM_RATIO,
+                                           COMPARISON_METHOD_TXT_MISS_RATIO])
        #vsm.lock_speed()
-        if not (len(frames_to_analyze) == 1 and frames_to_analyze[0][0] == 0 and frames_to_analyze[0][1] == vsm.get_video().get_count_frames()-1):
+        if not vsm.is_full_video(frames_to_analyze):
             vsm.set_analysis_frames(frames_to_analyze)
 
         while not vsm.is_video_ended():
@@ -826,12 +854,11 @@ class VideoAnalyzer:
                 coll_TFT_stack_mask = zeros(len(collisions_TFT_list,),dtype=bool)
                 #   create a mask for the text that's still on screen
                 if not vsm.is_video_ended():
-                    sentences = curr_frame.extract_text(return_text=True)
-                    for sentence in sentences:
-                        for indx_in_stack, coll_elem in enumerate(collisions_TFT_list):
-                            if sentence == coll_elem.full_text:
-                                coll_TFT_stack_mask[indx_in_stack] = True
-                                break
+                    text_on_screen:str = curr_frame.extract_text(return_text=True)
+                    for indx_in_stack, coll_elem in enumerate(collisions_TFT_list):
+                        if text_on_screen and text_on_screen in coll_elem.get_full_text():
+                            coll_TFT_stack_mask[indx_in_stack] = True
+                            break
 
                 #   get number of the last same frame to save it in the output structure
                 num_last_same_frame = vsm.get_prev_num_frame()
@@ -842,7 +869,7 @@ class VideoAnalyzer:
                     #  match on every element of the list sorted reversed because highly possible that 
                     for output_TFT_elem in output_TFT_stack: 
                         #   if already in the list append the starting and ending frames to the field in the struct 
-                        if txt_classif.are_cosine_similar(output_TFT_elem.full_text, coll_TFT_elem.full_text):# \
+                        if txt_classif.are_cosine_similar(output_TFT_elem.get_full_text(), coll_TFT_elem.get_full_text()):# \
                                 #and txt_classif.is_partially_in(coll_TFT_elem,output_TFT_elem):
                             output_TFT_elem.start_end_frames.append((coll_TFT_elem.start_end_frames[0][0],num_last_same_frame))
                             inserted = True
@@ -866,29 +893,29 @@ class VideoAnalyzer:
         output_TFT_list = list(output_TFT_stack)
         frames_dist_tol = vsm.get_video().get_fps()*10
 
-        txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM,
-                                            COMPARISON_METHOD_TXT_MISSING,
-                                            COMPARISON_METHOD_MEANINGFUL_WORDS_NUM])
+        txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM_RATIO,
+                                            COMPARISON_METHOD_TXT_MISS_RATIO,
+                                            COMPARISON_METHOD_MEANINGFUL_WORDS_COUNT])
         output_TFT_list = self._compact_embedding_partial_words(output_TFT_list,txt_classif,frames_dist_tol)
         
-        txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM,
-                                            COMPARISON_METHOD_TIME_PROXIMITY])
-        output_TFT_list = self._compact_embedding_partial_words(output_TFT_list,txt_classif,frames_dist_tol)
+       #txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM_RATIO,
+       #                                    COMPARISON_METHOD_FRAMES_TIME_PROXIMITY])
+       #output_TFT_list = self._compact_embedding_partial_words(output_TFT_list,txt_classif,frames_dist_tol)
         
-       #txt_classif.set_comparison_methods([COMPARISON_METHOD_TIME_PROXIMITY,
+       #txt_classif.set_comparison_methods([COMPARISON_METHOD_FRAMES_TIME_PROXIMITY,
        #                                    COMPARISON_METHOD_POSITION_NOT_COLLIDING])
        #output_TFT_list = self._compact_embedding_same_frames(output_TFT_list,txt_classif)
 
-        txt_classif.set_comparison_methods([COMPARISON_METHOD_TIME_PROXIMITY])
+        txt_classif.set_comparison_methods([COMPARISON_METHOD_FRAMES_TIME_PROXIMITY])
         output_TFT_list = self._compact_embedding_partial_words(output_TFT_list,txt_classif,frames_dist_tol)
 
-        txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM,
-                                            COMPARISON_METHOD_TXT_MISSING])
+        txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM_RATIO,
+                                            COMPARISON_METHOD_TXT_MISS_RATIO])
         output_TFT_list = self._remove_classification_errors(output_TFT_list,vsm,curr_frame,txt_classif)
        #output_TFT_list = [TFT_elem for TFT_elem in output_TFT_list if not txt_classif.is_random_noise(TFT_elem)]
 
         if _show_info:        
-            print()
+            print("video analysis completed!"+" "*30)
             print(f"total time = {round(time.time()-start_time,decimals=3)}"+" "*20)
 
         if _plot_contours:
@@ -896,7 +923,7 @@ class VideoAnalyzer:
             for output_TFT_elem in output_TFT_list:
                 pprint(output_TFT_elem)
                 for start_end in output_TFT_elem.start_end_frames:
-                    text = ''.join(list(output_TFT_elem.full_text)[:80]).replace('\n',' ')
+                    text = ''.join(list(output_TFT_elem.get_full_text())[:80]).replace('\n',' ')
                     frames = []
                     if start_end[0] > 0:
                         frames.append(vsm.get_frame_from_num(start_end[0]-1))
@@ -959,23 +986,23 @@ class VideoAnalyzer:
         if format=='list':
             return self._text_in_video
         elif format=='str':
-            return ' '.join([tft.full_text for tft in self._text_in_video])
-        elif format=='list[time,list[text,box]]':
-            video = LocalVideo(self._video_id)
-            return [((video.get_time_from_num_frame(startend[0]),video.get_time_from_num_frame(startend[1])), tft.get_framed_sentences())
-                        for tft in self._text_in_video for startend in tft.start_end_frames]
+            return ' '.join([tft.get_full_text() for tft in self._text_in_video])
         elif format=='list[text,box]':
             out_lst = []
             for tft in self._text_in_video:
                 out_lst.extend(tft.get_framed_sentences())
             return out_lst
-        elif format=='list[timed-text]':
+        elif format=='list[time,list[text,box]]':
             video = LocalVideo(self._video_id)
-            return [((video.get_time_from_num_frame(startend[0]),video.get_time_from_num_frame(startend[1])), tft.full_text) 
-                        for tft in self._text_in_video for startend in tft.start_end_frames]
+            timed_text = []
+            texts = self._text_in_video
+            for tft in texts:
+                for startend in tft.start_end_frames:
+                    insort_left(timed_text,((video.get_time_from_num_frame(startend[0]),video.get_time_from_num_frame(startend[1])), tft.get_full_text()))
+            return timed_text
         elif format=='list[tuple(id,timed-text)]':
             video = LocalVideo(self._video_id)
-            return [(id,(video.get_time_from_num_frame(startend[0]),video.get_time_from_num_frame(startend[1])), tft.full_text) 
+            return [(id,(video.get_time_from_num_frame(startend[0]),video.get_time_from_num_frame(startend[1])), tft.get_full_text()) 
                             for id, tft in enumerate(self._text_in_video) 
                             for startend in tft.start_end_frames]
         return None
@@ -1019,9 +1046,43 @@ class VideoAnalyzer:
         titles = [text_with_bb[0] for i,text_with_bb in enumerate(texts_with_bb) if i in indices_above_threshold]
         return titles
 
+    def create_thumbnails(self):
+        images_path = []
+        images_already_present = False
+        current_path = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(current_path, "static", "videos", self._video_id)
+        if any(File.endswith(".jpg") for File in os.listdir(path)):
+            thumbnails = [File for File in os.listdir(path) if File.endswith(".jpg")]
+            for i in range(len(thumbnails)):
+                for File in os.listdir(path):
+                    if File.startswith(str(i)+"."):
+                        images_path.append("videos/" + self._video_id + "/" + File)
+                        # TODO test here
+            images_already_present = True
+        assert self._text_in_video is not None
+        time_text = self.get_extracted_text(format='list[time,list[text,box]]')
+        start_times =[]
+        end_times = []
+        video = LocalVideo(self._video_id,output_colors=COLOR_RGB)
+
+        for i,((start_seconds,end_seconds),_) in enumerate(time_text):
+            if not images_already_present:
+                video.set_num_frame(video.get_num_frame_from_time(start_seconds))
+                image = video.extract_next_frame()
+                assert image is not None
+                file_name = str(i) + ".jpg"
+                image_file_dir = os.path.join(path, file_name)
+                cv2.imwrite(image_file_dir, image)
+                images_path.append("videos/" + self._video_id + "/" + file_name)
+            start_times.append(start_seconds)
+            end_times.append(end_seconds)
+        return start_times, end_times, images_path
+        
+
 from words import extract_keywords
 
 def main_in_segmentation():
+    import db_mongo
     # WEAK_POINT not performing fast with long videos or text that composes character by character each frame 
     #video = VideoAnalyzer('yN7ypxC7838') #TODO try again with this video and measure cv2.resize() performances against pure analysis
     #video = VideoAnalyzer('g8w-IKUFoSU') #infants and juveniles forensic
@@ -1031,14 +1092,14 @@ def main_in_segmentation():
     #video = VideoAnalyzer('rFRO8IwB8aY') # Lesson Med 33 minutes low score and very slow
 
     video.analyze_video(_show_info=True)
-    print(video.extract_titles())
-    #text_on_screen = video.get_extracted_text('list[time,list[text,box]]')
-    #pprint(text_on_screen)
-    
+    #print(video.extract_titles())
+    video.create_thumbnails()
+
     subtitles, autogenerated = video.get_transcript()
     start_times, end_times, images_path, text = video.transcript_segmentation(subtitles)
+    print(db_mongo.get_extracted_keywords(video._video_id))
     
-    print(video.is_slide_video())
+    #print(video.is_slide_video())
     #lemm_concepts_transcript = extract_keywords(text,minFrequency=3)
 
     #subtitles, autogenerated = video.get_transcript()

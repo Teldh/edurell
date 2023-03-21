@@ -98,7 +98,7 @@ def download(url):
     else:
         video_id = video_link.split('/')[-1]
 
-    # [NOTE] if returns NoneType accessing 'span' field, fix -> https://github.com/pytube/pytube/issues/1499#issuecomment-1473022893
+    # [BUG] if returns NoneType accessing 'span' field, fix -> https://github.com/pytube/pytube/issues/1499#issuecomment-1473022893
     # directory is /home/{user}/anaconda3/envs/myenv/lib/python3.7/site-packages/pytube/cipher.py
     youtube_video = YouTube(video_link)
     # video_streams.get_highest_resolution() not working properly
@@ -145,7 +145,7 @@ class VideoSpeedManager:
         - ratio_lin_exp_window_size : coeff of max_exp_window_factor that sets the clipping max speed overall
 
     '''
-    def __init__(self,video_id:str, output_colors:int, max_dim_frame:Tuple[int,int]=(640,360),time_decimals_accuracy:int=1,exp_base:float=1.4,lin_factor:float=2,max_seconds_exp_window:float=5,ratio_lin_exp_window_size:float=1.5):
+    def __init__(self,video_id:str, output_colors:int=COLOR_BGR, max_dim_frame:Tuple[int,int]=(640,360),time_decimals_accuracy:int=1,exp_base:float=1.4,lin_factor:float=2,max_seconds_exp_window:float=5,ratio_lin_exp_window_size:float=1.5):
         self._init_params = (video_id,output_colors,max_dim_frame,time_decimals_accuracy,exp_base,lin_factor,max_seconds_exp_window,ratio_lin_exp_window_size)
         vid_ref = LocalVideo(video_id=video_id,output_colors=output_colors)
         frame_dim = vid_ref.get_dim_frame()[:2]
@@ -219,6 +219,9 @@ class VideoSpeedManager:
         In seconds
         '''
         return self.vid_ref.get_time_from_num_frame(self._curr_num_frame)
+
+    def is_full_video(self,frames):
+        return len(frames)==1 and frames[0][0]==0 and frames[0][1]==self.vid_ref.get_count_frames()-1
 
     def _debug_get_speed(self):
         if self._curr_window_frame_size is not None:
