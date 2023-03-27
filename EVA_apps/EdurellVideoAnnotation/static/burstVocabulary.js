@@ -4,6 +4,9 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
+
+
 function sortVocabulary(dictionary) {
   
   var orderedDict = {}
@@ -348,6 +351,8 @@ async function getConceptVocabulary(){
 
 function launchBurstAnalysis(burstType){
 
+  console.log("launchBurstAnalysis")
+
     loading()
 
     // Activate to use advanced synonym burst
@@ -361,7 +366,7 @@ function launchBurstAnalysis(burstType){
         "burst_type": burstType
     }
 
-    //console.log(data);
+    console.log(data);
 
     var js_data = JSON.stringify(data);
 
@@ -378,6 +383,7 @@ function launchBurstAnalysis(burstType){
 }
 
 function showResults(result){
+    console.log("***** EDURELL - Video Annotation: burstVocabulary.js::showResults() ******")
     document.getElementById("loading").style.display = "none"
     document.getElementById("results").style.display = "block"
     //document.getElementById("results").innerText += result
@@ -386,8 +392,10 @@ function showResults(result){
     let relationsWithSynonyms = [];
 
     for(let word in $conceptVocabulary) {
+        console.log(word)
         let node = [word];
         for(let synonym of $conceptVocabulary[word]) {
+            console.log(synonym)
             node.push(synonym);
         }
         node.sort();
@@ -400,14 +408,14 @@ function showResults(result){
                 nodeName += " = " + node[i];
             }   
         }
-        //console.log(node)
+        console.log(node)
 
         conceptsWithSynonyms.push(nodeName);
-        //console.log(conceptsWithSynonyms)
+        console.log(conceptsWithSynonyms)
     }
 
     let graphNodes = [...new Set(conceptsWithSynonyms)];
-    //console.log(graphNodes)
+    console.log(graphNodes)
 
     let checkDuplicateArray = []
 
@@ -429,6 +437,11 @@ function showResults(result){
           checkDuplicateArray.push(strOfRelation)
         }
     }
+
+    console.log("graphNode")
+    console.log(graphNodes)
+    console.log("relations")
+    console.log(relationsWithSynonyms)
 
     network = showNetwork(graphNodes, relationsWithSynonyms, "network")
 
@@ -462,7 +475,7 @@ function showResults(result){
         "                    <th class=\"col\">"+ data_summary.num_rels +"</th>\n" +
         "                  </tr>\n" +
         "                  <tr class=\"d-flex\">\n" +
-        "                    <td class=\"col-3\">Unique relations</td>\n" +
+        "                    <td class=\"col-3\">Number of unique relations</td>\n" +
         "                    <th class=\"col\">"+ data_summary.num_unique +"</th>\n" +
         "                  </tr>\n" +
         "\n" +
@@ -515,16 +528,11 @@ function showResults(result){
 
     document.getElementById("data_summary").innerHTML = resultsToVisualize
     printDefinitions(result.definitions)
-    fitNetwork()
-}
-
-
-function fitNetwork(){
-    //network.fit();
 }
 
 
 function printDefinitions(definitions){
+  console.log("***** EDURELL - Video Annotation: burstVocabulary.js::printDefinitions() ******");
 
     let definitionTable = document.getElementById("defsTable")
 
@@ -548,6 +556,65 @@ function printDefinitions(definitions){
 
 }
 
+function downloadBurstGraph(){
+  console.log("***** EDURELL - Video Annotation: burstVocabulary.js::downloadBurstGraph() ******");
+  var data = {
+    "id": $video_id,
+    "concepts": $concepts,
+    "conceptVocabulary":$conceptVocabulary
+  } 
+
+  var js_data = JSON.stringify(data);
+
+  $.ajax({
+      url: '/annotator/download_burst_json',
+      type : 'post',
+      contentType: 'application/json',
+      dataType : 'json',
+      data: js_data
+  }).done(function(result) {
+      console.log(result)
+      downloadObjectAsJson(result, "graph");
+  })    
+  
+}
+
+function downloadObjectAsJson(exportObj, exportName){
+  var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj,null,2));
+  var downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute("href",     dataStr);
+  downloadAnchorNode.setAttribute("download", exportName + ".json");
+  document.body.appendChild(downloadAnchorNode); // required for firefox
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
+}
+
+function saveBurstGraph(){
+  console.log("***** EDURELL - Video Annotation: burstVocabulary.js::saveBurstGraph() ******");
+  var data = {
+    "id": $video_id,
+    "concepts": $concepts,
+    "conceptVocabulary":$conceptVocabulary
+  } 
+
+  console.log(data)
+
+  var js_data = JSON.stringify(data);  
+
+  console.log(js_data)
+
+  $.ajax({
+    url: '/annotator/save_burst_json',
+    type : 'post',
+    contentType: 'application/json',
+    dataType : 'json',
+    data: js_data
+}).done(function(result) {
+    console.log(result)
+})     
+}
+
+
 function hmsToSeconds(time){
     let hms = time.split(":")
 
@@ -563,7 +630,6 @@ function playDefinition(start){
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     var target = $(e.target).attr("href")
     console.log(target)
-    fitNetwork();
 });
 
 

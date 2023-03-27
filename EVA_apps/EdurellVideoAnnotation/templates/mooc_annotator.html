@@ -62,14 +62,12 @@
               Concepts & Synonyms
             </button>
 
-            <!--
-            <button type="button" onclick="showConcepts()" class="btn btn-primary btn-addrelation btn-dodgerblue" data-toggle="modal" data-target="#conceptsModal">
-              Concepts
-            </button>
-            -->
-
             <button onclick="downloadJson()" class="btn btn-primary btn-addrelation btn-dodgerblue">
              Save graph
+            </button>
+
+            <button onclick="downloadGraph()" class="btn btn-primary btn-addrelation btn-dodgerblue">
+              Download graph
             </button>
          </div>
 
@@ -161,7 +159,7 @@
             <label for="descriptionType">Type</label>
             <select class="form-control" id="descriptionType" onchange="changeColor()">
               <option value="Definition">Definition</option>
-              <option value="In depth">In depth</option>
+              <option value="Expansion">In depth</option>
             </select>
           </div>
 
@@ -360,7 +358,6 @@
 
 
   <script type="text/javascript" src="https://andywer.github.io/jquery-dim-background/jquery.dim-background.min.js"></script>
-  <!--<script src="../static/draw_box2.js"></script>-->
   <script src="{{ url_for('static', filename='draw_box2.js') }}"></script>
   <script type="text/javascript">
 
@@ -404,16 +401,8 @@
       });
 
   </script>
-  <!--<script src="../static/video_range_slider.js"></script>
-  <script src="../static/concepts.js"></script>
-  <script src="../static/descriptions.js"></script>
-  <script src="../static/subtitles.js"></script>
-  <script src="../static/segmentation.js"></script>
-  <script src="../static/create_graph.js"></script>
-  <script src="../static/autocomplete.js"></script>-->
   <script src="{{ url_for('static', filename='graph_visualization.js') }}"></script>
   <script src="{{ url_for('static', filename='video_range_slider.js') }}"></script>
-  <!--<script src="{{ url_for('static', filename='concepts.js') }}"></script>-->
   <script src="{{ url_for('static', filename='conceptVocabulary.js') }}"></script>
   <script src="{{ url_for('static', filename='descriptions.js') }}"></script>
   <script src="{{ url_for('static', filename='subtitles.js') }}"></script>

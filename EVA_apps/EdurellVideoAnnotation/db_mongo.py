@@ -33,14 +33,6 @@ def string_to_seconds(str):
     return seconds
 
 
-# def mail_confirmed(email):
-#     collection = db.users
-#     query = {"email": email}
-#
-#     if collection.find_one(query) is not None:
-#         new = {"$set": {"email_confirmed": True}}
-#         collection.update_one(query, new)
-
 def reset_password(email, password):
     query = {"email": email}
 
@@ -49,6 +41,10 @@ def reset_password(email, password):
         users.update_one(query, new)
 
 def insert_graph(data):
+    
+    print("***** EDURELL - Video Annotation: db_mongo.py::insert_graph(): Inizio ******")
+
+
     collection = db.graphs
     query = {
         "annotator_id": data["annotator_id"],
@@ -63,8 +59,13 @@ def insert_graph(data):
         new_graph = {"$set": {"graph": data["graph"], "conceptVocabulary": data["conceptVocabulary"]}}
         collection.update_one(query, new_graph)
 
+    print("***** EDURELL - Video Annotation: db_mongo.py::insert_graph(): Fine ******")    
+
 
 def insert_burst(data):
+
+    print("***** EDURELL - Video Annotation: db_mongo.py::insert_burst(): Inizio ******")
+
     collection = db.graphs
     query = {
         "extraction_method": "Burst",
@@ -77,7 +78,13 @@ def insert_burst(data):
         new_graph = {"$set": {"graph": data["graph"]}}
         collection.update_one(query, new_graph)
 
+    print("***** EDURELL - Video Annotation: db_mongo.py::insert_burst(): Fine ******")
+    
+
 def insert_gold(data):
+    print("***** EDURELL - Video Annotation: db_mongo.py::insert_gold(): Inizio ******")
+
+
     collection = db.graphs
     query = {
         "graph_type": "gold_standard",
@@ -91,6 +98,7 @@ def insert_gold(data):
         collection.update_one(query, new_graph)
 
 def insert_conll_MongoDB(data):
+    print("***** EDURELL - Video Annotation: db_mongo.py::insert_conll_MongoDB() ******")
     collection = db.conlls
     if collection.find_one({"video_id": data["video_id"]}) is None:
         collection.insert_one(data)
@@ -122,26 +130,33 @@ def get_conll(video_id):
 
 # from string id to object id
 def get_user(user_string_id):
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_user() ******")
     user_id = ObjectId(user_string_id)
     return list(users.find({'_id': user_id}))[0]
 
 
 def get_user_graphs(user):
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_user_graphs() ******")
     collection = db.graphs
     return list(collection.find({"annotator_id":user}))
 
 
 def get_graph(user, video):
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_graph() ******")
     collection = db.graphs
     return collection.find_one({"annotator_id":user, "video_id":video})["graph"]
 
 
 def get_videos():
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_videos() ******")
+
     collection = db.videos
     return list(collection.find({}).sort([("creator", pymongo.ASCENDING)]))
 
 
 def get_graphs_info(selected_video=None):
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_graphs_info(): Inizio ******")
+
     # If selected video is None
     # Returns all videos graphs, with the title, creator and the annotators
     # Else returns only the selected video
@@ -193,10 +208,14 @@ def get_graphs_info(selected_video=None):
         else:
             return None
 
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_graphs_info(): Fine ******")
+
     return graphs_info
 
 
 def get_concepts(annotator, video_id):
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_concepts(): Inizio ******")
+
     collection = db.graphs
 
     pipeline = [
@@ -225,12 +244,17 @@ def get_concepts(annotator, video_id):
     concepts = []
 
     for concept in results:
-        concepts.append(concept["concept"].replace("edu:","").replace("_"," "))
+        concepts.append(concept["concept"].replace("concept_","").replace("_"," "))
+
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_concepts(): Fine ******")
+
 
     return concepts
 
 
 def get_concept_map(annotator, video_id):
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_concept_map(): Inizio ******")
+
     collection = db.graphs
 
     pipeline = [
@@ -240,7 +264,7 @@ def get_concept_map(annotator, video_id):
                 {
                     "video_id": str(video_id),
                     "annotator_id": str(annotator),
-                    "graph.@graph.type": "oa:annotation",
+                    "graph.@graph.type": "Annotation",
                     "graph.@graph.motivation": "edu:linkingPrerequisite",
                 }
 
@@ -255,7 +279,7 @@ def get_concept_map(annotator, video_id):
                 "sent_id": "$graph.@graph.target.selector.edu:conllSentId",
                 "word_id": "$graph.@graph.target.selector.edu:conllWordId",
                 "xywh": "$graph.@graph.target.selector.edu:hasMediaFrag",
-                "creator": "$graph.@graph.dcterms:creator",
+                "creator": "$graph.@graph.creator",
                 "_id": 0
             }
         },
@@ -268,9 +292,9 @@ def get_concept_map(annotator, video_id):
     concept_map = list(aggregation)
 
     for rel in concept_map:
-        rel["prerequisite"] = rel["prerequisite"].replace("edu:","").replace("_"," ")
-        rel["target"] = rel["target"].replace("edu:","").replace("_"," ")
-        rel["weight"] = rel["weight"].replace("Prerequisite","")
+        rel["prerequisite"] = rel["prerequisite"].replace("concept_","").replace("_"," ")
+        rel["target"] = rel["target"].replace("concept_","").replace("_"," ")
+        rel["weight"] = (rel["weight"].replace("Prerequisite","")).capitalize()
         rel["time"] = rel["time"].replace("^^xsd:dateTime","")
         if "xywh" not in rel:
             rel["xywh"] = "None"
@@ -279,10 +303,14 @@ def get_concept_map(annotator, video_id):
         if "sent_id" not in rel:
             rel["sent_id"] = "None"
 
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_concept_map(): Fine ******")
+
     return concept_map
 
 
 def get_definitions(annotator, video_id):
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_definitions(): Inizio ******")
+
     collection = db.graphs
 
     pipeline = [
@@ -292,7 +320,7 @@ def get_definitions(annotator, video_id):
                 {
                     "video_id": str(video_id),
                     "annotator_id": str(annotator),
-                    "graph.@graph.type": "oa:annotation",
+                    "graph.@graph.type": "Annotation",
                     "graph.@graph.motivation": "describing",
                 }
 
@@ -305,7 +333,7 @@ def get_definitions(annotator, video_id):
                 "end": "$graph.@graph.target.selector.endSelector.value",
                 "start_sent_id": "$graph.@graph.target.selector.startSelector.edu:conllSentId",
                 "end_sent_id": "$graph.@graph.target.selector.endSelector.edu:conllSentId",
-                "creator": "$graph.@graph.dcterms:creator",
+                "creator": "$graph.@graph.creator",
                 "description_type": "$graph.@graph.skos:note",
                 "_id": 0
             }
@@ -319,14 +347,21 @@ def get_definitions(annotator, video_id):
     definitions = list(aggregation)
 
     for d in definitions:
-        d["concept"] = d["concept"].replace("edu:","").replace("_"," ")
+        d["concept"] = d["concept"].replace("concept_","").replace("_"," ")
         d["end"] = d["end"].replace("^^xsd:dateTime","")
         d["start"] = d["start"].replace("^^xsd:dateTime", "")
+        d["description_type"] = d["description_type"].replace("concept", "")
+
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_definitions(): Fine ******")
 
     return definitions
 
 
 def get_vocabulary(annotator, video_id):
+
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_vocabulary(): Inizio ******")
+
+
     collection = db.graphs
 
     pipeline = [
@@ -371,23 +406,14 @@ def get_vocabulary(annotator, video_id):
         else:
             conceptVocabulary[concept["prefLabel"]]=[]
 
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_vocabulary(): Fine ******")
+
     return conceptVocabulary
 
-'''
-def get_vocabulary2(video_id, annotator_id, title=False):
-    collection = db.graphs
-
-    if collection.find_one({"video_id":video_id, "annotator_id": annotator_id}) is not None:
-        video = collection.find_one({"video_id":video_id, "annotator_id": annotator_id})
-        if title:
-            return video["title"], video[""]
-
-        return video["conceptVocabulary"]
-    else:
-        return None
-'''
 
 def get_segments_times(video_id):
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_segments_times() ******")
+
     collection = db.videos
 
     if collection.find_one({"video_id":video_id}) is not None:
@@ -398,6 +424,8 @@ def get_segments_times(video_id):
 
 
 def get_extracted_keywords(video_id, title=False):
+    print("***** EDURELL - Video Annotation: db_mongo.py::get_extracted_keywords() ******")
+
     collection = db.videos
 
     if collection.find_one({"video_id":video_id}) is not None:
@@ -410,6 +438,9 @@ def get_extracted_keywords(video_id, title=False):
         return None
 
 def remove_account(email):
+
+    print("***** EDURELL - Video Annotation: db_mongo.py::remove_account() ******")
+
     query = {"email": email}
 
     if users.find_one(query) is not None:
@@ -427,133 +458,5 @@ def remove_account(email):
     return "Not Found"
 
 if __name__ == '__main__':
-    pass
-    #pprint(get_definitions("60d2e89014ff4217f4f50559", "sXLhYStO0m8"))
-    #print(remove_account('gabriele.romano121297@gmail.com'))
-    #print(remove_account('gaggioaxel@gmail.com'))
-    #print(remove_account('gaggioaxel@yahoo.it'))
 
-    # collection = db.graphs
-    # query = {
-    #     "annotator_id": "60d2e89014ff4217f4f50559",
-    #     "annotator_name": "Maria Rossi",
-    #     "video_id": "sXLhYStO0m8"
-    # }
-    #
-    #
-    # new_graph = {"$set": {"graph": json["graph"]}}
-    # collection.update_one(query, new_graph)
-    # a = time.time()
-
-    # curr_time = "00:07:40^^xsd:dateTime"
-    # video_id = "sXLhYStO0m8"
-    # annotator = "Pippo Topolino"
-    #
-    # pipeline = [
-    #     {"$unwind": "$graph.@graph"},
-    #     {
-    #         "$match":
-    #             {
-    #                 "video_id": video_id,
-    #                 "annotator": annotator,
-    #                 "graph.@graph.type": "Annotation",
-    #                 "graph.@graph.motivation": "describing",
-    #                 "graph.@graph.target.selector.startSelector.value": {"$lte": curr_time},
-    #                 "graph.@graph.target.selector.endSelector.value": {"$gte": curr_time}
-    #             }
-    #
-    #     },
-    #
-    #     {"$project": {"concept":"$graph.@graph.body", "_id": 0}}
-    #
-    # ]
-    # aggregation = db_graph.aggregate(pipeline)
-    # results = list(aggregation)
-    #
-    # print("Concetti spiegati al tempo ", curr_time.split("^^")[0])
-    # pprint(results)
-    #
-    # print("Tempo impiegato: ", time.time() - a, " secondi")
-    # print()
-    #
-    # b = time.time()
-    #
-    # concept = "edu:ventral_arc"
-    # curr_time = "00:02:00^^xsd:dateTime"
-    #
-    # pipeline = [
-    #     {"$unwind": "$graph.@graph"},
-    #     {
-    #         "$match":
-    #             {
-    #                 "video_id": video_id,
-    #                 "annotator": annotator,
-    #                 "graph.@graph.type": "Annotation",
-    #                 "graph.@graph.motivation": "linking",
-    #                 "graph.@graph.target.dcterms:subject.id": concept,
-    #                 "graph.@graph.target.selector.value": {"$lte": curr_time}
-    #             }
-    #
-    #     },
-    #
-    #     {
-    #         "$project": {
-    #             "prerequisite": "$graph.@graph.body",
-    #             "time": "$graph.@graph.target.selector.value",
-    #             "_id": 0
-    #         }
-    #     }
-    #
-    #
-    #
-    #
-    #
-    # ]
-    #
-    # aggregation = db_graph.aggregate(pipeline)
-    # prerequisites = list(aggregation)
-    #
-    #
-    # print("\nPrerequisiti di " + concept)
-    # pprint(prerequisites)
-    #
-    #
-    # print("\nTempo impiegato: ", time.time() - b, " secondi")
-    #
-    # c = time.time()
-    #
-    # # mappa dei concetti
-    # pipeline = [
-    #     {"$unwind": "$graph.@graph"},
-    #     {
-    #         "$match":
-    #             {
-    #                 "video_id": video_id,
-    #                 "annotator": "Luca Mirenda",
-    #                 "graph.@graph.type": "Annotation",
-    #                 "graph.@graph.motivation": "edu:linkingPrerequisite",
-    #             }
-    #
-    #     },
-    #
-    #     {"$project":
-    #          {
-    #             "prerequisite": "$graph.@graph.body",
-    #             "target": "$graph.@graph.target.dcterms:subject.id",
-    #             "time": "$graph.@graph.target.selector.value",
-    #             "_id": 0
-    #          }
-    #     },
-    #
-    #     {"$sort": {"time": 1}}
-    #
-    # ]
-    #
-    # aggregation = db_graph.aggregate(pipeline)
-    # concept_map = list(aggregation)
-    #
-    # print("\nConcept map: ")
-    # print(concept_map)
-    #
-    #
-    # print("Tempo impiegato: ", time.time() - c, " secondi")
+   print("***** EDURELL - Video Annotation: db_mongo.py::__main__ ******")

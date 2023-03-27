@@ -31,7 +31,7 @@ $(document).on('click','.clickableConcept',function(){
 function addRelation(){
 
   let prereq = document.getElementById("prerequisite").value.toLowerCase();
-  let weight = document.getElementById("weight").value;
+  let weight = document.getElementById("weight").value.toLowerCase();
   let target = document.getElementById("target").value.toLowerCase();
 
   if ((prereq === "") || (target === "")) {
@@ -209,6 +209,44 @@ function deleteDescription(button, concept, start, end){
 
   }
 
+
+
+function downloadGraph(){
+
+    console.log("***** EDURELL - Video Annotation: create_graph.js::downloadGraph(): Inizio *****")
+
+    let annotations = {
+        "id": $video_id,
+        "relations":relations,
+        "definitions": definitions,
+        "annotator": $annotator,
+        "conceptVocabulary": $conceptVocabulary,
+    }
+
+    var js_data = JSON.stringify(annotations);
+
+    $.ajax({
+        url: '/annotator/download_json',
+        type : 'post',
+        contentType: 'application/json',
+        dataType : 'json',
+        data : js_data
+    }).done(function(result) {
+        console.log(result)
+        downloadObjectAsJson(result, "graph");
+    })    
+}
+
+function downloadObjectAsJson(exportObj, exportName){
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj,null,2));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("download", exportName + ".json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+  
 function downloadJson(){
 
     let annotations = {
@@ -219,8 +257,7 @@ function downloadJson(){
         "conceptVocabulary": $conceptVocabulary,
     }
 
-    console.log("annotations")
-    console.log(annotations)
+    console.log("downloadJson")
 
     var js_data = JSON.stringify(annotations);
 
@@ -232,26 +269,10 @@ function downloadJson(){
         data : js_data
     }).done(function(result) {
         console.log(result)
-        downloadObjectAsJson(result, "graph");
     })
-
-    /*fetch('/json_ld/' + relations).then(function (response) {
-            downloadObjectAsJson(response.json(), "graph")
-        })*/
-
-
 }
-
-function downloadObjectAsJson(exportObj, exportName){
-    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj,null,2));
-    var downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href",     dataStr);
-    downloadAnchorNode.setAttribute("download", exportName + ".json");
-    document.body.appendChild(downloadAnchorNode); // required for firefox
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-  }
-
+  
+  
 /* Creation of the table containing the relations*/
 function printRelations(){
 

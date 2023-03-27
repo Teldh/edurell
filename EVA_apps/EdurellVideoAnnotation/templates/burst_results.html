@@ -9,6 +9,7 @@
 
           <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
           <style>
+
           .concept{
                 background-color: yellow;
             }
@@ -206,6 +207,12 @@
                 <a class="nav-link" id="rels-tab"
                    data-toggle="tab" href="#rels" role="tab" aria-controls="contact" aria-selected="false">Relations</a>
               </li>
+              <li class="button">
+                <button type="button" onclick="saveBurstGraph()" class="btn btn-primary">Save graph</button>
+              </li>
+              <li class="button">
+                <button type="button" onclick="downloadBurstGraph()" class="btn btn-primary">Download graph</button>
+              </li>
           </ul>
 
             <div class="tab-content" id="myTabContent">
@@ -247,7 +254,7 @@
             </div>
 
             <div class="tab-pane fade" id="rels" role="tabpanel" aria-labelledby="rels-tab">
-                <div id="network" style=""></div>
+                <div id="network"></div>
              </div>
           </div>
 
@@ -270,7 +277,7 @@
   </body>
 
 {% block scripts %}
-
+<script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 <script src="{{ url_for('static', filename='burstVocabulary.js') }}"></script>
 <script src="{{ url_for('static', filename='graph_visualization.js') }}"></script>
 <script>
@@ -296,7 +303,7 @@
     let $typeAnalysis = {{ type|tojson }};
     let $title = {{ title|tojson }};
 
-    async function runSemiBurst() {
+    async function runSemiBurst() {addActive
       $burstSynonym = await popup(); 
       launchBurstAnalysis("semi")
     }
@@ -330,5 +337,4 @@
 
 
 </script>
-<script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 {% endblock %}

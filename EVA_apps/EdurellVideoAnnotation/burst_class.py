@@ -7,6 +7,11 @@
 #------------------------------------------------------------------
 import pandas as pd
 
+from rdflib import Graph, URIRef, RDF, BNode, ConjunctiveGraph, Namespace
+from rdflib.namespace import SKOS, XSD
+from rdflib.term import Literal
+from rdflib.serializer import Serializer
+
 from burst_extractor import BurstExtractor
 from burst_weight_assigner import WeightAssigner
 from burst_weight_normalizer import WeightsNormalizer
@@ -19,22 +24,50 @@ from conll import lemmatize, get_text
 import agreement
 from segmentation import get_timed_sentences
 from nltk import tokenize
+import time
 import datetime
 from nltk import WordNetLemmatizer
 
+import json
+import pyld
+
+
+oa = Namespace("http://www.w3.org/ns/oa#")
+dc = Namespace("http://purl.org/dc/elements/1.1/")
+dctypes = Namespace("http://purl.org/dc/dcmitype/")
+dcterms = Namespace("http://purl.org/dc/terms/")
+edu = Namespace("https://teldh.github.io/edurell#")
+
+data = {}
+videoid = ""
+
+
+edurell = "https://teldh.github.io/edurell#"
+
+
+
+
+
 def burst_extraction(video_id, concepts, n=90):
+    print("***** EDURELL - Video Annotation: burst_class.py::burst_extraction(): Inizio ******")
+
+    global videoid
+
+    videoid = video_id
 
     text, conll = get_text(video_id, return_conll=True)
     text = text.replace("-", " ")
 
+
     concept_map_burst, burst_definitions = Burst(text, concepts, video_id, conll, threshold=0.7,
                                                  top_n=n, max_gap=1).launch_burst_analysis()
-    # [TODO] maybe substitute video analysis with this
+        # [TODO] maybe substitute video analysis with this
     print(concept_map_burst,burst_definitions)
     return concept_map_burst, burst_definitions
 
 # Get mapping of concepts and synonyms to selected word (alphabetically)
 def get_synonyms_mappings(conceptVocabulary):
+    print("***** EDURELL - Video Annotation: burst_class.py::get_synonyms_mappings(): Inizio ******")
     
     syn_map = {}
     new_concepts = []
@@ -49,9 +82,15 @@ def get_synonyms_mappings(conceptVocabulary):
 
     new_concepts = list(set(new_concepts))
     
+    print("***** EDURELL - Video Annotation: burst_class.py::get_synonyms_mappings(): Fine ******")
     return syn_map, new_concepts
 
 def burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary, n=90):
+    print("***** EDURELL - Video Annotation: burst_class.py::burst_extraction_with_synonyms(): Inizio ******")
+
+    global videoid
+
+    videoid = video_id
 
     text, conll = get_text(video_id, return_conll=True)
     text = text.replace("-", " ")
@@ -61,6 +100,7 @@ def burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary, n=90):
     concept_map_burst, burst_definitions = Burst(text, new_concepts, video_id, conll, syn_map, threshold=0.7,
                                                  top_n=n, max_gap=1).launch_burst_analysis()
 
+    print("***** EDURELL - Video Annotation: burst_class.py::burst_extraction_with_synonyms(): Fine ******")
     return concept_map_burst, burst_definitions
 
 class Burst:
@@ -74,6 +114,7 @@ class Burst:
         self.video_id = video_id
         self.threshold = threshold
         self.top_n = top_n
+        self.data = {}
 
 
         #Kleinberg's parameters
@@ -168,6 +209,7 @@ class Burst:
 
 
     def launch_burst_analysis(self):
+        print("***** EDURELL - Video Annotation: burst_class.py::launch_burst_analysis() ******")
         """Launch Burst analysis"""
         try:
             # FIRST PHASE: extract bursts
@@ -252,6 +294,7 @@ class Burst:
 
 
     def df_to_data(self, sorted_edgelist, burst_res, use_conll=False):
+        print("***** EDURELL - Video Annotation: burst_class.py::df_to_data() ******")
         ''' Transform burst dataframe results in data '''
 
         concept_map = []
@@ -317,10 +360,13 @@ class Burst:
                     "creator": "Burst Analysis"
                 })
 
+        create_burst_graph(definitions, concept_map)
+
         return concept_map, definitions
 
 
 def compute_agreement_burst(concept_map1, concept_map2):
+    print("***** EDURELL - Video Annotation: burst_class.py::compute_agreement_burst() ******")
 
     words = []
     user1 = "gold"
@@ -358,3 +404,220 @@ def compute_agreement_burst(concept_map1, concept_map2):
 
 
 
+def create_burst_graph(definitions, concept_map):
+
+    print("***** EDURELL - Video Annotation: burst_class.py::create_burst_graph(): Inizio ******")
+
+    concepts_anno = definitions
+    prereq_anno = concept_map
+    global videoid
+
+    video_id = videoid
+
+    creator = URIRef("Burst Analysis")
+    
+    g = Graph()
+
+    g.bind("oa", oa)
+    g.bind("dctypes", dctypes)
+    g.bind("edu", edu)
+    g.bind("SKOS", SKOS)
+    g.bind("dcterms", dcterms)
+
+
+    # aggiunge un nodo
+    video = URIRef("video_" + str(video_id))
+    #video = URIRef(edurell + "video_" + str(video_id))
+    g.add((video, RDF.type, dctypes.MovingImage))
+
+    conll = URIRef("conll_" + str(video_id))
+    #conll = URIRef(edurell + "conll_" + str(video_id))
+    g.add((conll, RDF.type, dctypes.Text))
+
+
+    # collegamento video conll
+    ann_linking_conll = URIRef("ann0")
+    g.add((ann_linking_conll, RDF.type, oa.Annotation))
+    g.add((ann_linking_conll, oa.motivatedBy, edu.linkingConll))
+    g.add((ann_linking_conll, oa.hasBody, conll))
+    g.add((ann_linking_conll, oa.hasTarget, video))
+
+    date = Literal(datetime.datetime.fromtimestamp(time.time()))
+
+    #creo il nuovo nodo dei concetti
+    #localVocabulary = URIRef("localVocabulary")
+    #g.add((localVocabulary, RDF.type, SKOS.Collection))
+
+
+    # per ogni annotazione di concetto spiegato aggiungo le triple
+    for i, annotation in enumerate(concepts_anno):
+        ann = URIRef("ann" + str(i + 1))
+
+        g.add((ann, RDF.type, oa.Annotation))
+
+        g.add((ann, dcterms.creator, creator))
+
+        g.add((ann, dcterms.created, date))
+        g.add((ann, oa.motivatedBy, oa.describing))
+        if annotation["description_type"] == "In Depth":
+            g.add((ann, SKOS.note, Literal("conceptExpansion")))
+        if annotation["description_type"] == "Definition":
+            g.add((ann, SKOS.note, Literal("concept"+annotation["description_type"]))) 
+
+        concept = URIRef("concept_" + annotation["concept"].replace(" ", "_"))
+
+        #crea un nodo concetto
+        
+        #g.add((localVocabulary, SKOS.member, concept))
+        #g.add((concept, RDF.type, SKOS.Concept))
+
+
+        g.add((ann, oa.hasBody, concept))
+
+        blank_target = BNode()
+
+        
+        blank_selector = BNode()
+
+        g.add((ann, oa.hasTarget, blank_target))
+        g.add((blank_target, RDF.type, oa.SpecificResource))
+
+        g.add((blank_target, oa.hasSelector, blank_selector))
+        g.add((blank_selector, RDF.type, oa.RangeSelector))
+
+        g.add((blank_target, oa.hasSource, video))
+
+        blank_startSelector = BNode()
+        blank_endSelector = BNode()
+
+        g.add((blank_startSelector, RDF.type, edu.InstantSelector))
+        g.add((blank_endSelector, RDF.type, edu.InstantSelector))
+
+        g.add((blank_selector, oa.hasStartSelector, blank_startSelector))
+        g.add((blank_selector, oa.hasEndSelector, blank_endSelector))
+
+        g.add((blank_startSelector, RDF.value, Literal(annotation["start"] + "^^xsd:dateTime")))
+        g.add((blank_startSelector, edu.conllSentId, Literal(annotation["start_sent_id"])))
+        #g.add((blank_startSelector, edu.conllWordId, Literal(annotation["word_id"])))
+
+        g.add((blank_endSelector, RDF.value, Literal(annotation["end"] + "^^xsd:dateTime")))
+        g.add((blank_endSelector, edu.conllSentId, Literal(annotation["end_sent_id"])))
+        
+
+    num_definitions = len(concepts_anno) + 1
+
+    # per ogni annotazione di prerequisito aggiungo le triple
+    for i, annotation in enumerate(prereq_anno):
+        ann = URIRef("ann" + str(num_definitions + i))
+
+        target_concept = URIRef("concept_" +  annotation["target"].replace(" ", "_"))
+        prereq_concept = URIRef("concept_" +  annotation["prerequisite"].replace(" ", "_"))
+
+        #g.add((target_concept, RDF.type, SKOS.Concept))
+        #g.add((prereq_concept, RDF.type, SKOS.Concept))
+
+        g.add((ann, RDF.type, oa.Annotation))
+
+        g.add((ann, dcterms.creator, creator))
+
+        g.add((ann, dcterms.created, date))
+        g.add((ann, oa.motivatedBy, edu.linkingPrerequisite))
+
+        g.add((ann, oa.hasBody, prereq_concept))
+        g.add((ann, SKOS.note, Literal(annotation["weight"].lower() + "Prerequisite")))
+
+        blank_target = BNode()
+
+        g.add((ann, oa.hasTarget, blank_target))
+        g.add((blank_target, RDF.type, oa.SpecificResource))
+        g.add((blank_target, dcterms.subject, target_concept))
+
+        g.add((blank_target, oa.hasSource, video))
+
+        blank_selector_video = BNode()
+
+        g.add((blank_target, oa.hasSelector, blank_selector_video))
+        g.add((blank_selector_video, RDF.type, edu.InstantSelector))
+        g.add((blank_selector_video, RDF.value, Literal(annotation["time"] + "^^xsd:dateTime")))
+
+        if annotation["xywh"] != "None":
+            g.add((blank_selector_video, edu.hasMediaFrag, Literal(annotation["xywh"])))
+
+
+        g.add((blank_selector_video, edu.conllSentId, Literal(annotation["sent_id"])))
+
+        if annotation["word_id"] != "None":
+            g.add((blank_selector_video, edu.conllWordId, Literal(annotation["word_id"])))
+
+    context = ["http://www.w3.org/ns/anno.jsonld", {
+               "@base": "https://edurell.dibris.unige.it/annotator/auto/"+video_id+"/",
+      			"@version": 1.1,
+      			"edu": "https://teldh.github.io/edurell#"
+             } ]
+
+    jsonld = json.loads(g.serialize(format='json-ld'))
+    jsonld = pyld.jsonld.compact(jsonld, context)
+
+
+    for o in jsonld["@graph"]:
+        if "target" in o:
+            for i, t in enumerate(jsonld["@graph"]):
+                if o["motivation"] != "edu:linkingConll" and o["target"] == t["id"]:
+                    o["target"] = t
+                    del jsonld["@graph"][i]
+                    for j, s in enumerate(jsonld["@graph"]):
+                        if o["target"]["selector"] == s["id"]:
+                            o["target"]["selector"] = s
+                            del jsonld["@graph"][j]
+
+                            if o["motivation"] == "describing":
+                                for k, p in enumerate(jsonld["@graph"]):
+                                    if o["target"]["selector"]["startSelector"] == p["id"]:
+                                        o["target"]["selector"]["startSelector"] = p
+                                        del jsonld["@graph"][k]
+                                        break
+
+                                for k, p in enumerate(jsonld["@graph"]):
+                                    if o["target"]["selector"]["endSelector"] == p["id"]:
+                                        o["target"]["selector"]["endSelector"] = p
+                                        del jsonld["@graph"][k]
+                                        break
+
+    global data
+    data = jsonld
+
+    #print(data)
+    print("***** EDURELL - Video Annotation: burst_class.py::create_burst_graph(): Fine ******")
+
+    return g, data
+
+
+def get_burst_graph(conceptVocabulary):
+    global videoid
+    context = ["http://www.w3.org/ns/anno.jsonld", {
+               "@base": "https://edurell.dibris.unige.it/annotator/auto/"+videoid+"/",
+      			"@version": 1.1,
+      			"edu": "https://teldh.github.io/edurell#"
+             } ]
+
+    global data
+
+    graph = Graph()
+
+    for concept in conceptVocabulary.keys():        
+        uri_concept = URIRef("concept_" + concept.replace(" ", "_"))
+        graph.add((uri_concept, RDF['type'], SKOS.Concept))
+        graph.add((uri_concept, SKOS.prefLabel, Literal(concept, lang='en')))
+        for synonym in conceptVocabulary[concept]:
+            graph.add((uri_concept, SKOS.altLabel, Literal(synonym, lang='en')))
+
+    jsonld = json.loads(graph.serialize(format='json-ld'))
+    jsonld = pyld.jsonld.compact(jsonld, context)        
+
+    localVocabulary = {"id": "localVocabulary", "type": "skos:Collection", "skos:member": []}
+
+    localVocabulary["skos:member"] = jsonld["@graph"]
+
+    data["@graph"].append(localVocabulary)
+
+    return data

@@ -155,28 +155,30 @@ export default class GraphKnowledge extends React.Component {
           }
         }
         else {
+          console.log("else")
           conceptVocabularyMap[concept['skos:prefLabel']['@value']]=[]
         }
       }
     }
 
-    //console.log(conceptVocabularyMap)
 
     let tempSyn = [];
     let finalNodes = [];
 
     for (const node of graphData["@graph"]){
-
       //creating a node if it's a a concept
       if(node.type==='skos:Concept'){
         let nodelabel
         if(node.id.startsWith("edu:")){
           nodelabel= node.id.slice(4).replaceAll("_"," ")
         }
-        else{
-          nodelabel= node.id.replaceAll("_"," ")
+        if(node.id.startsWith("concept_")){
+          //nodelabel= node.id.slice(8)
+          nodelabel= node.id.slice(8).replaceAll("_"," ")
+          console.log(nodelabel)
         }
         if(! tempSyn.includes(nodelabel)) {
+          console.log("sinonimi")
           
           let synonymsId = [];
           let nodeName = "";
@@ -197,8 +199,7 @@ export default class GraphKnowledge extends React.Component {
               nodeWithSyns.push(synonym);
               tempSyn.push(synonym)
             }
-        
-            synonymsId = conceptVocabularyMap[nodelabel].map(el => "edu:" + el.replaceAll(" ", "_"));
+            synonymsId = conceptVocabularyMap[nodelabel].map(el => "concept_" + el.replaceAll(" ", "_"));
             nodeWithSyns.sort();
 
             nodeName = "";
@@ -215,39 +216,39 @@ export default class GraphKnowledge extends React.Component {
             synonymsId = []
             nodeName = nodelabel;
           }
-          finalNodes.push(node.id)
-          this.state.graph.nodes.push({id: node.id, synonymsId: synonymsId, label: nodeName, color: baseColor, shadow:true, font: {color : 'black' , face: 'monospace'} })
+          finalNodes.push(nodelabel)
+          this.state.graph.nodes.push({id: nodelabel, synonymsId: synonymsId, label: nodeName, color: baseColor, shadow:true, font: {color : 'black' , face: 'monospace'} })
         }
       }
     }
 
     for (const node of graphData["@graph"]){
-      if(node.type==='oa:annotation'){
+      if(node.type==='Annotation'){
         if(node.body!=null){
-          //creating an edge if the motivation is linking
-        
-
+          //creating an edge if the motivation is linking    
           if(node.motivation==='edu:linkingPrerequisite'){
             if(node.target!=null && node.target["dcterms:subject"]!=null && node.target["dcterms:subject"].id!=null){
 
-              let nodePrereq = node.body;
-              let nodeTarget = node.target["dcterms:subject"].id;
+              let nodePrereq = node.body.replace("concept_", "");
+              let nodeTarget = node.target["dcterms:subject"].id.replace("concept_", "");
+              console.log(nodePrereq)
+              console.log(nodeTarget)
 
               for (let n of this.state.graph.nodes) {
                 if(n.synonymsId.includes(node.body)) {
                   nodePrereq = n.id;
+                  console.log(nodePrereq)
                 }
                 if(n.synonymsId.includes(node.target["dcterms:subject"].id)) {
                   nodeTarget = n.id;
+                  console.log(nodeTarget)
                 }
               }
 
               if(!this.state.graph.edges.some(e => e.from === nodePrereq && e.to === nodeTarget)){
                 this.state.graph.edges.push({from: nodePrereq, to: nodeTarget})
-                
+
                 var conceptTimeBegin = node.target.selector.value.replace("^^xsd:dateTime","");
-                let t = node.target["dcterms:subject"].id//.replace("edu:", "")
-                let p = node.body//.replace("edu:","")
                 
                 this.linkingTimestamps.set(nodePrereq+"-.-"+nodeTarget, 
                   {
@@ -279,8 +280,11 @@ export default class GraphKnowledge extends React.Component {
             var beginSeconds = this.convertTimeInSeconds(conceptTimeBegin)
             var endSeconds = this.convertTimeInSeconds(conceptTimeEnd)
 
-            let nodeD = node.body;
+            let nodeD = node.body.replace("concept_", "");
+            console.log("nodeD")
+            console.log(nodeD)
             for (let n of this.state.graph.nodes) {
+              console.log(n)
               if(n.synonymsId.includes(node.body)) {
                 nodeD = n.id;
               }
@@ -302,13 +306,15 @@ export default class GraphKnowledge extends React.Component {
               this.descriptionTimestamps.set(nodeD, 
                 {
                   id: nodeD, 
-                  word: [node.body],
+                  word: [nodeD],
                   descriptionType: [node["skos:note"]],
                   beginTime: [conceptTimeBegin], 
                   beginTimeInSec: [beginSeconds],  
                   endTime: [conceptTimeEnd], 
                   endTimeInSec:  [endSeconds]
                 })
+
+                console.log(this.descriptionTimestamps)
             }
             
             
@@ -349,54 +355,33 @@ export default class GraphKnowledge extends React.Component {
               //console.log("--")
               //console.log(result.descriptionType[i])
               
-              if(result.descriptionType[i] == "Definition"){
+              if(result.descriptionType[i] == "conceptDefinition"){
+                console.log("CONCEPTDEFINITION")
                 dotArray.push({ time: result.beginTime[i] , backgroundColor: '#228B22', size: 15})
-                
-                /*
-                if(first_def){
-
-                  // Select concept to show in popup
-                  let words = result.word.map(el => el.slice(4).replaceAll("_"," "))
-                  let timestamps = result.beginTime
-                  let popupMap = {}
- 
-                  for(let i=0; i<words.length; i++) {
-                    popupMap[words[i]] = []
-                  }
-
-                  for(let i=0; i<words.length; i++) {
-                    popupMap[words[i]].push(timestamps[i])
-                  }
-
-                  this.setState({
-                    showPopup: true ,
-                    xPopup : DOM.x +10, 
-                    yPopup : DOM.y+10, 
-                    //conceptNamePopup: result.id.slice(4).replaceAll("_"," ") ,
-                    //conceptList: result.word.map(el => el.slice(4).replaceAll("_"," ")),
-                    //conceptTimeBeginPopup: result.beginTime[i]
-                    //conceptTimeBeginList: result.beginTime
-                    popupMap: popupMap
-                  })
-                  first_def = false
-                }
-                */
               }
                 
               else
                 dotArray.push({ time: result.beginTime[i] , backgroundColor: '	#686868', size: 10})
               
-              // Select concept to show in popup
-              let words = result.word.map(el => el.slice(4).replaceAll("_"," "))
+              // Select concept to show in popup             
+              let words = result.word.map(el => el.slice(8).replaceAll("_"," "))
+              console.log(words)
               let timestamps = result.beginTime
               let popupMap = {}
 
               for(let i=0; i<words.length; i++) {
                 popupMap[words[i]] = {"Definition": [], "In depth": []}
+                console.log(popupMap[words[i]])
               }
 
               for(let i=0; i<words.length; i++) {
-                popupMap[words[i]][result.descriptionType[i]].push(timestamps[i])
+                console.log("non lo so")
+                if (result.descriptionType[i] == "conceptDefinition") {
+                  popupMap[words[i]]["Definition"].push(timestamps[i])
+                }
+                if (result.descriptionType[i] == "conceptExpansion") {
+                  popupMap[words[i]]["In depth"].push(timestamps[i])
+                }
               }
 
               this.setState({
@@ -428,24 +413,7 @@ export default class GraphKnowledge extends React.Component {
         this.setState({showPopup: false})  
         this.dotsChannel.postMessage([])     
       },
-
-      /*when you double-click a node on the graph it :
-          - send a message to the Video Component to change the timestamp of the video
-          - update the user history on the backend to collect user's behavior statistics
-      */
-      /*doubleClick: ({nodes})=>{
-        const result = this.descriptionTimestamps.get(nodes[0]);
-        if(result!==undefined){
-          if(result.beginTime!=null){
-            this.channel.postMessage({to: 'Video', msg: result.beginTime})
-            updateHistoryRequest({url: this.props.videoUrl, node_clicks: 1, concept: result.id}, this.context)
-          }
-          updateHistoryRequest({url: this.props.videoUrl, node_clicks: 1}, this.context)
-        }
-      }*/
     }
-
-    //this.removeTransitivity(this.state.graph)
 
     this.currentVideoTimeChannel = new BroadcastChannel("videoCurrentTime");
 

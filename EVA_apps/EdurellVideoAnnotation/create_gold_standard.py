@@ -37,7 +37,7 @@ def create_gold(video, annotators, combination_criteria, name):
         data["video_id"] = video
         data["graph_type"] = "gold standard"
         data["gold_name"] = name
-        data["conceptVocabulary"] = create_skos_dictionary(conceptVocabulary)
+        data["conceptVocabulary"] = create_skos_dictionary(conceptVocabulary, video, isGoldCreation=True)
 
         db_mongo.insert_gold(data)
 
