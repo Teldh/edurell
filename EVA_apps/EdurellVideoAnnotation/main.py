@@ -514,6 +514,7 @@ def burst_launch():
         concept_map, definitions = burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary)
     else:
         print("Starting Burst " + burstType)
+        # TODO check analysis here
         concept_map, definitions = burst_extraction(video_id, concepts)
     # ---------------------
 

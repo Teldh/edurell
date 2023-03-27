@@ -1,56 +1,7 @@
 import pysrt
 import os
-#import pafy
-import cv2
 from youtube_transcript_api import YouTubeTranscriptApi
 from nltk import tokenize
-
-
-
-#def subs_from_srt():
-#    srt = pysrt.open(os.path.dirname(os.path.abspath(__file__)) + "\\video\\subtitles.srt")
-#    subs = []
-#
-#    for sub in srt:
-#        # new_sentence = Subtitle(sub.text, (sub.start, sub.end))
-#        subs.append({"text": sub.text,
-#                     "start": sub.start.hours * 3600 + sub.start.minutes * 60 + sub.start.seconds + sub.start.milliseconds / 1000,
-#                     "end": sub.end.hours * 3600 + sub.end.minutes * 60 + sub.end.seconds + sub.end.milliseconds / 1000})
-#
-#    return subs
-#
-#
-#def text_from_srt():
-#    srt = pysrt.open(
-#        os.path.dirname(os.path.abspath(__file__)) + "\\video\\subtitles.srt")
-#    text = ""
-#
-#    for sub in srt:
-#        text += sub.text + " "
-#
-#    return text
-#
-#
-#def get_sentences_from_punto(subs):
-#    temp_list = []
-#    temp_sentence = ""
-#    for s in subs:
-#        temp_sentence += " " + s["text"].replace("\n", " ")
-#        if s["text"][-1] == ".":
-#            temp_list.append(temp_sentence)
-#            temp_sentence = ""
-#    return temp_list
-
-
-#def get_youtube_cap(url):
-#    # solve problem with pafy if appears 'like_count' in console
-#    # https://stackoverflow.com/questions/70297028/i-have-a-problem-with-dislike-error-when-creating-an-pafy-new-url-perhaps-its
-#    # go to your env installation folder /lib/python3.7/site-packages/pafy/backend_youtube_dl.py and comment lines 53 and 54
-#    # comment line with self._likes and self._dislikes
-#    # print('\033[91m'+"REMAINDER FROM get_youtube_cap() TO COMMENT LINES"+'\033[0m')
-#    play = pafy.new(url).streams[0]  # we will take the lowest quality stream
-#    assert play is not None  # makes sure we get an error if the video failed to load
-#    return cv2.VideoCapture(play.url)
 
 
 def speech_from_youtube(yt_video_id:str):

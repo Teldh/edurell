@@ -111,7 +111,7 @@ class ImageClassifier:
         cv2.dilate(img_bw, cv2.getStructuringElement(cv2.MORPH_RECT, (12, 12)), img_bw,iterations = 3)
         return cv2.findContours(img_bw, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
     
-    def _read_text_with_bbs(self, img, conf=80) -> List[Tuple[str,Tuple[int,int,int,int]]]:
+    def _read_text_with_bbs(self, img, xywh_orig, conf=80) -> List[Tuple[str,Tuple[int,int,int,int]]]:
         data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
         texts = data['text']
         xs = data['left']
@@ -121,29 +121,53 @@ class ImageClassifier:
         confs = data['conf']
         lines = data['line_num']
         texts_with_bb = []
+        x_off,y_off,img_w,img_h = xywh_orig
 
-        len_texts = len(texts)
+        last_text_indx = len(texts)-1
         text = ''
         ended_line = True
         for i, word in enumerate(texts):
-            next_line = lines[i]-1 if i == len_texts-1 else lines[i+1]
+            next_line = lines[i+1] if i < last_text_indx else lines[i]-1 
             if confs[i]>=conf:
-                if next_line-lines[i]==0: 
+                # there won't be line change
+                if next_line-lines[i]==0:
+                    # first word of line: reset vars
                     if ended_line:
-                        start_point = (xs[i],ys[i])
+                        start_x = xs[i]
+                        min_y = img_h; max_y = 0; cumul_w = 0
                         ended_line = False
+                    # middle sentence word: add width for previous space
+                    else:
+                        cumul_w += xs[i]-(xs[i-1]+ws[i-1])
                     text += word + ' '
+                    min_y = min(ys[i],min_y)
+                    max_y = max(hs[i]+ys[i]+y_off,max_y)
+                    cumul_w += ws[i]
+                # there will be line change
                 else:
+                    # single word phrase: reset vars
                     if ended_line:
-                        start_point = (xs[i],ys[i])
+                        start_x = xs[i]
+                        min_y = img_h; max_y = 0; cumul_w = 0
+                    # last word of sentence before new line: add width for previous space
+                    else:
+                        cumul_w += xs[i]-(xs[i-1]+ws[i-1])
                     text += word + '\n'
+                    # if there's some text flush it
                     if text.strip(): 
-                        texts_with_bb.append((text,(*start_point,ws[i],hs[i])))
+                        texts_with_bb.append((text,((start_x+x_off)/img_w,
+                                                    (min(ys[i],min_y)+y_off)/img_h,
+                                                    (cumul_w + ws[i])/img_w,
+                                                    (max(hs[i]+ys[i]+y_off,max_y)-(ys[i]+y_off))/img_h)))
                     text = ''
-                    ended_line = True
+                    ended_line = True    
         else:
+            # if there's still some text flush it
             if not ended_line:
-                texts_with_bb.append((text + word + '\n',(*start_point,ws[i],hs[i])))
+                texts_with_bb.append((text,((start_x+x_off)/img_w,
+                                            (min(ys[i],min_y)+y_off)/img_h,
+                                            (cumul_w + ws[i])/img_w,
+                                            (max(hs[i]+ys[i]+y_off,max_y)-(ys[i]+y_off))/img_h)))
         return texts_with_bb
 
     def _scan_image_for_text_and_bounding_boxes(self):
@@ -151,12 +175,14 @@ class ImageClassifier:
         RGB, BGR or GRAYSCALED but with len(image_shape) == 3 always
         '''
         img_bw = self._convert_grayscale()
+        img_height,img_width = img_bw.shape
         contours = self._preprocess_image(img_bw)
         y_and_texts_with_bb = []
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
-            img_cropped = img_bw[y:y + h, x:x + w]
-            insort_left(y_and_texts_with_bb,(y,self._read_text_with_bbs(img_cropped)))
+            img_cropped = img_bw[y:y+h,x:x+w]
+            text_read = self._read_text_with_bbs(img_cropped,(x,y,img_width,img_height))
+            insort_left(y_and_texts_with_bb,(y,text_read))
         self._texts_with_contour = [text_with_bb 
                                     for (_,texts_with_bb) in y_and_texts_with_bb
                                     for text_with_bb in texts_with_bb]
@@ -354,15 +380,21 @@ class ImageClassifier:
         self._color_scheme = color_scheme
         return self
     
-    def _debug_show_image(self):
-        from matplotlib import pyplot as plt
+    def _debug_show_image(self,axis=None):
         if self._image is not None:
             if self._color_scheme == COLOR_BGR:
                 image = self._image.copy()
-                plt.imshow(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
+                cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
             else:
-                plt.imshow(self._image)
-            plt.show()
+                image = self._image
+            if axis is not None:
+                axis.axis('off')
+                axis.imshow(image)
+            else:
+                from matplotlib import pyplot as plt
+                plt.axis('off')
+                plt.imshow(image)
+            
     
     def reset(self):
         return self.set_img(None)
@@ -370,14 +402,17 @@ class ImageClassifier:
 
 def draw_bounding_boxes_on_image(img, bounding_boxes:'list[tuple[(int,int,int,int)]]'):
     img = img.copy()
+    if len(img.shape) == 3:
+        img_h,img_w,_ = img.shape
+    else:
+        img_h,img_w = img.shape
     for xywh in bounding_boxes:
-        x = xywh[0]; y = xywh[1]; w = xywh[2]; h = xywh[3]
+        # rescale bbs
+        x = int(xywh[0]*img_w); y = int(xywh[1]*img_h); w = int(xywh[2]*img_w); h = int(xywh[3]*img_h)
+        # draw
         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
     return img
         
-
-
-#from words import extract_keywords, extract_title
 
 if __name__ == '__main__':
     import os
@@ -386,177 +421,3 @@ if __name__ == '__main__':
     print(classif.detect_faces())
     text = classif.extract_text(return_text=True)
     print(f"text: {text}")
-    #for sentence in text:
-    #    print(f"sentence: {sentence}")
-    #    print(f"title: {extract_title(sentence)}")
-    #    print(f"keywords: {extract_keywords(sentence)}")  
-
-
-
-#UNUSED
-#def color_histogram_on_clusters(video_url, cluster_starts, cluster_ends, S, seconds_range):
-#    """
-#    Take a list of clusters and compute the color histogram on end and start of the cluster
-#    :param video_url: video url from youtube
-#    :param cluster_list
-#    :param S: scala per color histogram
-#    :param seconds_range: aggiustare inizio e fine dei segmenti in base a differenza nel color histogram
-#    """
-#
-#    if "watch?v=" in video_url:
-#        video_id = video_url.split("?v=")[-1]
-#        #print(video_id)
-#        #video_id = video_url.split('&')[0].split("=")[1]
-#    else:
-#        video_id = video_url.split("/")[-1]
-#    #video_id = video_url.split('&')[0].split("=")[1]
-#
-#    current_path = os.path.dirname(os.path.abspath(__file__))
-#    video_path = os.path.join(current_path, "static", "videos", video_id, video_id + ".mp4")
-#    #cap = get_youtube_cap(video_url)
-#    cap = cv2.VideoCapture(video_path)
-#    if not cap.isOpened():
-#        video_path = video_path.replace(".mp4",".mkv")
-#        cap = cv2.VideoCapture(video_path)
-#    print(video_path)
-#    fps = cap.get(cv2.CAP_PROP_FPS)
-#    print("fps:", fps)
-#
-#    # cluster_ends = []
-#    # cluster_starts = []
-#    # for c in cluster_list:
-#    #     cluster_ends.append(int(c.end_time * fps))
-#    #     cluster_starts.append(int(c.start_time * fps))
-#
-#
-#    #prendo frame iniziali e finali dei segmenti
-#    cluster_frame_ends = []
-#    cluster_frame_starts = []
-#    for i, c in enumerate(cluster_starts):
-#        cluster_frame_ends.append(int(cluster_ends[i] * fps))
-#        cluster_frame_starts.append(int(cluster_starts[i] * fps))
-#
-#    print("PRIMA:")
-#    print(cluster_frame_starts)
-#    print(cluster_frame_ends)
-#    print()
-#
-#    frame_number = 0
-#    summation = 0
-#    frame_to_skip = int(fps)* 10 #guardo un frame al secondo
-#
-#    previous_hist = []
-#    all_diffs = []
-#    images_path = []
-#
-#    '''Calcolo le dif per trovare threshold con la formula '''
-#    print("Histograms Progress: ", end="")
-#    while cap.isOpened():
-#
-#        ret, current_frame = cap.read()
-#        cap.set(1, frame_number)
-#
-#        if ret:
-#            current_frame = cv2.resize(current_frame, (240, 180))
-#
-#            image = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
-#            hist = cv2.calcHist([image], [0], None, [32], [0, 128])
-#            hist = cv2.normalize(hist, hist)
-#
-#            if frame_number > 0:
-#
-#                diff = 0
-#                for i, bin in enumerate(hist):
-#                    diff += abs(bin[0] - previous_hist[i][0])
-#                all_diffs.append(diff)
-#                summation += diff
-#
-#            frame_number += frame_to_skip
-#            previous_hist = hist
-#
-#            if cv2.waitKey(1) & 0xFF == ord('q'):
-#                break
-#
-#        else:
-#            break
-#            
-#    cap.release()
-#    threshold = S * (summation / frame_number)
-#
-#    '''
-#    Controllo se c'è un cambio scena in un intorno di "seconds_range" frames dalla fine ed inizio di ciascun cluster.
-#    '''
-#
-#    start_changes = []
-#    end_changes = []
-#
-#    for end in cluster_frame_ends:
-#        change_found = False
-#        for i in range(seconds_range):
-#            end_diff = int(end / frame_to_skip)
-#
-#            if end_diff + i < len(all_diffs) and all_diffs[end_diff + i] > threshold:
-#                sec = (end + i) / fps
-#                end_changes.append(sec)
-#                change_found = True
-#                break
-#
-#        if not change_found:
-#            end_changes.append(-1)
-#
-#
-#
-#    for j, start in enumerate(cluster_frame_starts):
-#        change_found = False
-#        for i in range(seconds_range):
-#            start_diff = int(start/frame_to_skip)
-#
-#            if start_diff - i >= 0 and all_diffs[start_diff - i] > threshold:
-#                sec = (start - i) / fps
-#                start_changes.append(sec)
-#                change_found = True
-#                break
-#
-#        if not change_found:
-#            start_changes.append(-1)
-#
-#
-#
-#    # for i, c in enumerate(cluster_list):
-#    #     if start_changes[i] != -1:
-#    #         c.start_time = start_changes[i]
-#    #     if end_changes[i] != -1:
-#    #         c.end_time = end_changes[i]
-#
-#    for i, c in enumerate(cluster_starts):
-#        if start_changes[i] != -1:
-#            cluster_starts[i] = start_changes[i]
-#        if end_changes[i] != -1:
-#            cluster_ends[i] = end_changes[i]
-#
-#        cluster_starts[i] = round(cluster_starts[i], 2)
-#        cluster_ends[i] = round(cluster_ends[i], 2)
-#
-#    #print(cluster_starts)
-#
-#    # salvo immagini da mostrare nella timeline
-#    cap = get_youtube_cap(video_url)
-#
-#    for i, start in enumerate(cluster_frame_starts):
-#
-#        cap.set(1, start)
-#        ret, current_frame = cap.read()
-#
-#        current_path = os.path.dirname(os.path.abspath(__file__))
-#        image_name = str(i) #str(cluster_starts[i]).replace(".","_")
-#
-#        saving_position = os.path.join(current_path, "static", "videos", video_id, image_name + ".jpg")
-#        print(saving_position)
-#        #saving_position = "videos\\" + video_id + "\\" + str(start) + ".jpg"
-#        cv2.imwrite(saving_position, current_frame)
-#        images_path.append("videos/" + video_id + "/" + image_name + ".jpg")
-#
-#    cap.release()
-#    #print(images_path)
-#    ''' Ritorno le path delle immagini della timeline'''
-#    return images_path, cluster_starts, cluster_ends
