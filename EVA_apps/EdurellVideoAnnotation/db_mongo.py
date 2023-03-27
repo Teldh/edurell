@@ -90,12 +90,14 @@ def insert_gold(data):
         new_graph = {"$set": {"graph": data["graph"], "conceptVocabulary": data["conceptVocabulary"]}}
         collection.update_one(query, new_graph)
 
-
 def insert_conll_MongoDB(data):
     collection = db.conlls
     if collection.find_one({"video_id": data["video_id"]}) is None:
         collection.insert_one(data)
 
+def get_video_segmentation(video_id):
+    collection = db.video_text_segmentation
+    return collection.find_one({"video_id":video_id})
 
 def insert_video_data(data):
     collection = db.videos
@@ -105,6 +107,10 @@ def insert_video_data(data):
     #     new_graph = {"$set": {"extracted_keywords": data["extracted_keywords"]}}
     #     collection.update_one({"video_id": data["video_id"]}, new_graph)
 
+def insert_video_text_segmentation(data):
+    collection = db.video_text_segmentation
+    if collection.find_one({'video_id':data['video_id'] }) is None:
+        collection.insert_one(data)
 
 def get_conll(video_id):
     collection = db.conlls

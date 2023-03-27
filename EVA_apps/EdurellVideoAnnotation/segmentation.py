@@ -138,7 +138,6 @@ class TextSimilarityClassifier:
 
         Then are compared in terms of one or more predefined methods: 
             - time proximity of their frames within a tolerance\n
-            - NOT IMPLEMENTED ANYMORE { collision of their bounding boxes [improve adding a tol] }
         
         Then it is passed to is_partially_in_txt_version(), check that documentation
 
@@ -603,6 +602,7 @@ class VideoAnalyzer:
         Then both are compared in terms of cosine distance of their histograms (it's faster than flattening and computing on pure pixels)\n\n
         Lastly the distance between wach frame is selected as either the average of values, either with fixed value.\n
         In this instance with videos that are mostly static, the threshold is set to 0.9999
+        TODO improvements: validate positive feedback from xgboost with text identification
 
         Returns
         ----------
@@ -940,7 +940,7 @@ class VideoAnalyzer:
                             for startend in tft.start_end_frames]
         return None
 
-    def is_slide_video(self,slide_frames_percent_threshold:float=0.6):
+    def is_slide_video(self,slide_frames_percent_threshold:float=0.7):
         '''
         Returns
         -------
@@ -1034,11 +1034,14 @@ def main_in_segmentation():
     # WEAK_POINT not performing fast with long videos or text that composes character by character each frame 
     #video = VideoAnalyzer('yN7ypxC7838') #TODO try again with this video and measure cv2.resize() performances against pure analysis
     #video = VideoAnalyzer('g8w-IKUFoSU') #infants and juveniles forensic
-    video = VideoAnalyzer('PPLop4L2eGk') #introduction to ML
+    #video = VideoAnalyzer('PPLop4L2eGk') #introduction to ML
     #video = VideoAnalyzer('UuzKYffpxug') #estimating stature forensic
     #video = VideoAnalyzer('ujutUfgebdo')
+    video = VideoAnalyzer('sXLhYStO0m8') #sexing skeleton 1
     #video = VideoAnalyzer('rFRO8IwB8aY') # Lesson Med 33 minutes low score and very slow
-
+    video.is_slide_video()
+    print(video._video_slidishness)
+    return
     video.analyze_video(_show_info=True)
     #print(video.extract_titles())
     #video.create_thumbnails()
