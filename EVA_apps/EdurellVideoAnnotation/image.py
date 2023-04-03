@@ -105,6 +105,9 @@ class ImageClassifier:
         return img_bw
 
     def _preprocess_image(self,img_bw):
+        '''
+        Image is binarized and dilated to find contours of texts
+        '''
         img_bw.flags.writeable = True
         img_bw = img_bw.copy()
         cv2.threshold(img_bw, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV,img_bw)
@@ -112,6 +115,16 @@ class ImageClassifier:
         return cv2.findContours(img_bw, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)[0]
     
     def _read_text_with_bbs(self, img, xywh_orig, conf=80) -> List[Tuple[str,Tuple[int,int,int,int]]]:
+        '''
+        Read of text is made in this way:
+            - scan with pytesseract every word of the image (which is passed as cropped) and return as dict of words and other infos
+            - for every word in the structure i check if is regognized with a confidence above conf and save the delta line with respect to the previous
+            - if there's a delta line equal to zero i check if the previous line is ended ( -> there's a new sentence)
+            - otherwise we are in the middle of a sentence so width of the sentence must be accumulated (accounting also for spaces)
+            - the heights and start Y of every sentence are calculated as the average of every word (sometimes there's noise or other elemens like mouse cursors)
+            - if instead there's a delta line != 0 the sentence element is formed. New line is appended and bbs are normalized with respect to the original size of the full image
+            - lastly if there's still some text in the structure but the iterator has ended, flush it as before
+        '''
         data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
         texts = data['text']
         xs = data['left']
@@ -134,21 +147,31 @@ class ImageClassifier:
                     # first word of line: reset vars
                     if ended_line:
                         start_x = xs[i]
-                        min_y = img_h; max_y = 0; cumul_w = 0
+                        ys_words = []
+                        #min_y = img_h; 
+                        #max_y = 0
+                        hs_words = []
+                        cumul_w = 0
                         ended_line = False
                     # middle sentence word: add width for previous space
                     else:
                         cumul_w += xs[i]-(xs[i-1]+ws[i-1])
                     text += word + ' '
-                    min_y = min(ys[i],min_y)
-                    max_y = max(hs[i]+ys[i]+y_off,max_y)
+                    ys_words.append(ys[i])
+                    #min_y = min(ys[i],min_y)
+                    hs_words.append(hs[i])
+                    #max_y = max(hs[i]+ys[i]+y_off,max_y)
                     cumul_w += ws[i]
                 # there will be line change
                 else:
                     # single word phrase: reset vars
                     if ended_line:
                         start_x = xs[i]
-                        min_y = img_h; max_y = 0; cumul_w = 0
+                        ys_words = [ys[i]]
+                        #min_y = img_h; 
+                        #max_y = 0
+                        hs_words = [hs[i]]; 
+                        cumul_w = 0
                     # last word of sentence before new line: add width for previous space
                     else:
                         cumul_w += xs[i]-(xs[i-1]+ws[i-1])
@@ -156,23 +179,32 @@ class ImageClassifier:
                     # if there's some text flush it
                     if text.strip(): 
                         texts_with_bb.append((text,((start_x+x_off)/img_w,
-                                                    (min(ys[i],min_y)+y_off)/img_h,
+                                                    (mean(ys_words)+y_off)/img_h,
+                                                    #(min(ys[i],min_y)+y_off)/img_h,
                                                     (cumul_w + ws[i])/img_w,
-                                                    (max(hs[i]+ys[i]+y_off,max_y)-(ys[i]+y_off))/img_h)))
+                                                    mean(hs_words)/img_h)))
+                                                    #(max(hs[i]+ys[i]+y_off,max_y)-(ys[i]+y_off))/img_h)))
                     text = ''
                     ended_line = True    
         else:
             # if there's still some text flush it
             if not ended_line:
                 texts_with_bb.append((text,((start_x+x_off)/img_w,
-                                            (min(ys[i],min_y)+y_off)/img_h,
+                                            (mean(ys_words)+y_off)/img_h,
+                                            #(min(ys[i],min_y)+y_off)/img_h,
                                             (cumul_w + ws[i])/img_w,
-                                            (max(hs[i]+ys[i]+y_off,max_y)-(ys[i]+y_off))/img_h)))
+                                            mean(hs_words)/img_h)))
+                                            #(max(hs[i]+ys[i]+y_off,max_y)-(ys[i]+y_off))/img_h)))
         return texts_with_bb
 
     def _scan_image_for_text_and_bounding_boxes(self):
         '''
-        RGB, BGR or GRAYSCALED but with len(image_shape) == 3 always
+        Image is preprocessed and cropped in multiple rectangles of texts, then these are singularly analyzed
+        
+        Prerequisite
+        ------------
+        RGB, BGR or GRAYSCALED but with len(image_shape) == 3 always\n
+        __future__ (grayscale as image input of this function is deprecated because face recognition require 3 channels image)
         '''
         img_bw = self._convert_grayscale()
         img_height,img_width = img_bw.shape
@@ -193,8 +225,8 @@ class ImageClassifier:
         
         Returns
         -----------
-        True if at least one face has been found and return_contours is False
-        otherwise returns the full array of contours for every face
+        True if at least one text has been found and return_contours is False
+        otherwise returns the full array of contours for every text
         '''
         assert self._image is not None and len(self._image.shape) == 3
         self._scan_image_for_text_and_bounding_boxes()
@@ -229,52 +261,6 @@ class ImageClassifier:
     def get_img_shape(self):
         assert self._image is not None
         return self._image.shape
-
-    def get_max_size_text(self, return_index = False):
-        texts_with_contour = self._texts_with_contour
-        if texts_with_contour is not None:
-            max_index = -1
-            max_norm = -1
-            for indx, text_with_contour in enumerate(texts_with_contour):
-                curr_norm = norm(array([text_with_contour[1][2],text_with_contour[1][3]]))
-                if max_norm < curr_norm:
-                    max_index = indx
-                    max_norm = curr_norm
-            if not return_index:
-                return [texts_with_contour[max_index]]
-            else:
-                return max_index, texts_with_contour[max_index][0]
-        if not return_index:
-            return None
-        else:
-            return -1, None
-
-    def get_smaller_text(self):
-        texts_with_contour = self._texts_with_contour.copy()
-        texts_with_contour.remove(self.get_max_size_text(return_index=True)[0])
-        return [elem[0] for elem in texts_with_contour]
-
-    def get_min_size_text(self):
-        texts_with_contour = self._texts_with_contour
-        if texts_with_contour is not None:
-            min_index = -1
-            min_norm = inf
-            for indx, text_with_contour in enumerate(texts_with_contour):
-                curr_norm = norm(array([text_with_contour[1][2],text_with_contour[1][3]]))
-                if min_norm > curr_norm:
-                    min_index = indx
-                    min_norm = curr_norm
-            return [texts_with_contour[min_index][0]]
-        return None
-
-    def get_stat_params(self):
-        if self._image is not None:
-            flatten = self._image.flatten()
-            return (mean(flatten),var(flatten))
-        return (0,0)
-    
-    def is_empty_transition_image(self,var_threshold=1e-2):
-        return self.get_stat_params()[1] < var_threshold
 
     def is_similar_to(self,other_image:'ImageClassifier') -> bool:
         comp_method = self._comp_method
@@ -394,10 +380,6 @@ class ImageClassifier:
                 from matplotlib import pyplot as plt
                 plt.axis('off')
                 plt.imshow(image)
-            
-    
-    def reset(self):
-        return self.set_img(None)
 
 
 def draw_bounding_boxes_on_image(img, bounding_boxes:'list[tuple[(int,int,int,int)]]'):

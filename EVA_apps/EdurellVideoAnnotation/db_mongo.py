@@ -103,9 +103,12 @@ def insert_conll_MongoDB(data):
     if collection.find_one({"video_id": data["video_id"]}) is None:
         collection.insert_one(data)
 
-def get_video_segmentation(video_id):
+def get_video_segmentation(video_id, raise_error=True):
     collection = db.video_text_segmentation
-    return collection.find_one({"video_id":video_id})
+    item = collection.find_one({"video_id":video_id})
+    if item is None and raise_error:
+        raise Exception("Video has not been segmented yet, it must be firstly analyzed")
+    return item
 
 def insert_video_data(data):
     collection = db.videos
@@ -115,10 +118,13 @@ def insert_video_data(data):
     #     new_graph = {"$set": {"extracted_keywords": data["extracted_keywords"]}}
     #     collection.update_one({"video_id": data["video_id"]}, new_graph)
 
-def insert_video_text_segmentation(data):
+def insert_video_text_segmentation(data,update=False):
     collection = db.video_text_segmentation
     if collection.find_one({'video_id':data['video_id'] }) is None:
         collection.insert_one(data)
+        return
+    if update:
+        collection.update_one(data)
 
 def get_conll(video_id):
     collection = db.conlls
@@ -436,9 +442,27 @@ def get_extracted_keywords(video_id, title=False):
         return video["extracted_keywords"]
     else:
         return None
+    
+def remove_video(video_id):
+    '''
+    ### WARNING!!! NOT FULLY TESTED MAY BREAK THE DB DUE TO DATA ENTANGLEMENT
+    '''
+    query = {"video_id":video_id}
+    collections = ['videos','graphs','video_text_segmentation','conll']
+    #collections = ['video_text_segmentation']
+    for coll_name in collections:
+        collection = db.get_collection(coll_name)
+        if collection.find_one(query):
+            try:
+                collection.delete_one(query)
+                print(f'removing from {coll_name}')
+            except:
+                pass
 
 def remove_account(email):
-
+    '''
+    ### WARNING!!! NOT FULLY TESTED MAY BREAK THE DB DUE TO DATA ENTANGLEMENT
+    '''
     print("***** EDURELL - Video Annotation: db_mongo.py::remove_account() ******")
 
     query = {"email": email}
@@ -458,5 +482,5 @@ def remove_account(email):
     return "Not Found"
 
 if __name__ == '__main__':
-
-   print("***** EDURELL - Video Annotation: db_mongo.py::__main__ ******")
+    #remove_video('PPLop4L2eGk')
+    print("***** EDURELL - Video Annotation: db_mongo.py::__main__ ******")

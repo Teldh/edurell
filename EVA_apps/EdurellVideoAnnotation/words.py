@@ -1,9 +1,15 @@
-from conll import lemmatize
-import db_mongo
-
 import RAKE
 import phrasemachine
 import spacy
+import re
+
+from conll import lemmatize
+import db_mongo
+
+def get_keywords_from_title(text:str):
+    text = re.sub('[Dd]efinition|[Ii]ntroduction|\n',' ',text.lower())
+    Rake = RAKE.Rake(RAKE.SmartStopList())
+    return [keyword[0] for keyword in Rake.run(text, maxWords=3, minFrequency=1)]
 
 def extract_keywords(text:str,maxWords=3,minFrequency=1):
 
@@ -34,13 +40,11 @@ def extract_keywords(text:str,maxWords=3,minFrequency=1):
     #print(concepts)
     return concepts
 
-def get_real_keywords(video_id, title=False, defs=True):
-    graphs = db_mongo.get_graphs_info(video_id)
+def get_real_keywords(video_id, graphs, annotator_id, title=False, defs=True):
     if graphs is not None:
         #print("Annotator: ", graphs["annotators"][0]["name"])
-        first_annotator = graphs["annotators"][0]['id']
-        concept_map_annotator = db_mongo.get_concept_map(first_annotator, video_id)
-        definitions = db_mongo.get_definitions(first_annotator, video_id)
+        concept_map_annotator = db_mongo.get_concept_map(annotator_id, video_id)
+        definitions = db_mongo.get_definitions(annotator_id, video_id)
         keywords = []
 
         if defs:
@@ -65,5 +69,7 @@ if __name__ == '__main__':
     text1 = 'Forensic Archaeology and Anthropology\nPart.4\nEstimating Stature'
     text2 = 'an\nA Ablinerrin\ni oy\n\nThis example: (2.47 x [bone measurement 45.4cm]) + 54.10cm'
     text3 = 'YY\nS [ 2blteeretiny\n\nLeaves'
+    text4 = 'Machine Learning definition'
+    print(get_keywords_from_title(text2))
     #print(extract_title(text))
     #print(TextSimilarityClassifier().is_partially_in(text1,text2))

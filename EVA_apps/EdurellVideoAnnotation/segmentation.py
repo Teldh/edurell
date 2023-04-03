@@ -197,6 +197,7 @@ class TextSimilarityClassifier:
         '''
         checks = [bool(text1) and bool(text2)]
         comp_methods = self._comp_methods
+        removed_chars_count = None
 
         if all(checks) and COMPARISON_METHOD_TXT_SIM_RATIO in comp_methods:
             cleaner = self._txt_cleaner
@@ -224,6 +225,12 @@ class TextSimilarityClassifier:
                             or len_txt1_split <= len_txt2_split )
         
         if all(checks) and COMPARISON_METHOD_TXT_MISS_RATIO in comp_methods:
+            if removed_chars_count is None:
+                cleaner = self._txt_cleaner
+                text1_cleaned = cleaner.clean_text(text1); text2_cleaned = cleaner.clean_text(text2)
+                counter = Counter([change[0] for change in ndiff(text1_cleaned,text2_cleaned)])
+                removed_chars_count = 0 if not '-' in counter.keys() else counter['-']
+                text1_len = len(text1_cleaned)
             checks.append(  text1_len > 0 and 
                             removed_chars_count/len(text1_cleaned) < self.removed_chars_txt_ratio_thresh)
         
@@ -266,8 +273,6 @@ class TextSimilarityClassifier:
         return sum(prod(texts_vectorized,axis=0))/prod(norm(texts_vectorized,axis=1)) > confidence
 
     def set_comparison_methods(self,methods:List[int]):
-        assert not COMPARISON_METHOD_TXT_MISS_RATIO in methods or COMPARISON_METHOD_TXT_SIM_RATIO in methods, \
-                "Too low granularity in setting txt_missing and not txt_similarity"
         self._comp_methods = set(methods)
 
 TxSmCl = TextSimilarityClassifier
@@ -339,19 +344,32 @@ from video import VideoSpeedManager, LocalVideo
 from xgboost_model import XGBoostModelAdapter
 from itertools_extension import double_iterator, pairwise_linked_iterator
 from collections_extension import LiFoStack
+from words import get_keywords_from_title
 
 class VideoAnalyzer:
-
+    '''
+    This class analyzes videos from their ids in the path "__class__"-path/static/videos \n
+    _testing_path is for changing the folder path but it's used just for testing\n\n
+        - It provides a method to get the transcript from the youtube link associated to the id provided\n
+        - segment the transcript to obtain keyframes\n
+        - Analyze the whole video stream to segment slides,text and times on screen of those\n
+        - get the extracted text in different formats (tipically only one is used and the others are for debug)\n
+        - check if the video contains slides (for now this means text around the center of the screen) and the proportion with respect to the whole video len\n
+        - extract titles from the slides found\n
+        - ALPHA: create thumbnails based on the slides segmentation after having analyzed the text\n
+        - ALPHA: find definitions and in-depths of concepts expressed in the title of every slide
+    '''
     _text_in_video: List[TimedAndFramedText] or None = None
     _video_slidishness = None
     _cos_sim_img_threshold = None
     _frames_to_analyze = None
 
-    def __init__(self,video_id:str,from_youtube:bool=True) -> None:
+    def __init__(self,video_id:str,from_youtube:bool=True,_testing_path:str=None) -> None:
         if from_youtube:
             self._video_id = video_id
         else:
             raise Exception("not implemented!")
+        self._testing_path = _testing_path
     
     def _create_keyframes(self,start_times,end_times,S,seconds_range, image_scale:float=0.5):
         """
@@ -602,7 +620,7 @@ class VideoAnalyzer:
         Then both are compared in terms of cosine distance of their histograms (it's faster than flattening and computing on pure pixels)\n\n
         Lastly the distance between wach frame is selected as either the average of values, either with fixed value.\n
         In this instance with videos that are mostly static, the threshold is set to 0.9999
-        TODO improvements: validate positive feedback from xgboost with text identification
+        #TODO further improvements: for more accuracy this algorithm could include frames similarity to classify a segment as slide (which is a generally very static)
 
         Returns
         ----------
@@ -621,6 +639,7 @@ class VideoAnalyzer:
         speed = floor(num_frames / (num_segments))
         vsm.lock_speed(speed)
         iterations_counter:int = 0
+        txt_cleaner = TextCleaner()
         if estimate_threshold:
             cos_sim_values = empty((num_segments,vsm.get_video().get_dim_frame()[2]))
             #dists = empty((num_segments,vsm.get_video().get_dim_frame()[2]))
@@ -634,10 +653,20 @@ class VideoAnalyzer:
         answ_queue = deque([False,False])
         curr_frame = ImageClassifier(image_and_scheme=[None,vsm._color_scheme])
         prev_frame = curr_frame.copy()
+        frame_w,frame_h,num_colors = vsm.get_video().get_dim_frame()
         while iterations_counter < num_segments:
             prev_frame.set_img(vsm.get_frame())
             curr_frame.set_img(vsm.get_following_frame())
-            answ_queue.appendleft(scene_model.is_enough_slidish_like(prev_frame)); answ_queue.pop()
+            if scene_model.is_enough_slidish_like(prev_frame):
+                frame = prev_frame.get_img()
+                # validate slide in frame by slicing the image in a region that removes logos (that are usually in corners)
+                region = (slice(int(frame_h/4),int(frame_h*3/4)),slice(int(frame_w/4),int(frame_w*3/4)))
+                prev_frame.set_img(frame[region])
+                # double checks the text  
+                is_slide = bool(txt_cleaner.clean_text(prev_frame.extract_text(return_text=True)).strip())
+            else:
+                is_slide = False
+            answ_queue.appendleft(is_slide); answ_queue.pop()
 
             # if there's more than 1 True discontinuity -> cut the video
             if any(answ_queue) and start_frame_num is None:
@@ -664,7 +693,7 @@ class VideoAnalyzer:
             #diff_threshold = average(diffs,axis=0)+3*var(diffs,axis=0)
             #dist_threshold = (dists.max(axis=0) - dists.min(axis=0)) / 2
         else:
-            cos_sim_img_threshold = ones((1,vsm.get_video().get_dim_frame()[2]))*0.9999
+            cos_sim_img_threshold = ones((1,num_colors))*0.9999
         
         if _show_info:
             if estimate_threshold:
@@ -673,11 +702,7 @@ class VideoAnalyzer:
                 print(f"Cosine_similarity threshold: {cos_sim_img_threshold}")
                 #print(f"Estimated mean_dist_threshold: {dist_threshold}")
             print(f"Frames to analyze: {frames_to_analyze} of {num_frames} total frames")
-        counter:int = 0
-        for frame_window in frames_to_analyze:
-            counter += (frame_window[1] - frame_window[0])
-        self._video_slidishness = counter/(num_frames-1)
-
+        self._video_slidishness = sum([frame_window[1] - frame_window[0] for frame_window in frames_to_analyze])/(num_frames-1)
         self._cos_sim_img_threshold = cos_sim_img_threshold 
         self._frames_to_analyze = frames_to_analyze #dist_threshold, frames_to_analyze
 
@@ -736,8 +761,10 @@ class VideoAnalyzer:
         assert color_scheme_for_analysis is not None and (color_scheme_for_analysis == COLOR_BGR or color_scheme_for_analysis == COLOR_RGB)
         start_time = time.time()
         vsm = VideoSpeedManager(self._video_id,color_scheme_for_analysis)
-        if self._cos_sim_img_threshold is None:
+        if self._video_slidishness is None:
             self._preprocess_video(vsm,_show_info=_show_info)
+        else:
+            self._cos_sim_img_threshold = ones((1,vsm.get_video().get_dim_frame()[2]))*0.9999
         img_diff_threshold, frames_to_analyze = self._cos_sim_img_threshold, self._frames_to_analyze
         vsm.reset()
         if frames_to_analyze is None:
@@ -789,7 +816,7 @@ class VideoAnalyzer:
                 num_last_same_frame = vsm.get_prev_num_frame()
                 for indx_in_stack in sorted(where(~coll_TFT_stack_mask)[0],reverse=True):
                     coll_TFT_elem = collisions_TFT_list.pop(indx_in_stack)
-                    inserted = False
+                    merged = False
                     output_TFT_elem:TimedAndFramedText  # hinting variables for the IDE 
                     #  match on every element of the list sorted reversed because highly possible that 
                     for output_TFT_elem in output_TFT_stack: 
@@ -797,9 +824,9 @@ class VideoAnalyzer:
                         if txt_classif.are_cosine_similar(output_TFT_elem.get_full_text(), coll_TFT_elem.get_full_text()):# \
                                 #and txt_classif.is_partially_in(coll_TFT_elem,output_TFT_elem):
                             output_TFT_elem.start_end_frames.append((coll_TFT_elem.start_end_frames[0][0],num_last_same_frame))
-                            inserted = True
+                            merged = True
                             break
-                    if not inserted:
+                    if not merged:
                         #   append the whole structure to the list
                         coll_TFT_elem.start_end_frames[0] = (coll_TFT_elem.start_end_frames[0][0],num_last_same_frame)
                         output_TFT_stack.push(coll_TFT_elem)
@@ -813,7 +840,7 @@ class VideoAnalyzer:
            #print("  video analysis "+str(vsm.get_percentage_progression())+'%'+" progress"+" max_speed = "+str(max_speed)+" "+"."*(iterations_counter%12)+" "*12,end="\r")
             if _show_info:
                 print("  video analysis "+str(vsm.get_percentage_progression())+'%'+" progress"+"."*(iterations_counter%12)+" "*12,end="\r")
-            iterations_counter += 1
+                iterations_counter += 1
 
         output_TFT_list = list(output_TFT_stack)
         frames_dist_tol = vsm.get_video().get_fps()*10
@@ -884,7 +911,7 @@ class VideoAnalyzer:
 
         self._text_in_video = output_TFT_list
 
-    def get_extracted_text(self,format:Literal['str','list','list[text,box]','list[time,text,box]','list[time,list[text,box]]','list[id,text,box]']='list',from_ids:'tuple[int]' or None=None):
+    def get_extracted_text(self,format:Literal['str','list','list[text,box]','list[text,time,box]','list[time,list[text,box]]','list[id,text,box]']='list',from_ids:'tuple[int]' or None=None):
         """
         Returns the text extracted from the video.\n
         Text can be cleaned from non-alphanumeric characters or not.
@@ -897,7 +924,7 @@ class VideoAnalyzer:
             - 'list[time,list[text,box]]': a list of (times, list of (sentence, bounding-box))
             - 'list[text,box]': list of texts with bounding boxes
             - 'list[id,text,box]': list of tuple of id, text, and bounding boxes
-            - 'list[time,text,box]': list of repeated times (in frames) for every text_bounding_boxed
+            - 'list[text,time,box]': list of repeated times (in seconds) for every text_bounding_boxed
             - 'list[tuple(id,timed-text)]': list of tuples made of (startend times in seconds, text as string present in those frames)
         """
         if self._text_in_video is None:
@@ -919,11 +946,13 @@ class VideoAnalyzer:
                     timed_text_with_bb.append((_id,sentence,bb))
                     _id +=1
             return timed_text_with_bb
-        elif format=='list[time,text,box]':
+        elif format=='list[text,time,box]':
             timed_text_with_bb = []
+            video = LocalVideo(self._video_id)
             for tft in self._text_in_video:
+                st_en_frames = tft.start_end_frames[0]
                 for sentence,bb in tft.get_framed_sentences():
-                    timed_text_with_bb.append((tft.start_end_frames,sentence,bb))
+                    timed_text_with_bb.append((sentence.strip('\n'),(video.get_time_from_num_frame(st_en_frames[0]),video.get_time_from_num_frame(st_en_frames[1])),bb))
             return timed_text_with_bb
         elif format=='list[time,list[text,box]]':
             video = LocalVideo(self._video_id)
@@ -940,16 +969,24 @@ class VideoAnalyzer:
                             for startend in tft.start_end_frames]
         return None
 
-    def is_slide_video(self,slide_frames_percent_threshold:float=0.7):
+    def is_slide_video(self,precomputed_value:float=None,slide_frames_percent_threshold:float=0.5,return_value=False):
         '''
+        Computes a threshold against a value that can be calculated or passed as precomputed_value
+        
         Returns
         -------
-        True if percentage of recognized slidish frames is above the threshold
+        value and slide frames if return value is True\n
+        else\n
+        True and slide frames if percentage of recognized slidish frames is above the threshold
         '''
-        if self._video_slidishness is None:
-            self._preprocess_video(vsm=VideoSpeedManager(self._video_id,COLOR_RGB))
+        if precomputed_value is not None:
+            self._video_slidishness = precomputed_value
+        elif self._video_slidishness is None:
+            self._preprocess_video(vsm=VideoSpeedManager(self._video_id,COLOR_RGB,_testing_path=self._testing_path))
         self._video_slidishness:float
-        return self._video_slidishness > slide_frames_percent_threshold
+        if return_value:
+            return self._video_slidishness, self._frames_to_analyze
+        return self._video_slidishness > slide_frames_percent_threshold, self._frames_to_analyze
 
     def extract_titles(self,quant:float=.88,axis_for_outliers_detection:Literal['w','h','wh']='h',union=True,with_times=True):
         """
@@ -979,7 +1016,7 @@ class VideoAnalyzer:
         assert axis_for_outliers_detection in {'w','h','wh'} and 0 < quant < 1 and self.get_extracted_text(format='list[id,text,box]') is not None
         # convert input into columns slice for analysis
         sliced_columns = {'w':slice(2,3),'h':slice(3,4),'wh':slice(2,4)}[axis_for_outliers_detection]
-        texts_with_bb = self.get_extracted_text(format='list[time,text,box]')
+        texts_with_bb = self.get_extracted_text(format='list[text,time,box]')
         # select columns
         axis_array = array([text_with_bb[2][sliced_columns] for text_with_bb in texts_with_bb],dtype=dtype('float','float'))
         # compute statistical analysis on columns
@@ -989,12 +1026,22 @@ class VideoAnalyzer:
         if with_times:
             titles = itemgetter(*indices_above_threshold)(texts_with_bb)
         else:
-            titles = itemgetter(*indices_above_threshold)(list(zip(*list(zip(*texts_with_bb))[1:])))
+            titles = itemgetter(*indices_above_threshold)(list(zip(*list(zip(*texts_with_bb))[slice(0,3,2)])))
         return titles
 
     def create_thumbnails(self):
         '''
-        could replace previous creation of keyframes
+        FOR NOW UNUSED\n
+        Create thumbnails of keyframes from slide segmentation
+
+        -------------------------------
+        Prerequisites
+        -------------
+        Must have runned analyze_vdeo()
+
+        -------------------------------
+        could replace previous creation of keyframes\n
+        but for now it can't work due to functions entanglement and db dependency
         '''
         images_path = []
         images_already_present = False
@@ -1008,6 +1055,8 @@ class VideoAnalyzer:
                         images_path.append("videos/" + self._video_id + "/" + File)
             images_already_present = True
         assert self._text_in_video is not None
+        if not self.is_slide_video():
+            return None,None,None
         time_text = self.get_extracted_text(format='list[time,list[text,box]]')
         start_times =[]
         end_times = []
@@ -1026,35 +1075,92 @@ class VideoAnalyzer:
             end_times.append(end_seconds)
         return start_times, end_times, images_path
         
+    def get_definitions_and_indepth_times(self,titles:List[dict],definition_tol_seconds:float = 3):
+        '''
+        This is an attempt to find definitions from timed sentences of the transcript and the timed titles of the slides.\n
+        Heuristic is that if there's a keyword in the title of a slide (frontpage slide excluded)
+        find the first occurence of that keyword in the transcript within a tolerance seconds window before and after the appearance of the slide
+        set that as "definition" only if it contains the keyword of the title .\n 
+        Heuristic for the in-depth is that after definition there's an in-depth of the slide, this means that the concept is explained further there.
+        '''
+        subtitles,_ = self.get_transcript()
+        timed_sentences = subtitles
+        #transcription = ' '.join([sub['text'] for sub in subtitles])
+        #punct = Punctuator(os.path.join(os.path.dirname(os.path.abspath(getfile(self.__class__))), "punctuator", "Demo-Europarl-EN.pcl"))
+        #punctuated_transcription = punct.punctuate(transcription)
+        #sentences = tokenize.sent_tokenize(punctuated_transcription)
+        #timed_sentences = get_timed_sentences(subtitles,sentences)
+
+        is_introductory_slide = True
+        definitions = {}
+        in_depths = {}
+        txt_classif = TextSimilarityClassifier([COMPARISON_METHOD_TXT_MISS_RATIO])
+        print(titles)
+        for title in titles:
+            if is_introductory_slide or title['start_end_seconds'] == start_end_times_introductory_slides:
+                start_end_times_introductory_slides = title['start_end_seconds']
+                is_introductory_slide = False
+            else:
+                start_time_title,end_time_title = title['start_end_seconds'][0],title['start_end_seconds'][1]
+                title_keywords = get_keywords_from_title(title['title'])
+                title_keyword = title_keywords[0] #TODO how to select best keyword in case more than 1 are found in the title?
+                for timed_sentence in timed_sentences:
+                    if title_keyword not in set(definitions.keys()) and \
+                    abs(start_time_title - timed_sentence['start']) < definition_tol_seconds and \
+                    title_keyword in timed_sentence['text']:
+                        print('********** Here comes the definition of the following keyword *******')
+                        print(f'keyword from title: {title_keyword}')
+                        print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
+                        definitions[title_keyword] = timed_sentence
+                        print()
+                    # shift end times threshold to incorporate split slides with the same title
+                    if title_keyword in set(definitions.keys()) and \
+                    end_time_title > timed_sentence['end'] - 1 and \
+                    timed_sentence['start'] > definitions[title_keyword]['start'] and \
+                    (True or txt_classif.is_partially_in_txt_version(title_keywords[0],timed_sentence['text'])):
+                        if title_keyword not in set(in_depths.keys()):
+                            print('********** Here comes the indepth of the following keyword *******')
+                            print(f'keyword from title: {title_keyword}')
+                            in_depths[title_keyword] = [timed_sentence]
+                            print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
+                        elif not any([True for tmd_sentence in in_depths[title_keyword] if tmd_sentence['start'] == timed_sentence['start']]):
+                            in_depths[title_keyword].append(timed_sentence)
+                            print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
+        print()
+        return definitions, in_depths           
+
+
 
 from words import extract_keywords
 
-def main_in_segmentation():
+def _main_in_segmentation():
     import db_mongo
     # WEAK_POINT not performing fast with long videos or text that composes character by character each frame 
     #video = VideoAnalyzer('yN7ypxC7838') #TODO try again with this video and measure cv2.resize() performances against pure analysis
     #video = VideoAnalyzer('g8w-IKUFoSU') #infants and juveniles forensic
-    #video = VideoAnalyzer('PPLop4L2eGk') #introduction to ML
+    video = VideoAnalyzer('PPLop4L2eGk') #introduction to ML
     #video = VideoAnalyzer('UuzKYffpxug') #estimating stature forensic
     #video = VideoAnalyzer('ujutUfgebdo')
-    video = VideoAnalyzer('sXLhYStO0m8') #sexing skeleton 1
+    #video = VideoAnalyzer('sXLhYStO0m8') #sexing skeleton 1
     #video = VideoAnalyzer('rFRO8IwB8aY') # Lesson Med 33 minutes low score and very slow
-    video.is_slide_video()
-    print(video._video_slidishness)
-    return
+    #segmentation_data = db_mongo.get_video_segmentation('PPLop4L2eGk',raise_error=False)
+    #video._video_slidishness = segmentation_data['video_slidishness']
+    #video._frames_to_analyze = segmentation_data['slide_frames']
     video.analyze_video(_show_info=True)
-    #print(video.extract_titles())
-    #video.create_thumbnails()
-    results = video.extract_titles()
-    results_dict = [{'start_end_frames':start_end_frames,'title':title,'xywh_normalized':bb} for (start_end_frames,title,bb) in results]
+
+    results = video.extract_titles(quant=0.7)
+    results_dict = [{'start_end_frames':start_end_frames,'title':title,'xywh_normalized':bb} for (title,start_end_frames,bb) in results]
     pprint(results_dict)
+    return
     
+
+    # print results
     image = ImageClassifier(image_and_scheme=[None, COLOR_BGR])
     video_ref = LocalVideo('PPLop4L2eGk')
     from matplotlib import pyplot as plt
     fig, ax = plt.subplots(nrows=1,ncols=5, figsize=(16,9))
     j=0
-    for (start_end_frames,title,bb) in results:
+    for (title,start_end_frames,bb) in results:
         for start_end in start_end_frames:
             axis = ax[j]
             video_ref.set_num_frame(start_end[0])
@@ -1065,38 +1171,7 @@ def main_in_segmentation():
             j+=1
 
     plt.show()
-    # TODO make plots
-    
-    #subtitles, autogenerated = video.get_transcript()
-    #start_times, end_times, images_path, text = video.transcript_segmentation(subtitles)
-    #print(db_mongo.get_extracted_keywords(video._video_id))
-    
-    #print(video.is_slide_video())
-    #lemm_concepts_transcript = extract_keywords(text,minFrequency=3)
-
-    #subtitles, autogenerated = video.get_transcript()
-    
-    # segment the video with semantic similarity
-    #print("Entering segmentation")
-    #start_times, end_times, images_path, text = video.transcript_segmentation(subtitles)
-    
-    #lemm_concepts_video_text = []
-    #titles = []
-    #curr_id = 0
-    #for (text_id,timing,text) in text_on_screen:
-    #    if curr_id < text_id:
-    #        lemm_concepts_video_text.append(extract_keywords(text,maxWords=2))
-    #        titles.append(extract_title(text))
-    #        curr_id = text_id
-    #print(f"titles: {titles}")
-    #print(f"lemm_concepts_video_text: {lemm_concepts_video_text}")
-    
-    #lemmatized_concepts = extract_keywords(text, minFrequency=2)
-    #print(lemmatized_concepts)
-    #segmentation("https://www.youtube.com/watch?v=TpcbfxtdoI8", 0.19, 20, 1, 375)
-    #segmentation("https://www.youtube.com/watch?v=KkgkZwQ9HgQ", 0.22, 40, 1, 375)
-    # https://youtu.be/gbg89EJHtk0
 
 
 if __name__ == '__main__':
-    main_in_segmentation()
+    _main_in_segmentation()

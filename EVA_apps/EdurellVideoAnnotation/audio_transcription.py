@@ -33,7 +33,7 @@ def speech_from_youtube(yt_video_id:str):
 
 def get_timed_sentences(subtitles, sentences):
     '''For each sentence, add its start and end time obtained from the subtitles'''
-
+    # TODO improvements: add a way to return it as a list of tuples because accessing inside a list of dicts can be slow
     # Compute the number of words for each sentence and for each sub
     num_words_sentence = []
     num_words_sub = []

@@ -22,7 +22,7 @@ class LocalVideo:
     video_id : string to load video: /static/videos/{video_id}/{video_id}.mp4
     output_colors : must be a value from the ``class(Enum) ColorScheme``and is used for format conversions
     '''
-    def __init__(self,video_id:str,output_colors:int=COLOR_BGR,forced_frame_size:'tuple[int,int] | None'= None):
+    def __init__(self,video_id:str,output_colors:int=COLOR_BGR,forced_frame_size:'tuple[int,int] | None'= None,_testing_path=None):
         if output_colors!=COLOR_BGR and output_colors!=COLOR_RGB and output_colors!=COLOR_GRAY:
             raise Exception(f"Wrong parameter ouput_color value must be a COLOR_ value present in image.py")
         else:
@@ -34,7 +34,10 @@ class LocalVideo:
         self._frame_size = forced_frame_size
         class_path = os.path.dirname(os.path.abspath(getfile(self.__class__)))
         self._vid_id = video_id
-        self._vidcap = cv2.VideoCapture(os.path.join(class_path, "static", "videos", video_id,f"{video_id}.mp4"))
+        if _testing_path is None:
+            self._vidcap = cv2.VideoCapture(os.path.join(class_path, "static", "videos", video_id,f"{video_id}.mp4"))
+        else:
+            self._vidcap = cv2.VideoCapture(os.path.join(_testing_path,f"{video_id}.mp4"))
         #self._vidcap = cv2.VideoCapture(os.path.join(class_path, "static", "videos", video_id,f"{video_id}.mkv"))
         if not self._vidcap.isOpened():
             raise Exception(f"Can't find video: {video_id}")
@@ -63,6 +66,9 @@ class LocalVideo:
         return int(self._vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     def get_dim_frame(self):
+        '''
+        returns a tuple of ( WIDTH , HEIGHT , NUM_COLORS )
+        '''
         return  int(self._vidcap.get(cv2.CAP_PROP_FRAME_WIDTH)), \
                 int(self._vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT)), \
                 self._num_colors
@@ -81,9 +87,6 @@ class LocalVideo:
 
     def get_num_frame_from_time(self,seconds:float):
         return round(seconds*self.get_fps())
-
-    def rewind_video(self):
-        self.set_num_frame(0)
     
     def set_num_frame(self,num_frame:int):
         self._vidcap.set(cv2.CAP_PROP_POS_FRAMES,num_frame)
@@ -91,16 +94,36 @@ class LocalVideo:
     def set_frame_size(self,value:'tuple[int,int]'):
         self._frame_size = value
 
-def download(url):
+def download(url,_path:str=None):
+    '''
+    Downloads the video from the url provided (YouTube video)\n
+    _path parameter is used for testing purposes and should be left None
+    
+    --------------
+    # Warning
+    NOTE: there are problems very often with (maybe) YouTube APIs that lead both
+    pytube and pafy not to work. Take this into account and maybe try downloading videos on your own.\n
+    Then in the code allow skipping video informations retrival because those raise Exceptions.
+    '''
     video_link = url.split('&')[0]
     if '=' in video_link:
         video_id = video_link.split('=')[-1]
     else:
         video_id = video_link.split('/')[-1]
-
+    if _path is None:
+        current_path = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(current_path, "static", "videos", video_id)
+    else:
+        path = _path
+    if not os.path.exists(path):
+        os.mkdir(path)
+    
     # [BUG] if returns NoneType accessing 'span' field, fix -> https://github.com/pytube/pytube/issues/1499#issuecomment-1473022893
     # directory is /home/{user}/anaconda3/envs/myenv/lib/python3.7/site-packages/pytube/cipher.py
     youtube_video = YouTube(video_link)
+    if os.path.isfile(os.path.join(path,video_id+'.mp4')):
+        return video_id, youtube_video.title,youtube_video.author,youtube_video.length
+
     # video_streams.get_highest_resolution() not working properly
     all_video_streams = youtube_video.streams.filter(mime_type='video/mp4')
     res_video_streams = []
@@ -109,16 +132,8 @@ def download(url):
         if len(res_video_streams) > 0:
             break
     if len(res_video_streams) == 0: raise Exception("Can't find video stream with enough resolution")
-
-    current_path = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(current_path, "static", "videos", video_id)
-    if not os.path.exists(path):
-        os.mkdir(path)
-    if not os.path.isfile(os.path.join(path,video_id+'.mp4')):
-        res_video_streams[0].download(output_path=path,filename=video_id+'.mp4')
-
-    title,channel,duration = youtube_video.title,youtube_video.author,youtube_video.length
-    return video_id, title, channel, duration
+    res_video_streams[0].download(output_path=path,filename=video_id+'.mp4')
+    return video_id, youtube_video.title,youtube_video.author,youtube_video.length
 
 class VideoSpeedManager:
     '''
@@ -145,9 +160,9 @@ class VideoSpeedManager:
         - ratio_lin_exp_window_size : coeff of max_exp_window_factor that sets the clipping max speed overall
 
     '''
-    def __init__(self,video_id:str, output_colors:int=COLOR_BGR, max_dim_frame:Tuple[int,int]=(640,360),time_decimals_accuracy:int=1,exp_base:float=1.4,lin_factor:float=2,max_seconds_exp_window:float=5,ratio_lin_exp_window_size:float=1.5):
+    def __init__(self,video_id:str, output_colors:int=COLOR_BGR, max_dim_frame:Tuple[int,int]=(640,360),time_decimals_accuracy:int=1,exp_base:float=1.4,lin_factor:float=2,max_seconds_exp_window:float=5,ratio_lin_exp_window_size:float=1.5,_testing_path:str=None):
         self._init_params = (video_id,output_colors,max_dim_frame,time_decimals_accuracy,exp_base,lin_factor,max_seconds_exp_window,ratio_lin_exp_window_size)
-        vid_ref = LocalVideo(video_id=video_id,output_colors=output_colors)
+        vid_ref = LocalVideo(video_id=video_id,output_colors=output_colors,_testing_path=_testing_path)
         frame_dim = vid_ref.get_dim_frame()[:2]
         max_scale_factor = max(divmod(frame_dim,max_dim_frame)[0])
         if max_scale_factor > 1: vid_ref.set_frame_size(tuple((array(frame_dim)/max_scale_factor).astype(int)))
@@ -213,12 +228,6 @@ class VideoSpeedManager:
                 assert self._curr_start_end_frames is not None
                 return ceil(self._curr_num_frame/self._curr_start_end_frames[1] * 100)
         return ceil(self._curr_num_frame/self.vid_ref.get_count_frames()*100)
-
-    def get_time_curr_frame(self):
-        '''
-        In seconds
-        '''
-        return self.vid_ref.get_time_from_num_frame(self._curr_num_frame)
 
     def is_full_video(self,frames):
         return len(frames)==1 and frames[0][0]==0 and frames[0][1]==self.vid_ref.get_count_frames()-1
@@ -361,11 +370,6 @@ class VideoSpeedManager:
         self._curr_window_frame_size = prev_speed
         self._is_forced_speed = was_forced
         return frame
-
-    def get_previous_frame(self):
-        if self._curr_num_frame - self._min_window_frame_size < 0:
-            self._curr_num_frame = 0
-        return self._get_frame_offset(self._min_window_frame_size)
 
     def get_following_frame(self):
         if self._is_video_ended or self._curr_num_frame + self._min_window_frame_size > self.get_video().get_count_frames()-1:
