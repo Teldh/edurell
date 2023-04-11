@@ -86,7 +86,7 @@ class LocalVideo:
         return round(num_frame/self.get_fps(), decimals=decimals)
 
     def get_num_frame_from_time(self,seconds:float):
-        return round(seconds*self.get_fps())
+        return int(seconds*self.get_fps())
     
     def set_num_frame(self,num_frame:int):
         self._vidcap.set(cv2.CAP_PROP_POS_FRAMES,num_frame)
@@ -380,13 +380,13 @@ class VideoSpeedManager:
         self._frames = sorted(frames,reverse=True)
     
 if __name__ == '__main__':
-    #vid_id = "PPLop4L2eGk" # slide video
+    vid_id = "PPLop4L2eGk" # slide video
     #vid_id = "YI3tsmFsrOg" # not slide video
     #vid_id = "UuzKYffpxug" # slide + person video
     #vid_id = "g8w-IKUFoSU" # forensic arch
+    #vid_id = 'GdPVu6vn034'
     #download('https://youtu.be/ujutUfgebdo')
-    download('https://www.youtube.com/watch?v=GdPVu6vn034')
-    pass
+    download('https://www.youtube.com/watch?v='+vid_id)
     #color_scheme_for_analysis = ColorScheme.BGR
     #   BGR: is the most natural for Opencv video reader, so we avoid some matrix transformations
     #   RGB: should be used for debug visualization

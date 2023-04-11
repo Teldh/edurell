@@ -54,6 +54,7 @@ def burst_extraction(video_id, concepts, n=90):
     global videoid
 
     videoid = video_id
+    print(concepts)
 
     text, conll = get_text(video_id, return_conll=True)
     text = text.replace("-", " ")
@@ -61,8 +62,7 @@ def burst_extraction(video_id, concepts, n=90):
 
     concept_map_burst, burst_definitions = Burst(text, concepts, video_id, conll, threshold=0.7,
                                                  top_n=n, max_gap=1).launch_burst_analysis()
-        # [TODO] maybe substitute video analysis with this
-    #print(concept_map_burst,burst_definitions)
+
     return concept_map_burst, burst_definitions
 
 # Get mapping of concepts and synonyms to selected word (alphabetically)

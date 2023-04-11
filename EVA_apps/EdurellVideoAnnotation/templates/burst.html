@@ -41,7 +41,8 @@
 
         <div class="wrapperRadio">
          <input type="radio" class="analysis_type" name="analysis_type" id="semi" value="Semi automatic extraction">
-         <input type="radio" class="analysis_type" name="analysis_type" id="auto" value="automatic extraction">
+         <input type="radio" class="analysis_type" name="analysis_type" id="auto" value="Automatic extraction">
+         <input type="radio" class="analysis_type" name="analysis_type" id="video" value="Automatic&Video extraction">
 
            <label for="semi" class="option option-1">
              <div class="dot"></div>
@@ -51,6 +52,10 @@
              <div class="dot"></div>
               <span>Automatic extraction</span>
            </label>
+           <label for="video" class="option option-3">
+            <div class="dot"></div>
+             <span>Automatic & Video extraction</span>
+          </label>
 
         </div>
     </div>
@@ -139,10 +144,15 @@
 
     $('.analysis_type').click(function(e) {
 
-      document.getElementById("tab_analysis_type").style.display = "none"
-      document.getElementById("videos").style.display = "block"
-
-      if($(this).attr('id') == "auto")
+      document.getElementById("tab_analysis_type").style.display = "none";
+      document.getElementById("videos").style.display = "block";
+      console.log($(this).attr('id')+ " in burst.html");
+      for(i=0; i< 3; i+=1)
+        console.log(document.getElementById("type-"+i));
+      //console.log(document.getElementById("type-1"));
+      //console.log(document.getElementById("type-0"));
+      console.log(document)
+      if($(this).attr('id') == "auto" || $(this).attr('id') == "video")
         document.getElementById("type-1").checked = true;
       else
         document.getElementById("type-0").checked = true;

@@ -351,7 +351,7 @@ async function getConceptVocabulary(){
 
 function launchBurstAnalysis(burstType){
 
-  console.log("launchBurstAnalysis")
+  console.log("launchBurstAnalysis in burstVocabulary.js");
 
     loading()
 

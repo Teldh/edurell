@@ -118,13 +118,10 @@ def insert_video_data(data):
     #     new_graph = {"$set": {"extracted_keywords": data["extracted_keywords"]}}
     #     collection.update_one({"video_id": data["video_id"]}, new_graph)
 
-def insert_video_text_segmentation(data,update=False):
+def insert_video_text_segmentation(data):
     collection = db.video_text_segmentation
     if collection.find_one({'video_id':data['video_id'] }) is None:
         collection.insert_one(data)
-        return
-    if update:
-        collection.update_one(data)
 
 def get_conll(video_id):
     collection = db.conlls
@@ -158,6 +155,7 @@ def get_videos():
 
     collection = db.videos
     return list(collection.find({}).sort([("creator", pymongo.ASCENDING)]))
+
 
 
 def get_graphs_info(selected_video=None):

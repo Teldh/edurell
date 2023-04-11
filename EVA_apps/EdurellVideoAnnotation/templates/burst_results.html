@@ -302,7 +302,6 @@
 
     let $typeAnalysis = {{ type|tojson }};
     let $title = {{ title|tojson }};
-
     async function runSemiBurst() {addActive
       $burstSynonym = await popup(); 
       launchBurstAnalysis("semi")
@@ -310,6 +309,7 @@
 
     async function getVocabulary() {
       $conceptVocabulary = await getConceptVocabulary();
+      console.log($typeAnalysis+ " in burst_results.html getVocabulary()");
       if($typeAnalysis == "semi"){
         addSubtitles();
         //printConcepts();
@@ -317,8 +317,7 @@
       }
       else{
         $burstSynonym = await popup();
-        console.log($typeAnalysis)
-        launchBurstAnalysis("auto");
+        launchBurstAnalysis($typeAnalysis);
       }
 
       

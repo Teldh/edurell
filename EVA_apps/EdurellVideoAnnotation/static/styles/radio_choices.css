@@ -86,21 +86,25 @@
 }
 
 #semi:checked:checked ~ .option-1,
-#auto:checked:checked ~ .option-2{
+#auto:checked:checked ~ .option-2,
+#video:checked:checked ~ .option-3{
   border-color: dodgerblue;
   background: dodgerblue;
 }
 #semi:checked:checked ~ .option-1 .dot,
-#auto:checked:checked ~ .option-2 .dot{
+#auto:checked:checked ~ .option-2 .dot,
+#video:checked:checked ~ .option-3 .dot{
   background: #fff;
 }
 #semi:checked:checked ~ .option-1 .dot::before,
-#auto:checked:checked ~ .option-2 .dot::before{
+#auto:checked:checked ~ .option-2 .dot::before,
+#video:checked:checked ~ .option-3 .dot::before{
   opacity: 1;
   transform: scale(1);
 }
 
 #semi:checked:checked ~ .option-1 span,
-#auto:checked:checked ~ .option-2 span{
+#auto:checked:checked ~ .option-2 span,
+#video:checked:checked ~ .option-3 span{
   color: #fff;
 }
