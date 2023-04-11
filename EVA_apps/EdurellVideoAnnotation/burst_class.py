@@ -54,7 +54,6 @@ def burst_extraction(video_id, concepts, n=90):
     global videoid
 
     videoid = video_id
-    print(concepts)
 
     text, conll = get_text(video_id, return_conll=True)
     text = text.replace("-", " ")

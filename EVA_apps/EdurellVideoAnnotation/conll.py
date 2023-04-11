@@ -40,15 +40,17 @@ def conll_gen(video_id,text):
 
 
 # get text from a conll in the db
-def get_text(video_id, return_conll=False):
+def get_text(video_id, return_conll=False,return_text=True):
     conll = get_conll(video_id)
+    if not return_text and return_conll:
+        return conll
     if conll is not None:
         parsed = parse(conll)
         text = ""
         for sentence in parsed:
             text += sentence.metadata["text"] + " "
-            if return_conll:
-                return text, conll
+        if return_conll:
+            return text, conll
         return text
     return None
 

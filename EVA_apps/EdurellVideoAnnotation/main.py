@@ -242,7 +242,7 @@ def video_selection():
                     results = vid_analyzer.extract_titles()
                     # insert titles data in the structure that will be loaded on the db
                     segmentation_data = {**segmentation_data, 
-                                         **{'slide_titles':[{'start_end_seconds':start_end_seconds,'title':title,'xywh_normalized':bb} for (title,start_end_seconds,bb) in results],
+                                         **{'slide_titles':[{'start_end_seconds':start_end_seconds,'text':title,'xywh_normalized':bb} for (title,start_end_seconds,bb) in results],
                                             'slide_startends': vid_analyzer.get_extracted_text(format='set[times]')}}
                 db_mongo.insert_video_text_segmentation(segmentation_data)
             else:
@@ -594,13 +594,13 @@ def burst():
         conll_sentences = conll_gen(video_id, text)
 
         k = get_real_keywords(video_id,title=True)
-        if k is None:
+        if k is None or form.type.data == "video":
             # keywords = rake_phrasemachine(text)
             title, keywords = db_mongo.get_extracted_keywords(video_id, title=True)
         else:
             title = k[0]
             keywords = k[1]
-        print(form.type.data+" is typeeeeee")
+        
         # semi-automatic extraction
         if form.type.data == "semi":
 
@@ -611,14 +611,8 @@ def burst():
             return render_template('burst_results.html', result=subtitles, video_id=video_id, concepts=keywords,
                                    title=title, lemmatized_subtitles=lemmatized_subtitles, all_lemmas=all_lemmas,
                                    type="semi")
-
-        elif form.type.data == "auto":
-            return render_template('burst_results.html', result=[], video_id=video_id, concepts=keywords, title=title,
-                                   lemmatized_subtitles=[], all_lemmas=[], type="auto")
-
-        elif form.type.data == "video":
-            return render_template('burst_results.html', result=[], video_id=video_id, concepts=keywords, title=title,
-                                   lemmatized_subtitles=[], all_lemmas=[], type="video")
+        return render_template('burst_results.html', result=[], video_id=video_id, concepts=keywords, title=title,
+                                lemmatized_subtitles=[], all_lemmas=[], type=form.type.data)
 
     return render_template('burst.html', form=form, videos=videos)
 
@@ -631,7 +625,7 @@ def burst_launch():
 
     video_id = data["id"]
     concepts = data["concepts"]
-    print(f"data in main {data}")
+    #print(f"data in main {data}")
     #print(f"concepts in main {concepts}")
     conceptVocabulary = data["conceptVocabulary"]
     syn_burst = data["syn_burst"]
@@ -643,9 +637,10 @@ def burst_launch():
         concept_map, definitions = burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary)
     else:
         print("Starting Burst " + burstType)
-        concept_map, definitions = burst_extraction(video_id, concepts)
+        concept_map,definitions = burst_extraction(video_id,concepts)
         if burstType == 'video':
             try:
+                print(definitions)
                 segmentation_data = db_mongo.get_video_segmentation(video_id)
                 vid_analyzer = VideoAnalyzer(video_id)
                 vid_analyzer.set(segmentation_data['video_slidishness'],segmentation_data['slide_startends'])
@@ -657,8 +652,6 @@ def burst_launch():
                     definitions = vid_analyzer.get_fixed_definitions_and_indepth_times(definitions)
             except Exception:
                 print('Error: video not already segmented')
-        else:    
-            pass
 
     # ---------------------
 

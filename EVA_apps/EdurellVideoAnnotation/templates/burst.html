@@ -46,15 +46,15 @@
 
            <label for="semi" class="option option-1">
              <div class="dot"></div>
-              <span>Semi automatic extraction</span>
+              <span>Semi automatic</span>
               </label>
            <label for="auto" class="option option-2">
              <div class="dot"></div>
-              <span>Automatic extraction</span>
+              <span>Automatic</span>
            </label>
            <label for="video" class="option option-3">
             <div class="dot"></div>
-             <span>Automatic & Video extraction</span>
+             <span>Automatic + Video segmentation</span>
           </label>
 
         </div>
@@ -146,18 +146,11 @@
 
       document.getElementById("tab_analysis_type").style.display = "none";
       document.getElementById("videos").style.display = "block";
-      console.log($(this).attr('id')+ " in burst.html");
-      for(i=0; i< 3; i+=1)
-        console.log(document.getElementById("type-"+i));
-      //console.log(document.getElementById("type-1"));
-      //console.log(document.getElementById("type-0"));
-      console.log(document)
-      if($(this).attr('id') == "auto" || $(this).attr('id') == "video")
-        document.getElementById("type-1").checked = true;
-      else
-        document.getElementById("type-0").checked = true;
-
-
+      var attrs = {"semi": "0",
+                   "auto": "1",
+                   "video": "2"}
+      console.log(attrs[$(this).attr('id')])
+      document.getElementById("type-"+attrs[$(this).attr('id')]).checked = true;
     })
 
 
