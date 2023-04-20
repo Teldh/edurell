@@ -103,9 +103,15 @@ def insert_conll_MongoDB(data):
     if collection.find_one({"video_id": data["video_id"]}) is None:
         collection.insert_one(data)
 
-def get_video_segmentation(video_id, raise_error=True):
+def get_video_segmentation(video_id, returned_fields={},raise_error=True):
     collection = db.video_text_segmentation
-    item = collection.find_one({"video_id":video_id})
+    assert all([returned_field in {"video_id","video_slidishness","slide_titles","slide_startends","slidish_frames_startend"} for returned_field in returned_fields])
+    if len(returned_fields) > 0:
+        fields = {"_id":0}
+        fields.update({field:1 for field in returned_fields})
+        item = collection.find_one({"video_id":video_id},fields)
+    else:
+        item = collection.find_one({"video_id":video_id})
     if item is None and raise_error:
         raise Exception("Video has not been segmented yet, it must be firstly analyzed")
     return item
@@ -118,10 +124,14 @@ def insert_video_data(data):
     #     new_graph = {"$set": {"extracted_keywords": data["extracted_keywords"]}}
     #     collection.update_one({"video_id": data["video_id"]}, new_graph)
 
-def insert_video_text_segmentation(data):
+def insert_video_text_segmentation(data,update=False):
     collection = db.video_text_segmentation
     if collection.find_one({'video_id':data['video_id'] }) is None:
         collection.insert_one(data)
+    elif update:
+        collection.delete_one({'video_id':data['video_id']})
+        collection.insert_one(data)
+
 
 def get_conll(video_id):
     collection = db.conlls
@@ -147,7 +157,10 @@ def get_user_graphs(user):
 def get_graph(user, video):
     print("***** EDURELL - Video Annotation: db_mongo.py::get_graph() ******")
     collection = db.graphs
-    return collection.find_one({"annotator_id":user, "video_id":video})["graph"]
+    item = collection.find_one({"annotator_id":user, "video_id":video},{"_id":0,"graph":1})
+    if item is not None:
+        return item["graph"]
+    return None
 
 
 def get_videos():
@@ -481,4 +494,5 @@ def remove_account(email):
 
 if __name__ == '__main__':
     #remove_video('PPLop4L2eGk')
+    graph = get_graph("Burst Analysis","PPLop4L2eGk")
     print("***** EDURELL - Video Annotation: db_mongo.py::__main__ ******")

@@ -249,11 +249,16 @@ def graph_to_rdf(jsonld):
 
 if __name__ == '__main__':
 
-    print("***** EDURELL - Video Annotation: ontology.py::__main__: Inizio ******")
+    #print("***** EDURELL - Video Annotation: ontology.py::__main__: Inizio ******")
 
-    json_graph = db_mongo.get_graph("616726e4d1a3488902b4b55d", "sXLhYStO0m8")
+    #json_graph = db_mongo.get_graph("616726e4d1a3488902b4b55d", "sXLhYStO0m8")
+    json_graph = db_mongo.get_graph("Burst Analysis", "PPLop4L2eGk")
+
+    from pprint import pprint
+    #pprint(json_graph)
 
     json_expanded = pyld.jsonld.expand(json_graph)
+    pprint(json_expanded[0])
 
     gr = Graph()\
         .parse(data=json.dumps(json_graph), format='json-ld')
@@ -263,19 +268,35 @@ if __name__ == '__main__':
     # Seleziona i concetti che sono spiegati nel video
     query1 = """
         PREFIX oa: <http://www.w3.org/ns/oa#>
-        PREFIX edu: <http://edurell.com/>
+        PREFIX edu: <'https://teldh.github.io/edurell#>
         SELECT ?explained_concept
            WHERE {
                 ?concept_annotation oa:motivatedBy oa:describing.
                 ?concept_annotation oa:hasBody ?explained_concept.
             }"""
 
-    qres = gr.query(query1)
+    query2 = """
+        PREFIX oa: <http://www.w3.org/ns/oa#>
+        PREFIX edu: <'https://teldh.github.io/edurell#>
+        PREFIX rdf: <'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+        SELECT ?explained_concept ?start
+           WHERE {
+                ?concept_annotation oa:motivatedBy oa:describing.
+                ?concept_annotation oa:hasBody ?explained_concept.
+                ?concept_annotation oa:hasTarget ?targ.
+                ?targ oa:hasSelector ?selector.
+                ?selector oa:hasStartSelector ?start_selector.
+                ?start_selector rdf:value ?start_sent_id.
+                
+            }"""
 
+    qres = gr.query(query2)
+    
     toc = time.time()
 
     print("Results: - obtained in %.4f seconds" % (toc - tic))
     for row in qres:
-        print("%s" % row)
+        print(row)
+        print("%s, %d" % row)
 
-    print("***** EDURELL - Video Annotation: ontology.py::__main__: Fine ******")    
+    #print("***** EDURELL - Video Annotation: ontology.py::__main__: Fine ******")    

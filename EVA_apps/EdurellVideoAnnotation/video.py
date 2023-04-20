@@ -2,11 +2,13 @@ from pytube import YouTube
 import os
 import cv2
 from numpy import clip,reshape,divmod,array,round
-
-from image import ImageClassifier,COLOR_BGR,COLOR_RGB,COLOR_GRAY
+import requests
+from re import search
 from math import floor, ceil, log2
 from inspect import getfile
 from typing import Tuple
+
+from image import ImageClassifier,COLOR_BGR,COLOR_RGB,COLOR_GRAY
 
 
 class LocalVideo:
@@ -118,12 +120,15 @@ def download(url,_path:str=None):
     if not os.path.exists(path):
         os.mkdir(path)
     
-    # [BUG] if returns NoneType accessing 'span' field, fix -> https://github.com/pytube/pytube/issues/1499#issuecomment-1473022893
-    # directory is /home/{user}/anaconda3/envs/myenv/lib/python3.7/site-packages/pytube/cipher.py
-    youtube_video = YouTube(video_link)
-    if os.path.isfile(os.path.join(path,video_id+'.mp4')):
-        return video_id, youtube_video.title,youtube_video.author,youtube_video.length
+    response = requests.get(url)
+    title = search(r'"title":"(.*?)"', response.text).group(1)
+    author = search(r'"ownerChannelName":"(.*?)"', response.text).group(1)
+    length = str(int(search(r'"approxDurationMs":"(\d+)"', response.text).group(1)) // 1000)
 
+    if os.path.isfile(os.path.join(path,video_id+'.mp4')):
+        return video_id, title, author, length
+
+    youtube_video = YouTube(video_link)
     # video_streams.get_highest_resolution() not working properly
     all_video_streams = youtube_video.streams.filter(mime_type='video/mp4')
     res_video_streams = []
@@ -133,7 +138,7 @@ def download(url,_path:str=None):
             break
     if len(res_video_streams) == 0: raise Exception("Can't find video stream with enough resolution")
     res_video_streams[0].download(output_path=path,filename=video_id+'.mp4')
-    return video_id, youtube_video.title,youtube_video.author,youtube_video.length
+    return video_id, title,author,length
 
 class VideoSpeedManager:
     '''
@@ -380,13 +385,13 @@ class VideoSpeedManager:
         self._frames = sorted(frames,reverse=True)
     
 if __name__ == '__main__':
-    vid_id = "PPLop4L2eGk" # slide video
+    vid_id = "ujutUfgebdo" # slide video
     #vid_id = "YI3tsmFsrOg" # not slide video
     #vid_id = "UuzKYffpxug" # slide + person video
     #vid_id = "g8w-IKUFoSU" # forensic arch
     #vid_id = 'GdPVu6vn034'
     #download('https://youtu.be/ujutUfgebdo')
-    download('https://www.youtube.com/watch?v='+vid_id)
+    print(download('https://www.youtube.com/watch?v='+vid_id))
     #color_scheme_for_analysis = ColorScheme.BGR
     #   BGR: is the most natural for Opencv video reader, so we avoid some matrix transformations
     #   RGB: should be used for debug visualization
@@ -394,7 +399,7 @@ if __name__ == '__main__':
     #         EDIT: grayscale don't work with face recognition so it's better not to use it 
     #extract_text_from_video(vid_id,color_scheme_for_analysis)
     #video.close()
-
+    # https://www.youtube.com/watch?v=ujutUfgebdo
 
     
     

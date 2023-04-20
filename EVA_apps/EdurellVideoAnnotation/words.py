@@ -40,10 +40,17 @@ def extract_keywords(text:str,maxWords=3,minFrequency=1):
     #print(concepts)
     return concepts
 
-def get_real_keywords(video_id, title=False, defs=True):
+def get_real_keywords(video_id, annotator_id=None, title=False, defs=True):
     graphs = db_mongo.get_graphs_info(video_id)
     if graphs is not None:
-        annotator_id = graphs["annotators"][0]['id']
+        indx_annotator = 0
+        if annotator_id is not None:
+            annotators = graphs['annotators']
+            for i,annot in enumerate(annotators):
+                if annot['id']==annotator_id:
+                    indx_annotator = i
+                    break
+        annotator_id = graphs["annotators"][indx_annotator]['id']
         #print("Annotator: ", graphs["annotators"][0]["name"])
         concept_map_annotator = db_mongo.get_concept_map(annotator_id, video_id)
         definitions = db_mongo.get_definitions(annotator_id, video_id)

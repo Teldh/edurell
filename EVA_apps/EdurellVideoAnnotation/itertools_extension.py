@@ -2,6 +2,9 @@ from itertools import zip_longest, tee
 from typing import Generator, Iterable
 
 def _pairwise_linked_reversed(iterable,None_tail):
+    '''
+    Returns reversed list
+    '''
     curr_index = len(iterable)-1
     while curr_index > 0:
         yield iterable[curr_index], iterable[curr_index-1]

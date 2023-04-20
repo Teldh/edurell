@@ -13,7 +13,7 @@ class addVideoForm(FlaskForm):
 
 class BurstForm(FlaskForm):
     url = TextField('Url', validators=[InputRequired()])
-    type = RadioField('video', choices=[("semi","semi-automatic"), ("auto","automatic"),("video","video&automatic")])
+    type = RadioField('video', choices=[("semi","semi-automatic"), ("auto","automatic")])
 
 
 class ForgotForm(FlaskForm):

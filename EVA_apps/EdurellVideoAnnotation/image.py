@@ -214,7 +214,8 @@ class ImageClassifier:
             x, y, w, h = cv2.boundingRect(cnt)
             img_cropped = img_bw[y:y+h,x:x+w]
             text_read = self._read_text_with_bbs(img_cropped,(x,y,img_width,img_height))
-            insort_left(y_and_texts_with_bb,(y,text_read))
+            if text_read:
+                insort_left(y_and_texts_with_bb,(y,text_read))
         self._texts_with_contour = [text_with_bb 
                                     for (_,texts_with_bb) in y_and_texts_with_bb
                                     for text_with_bb in texts_with_bb]
@@ -247,9 +248,11 @@ class ImageClassifier:
             mp_drawing.draw_detections(image, detection)
         return image
 
-    def get_detected_text_as_str(self):
+    def get_detected_text(self,with_contours=True):
         assert self._texts_with_contour is not None
-        return ''.join([text_with_bb[0] for text_with_bb in self._texts_with_contour])
+        if with_contours: return self._texts_with_contour
+        else: return ''.join([elem[0] for elem in self._texts_with_contour])
+        
 
     def get_detected_faces(self,with_contours=False):
         assert self._faces is not None
@@ -394,7 +397,18 @@ def draw_bounding_boxes_on_image(img, bounding_boxes:'list[tuple[(int,int,int,in
         # draw
         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 1)
     return img
-        
+
+def draw_bounding_boxes_on_image_classifier(image:ImageClassifier):
+    assert image.get_img() is not None and image.get_detected_text() is not None
+    return draw_bounding_boxes_on_image(image.get_img(),[bbs for _,bbs in image.get_detected_text()])
+
+def show_image(image,color_scheme=COLOR_BGR):
+    from matplotlib import pyplot as plt
+    if color_scheme == COLOR_BGR:
+        cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+    plt.axis('off')
+    plt.imshow(image)
+    plt.show()
 
 if __name__ == '__main__':
     import os

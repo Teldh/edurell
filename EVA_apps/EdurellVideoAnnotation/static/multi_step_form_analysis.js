@@ -18,6 +18,7 @@ function next(clickedOn) {
   document.getElementById(currentTab).style.display = "none";
   // document.getElementById(currentTab).style.visibility= "hidden";
   // document.getElementById(currentTab).style.opacity = 0;
+  console.logg("here")
   console.log(clickedOn)
 
 

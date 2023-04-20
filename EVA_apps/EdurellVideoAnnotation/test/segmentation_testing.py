@@ -36,7 +36,7 @@ with open(this_folder_path+'/videos_slide.csv',newline='') as csvfile:
             raise Exception('csv not correctly formatted')
         correct_answer = bool_value
         vsm = VideoAnalyzer(video_id,_testing_path=videos_path)
-        predicted_answer,_ = vsm.is_slide_video()
+        predicted_answer = vsm.is_slide_video()
         slidishnesses.append(vsm._video_slidishness)
         matching_results.append(correct_answer == predicted_answer)
         print(f" processed: {str((i+1)/num_rows*100)[:5]}%"+' '*4,end='\r')

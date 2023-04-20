@@ -42,7 +42,7 @@
         <div class="wrapperRadio">
          <input type="radio" class="analysis_type" name="analysis_type" id="semi" value="Semi automatic extraction">
          <input type="radio" class="analysis_type" name="analysis_type" id="auto" value="Automatic extraction">
-         <input type="radio" class="analysis_type" name="analysis_type" id="video" value="Automatic&Video extraction">
+         <!--<input type="radio" class="analysis_type" name="analysis_type" id="video" value="Automatic&Video extraction">-->
 
            <label for="semi" class="option option-1">
              <div class="dot"></div>
@@ -52,10 +52,10 @@
              <div class="dot"></div>
               <span>Automatic</span>
            </label>
-           <label for="video" class="option option-3">
+           <!--<label for="video" class="option option-3">
             <div class="dot"></div>
              <span>Automatic + Video segmentation</span>
-          </label>
+          </label> -->
 
         </div>
     </div>
@@ -149,7 +149,6 @@
       var attrs = {"semi": "0",
                    "auto": "1",
                    "video": "2"}
-      console.log(attrs[$(this).attr('id')])
       document.getElementById("type-"+attrs[$(this).attr('id')]).checked = true;
     })
 

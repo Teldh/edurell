@@ -297,8 +297,6 @@ class TextSimilarityClassifier:
     def set_comparison_methods(self,methods:List[int]):
         self._comp_methods = set(methods)
 
-TxSmCl = TextSimilarityClassifier
-
 from nltk import tokenize
 import db_mongo
 
@@ -362,7 +360,7 @@ import time
 from operator import itemgetter
 from itertools import groupby
 
-from image import ImageClassifier,draw_bounding_boxes_on_image,COLOR_RGB,COLOR_BGR,DIST_MEAS_METHOD_COSINE_SIM
+from image import * #ImageClassifier,draw_bounding_boxes_on_image,COLOR_RGB,COLOR_BGR,DIST_MEAS_METHOD_COSINE_SIM
 from video import VideoSpeedManager, LocalVideo
 from xgboost_model import XGBoostModelAdapter
 from itertools_extension import double_iterator, pairwise_linked_iterator
@@ -377,12 +375,12 @@ class VideoAnalyzer:
     _testing_path is for changing the folder path but it's used just for testing\n\n
         - It provides a method to get the transcript from the youtube link associated to the id provided\n
         - segment the transcript to obtain keyframes\n
-        - Analyze the whole video stream to segment slides,text and times on screen of those\n
-        - get the extracted text in different formats (tipically only one is used and the others are for debug)\n
-        - check if the video contains slides (for now this means text around the center of the screen) and the proportion with respect to the whole video len\n
-        - extract titles from the slides found\n
-        - ALPHA: create thumbnails based on the slides segmentation after having analyzed the text\n
-        - ALPHA: find definitions and in-depths of concepts expressed in the title of every slide
+        - Analyze the whole video stream or frames to segment slides,text and times on screen of those\n
+        - Get the extracted text in different formats (tipically only one is used and the others are for debug)\n
+        - Check if the video contains slides (for now this means text around the center of the screen) and the proportion with respect to the whole video len\n
+        - Extract titles from the slides found\n
+        - (TO BE TESTED) Create thumbnails based on the slides segmentation after having analyzed the text\n
+        - (TO BE TESTED) Find definitions and in-depths of concepts expressed in the title of every slide
     '''
     _text_in_video: List[TimedAndFramedText] or None = None
     _video_slidishness = None
@@ -620,30 +618,6 @@ class VideoAnalyzer:
             return start_times, end_times, punctuated_transcription
         
 
-
-    def _remove_classification_errors(self,lst: List[TimedAndFramedText],vsm: VideoSpeedManager,img_classif:ImageClassifier,txt_classif: TextSimilarityClassifier,min_seconds_duration=3):
-        '''
-        for every element of the input list of TimedAndFramedText checks if at every start frame the text recognized is approximatly the same\n
-        checks also that the text has a minimum len and the segment's duration is long enough\n
-        otherwise it pops that startend frames or removes the whole element if it's too distant from the real one found 
-        '''
-        min_frames_duration = vsm.get_video().get_fps()*min_seconds_duration
-        for i, elem in reversed(list(enumerate(lst))):
-            text_in_lst = elem.get_full_text()
-            start_end_frames = elem.start_end_frames
-            for j, startend in reversed(list(enumerate(start_end_frames))):
-                img_classif.set_img(vsm.get_frame_from_num(startend[0]))
-                text_in_frame = img_classif.extract_text(return_text=True)
-                if  len(text_in_frame) < 4 or \
-                    startend[0] + min_frames_duration > startend[1] or \
-                    len(text_in_lst) < 4 or \
-                    (not txt_classif.is_partially_in_txt_version(text_in_frame,text_in_lst) and \
-                    not txt_classif.is_partially_in_txt_version(text_in_lst,text_in_frame)): 
-                        start_end_frames.pop(j)
-            elem.start_end_frames = start_end_frames
-            if len(elem.start_end_frames) == 0: lst.pop(i)
-        return lst
-
     def _preprocess_video(self, vsm:VideoSpeedManager,num_segments:int=150,estimate_threshold=False,_show_info=False):
         '''
         Split the video into `num_segments` windows frames, for every segment it's taken the frame that's far enough to guarantee a minimum sensibility\n
@@ -739,37 +713,77 @@ class VideoAnalyzer:
         self._cos_sim_img_threshold = cos_sim_img_threshold 
         self._frames_to_analyze = frames_to_analyze #dist_threshold, frames_to_analyze
 
-    def _compact_embedding_partial_words(self,TFT_list:'list[TimedAndFramedText]',text_classifier:TextSimilarityClassifier,frames_max_dist:int):
-        '''
-        Merge near TimedAndFramedText elements of the list\n
-        Goes in both directions reversing the array and lastly iterates over all the elements with an (optimized) nested loop\n
+    def _merge_and_cleanup(self,TFT_list:'list[TimedAndFramedText]',vsm: VideoSpeedManager,frame:ImageClassifier,frames_dist_tol:int):
+        def compact_embedding_partial_words(TFT_list:'list[TimedAndFramedText]',text_classifier:TextSimilarityClassifier,frames_max_dist:int):
+            '''
+            Merge near TimedAndFramedText elements of the list\n
+            Goes in both directions reversing the array and lastly iterates over all the elements with an (optimized) nested loop\n
 
-        ----------
-        Parameters
-        ----------
-        TFT_list : list of texts
-        text_classifier : utility class for text similarity comparison used by TimedAndFramedText for finding partial texts
+            ----------
+            Parameters
+            ----------
+            TFT_list : list of texts
+            text_classifier : utility class for text similarity comparison used by TimedAndFramedText for finding partial texts
+
+            Returns
+            -------
+            Same length or shorter list with elements merged
+            '''
+            input_list = TFT_list
+            elem1:TimedAndFramedText
+            elem2:TimedAndFramedText
+            for _reverse in [False, True]:
+                output_list:'list[TimedAndFramedText]' = []
+                for elem1, elem2 in pairwise_linked_iterator(input_list,reversed=_reverse):
+                    if text_classifier.is_partially_in(elem1,elem2): elem2.extend_frames(elem1.start_end_frames)
+                    else: output_list.append(elem1)
+                input_list = output_list
+
+            deleted:'list[int]' = []
+            for i1,i2, elem1,elem2 in double_iterator(input_list,enumerated=True):
+                if not i1 in deleted and not i2 in deleted and text_classifier.is_partially_in(elem1,elem2):
+                    elem2.extend_frames(elem1.start_end_frames)
+                    deleted.append(i1)
+            return sorted([elem.merge_adjacent_startend_frames(max_dist=frames_max_dist) for indx, elem in enumerate(input_list) if not indx in deleted])
+
+        txt_classif = TextSimilarityClassifier()
+
+        txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM_RATIO,
+                                            COMPARISON_METHOD_TXT_MISS_RATIO,
+                                            COMPARISON_METHOD_MEANINGFUL_WORDS_COUNT])
+        TFT_list = compact_embedding_partial_words(TFT_list,txt_classif,frames_dist_tol)
+
+        txt_classif.set_comparison_methods([COMPARISON_METHOD_FRAMES_TIME_PROXIMITY])
+        TFT_list = compact_embedding_partial_words(TFT_list,txt_classif,frames_dist_tol)
+
+        txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM_RATIO,
+                                            COMPARISON_METHOD_TXT_MISS_RATIO])
         
-        Returns
-        -------
-        Same length or shorter list with elements merged
-        '''
-        input_list = TFT_list
-        elem1:TimedAndFramedText
-        elem2:TimedAndFramedText
-        for _reverse in [False, True]:
-            output_list:'list[TimedAndFramedText]' = []
-            for elem1, elem2 in pairwise_linked_iterator(input_list,reversed=_reverse):
-                if text_classifier.is_partially_in(elem1,elem2): elem2.extend_frames(elem1.start_end_frames)
-                else: output_list.append(elem1)
-            input_list = output_list
+        def remove_classification_errors(lst: List[TimedAndFramedText],vsm: VideoSpeedManager,img_classif:ImageClassifier,txt_classif: TextSimilarityClassifier,min_seconds_duration=3):
+            '''
+            for every element of the input list of TimedAndFramedText checks if at every start frame the text recognized is approximatly the same\n
+            checks also that the text has a minimum len and the segment's duration is long enough\n
+            otherwise it pops that startend frames or removes the whole element if it's too distant from the real one found 
+            '''
+            min_frames_duration = vsm.get_video().get_fps()*min_seconds_duration
+            for i, elem in reversed(list(enumerate(lst))):
+                text_in_lst = elem.get_full_text()
+                start_end_frames = elem.start_end_frames
+                for j, startend in reversed(list(enumerate(start_end_frames))):
+                    img_classif.set_img(vsm.get_frame_from_num(startend[0]))
+                    text_in_frame = img_classif.extract_text(return_text=True)
+                    if  len(text_in_frame) < 4 or \
+                        startend[0] + min_frames_duration > startend[1] or \
+                        len(text_in_lst) < 4 or \
+                        (not txt_classif.is_partially_in_txt_version(text_in_frame,text_in_lst) and \
+                        not txt_classif.is_partially_in_txt_version(text_in_lst,text_in_frame)): 
+                            start_end_frames.pop(j)
+                elem.start_end_frames = start_end_frames
+                if len(elem.start_end_frames) == 0: lst.pop(i)
+            return lst
 
-        deleted:'list[int]' = []
-        for i1,i2, elem1,elem2 in double_iterator(input_list,enumerated=True):
-            if not i1 in deleted and not i2 in deleted and text_classifier.is_partially_in(elem1,elem2):
-                elem2.extend_frames(elem1.start_end_frames)
-                deleted.append(i1)
-        return sorted([elem.merge_adjacent_startend_frames(max_dist=frames_max_dist) for indx, elem in enumerate(input_list) if not indx in deleted])
+        return remove_classification_errors(TFT_list,vsm,frame,txt_classif)
+    
 
     def analyze_video(self,color_scheme_for_analysis:int=COLOR_BGR,_show_info:bool=False,_plot_contours=False):
         '''
@@ -813,8 +827,8 @@ class VideoAnalyzer:
         iterations_counter:int = 0
         collisions_TFT_list:'list[TimedAndFramedText]' = []
        #max_speed = 0
-        txt_classif = TxSmCl(comp_methods=[COMPARISON_METHOD_TXT_SIM_RATIO,
-                                           COMPARISON_METHOD_TXT_MISS_RATIO])
+        txt_classif = TextSimilarityClassifier(comp_methods=[COMPARISON_METHOD_TXT_SIM_RATIO,
+                                                             COMPARISON_METHOD_TXT_MISS_RATIO])
        #vsm.lock_speed()
         if not vsm.is_full_video(frames_to_analyze):
             vsm.set_analysis_frames(frames_to_analyze)
@@ -878,17 +892,7 @@ class VideoAnalyzer:
         output_TFT_list = list(output_TFT_stack)
         frames_dist_tol = vsm.get_video().get_fps()*10
 
-        txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM_RATIO,
-                                            COMPARISON_METHOD_TXT_MISS_RATIO,
-                                            COMPARISON_METHOD_MEANINGFUL_WORDS_COUNT])
-        output_TFT_list = self._compact_embedding_partial_words(output_TFT_list,txt_classif,frames_dist_tol)
-
-        txt_classif.set_comparison_methods([COMPARISON_METHOD_FRAMES_TIME_PROXIMITY])
-        output_TFT_list = self._compact_embedding_partial_words(output_TFT_list,txt_classif,frames_dist_tol)
-
-        txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM_RATIO,
-                                            COMPARISON_METHOD_TXT_MISS_RATIO])
-        output_TFT_list = self._remove_classification_errors(output_TFT_list,vsm,curr_frame,txt_classif)
+        output_TFT_list = self._merge_and_cleanup(output_TFT_list,vsm,curr_frame,frames_dist_tol)
 
         if _show_info:        
             print("video analysis completed!"+" "*30)
@@ -1009,7 +1013,7 @@ class VideoAnalyzer:
                             for startend in tft.start_end_frames]
         return None
 
-    def is_slide_video(self,slide_frames_percent_threshold:float=0.5,return_value=False,return_slide_frames=True):
+    def is_slide_video(self,slide_frames_percent_threshold:float=0.5,return_value=False,return_slide_frames=False,_show_info=False):
         '''
         Computes a threshold against a value that can be calculated or passed as precomputed_value
         
@@ -1020,7 +1024,7 @@ class VideoAnalyzer:
         True and slide frames if percentage of recognized slidish frames is above the threshold
         '''
         if self._video_slidishness is None:
-            self._preprocess_video(vsm=VideoSpeedManager(self._video_id,COLOR_RGB,_testing_path=self._testing_path))
+            self._preprocess_video(vsm=VideoSpeedManager(self._video_id,COLOR_RGB,_testing_path=self._testing_path),_show_info=_show_info)
         self._video_slidishness:float
         
         if return_value:
@@ -1031,15 +1035,19 @@ class VideoAnalyzer:
             returned_elements = (returned_elements, self._frames_to_analyze)
         return returned_elements
 
-    def extract_titles(self,quant:float=.85,axis_for_outliers_detection:Literal['w','h','wh']='h',union=True,with_times=True):
+    def extract_titles(self,quant:float=.8,axis_for_outliers_detection:Literal['w','h','wh']='h',union=True,with_times=True) -> list:
         """
         Titles are extracted by performing statistics on the axis defined, computing a threshold based on quantiles\n
         and merging results based on union of results or intersection\n
         #TODO improvements: now the analysis is performed on the whole list of sentences, but can be performed:\n
             - per slide\n
             - then overall\n
-            but i don't know if can be beneficial
+        but i don't know if can be beneficial, depends on style of presentation. 
+        For now the assumption is that there's uniform text across all the slides and titles are generally bigger than the other text
 
+        Then titles are further more filtered by choosing that text whose size is above the threshold, only if it's
+        the first sentence of the slide\n
+            
         Prerequisites :
         ------------
         Must have runned analyze_video()
@@ -1056,21 +1064,41 @@ class VideoAnalyzer:
         ---------
         List of all the detected titles
         """
-        assert axis_for_outliers_detection in {'w','h','wh'} and 0 < quant < 1 and self.get_extracted_text(format='list[id,text,box]') is not None
+        assert axis_for_outliers_detection in {'w','h','wh'} and 0 < quant < 1 and self.get_extracted_text(format='list[text,time,box]') is not None
         # convert input into columns slice for analysis
         sliced_columns = {'w':slice(2,3),'h':slice(3,4),'wh':slice(2,4)}[axis_for_outliers_detection]
         texts_with_bb = self.get_extracted_text(format='list[text,time,box]')
+        
         # select columns
         axis_array = array([text_with_bb[2][sliced_columns] for text_with_bb in texts_with_bb],dtype=dtype('float','float'))
+        
         # compute statistical analysis on columns
-        indices_above_threshold = where((axis_array > quantile(axis_array,quant,axis=0)).any(axis=1))[0] if union else \
-                                  where((axis_array > quantile(axis_array,quant,axis=0)).all(axis=1))[0]
-        # selects the above texts
-        if with_times:
-            titles = itemgetter(*indices_above_threshold)(texts_with_bb)
-        else:
-            titles = itemgetter(*indices_above_threshold)(list(zip(*list(zip(*texts_with_bb))[slice(0,3,2)])))
-        return titles
+        indices_above_threshold = list(where((axis_array > quantile(axis_array,quant,axis=0)).any(axis=1))[0]) if union else \
+                                  list(where((axis_array > quantile(axis_array,quant,axis=0)).all(axis=1))[0])
+
+        slides_group = []
+        # group by slide
+        # x[0] is one element of indices_above_threshold to compare, x[1] is another
+        # [1] accesses the startend seconds of that TimedAndFramedText  [text, startend, bounding_boxes]
+        # [0] picks the start second of that object [start_second, end_second]
+        for _,g in groupby(enumerate(indices_above_threshold),lambda x: texts_with_bb[x[0]][1][0] - texts_with_bb[x[1]][1][0]):
+            slides_group.append(list(reversed(list(map(lambda x:x[1], g)))))
+        slides_group = list(reversed(slides_group))
+
+        # remove indices of text that are classified as titles but are just big text that's not at the top of every slide
+        for group in slides_group:
+            for indx_text in group:
+                if indx_text > 0 and indx_text-1 not in group and (                        # if i'm not at the first index and the text of the previous index is not in the group
+                   texts_with_bb[indx_text-1][1][0] == texts_with_bb[indx_text][1][0] and  # and the text is in the same slide
+                   texts_with_bb[indx_text-1][2][1] < texts_with_bb[indx_text][2][1]):     # and has a y value lower than my current text (there's another sentence before this one)
+                    indices_above_threshold.remove(indx_text)
+
+        # selects the texts from the list of texts
+        if not with_times:
+            return itemgetter(*indices_above_threshold)(list(zip(*list(zip(*texts_with_bb))[0:3:2])))
+        return itemgetter(*indices_above_threshold)(texts_with_bb)
+        
+        
 
     def create_thumbnails(self):
         '''
@@ -1084,164 +1112,178 @@ class VideoAnalyzer:
         -------------------------------
         could replace previous creation of keyframes when video is enough slidish\n
         '''
+
+        assert self._slide_startends is not None or self._text_in_video is not None, "Must firstly either set slides startends or analyze the video"
+        
+        times = self._slide_startends
+        print(times)
+        if times is None:
+            times = sorted(self.get_extracted_text(format='set[times]'))
+        else:
+            times = sorted(times)
+
         images_path = []
         images_already_present = False
         current_path = os.path.dirname(os.path.abspath(__file__))
         path = os.path.join(current_path, "static", "videos", self._video_id)
         if any(File.endswith(".jpg") for File in os.listdir(path)):
             thumbnails = [File for File in os.listdir(path) if File.endswith(".jpg")]
-            for i in range(len(thumbnails)):
+            if len(times) == len(thumbnails):
+                for i in range(len(thumbnails)):
+                    for File in os.listdir(path):
+                        if File.startswith(str(i)+"."):
+                            images_path.append("videos/" + self._video_id + "/" + File)
+                assert len(thumbnails) == len(images_path), "Images are incorrectly labeled!"
+                images_already_present = True
+            else:
                 for File in os.listdir(path):
-                    if File.startswith(str(i)+"."):
-                        images_path.append("videos/" + self._video_id + "/" + File)
-            images_already_present = True
+                    if not File.endswith(".mp4"):
+                        print("removing "+File)
+                        os.remove(os.path.join(path,File))
+                images_already_present = False
 
-        assert self._slide_startends is not None or self._text_in_video is not None
         
-        times = self._slide_startends
-        if times is None:
-            times = self.get_extracted_text(format='set[times]')
-        start_times =[]
+
+        start_times = []
         end_times = []
         video = LocalVideo(self._video_id)
-
         for i,(start_seconds,end_seconds) in enumerate(times):
+            start_times.append(start_seconds)
+            end_times.append(end_seconds)
             if not images_already_present:
-                video.set_num_frame(video.get_num_frame_from_time(start_seconds))
+                video.set_num_frame(video.get_num_frame_from_time(start_seconds+2))
                 image = video.extract_next_frame()
                 assert image is not None
                 file_name = str(i) + ".jpg"
                 image_file_dir = os.path.join(path, file_name)
                 cv2.imwrite(image_file_dir, image)
                 images_path.append("videos/" + self._video_id + "/" + file_name)
-            start_times.append(start_seconds)
-            end_times.append(end_seconds)
+            
         return start_times, end_times, images_path
-        
-    def _convert_seconds_to_h_mm_ss_dddddd(self,time:float):
-        millisec = str(time).split('.')[1][:6]
-        millisec += '0'*(6-len(millisec))
-        seconds = str(int(time)%60)
-        seconds = '0'*(2-len(seconds)) + seconds
-        minutes = str(int(time/60))
-        minutes = '0'*(2-len(minutes)) + minutes
-        hours = str(int(time/3600))
-        return hours+':'+minutes+':'+seconds+'.'+millisec
 
-    def get_fixed_definitions_and_indepth_times(self,burst_concepts:List[dict],definition_tol_seconds:float = 3,_show_output=False):
+    def adjust_or_insert_definitions_and_indepth_times(self,burst_concepts:List[dict],definition_tol_seconds:float = 3,_show_output=False):
         '''
         This is an attempt to find definitions from timed sentences of the transcript and the timed titles of the slides.\n
         Heuristic is that if there's a keyword in the title of a slide (frontpage slide excluded)
         find the first occurence of that keyword in the transcript within a tolerance seconds window before and after the appearance of the slide
         set that as "definition" only if it contains the keyword of the title .\n 
-        Heuristic for the in-depth is that after definition there's an in-depth of the slide, this means that the concept is explained further there.
+        Heuristic for the in-depth is that after definition there's an in-depth of the slide, this means that the concept is explained further there, until the slide with that title won't disappear.\n
+        
+        On the algorithmic side sentences of the transcript used by the heuristic are mapped to the conll version of the text,
+        cleaning operation is performed to remove errors (it groups the contiguous hit of every used sentence of the transcript to the conll by groups len and picks the biggest)\n
+        Then the mapped sentences are aggregated by start and end sentence ids\n
+        Lastly if the burst analysis has different definition times it is overwritten, if it does not contain the definition, this is appended at the end
         '''
         if self._slide_titles is None:
             raise Exception('slide titles not set')
-        else:
-            titles = self._slide_titles
         
-        timed_sentences,_ = self.get_transcript()
+        def extract_defs_and_indepths(titles:'list[dict]',timed_sentences:dict,definition_tol_seconds:float,_show_output=False):
+            video_defs = {}
+            video_in_depths = {}
+            used_sentences_in_trscr = []
+            #txt_classif = TextSimilarityClassifier([COMPARISON_METHOD_TXT_MISS_RATIO])
+            is_introductory_slide = True
 
-        video_defs = {}
-        video_in_depths = {}
-        used_sentences_in_trscr = []
-        txt_classif = TextSimilarityClassifier([COMPARISON_METHOD_TXT_MISS_RATIO])
-        is_introductory_slide = True
+            for title in titles:
+                if is_introductory_slide or title['start_end_seconds'] == start_end_times_introductory_slides: # TODO is there always an introductory slide?
+                    start_end_times_introductory_slides = title['start_end_seconds']
+                    is_introductory_slide = False
 
-        for title in titles:
-            if is_introductory_slide or title['start_end_seconds'] == start_end_times_introductory_slides: # TODO is there always an introductory slide?
-                start_end_times_introductory_slides = title['start_end_seconds']
-                is_introductory_slide = False
+                else:
+                    start_time_title,end_time_title = title['start_end_seconds']
+                    title_keyword = get_keywords_from_title(title['text'])[0] #TODO how to select best keyword in case more than 1 are found in the title?
 
-            else:
-                start_time_title,end_time_title = title['start_end_seconds']
-                title_keyword = get_keywords_from_title(title['text'])[0] #TODO how to select best keyword in case more than 1 are found in the title?
-                
-                for ts_id, timed_sentence in enumerate(timed_sentences):
-                    if title_keyword not in video_defs.keys() and \
-                       abs(start_time_title - timed_sentence['start']) < definition_tol_seconds and \
-                       title_keyword in timed_sentence['text']:
-                        if _show_output:
-                            print()
-                            print('********** Here comes the definition of the following keyword *******')
-                            print(f'keyword from title: {title_keyword}')
-                            print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
-                            print()
-                        timed_sentence['id'] = ts_id
-                        video_defs[title_keyword] = [timed_sentence]
-                        used_sentences_in_trscr.append((ts_id,timed_sentence['text'].lower()))
-                        
-                    # enlarge end time threshold to incorporate split slides with the same title
-                    if title_keyword in video_defs.keys() and \
-                       end_time_title > timed_sentence['end'] - 1 and \
-                       timed_sentence['start'] > video_defs[title_keyword][0]['start']: # and \
-                       #txt_classif.is_partially_in_txt_version(title_keywords[0],timed_sentence['text']):
-                        if title_keyword not in video_in_depths.keys():
+                    for timed_sent_id, timed_sentence in enumerate(timed_sentences):
+                        if title_keyword not in video_defs.keys() and \
+                           abs(start_time_title - timed_sentence['start']) < definition_tol_seconds and \
+                           title_keyword in timed_sentence['text']:
                             if _show_output:
-                                print('********** Here comes the indepth of the following keyword *******')
+                                print()
+                                print('********** Here comes the definition of the following keyword *******')
                                 print(f'keyword from title: {title_keyword}')
                                 print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
-                            timed_sentence['id'] = ts_id
-                            video_in_depths[title_keyword] = [timed_sentence]
-                            used_sentences_in_trscr.append((ts_id,timed_sentence['text'].lower()))
-                            
-                        elif not any([True for tmd_sentence in video_in_depths[title_keyword] if tmd_sentence['start'] == timed_sentence['start']]):
-                            timed_sentence['id'] = ts_id
-                            video_in_depths[title_keyword].append(timed_sentence)
-                            used_sentences_in_trscr.append((ts_id,timed_sentence['text'].lower()))
-                            if _show_output:
-                                print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
-        if _show_output:
-            print()
-        
-        del _, timed_sentences,txt_classif, is_introductory_slide,timed_sentence,title_keyword,start_time_title,end_time_title, title, definition_tol_seconds, start_end_times_introductory_slides,titles
+                                print()
+                            #timed_sentence['id'] = ts_id
+                            video_defs[title_keyword] = [(timed_sent_id,timed_sentence)]
+                            used_sentences_in_trscr.append((timed_sent_id,timed_sentence['text'].lower()))
 
-        
-        txt_cleaner = TextCleaner()
-        conll = get_text(self._video_id,return_conll=True,return_text=False)
-        conll_sentences = [(int(sent.metadata['sent_id']),txt_cleaner.clean_text(sent.metadata['text'])) for sent in parse(conll)]
-        conll_indx=0
-        conll_len = len(conll_sentences)
+                        # enlarge end time threshold to incorporate split slides with the same title
+                        if title_keyword in video_defs.keys() and \
+                           end_time_title > timed_sentence['end'] - 1 and \
+                           timed_sentence['start'] > video_defs[title_keyword][0][1]['start']: # and \
+                           #txt_classif.is_partially_in_txt_version(title_keywords[0],timed_sentence['text']):
+                            if title_keyword not in video_in_depths.keys():
+                                if _show_output:
+                                    print('********** Here comes the indepth of the following keyword *******')
+                                    print(f'keyword from title: {title_keyword}')
+                                    print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
+                                #timed_sentence['id'] = ts_id
+                                video_in_depths[title_keyword] = [(timed_sent_id,timed_sentence)]
+                                used_sentences_in_trscr.append((timed_sent_id,timed_sentence['text'].lower()))
 
-        # projecting timed sentences on conll sentences (not perfect due to imperfect match between conll and transcript)
-        txt_classif = TextSimilarityClassifier([COMPARISON_METHOD_TXT_MISS_RATIO],max_removed_chars_over_txt=0.1)
-        timed_to_conll = {}
-        for (ts_id,sent) in used_sentences_in_trscr:
-            completed = False
-            while not completed:
-                conll_elem_id, conll_elem_text = conll_sentences[conll_indx]
-                if txt_classif.is_exactly_in_txt_version(sent,conll_elem_text) or txt_classif.is_partially_in_txt_version(sent,conll_elem_text):
-                    if ts_id not in timed_to_conll.keys():
-                        timed_to_conll[ts_id] = {conll_elem_id}
-                    else:
-                        timed_to_conll[ts_id].add(conll_elem_id)
-                    completed = True
-                elif txt_classif.is_exactly_in_txt_version(conll_elem_text,sent) or txt_classif.is_partially_in_txt_version(conll_elem_text,sent):
-                    if ts_id not in timed_to_conll.keys():
-                        timed_to_conll[ts_id] = {conll_elem_id}
-                    else:
-                        if conll_elem_id not in timed_to_conll[ts_id]:
-                            timed_to_conll[ts_id].add(conll_elem_id)
+                            elif not any([True for _,tmd_sentence in video_in_depths[title_keyword] if tmd_sentence['start'] == timed_sentence['start']]):
+                                #timed_sentence['id'] = ts_id
+                                video_in_depths[title_keyword].append((timed_sent_id,timed_sentence))
+                                used_sentences_in_trscr.append((timed_sent_id,timed_sentence['text'].lower()))
+                                if _show_output:
+                                    print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
+            if _show_output:
+                print()
+            return video_defs,video_in_depths,used_sentences_in_trscr
+        
+        # extract definitions and in-depths in the transcript of every title based on slide show time and concept citation (especially with definition)
+        # alg is O(kn) with k titles and n sentences of the transcript 
+        video_defs, video_in_depths,used_sentences_in_trscr = extract_defs_and_indepths(self._slide_titles,self.get_transcript()[0],definition_tol_seconds,_show_output=_show_output)
+        
+        
+        def project_transcript_used_sentences_to_conll(video_id,used_sentences_in_trscr,):
+            txt_cleaner = TextCleaner()
+            conll = get_text(video_id,return_conll=True,return_text=False)
+            conll_sentences = [(int(sent.metadata['sent_id']),txt_cleaner.clean_text(sent.metadata['text'])) for sent in parse(conll)]
+            conll_indx=0
+            conll_len = len(conll_sentences)
+
+            # projecting timed sentences on conll sentences (not perfect due to imperfect match between conll and transcript) 
+            # this alg is O(n^2) with n sentences of the transcript
+            txt_classif = TextSimilarityClassifier([COMPARISON_METHOD_TXT_MISS_RATIO],max_removed_chars_over_txt=0.1)
+            timed_id_to_conll_ids:dict[int:list] = {}
+            for (timed_sent_id,sent) in used_sentences_in_trscr:
+                completed = False
+                while not completed:
+                    conll_elem_id, conll_elem_text = conll_sentences[conll_indx]
+                    if txt_classif.is_exactly_in_txt_version(sent,conll_elem_text) or txt_classif.is_partially_in_txt_version(sent,conll_elem_text):
+                        if timed_sent_id not in timed_id_to_conll_ids.keys():
+                            timed_id_to_conll_ids[timed_sent_id] = {conll_elem_id}
                         else:
-                            completed = True
-                    sent = txt_classif.subtract_common_text(sent,conll_elem_text)
-                if not completed:
-                    conll_indx += 1
-                    if conll_indx == conll_len:
-                        conll_indx = 0
-        del ts_id,sent,completed,conll_elem_id,conll_elem_text,conll_len,conll_indx,conll
+                            timed_id_to_conll_ids[timed_sent_id].add(conll_elem_id)
+                        completed = True
+                    elif txt_classif.is_exactly_in_txt_version(conll_elem_text,sent) or txt_classif.is_partially_in_txt_version(conll_elem_text,sent):
+                        if timed_sent_id not in timed_id_to_conll_ids.keys():
+                            timed_id_to_conll_ids[timed_sent_id] = {conll_elem_id}
+                        else:
+                            if conll_elem_id not in timed_id_to_conll_ids[timed_sent_id]:
+                                timed_id_to_conll_ids[timed_sent_id].add(conll_elem_id)
+                            else:
+                                completed = True
+                        sent = txt_classif.subtract_common_text(sent,conll_elem_text)
+                    if not completed:
+                        conll_indx += 1
+                        if conll_indx == conll_len:
+                            conll_indx = 0
+            return timed_id_to_conll_ids
         
+        timed_id_to_conll_ids = project_transcript_used_sentences_to_conll(self._video_id,used_sentences_in_trscr)
+
         # cleanup errors by sorting, grouping and picking largest group
-        timed_to_conll_keys = sorted(timed_to_conll)    
+        timed_id_to_conll_ids_keys = sorted(timed_id_to_conll_ids)    
         #procrastinate_first = False
         #is_first = True
-        for key in timed_to_conll_keys:
+        for key in timed_id_to_conll_ids_keys:
             groups = []
-            for _,g in groupby(enumerate(sorted(timed_to_conll[key])),lambda x:x[0]-x[1]):
+            for _,g in groupby(enumerate(sorted(timed_id_to_conll_ids[key])),lambda x:x[0]-x[1]):
                 groups.append(list(map(lambda x:x[1], g)))
             max_group_len_index = max(range(len(groups)), key=lambda i: len(groups[i]))
-            timed_to_conll[key] = {*groups[max_group_len_index]}
+            timed_id_to_conll_ids[key] = [*groups[max_group_len_index]]
             # in this case it works but in case of timed_to_conll[timed_to_conll_keys[0]] == {3,5,7} 
             # i can't group and whatever index can be valid
             # thus must procrastinate to find which index is best
@@ -1262,7 +1304,7 @@ class VideoAnalyzer:
             #    procrastinate_first = False
             #    timed_to_conll[key] = {*groups[max_group_index]}
             #elif len(groups[max_group_index]) > 1:
-        del timed_to_conll_keys,_,g,max_group_len_index,groups,key
+        del timed_id_to_conll_ids_keys,_,g,max_group_len_index,groups,key
         #for (c_id1,sent1),(c_id2,sent2) in pairwise_linked_iterator(conll_sentences):
         #    for s_id,sentence in used_sentences_in_trscr:
         #        if txt_classif.is_partially_in_txt_version(sentence,sent1):
@@ -1270,7 +1312,7 @@ class VideoAnalyzer:
         #        elif txt_classif.is_partially_in_txt_version(sentence,sent1+sent2):
         #            timed_to_conll[s_id] = [c_id1,c_id2]
         
-        # mapping concepts definitions extracted from video, to list of (inclusive) start_end_ids 
+        # mapping concepts definitions extracted from video, to list of start_end_ids 
         vid_defs_to_ids = {}
         vid_indep_to_ids = {}
         for from_dict,to_dict in [(video_defs,vid_defs_to_ids),(video_in_depths,vid_indep_to_ids)]:
@@ -1278,8 +1320,8 @@ class VideoAnalyzer:
                 this_elem_startends = []
                 start_id = None
                 ids_counter = None
-                for timed_def in from_dict[key]:
-                    curr_id = timed_def['id']
+                for curr_id,_ in from_dict[key]:
+                    #curr_id = timed_def['id']
                     if start_id is None:
                         start_id = curr_id
                         ids_counter = curr_id
@@ -1290,124 +1332,131 @@ class VideoAnalyzer:
                     else:
                         ids_counter += 1
                 else:
-                    this_elem_startends.append((start_id,curr_id+1))
+                    this_elem_startends.append((start_id,curr_id))
                 to_dict[key] = this_elem_startends
+        del from_dict,to_dict,key,this_elem_startends,start_id,ids_counter,curr_id,_,_show_output
         
-        #################################################
-        # creating burst_concept_objects TODO continua.....
-        # | CHANGE |
-        # V        V
-        video_segm_concepts = {}
-        for indx_list,from_list in enumerate([video_defs,video_in_depths]):
-            concept_description_type = 'Definition (V)' if indx_list == 0 else 'In Depth (V)'
-            for concept in list(from_list.keys()):
-                concept_txt = from_list[concept]['text'].lower(); concept_id = from_list[concept]['id']
-                for i in []:
-                    pass
 
-        txt_classif = TextSimilarityClassifier([COMPARISON_METHOD_TXT_MISS_RATIO],max_removed_chars_over_txt=0.1)
-        # TODO in case of in_depth there's more than one sentence, but also in case of definition there can be more than one sentence
-        for indx_list,from_list in enumerate([video_defs,video_in_depths]):
-            if indx_list==1: break
-            concept_description_type = 'Definition (V)' if indx_list == 0 else 'In Depth (V)'
-            for concept in list(from_list.keys()):
-                concept_txt = from_list[concept]['text'].lower()
-                for (id1,sent1),(id2,sent2) in pairwise_linked_iterator(conll_sentences):
-                    # if the sentence contains the whole definition text coming from the transcript
-                    if txt_classif.is_partially_in_txt_version(concept_txt,sent1):
-                        # if there's already a definition of the text -> substitute
-                        if concept in burst_defs_map.keys():
-                            for loc in burst_defs_map[concept]:
-                                pass
-                        # if there isn't already a definition append to the structure
-                        else:
-                            burst_concepts.append({ 'concept':concept,
-                                                    'start':self._convert_seconds_to_h_mm_ss_dddddd(from_list[concept]['start']),
-                                                    'end':self._convert_seconds_to_h_mm_ss_dddddd(from_list[concept]['end']),
-                                                    'description_type':concept_description_type,
-                                                    'start_sent_id':id1,
-                                                    'end_sent_id':id2,
-                                                    'creator':'Burst Analysis'})
-                        break
-                    # if instead 
-                    elif txt_classif.is_partially_in_txt_version(sent1,concept_txt):
-                        # if the concept_text is within two contiguous sentences of the conll
-                        if sent2 is None or txt_classif.is_partially_in_txt_version(concept_txt,sent1+sent2):
-                            # if there's already a definition of the text TODO decide what to do (substitute / compare / ignore) 
-                            if concept in burst_defs_map.keys():
-                                burst_concepts[burst_defs_map[concept]]
-                            # if there isn't already a definition append to the structure
-                            else:
-                                burst_concepts.append({ 'concept':concept,
-                                                        'start':self._convert_seconds_to_h_mm_ss_dddddd(from_list[concept]['start']),
-                                                        'end':self._convert_seconds_to_h_mm_ss_dddddd(from_list[concept]['end']),
-                                                        'description_type':concept_description_type,
-                                                        'start_sent_id':id1,
-                                                        'end_sent_id':id2,
-                                                        'creator':'Burst Analysis'})
-                            break
-                    #TODO elif it's required for more than 2 contiguous sentences 
+        def seconds_to_h_mm_ss_dddddd(time:float):
+            millisec = str(time%1)[2:8]
+            millisec += '0'*(6-len(millisec))
+            seconds = str(int(time)%60)
+            seconds = '0'*(2-len(seconds)) + seconds
+            minutes = str(int(time/60))
+            minutes = '0'*(2-len(minutes)) + minutes
+            hours = str(int(time/3600))
+            return hours+':'+minutes+':'+seconds+'.'+millisec
 
-        return burst_concepts           
+        # creating burst_concept_objects of the video results 
+        video_segm_concepts = []
+        concept_name_to_video_segm_concepts = {}
+        video_segm_concepts_len = 0
+        for dict_num,(concs_to_ids_dict,concs_dict) in enumerate([(vid_defs_to_ids,video_defs),(vid_indep_to_ids,video_in_depths)]):
+            concept_description_type = 'Definition (V)' if dict_num == 0 else 'In Depth (V)'
+            curr_text_indx = 0
+            for concept_name in concs_to_ids_dict.keys():
+                if concept_name not in concept_name_to_video_segm_concepts.keys():
+                    concept_name_to_video_segm_concepts[concept_name] = []
+                conc_elem:list[Tuple[int,dict]] = concs_dict[concept_name]    # has an id and a concept object
+                for timed_sent_start_id,timed_sent_end_id in concs_to_ids_dict[concept_name]:
+                    video_segm_concepts.append({'concept':concept_name,
+                                                'start_sent_id':min(timed_id_to_conll_ids[timed_sent_start_id]),
+                                                'end_sent_id':max(timed_id_to_conll_ids[timed_sent_end_id]),
+                                                'start':seconds_to_h_mm_ss_dddddd(conc_elem[curr_text_indx][1]['start']),
+                                                'end':seconds_to_h_mm_ss_dddddd(conc_elem[timed_sent_end_id-timed_sent_start_id+curr_text_indx][1]['end']),
+                                                'description_type':concept_description_type,
+                                                'creator':'Video Analysis'})
+                    concept_name_to_video_segm_concepts[concept_name].append([video_segm_concepts_len,False])
+                    video_segm_concepts_len += 1
+                    curr_text_indx += timed_sent_end_id-timed_sent_start_id + 1 #TODO not tested because the alg is not designed to have concepts' definitions that span across multiple segments 
+                    # i.e. for now there's just one definition and one in_depth segment for every keyword
+        del concept_name,concept_description_type,video_segm_concepts_len,curr_text_indx,dict_num,concs_to_ids_dict,concs_dict,conc_elem
 
-    def get_fixed_definitions_and_indepth_times_V2(self,burst_concepts:List[dict],definition_tol_seconds:float = 3):
-        txt_cleaner = TextCleaner()
-        conll = get_text(self._video_id,return_conll=True,return_text=False)
-        conll_sentences = [(int(sent.metadata['sent_id']),txt_cleaner.clean_text(sent.metadata['text'])) for sent in parse(conll)]
+        # checking for every burst keyword whether it must be replaced
+        for indx,burst_concept in reversed(list(enumerate(burst_concepts))): # TODO continue
+            if burst_concept['concept'] in concept_name_to_video_segm_concepts.keys():
+                for conc_indx,(vid_segm_indx,has_been_used) in enumerate(concept_name_to_video_segm_concepts[burst_concept['concept']]):
+                    if not has_been_used:
+                        this_video_segm_concept = video_segm_concepts[vid_segm_indx]
+                        burst_concept_descr = burst_concept['description_type']; vid_concept_descr = this_video_segm_concept['description_type'].split(' (')[0]
+                        if burst_concept_descr == vid_concept_descr:
+                            if this_video_segm_concept['start_sent_id'] != burst_concept['start_sent_id'] or \
+                               this_video_segm_concept['end_sent_id'] != burst_concept['end_sent_id']:
+                                burst_concepts.pop(indx); burst_concepts.insert(indx,this_video_segm_concept)
+                            concept_name_to_video_segm_concepts[burst_concept['concept']][conc_indx][1] = True  # setting "has_been_used" param to True to avoid repetitions
         
-        is_introductory_slide = True
-        video_defs = {}
-        video_in_depths = {}
-        txt_classif = TextSimilarityClassifier([COMPARISON_METHOD_TXT_MISS_RATIO])
-        if self._slide_titles is None:
-            raise Exception('slide titles not set')
-        else:
-            titles = self._slide_titles
-        for title in titles:
-            if is_introductory_slide or title['start_end_seconds'] == start_end_times_introductory_slides:
-                start_end_times_introductory_slides = title['start_end_seconds']
-                is_introductory_slide = False
-            else:
-                start_time_title,end_time_title = title['start_end_seconds'][0],title['start_end_seconds'][1]
-                title_keyword = get_keywords_from_title(title['text'])[0] #TODO how to select best keyword in case more than 1 are found in the title?
-                for (indx,sentence) in conll_sentences:
-                    if title_keyword not in set(video_defs.keys()) and \
-                    abs(start_time_title - timed_sentence['start']) < definition_tol_seconds and \
-                    title_keyword in timed_sentence['text']:
-                        print()
-                        print('********** Here comes the definition of the following keyword *******')
-                        print(f'keyword from title: {title_keyword}')
-                        print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
-                        video_defs[title_keyword] = timed_sentence
-                        print()
-                    # shift end times threshold to incorporate split slides with the same title
-                    if title_keyword in set(video_defs.keys()) and \
-                    end_time_title > timed_sentence['end'] - 1 and \
-                    timed_sentence['start'] > video_defs[title_keyword]['start'] and \
-                    (True or txt_classif.is_partially_in_txt_version(title_keywords[0],timed_sentence['text'])):
-                        if title_keyword not in set(video_in_depths.keys()):
-                            print('********** Here comes the indepth of the following keyword *******')
-                            print(f'keyword from title: {title_keyword}')
-                            video_in_depths[title_keyword] = [timed_sentence]
-                            print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
-                        elif not any([True for tmd_sentence in video_in_depths[title_keyword] if tmd_sentence['start'] == timed_sentence['start']]):
-                            video_in_depths[title_keyword].append(timed_sentence)
-                            print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
+        # adding remaining keywords that were not already present in burst
+        for key in concept_name_to_video_segm_concepts.keys():
+            for vid_segm_indx,has_been_used in concept_name_to_video_segm_concepts[key]:
+                if not has_been_used:
+                    burst_concepts.append(video_segm_concepts[vid_segm_indx])
 
-    def set(self,video_slidishness=None,slide_startends=None,titles=None):
+        return burst_concepts
+
+    def reconstruct_slides_from_times_set(self):
+        assert self._slide_startends is not None, "Must firstly load (set) startend frames read from database to run this function"
+        slide_startends = self._slide_startends
+        frame = ImageClassifier(image_and_scheme=[None,COLOR_BGR])
+        loc_video = LocalVideo(self._video_id)
+        TFT_list = []
+        for slide_start_seconds,slide_end_seconds in slide_startends:
+            slide_frames_startend = (loc_video.get_num_frame_from_time(slide_start_seconds),loc_video.get_num_frame_from_time(slide_end_seconds))
+            loc_video.set_num_frame(slide_frames_startend[0])
+            frame.set_img(loc_video.extract_next_frame())
+            text_extracted = frame.extract_text(return_text=True,with_contours=True)
+            #show_image(draw_bounding_boxes_on_image_classifier(frame))
+            TFT_list.append(TimedAndFramedText(text_extracted,[slide_frames_startend]))
+        self._text_in_video = TFT_list
+        #self._text_in_video = self._merge_and_cleanup(TFT_list,VideoSpeedManager(self._video_id),frame,int(loc_video.get_fps()*10))
+
+
+
+    def set(self,video_slidishness=None,slidish_frames_startend=None,slide_startends=None,titles=None):
         if video_slidishness is not None:
             self._video_slidishness = video_slidishness
+        if slidish_frames_startend is not None:
+            self._frames_to_analyze = slidish_frames_startend
         if slide_startends is not None:
             self._slide_startends = slide_startends
         if titles is not None:
             self._slide_titles = titles
+        return self
 
+def _test_and_save_segment_video(vid_id):
+    video = VideoAnalyzer(vid_id)
+    try:
+        segmentation_data = db_mongo.get_video_segmentation(vid_id)
+        video.set(segmentation_data['video_slidishness'],segmentation_data['slidish_frames_startend'])
+        if video.is_slide_video():
+            video.set(slide_startends = segmentation_data['slide_startends'])
+            video.reconstruct_slides_from_times_set()
+            pprint(video.extract_titles())
+    except Exception as e:
+        print("Error: ")
+        print(e)
+
+        # Pre-process the video
+        video_slidishness,slide_frames = video.is_slide_video(return_slide_frames=True,return_value=True,_show_info=True)
+        segmentation_data = {'video_id':vid_id,'video_slidishness':video_slidishness,'slidish_frames_startend':slide_frames}
+
+        # Analyze the video
+        video.analyze_video(_show_info=True)
+        segmentation_data = {**segmentation_data,
+                             **{'slide_startends': video.get_extracted_text(format='set[times]'),
+                                'slide_titles':[{'start_end_seconds':start_end_seconds,
+                                                 'text':title,
+                                                 'xywh_normalized':bb} 
+                                                 for (title,start_end_seconds,bb) in video.extract_titles()]}}
+        db_mongo.insert_video_text_segmentation(segmentation_data,update=True)
+    return
 
 
 def _main_in_segmentation():
-    import db_mongo
+    #vid_id = 'eVjQXLEX-78'
+
+    # FOR TEST
     # WEAK_POINT not performing fast with long videos or text that composes character by character each frame 
-    #video = VideoAnalyzer('yN7ypxC7838') #TODO try again with this video and measure cv2.resize() performances against pure analysis
+    #video = VideoAnalyzer('yN7ypxC7838')
     #video = VideoAnalyzer('g8w-IKUFoSU') #infants and juveniles forensic
     video = VideoAnalyzer('PPLop4L2eGk') #introduction to ML
     #video = VideoAnalyzer('UuzKYffpxug') #estimating stature forensic
@@ -1419,8 +1468,8 @@ def _main_in_segmentation():
     video._video_slidishness = segmentation_data['video_slidishness']
     video._frames_to_analyze = segmentation_data['slide_frames']
     video.set(titles=segmentation_data['slide_titles'])
-    concepts = [{'concept': 'machine learning', 'start_sent_id': 0, 'end_sent_id': 7, 'start': '0:00:00.060000', 'end': '0:00:31.319000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'machine learning', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 0, 'end_sent_id': 3, 'start': '0:00:00.060000', 'end': '0:00:14.879000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 38, 'end_sent_id': 42, 'start': '0:03:29.250000', 'end': '0:04:25.850000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 45, 'end_sent_id': 50, 'start': '0:04:19.350000', 'end': '0:04:59.690000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'video', 'start_sent_id': 28, 'end_sent_id': 48, 'start': '0:02:19.140000', 'end': '0:04:51.109000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'define', 'start_sent_id': 1, 'end_sent_id': 7, 'start': '0:00:02.250000', 'end': '0:00:31.319000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'define', 'start_sent_id': 37, 'end_sent_id': 48, 'start': '0:03:15.690000', 'end': '0:04:51.109000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'definition', 'start_sent_id': 3, 'end_sent_id': 6, 'start': '0:00:08.109000', 'end': '0:00:24.180000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'definition', 'start_sent_id': 18, 'end_sent_id': 23, 'start': '0:01:32.439000', 'end': '0:02:03.389000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'people', 'start_sent_id': 64, 'end_sent_id': 73, 'start': '0:05:37.310000', 'end': '0:06:59.189000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'time', 'start_sent_id': 69, 'end_sent_id': 71, 'start': '0:06:16.110000', 'end': '0:06:48.239000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'experience', 'start_sent_id': 17, 'end_sent_id': 25, 'start': '0:01:22.330000', 'end': '0:02:11.989000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'performance measure', 'start_sent_id': 22, 'end_sent_id': 27, 'start': '0:01:47.950000', 'end': '0:02:18.769000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'make', 'start_sent_id': 23, 'end_sent_id': 28, 'start': '0:01:58.509000', 'end': '0:02:32.539000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'make', 'start_sent_id': 69, 'end_sent_id': 73, 'start': '0:06:16.110000', 'end': '0:06:59.189000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'email', 'start_sent_id': 29, 'end_sent_id': 31, 'start': '0:02:26.900000', 'end': '0:02:57.530000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'email', 'start_sent_id': 36, 'end_sent_id': 38, 'start': '0:03:15.690000', 'end': '0:03:58.489000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'type', 'start_sent_id': 38, 'end_sent_id': 49, 'start': '0:03:29.250000', 'end': '0:04:52.650000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'tool', 'start_sent_id': 62, 'end_sent_id': 64, 'start': '0:05:29.300000', 'end': '0:05:44.119000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'month', 'start_sent_id': 68, 'end_sent_id': 70, 'start': '0:06:00.560000', 'end': '0:06:40.110000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}]
-    concepts = video.get_fixed_definitions_and_indepth_times(concepts)
+    concepts = [{'concept': 'machine', 'start_sent_id': 0, 'end_sent_id': 7, 'start': '0:00:00.060000', 'end': '0:00:31.319000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'machine', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'machine learning', 'start_sent_id': 0, 'end_sent_id': 7, 'start': '0:00:00.060000', 'end': '0:00:31.319000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'machine learning', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 0, 'end_sent_id': 3, 'start': '0:00:00.060000', 'end': '0:00:14.879000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 38, 'end_sent_id': 42, 'start': '0:03:29.250000', 'end': '0:04:25.850000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 45, 'end_sent_id': 50, 'start': '0:04:19.350000', 'end': '0:04:59.690000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'checker', 'start_sent_id': 8, 'end_sent_id': 13, 'start': '0:00:24.609000', 'end': '0:01:13.349000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}]
+    concepts = video.adjust_or_insert_definitions_and_indepth_times(concepts)
     print(concepts)
     #results = video.extract_titles(quant=0.85)
     #results_dict = [{'start_end_frames':start_end_frames,'title':title,'xywh_normalized':bb} for (title,start_end_frames,bb) in results]
@@ -1445,6 +1494,8 @@ def _main_in_segmentation():
 
     plt.show()
 
+import db_mongo
 
 if __name__ == '__main__':
-    _main_in_segmentation()
+    vid_id = "ujutUfgebdo"
+    _test_and_save_segment_video(vid_id)
