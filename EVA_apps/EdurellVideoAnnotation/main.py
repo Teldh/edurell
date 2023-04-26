@@ -576,11 +576,13 @@ def burst_launch():
     # select burst type
     if syn_burst:
         print("Starting Burst " + burstType + " with synonyms")
-        jsonld,concept_map,definitions = burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary)
+        concept_map,definitions = burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary)
     else:
         print("Starting Burst " + burstType)
-        jsonld,concept_map,definitions = burst_extraction(video_id,concepts)
-
+        concept_map,definitions = burst_extraction(video_id,concepts)
+    
+    _,jsonld = create_burst_graph(video_id,definitions,concept_map)
+    
     # saving burst_graph on db if not already present
     burst_graph = db_mongo.get_graph(user="Burst Analysis",video=video_id)
 
@@ -671,25 +673,25 @@ def video_segmentation_refinement():
                     .set(segmentation_data['video_slidishness'],segmentation_data['slide_startends'],titles=segmentation_data['slide_titles']) \
                     .adjust_or_insert_definitions_and_indepth_times(definitions,_show_output=False)
     #pprint(definitions)
-    burst_graph = db_mongo.get_graph(user="Burst Analysis",video=video_id)
-    
-    if burst_graph is None:
-        print("Saving graph on DB")
-        burst_graph = create_localVocabulary(conceptVocabulary)
-        for item in burst_graph["@graph"]:
-            if item["id"] == "localVocabulary":
-                localVocabulary = item["skos:member"]
-                burst_graph["@graph"].remove(item)
-                break
-        for concept in concepts:
-            burst_graph["@graph"].append({"id": "concept_"+concept, "type": "skos:Concept"})
-        graph_to_mongo={"video_id":video_id,
-                        "annotator_id":"Burst Analysis",
-                        "annotator_name":"Burst Analysis",
-                        "email":"Burst Analysis",
-                        "graph": burst_graph,
-                        "conceptVocabulary": {"@context": burst_graph["@context"], "@graph": localVocabulary}} 
-        db_mongo.insert_graph(graph_to_mongo)
+    #burst_graph = db_mongo.get_graph(user="Burst Analysis",video=video_id)
+    #
+    #if burst_graph is None:
+    #    print("Saving graph on DB")
+    #    burst_graph = create_localVocabulary(conceptVocabulary)
+    #    for item in burst_graph["@graph"]:
+    #        if item["id"] == "localVocabulary":
+    #            localVocabulary = item["skos:member"]
+    #            burst_graph["@graph"].remove(item)
+    #            break
+    #    for concept in concepts:
+    #        burst_graph["@graph"].append({"id": "concept_"+concept, "type": "skos:Concept"})
+    #    graph_to_mongo={"video_id":video_id,
+    #                    "annotator_id":"Burst Analysis",
+    #                    "annotator_name":"Burst Analysis",
+    #                    "email":"Burst Analysis",
+    #                    "graph": burst_graph,
+    #                    "conceptVocabulary": {"@context": burst_graph["@context"], "@graph": localVocabulary}} 
+    #    db_mongo.insert_graph(graph_to_mongo)
     return {"definitions":definitions}
 
 # from color_histogram import get_image_from_video

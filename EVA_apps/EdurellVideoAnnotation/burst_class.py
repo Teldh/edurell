@@ -91,11 +91,11 @@ def burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary, n=90):
 
     syn_map, new_concepts = get_synonyms_mappings(conceptVocabulary)
 
-    jsonld, concept_map_burst, burst_definitions = Burst(text, new_concepts, video_id, conll, syn_map, threshold=0.7,
+    concept_map_burst, burst_definitions = Burst(text, new_concepts, video_id, conll, syn_map, threshold=0.7,
                                                  top_n=n, max_gap=1).launch_burst_analysis()
 
     print("***** EDURELL - Video Annotation: burst_class.py::burst_extraction_with_synonyms(): Fine ******")
-    return jsonld,concept_map_burst, burst_definitions
+    return concept_map_burst, burst_definitions
 
 class Burst:
 
@@ -294,8 +294,8 @@ class Burst:
             sorted_edgelist = pd.DataFrame(burst_proc.to_edgelist(directed_burst),
                                            columns=["prerequisite", "target", "weight"])
 
-            jsonld, concept_map, definitions = self.df_to_data(sorted_edgelist, burst_res, use_conll=True)
-            return jsonld, concept_map, self._merge_contained_definitions(definitions)
+            concept_map, definitions = self.df_to_data(sorted_edgelist, burst_res, use_conll=True)
+            return concept_map, self._merge_contained_definitions(definitions)
 
 
         except ValueError as e:
@@ -373,9 +373,9 @@ class Burst:
                     "creator": "Burst Analysis"
                 })
 
-        _,jsonld = create_burst_graph(self.video_id,definitions, concept_map)
+        #_,jsonld = create_burst_graph(self.video_id,definitions, concept_map)
 
-        return jsonld,concept_map, definitions
+        return concept_map, definitions
 
 
 def compute_agreement_burst(concept_map1, concept_map2):
@@ -417,12 +417,9 @@ def compute_agreement_burst(concept_map1, concept_map2):
 
 
 
-def create_burst_graph(video_id,definitions, concept_map):
+def create_burst_graph(video_id,definitions,concept_map):
 
     print("***** EDURELL - Video Annotation: burst_class.py::create_burst_graph(): Inizio ******")
-
-    concepts_anno = definitions
-    prereq_anno = concept_map
 
     creator = URIRef("Burst Analysis")
     
@@ -460,7 +457,7 @@ def create_burst_graph(video_id,definitions, concept_map):
 
 
     # per ogni annotazione di concetto spiegato aggiungo le triple
-    for i, annotation in enumerate(concepts_anno):
+    for i, annotation in enumerate(definitions):
         ann = URIRef("ann" + str(i + 1))
 
         g.add((ann, RDF.type, oa.Annotation))
@@ -514,10 +511,10 @@ def create_burst_graph(video_id,definitions, concept_map):
         g.add((blank_endSelector, edu.conllSentId, Literal(annotation["end_sent_id"])))
         
 
-    num_definitions = len(concepts_anno) + 1
+    num_definitions = len(definitions) + 1
 
     # per ogni annotazione di prerequisito aggiungo le triple
-    for i, annotation in enumerate(prereq_anno):
+    for i, annotation in enumerate(concept_map):
         ann = URIRef("ann" + str(num_definitions + i))
 
         target_concept = URIRef("concept_" +  annotation["target"].replace(" ", "_"))
@@ -600,7 +597,7 @@ def create_burst_graph(video_id,definitions, concept_map):
     return g, jsonld
 
 
-def create_localVocabulary(video_id,jsonld,conceptVocabulary):
+def create_localVocabulary(video_id,conceptVocabulary):
     context = ["http://www.w3.org/ns/anno.jsonld", {
                "@base": "https://edurell.dibris.unige.it/annotator/auto/"+video_id+"/",
       			"@version": 1.1,
