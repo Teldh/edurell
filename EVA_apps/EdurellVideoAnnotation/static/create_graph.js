@@ -211,9 +211,9 @@ function deleteDescription(button, concept, start, end){
 
 
 
-function downloadGraph(){
+function downloadManuGraphAsJson(){
 
-    console.log("***** EDURELL - Video Annotation: create_graph.js::downloadGraph(): Inizio *****")
+    console.log("***** EDURELL - Video Annotation: create_graph.js::downloadManuGraphAsJson(): Inizio *****")
 
     let annotations = {
         "id": $video_id,
@@ -226,7 +226,7 @@ function downloadGraph(){
     var js_data = JSON.stringify(annotations);
 
     $.ajax({
-        url: '/annotator/download_json',
+        url: '/annotator/download_graph',
         type : 'post',
         contentType: 'application/json',
         dataType : 'json',
@@ -236,18 +236,8 @@ function downloadGraph(){
         downloadObjectAsJson(result, "graph");
     })    
 }
-
-function downloadObjectAsJson(exportObj, exportName){
-    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj,null,2));
-    var downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href",     dataStr);
-    downloadAnchorNode.setAttribute("download", exportName + ".json");
-    document.body.appendChild(downloadAnchorNode); // required for firefox
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-}
   
-function downloadJson(){
+function uploadManuGraphOnDB(){
 
     let annotations = {
         "id": $video_id,
@@ -257,12 +247,12 @@ function downloadJson(){
         "conceptVocabulary": $conceptVocabulary,
     }
 
-    console.log("downloadJson")
+    console.log("uploadGraphOnDB")
 
     var js_data = JSON.stringify(annotations);
 
     $.ajax({
-        url: '/annotator/json_ld',
+        url: '/annotator/upload_graph',
         type : 'post',
         contentType: 'application/json',
         dataType : 'json',

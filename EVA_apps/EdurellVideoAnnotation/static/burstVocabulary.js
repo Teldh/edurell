@@ -379,7 +379,7 @@ async function launchBurstAnalysis(burstType){
     }).done(function(result) {
       showResults(result)
     })
-    $burstGraph = result.burst_graph;
+    $burstGraph = result.downloadable_json_LD_graph;
     console.log($burstGraph)
     return result
 }
@@ -393,13 +393,26 @@ function refineBurstWithVideoAnalysis() {
     "definitions":$definitions
   } 
 
+  function showRefinementLoading(){
+    document.getElementById("results").style.display = "none";
+    var loading_text_elem = document.getElementById("loadingText")
+    loading_text_elem.textContent = "Refining results..."
+    document.getElementById("loading").style.display = "block";
+  }
+
+  function hideRefinementLoading(prev_text) {
+    document.getElementById("loadingText").textContent = prev_text;
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("results").style.display = "block";
+  }
+
   var js_data = JSON.stringify(data);
   
   var prev_text = document.getElementById("loadingText").textContent;
   showRefinementLoading();
 
   $.ajax({
-    url: '/annotator/video_segmentation_refinement',
+    url: '/annotator/refinement',
     type : 'post',
     contentType: 'application/json',
     dataType : 'json',
@@ -408,21 +421,15 @@ function refineBurstWithVideoAnalysis() {
       console.log(result);
       hideRefinementLoading(prev_text);
       printDefinitions(result.definitions,true);
+      $hasBeenRefined = true;
+      document.getElementById("refinement-button").style.display = "none";
+      $definitions = result.definitions;
   })
 }
 
-function showRefinementLoading(){
-  document.getElementById("results").style.display = "none";
-  var loading_text_elem = document.getElementById("loadingText")
-  loading_text_elem.textContent = "Refining results..."
-  document.getElementById("loading").style.display = "block";
-}
 
-function hideRefinementLoading(prev_text) {
-  document.getElementById("loadingText").textContent = prev_text;
-  document.getElementById("loading").style.display = "none";
-  document.getElementById("results").style.display = "block";
-}
+
+
 
 function showResults(result){
     console.log("***** EDURELL - Video Annotation: burstVocabulary.js::showResults() ******")
@@ -598,14 +605,23 @@ function printDefinitions(definitions, update){
 
 }
 
-function downloadObjectAsJson(exportObj, exportName){
-  var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj,null,2));
-  var downloadAnchorNode = document.createElement('a');
-  downloadAnchorNode.setAttribute("href",     dataStr);
-  downloadAnchorNode.setAttribute("download", exportName + ".json");
-  document.body.appendChild(downloadAnchorNode); // required for firefox
-  downloadAnchorNode.click();
-  downloadAnchorNode.remove();
+//function downloadObjectAsJson(exportObj, exportName){
+//  var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj,null,2));
+//  var downloadAnchorNode = document.createElement('a');
+//  downloadAnchorNode.setAttribute("href",     dataStr);
+//  downloadAnchorNode.setAttribute("download", exportName + ".json");
+//  document.body.appendChild(downloadAnchorNode); // required for firefox
+//  downloadAnchorNode.click();
+//  downloadAnchorNode.remove();
+//}
+
+function DownloadBurstResultAsJson(exportObj) {
+  if($hasBeenRefined){
+      namefile = "refined_graph"
+  } else {
+      namefile = "graph"
+  }
+  downloadObjectAsJson(exportObj,namefile)
 }
 
 function saveBurstGraph(){

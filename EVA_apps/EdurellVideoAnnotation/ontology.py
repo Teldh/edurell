@@ -20,9 +20,9 @@ edurell = "https://teldh.github.io/edurell#"
 context = ["http://www.w3.org/ns/anno.jsonld", {"edu": edurell}]
 
 
-def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
+def annotations_to_jsonLD(annotations, isAutomatic:bool):
 
-    print("***** EDURELL - Video Annotation: ontology.py::create_graph_jsonld(): Inizio ******")
+    print("***** EDURELL - Video Annotation: ontology.py::to_jsonLD(): Inizio ******")
 
     concepts_anno = []
     prereq_anno = []
@@ -33,7 +33,7 @@ def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
         prereq_anno = annotations["relations"]
     video_id = annotations["id"]
 
-    if not isGoldCreation and not isBurst:
+    if not isAutomatic:
         creator = annotations["annotator"]
         creator = URIRef(creator)
 
@@ -80,7 +80,7 @@ def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
 
         g.add((ann, RDF.type, oa.Annotation))
 
-        if isGoldCreation or isBurst:
+        if isAutomatic:
             g.add((ann, dcterms.creator, URIRef(annotation["creator"])))
         else:
             g.add((ann, dcterms.creator, creator))
@@ -144,7 +144,7 @@ def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
 
         g.add((ann, RDF.type, oa.Annotation))
 
-        if isGoldCreation or isBurst:
+        if isAutomatic:
             g.add((ann, dcterms.creator, URIRef(annotation["creator"])))
         else:
             g.add((ann, dcterms.creator, creator))
@@ -235,7 +235,7 @@ def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
     }
 
     #print(data)
-    print("***** EDURELL - Video Annotation: ontology.py::create_graph_jsonld(): Fine ******")
+    print("***** EDURELL - Video Annotation: ontology.py::to_jsonLD(): Fine ******")
 
     return g, data
 

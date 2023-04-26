@@ -714,6 +714,9 @@ class VideoAnalyzer:
         self._frames_to_analyze = frames_to_analyze #dist_threshold, frames_to_analyze
 
     def _merge_and_cleanup(self,TFT_list:'list[TimedAndFramedText]',vsm: VideoSpeedManager,frame:ImageClassifier,frames_dist_tol:int):
+        
+        txt_classif = TextSimilarityClassifier()
+
         def compact_embedding_partial_words(TFT_list:'list[TimedAndFramedText]',text_classifier:TextSimilarityClassifier,frames_max_dist:int):
             '''
             Merge near TimedAndFramedText elements of the list\n
@@ -745,8 +748,6 @@ class VideoAnalyzer:
                     elem2.extend_frames(elem1.start_end_frames)
                     deleted.append(i1)
             return sorted([elem.merge_adjacent_startend_frames(max_dist=frames_max_dist) for indx, elem in enumerate(input_list) if not indx in deleted])
-
-        txt_classif = TextSimilarityClassifier()
 
         txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM_RATIO,
                                             COMPARISON_METHOD_TXT_MISS_RATIO,

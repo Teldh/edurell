@@ -7,8 +7,8 @@ from flask import render_template, jsonify, request, session, flash, redirect, u
 from flask_login import current_user, login_user, logout_user, login_required
 from video import download
 from segmentation import VideoAnalyzer
-from ontology import create_graph_jsonld
-from burst_class import get_burst_graph
+from ontology import annotations_to_jsonLD
+from burst_class import create_localVocabulary, create_burst_graph
 from werkzeug.urls import url_parse
 from forms import addVideoForm, RegisterForm, LoginForm, GoldStandardForm, ForgotForm, PasswordResetForm, ConfirmCodeForm, BurstForm
 from words import extract_keywords, get_real_keywords
@@ -16,7 +16,7 @@ from conll import conll_gen, lemmatize,create_text
 from nltk import WordNetLemmatizer
 from audio_transcription import speech_from_youtube
 import bcrypt
-from analysis import data_summary, compute_agreement, linguistic_analysis, fleiss
+from analysis import compute_data_summary, compute_agreement, linguistic_analysis, fleiss
 from user import User
 from sendmail import send_mail, generate_confirmation_token, confirm_token, send_confirmation_mail
 from create_gold_standard import create_gold
@@ -29,6 +29,7 @@ from metrics import calculate_metrics
 from synonyms import create_skos_dictionary, get_synonyms_from_list
 from skos_synonyms_query import try_query
 import pdb
+from pprint import pprint
 
 @app.route('/')
 def index():
@@ -363,65 +364,59 @@ def lemmatize_word(word):
     return jsonify({'lemma': lemma.lower()})
 
 
-@app.route('/json_ld', methods=["GET", "POST"])
-def jsonld():
-    print("***** EDURELL - Video Annotation: main.py::jsonld(): Inizio ******")
-    #deve solo salvare sul db
+@app.route('/upload_graph', methods=["GET", "POST"])
+def upload_annotated_graph():
+
+    print("***** EDURELL - Video Annotation: main.py::upload_annotations(): Inizio ******")
     annotations = request.json
 
-    g, json = create_graph_jsonld(annotations)
+    _, json = annotations_to_jsonLD(annotations,isAutomatic=False)
+    print(annotations)
 
     data = json.copy()
     data["video_id"] = annotations["id"]
     data["annotator_id"] = current_user.mongodb_id
     data["annotator_name"] = current_user.complete_name
     data["email"] = current_user.email
-    data["conceptVocabulary"] = create_skos_dictionary(annotations["conceptVocabulary"], annotations["id"])
+    data["conceptVocabulary"] = create_skos_dictionary(annotations["conceptVocabulary"], annotations["id"],"manu")
 
-    for x in data["conceptVocabulary"]["@graph"]:
-        mydict = {"id": x["id"], "type" : "skos:Concept"}
-        data["graph"]["@graph"].append(mydict)
+    data["graph"]["@graph"].extend([{"id": x["id"], "type" : "skos:Concept"} for x in data["conceptVocabulary"]["@graph"]])
 
 
     # inserting annotations on DB
-    db_mongo.insert_graph(data)    
+    try: 
+        db_mongo.insert_graph(data)    
+    except Exception as e:
+        print(e)
+        flash(e,"error")
+        return False
 
-    print("***** EDURELL - Video Annotation: main.py::jsonld(): Fine ******")
+    print("***** EDURELL - Video Annotation: main.py::upload_annotations(): Fine ******")
+    # TODO show a message on screen
+    return True
 
-    return ""
 
 
+@app.route('/download_graph', methods=["GET", "POST"])
+def prepare_annotated_graph():
+    print("***** EDURELL - Video Annotation: main.py::download_graph(): Inizio ******")
 
-@app.route('/download_json', methods=["GET", "POST"])
-def download_json():
-    print("***** EDURELL - Video Annotation: main.py::download_json(): Inizio ******")
-    #serve solo per il download
     annotations = request.json
 
-    g, json = create_graph_jsonld(annotations)
+    _, json = annotations_to_jsonLD(annotations,isAutomatic=False)
+    print(annotations)
 
-    conceptVocabulary = create_skos_dictionary(annotations["conceptVocabulary"], annotations["id"])
-
-    myarray = []
-
-    for x in conceptVocabulary["@graph"]:
-        myarray.append(x)
-
-    localVocabulary = {    
-    "id":"localVocabulary",
-    "type": "skos:Collection", 
-    "skos:member": myarray
-    }
-
-    json["graph"]["@graph"].append(localVocabulary)
+    conceptVocabulary = create_skos_dictionary(annotations["conceptVocabulary"], annotations["id"],"manu")
+    
+    json["graph"]["@graph"].append({ "id":"localVocabulary","type": "skos:Collection","skos:member": [elem for elem in conceptVocabulary["@graph"]]})
 
     result = {
         "@context": conceptVocabulary["@context"],
         "@graph": json["graph"]["@graph"]
     }
 
-    print("***** EDURELL - Video Annotation: main.py::download_json(): Fine ******")
-
+    print("***** EDURELL - Video Annotation: main.py::download_annotated_graph(): Fine ******")
+    # real download happens on the js side
     return result   
 
 
@@ -442,7 +437,7 @@ def analysis():
             concept_map = db_mongo.get_concept_map(annotator_id, video_id)
             definitions = db_mongo.get_definitions(annotator_id, video_id)
 
-            results = data_summary(concept_map, definitions, video_id)
+            results = compute_data_summary(video_id,concept_map, definitions)
 
             if annotator_id != "Burst":
                 user = db_mongo.get_user(annotator_id)
@@ -578,40 +573,44 @@ def burst_launch():
     syn_burst = data["syn_burst"]
     burstType = data["burst_type"]
 
+    # select burst type
+    if syn_burst:
+        print("Starting Burst " + burstType + " with synonyms")
+        jsonld,concept_map,definitions = burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary)
+    else:
+        print("Starting Burst " + burstType)
+        jsonld,concept_map,definitions = burst_extraction(video_id,concepts)
+
     # saving burst_graph on db if not already present
     burst_graph = db_mongo.get_graph(user="Burst Analysis",video=video_id)
-    
+
     if burst_graph is None:
         print("Saving graph on DB")
-        print(conceptVocabulary)
-        burst_graph = get_burst_graph(conceptVocabulary)
+        burst_graph = jsonld
+        localVocabulary = None
         for item in burst_graph["@graph"]:
             if item["id"] == "localVocabulary":
                 localVocabulary = item["skos:member"]
                 burst_graph["@graph"].remove(item)
                 break
-        for concept in concepts:
-            burst_graph["@graph"].append({"id": "concept_"+concept, "type": "skos:Concept"})
+        if localVocabulary is None:
+            localVocabulary = create_localVocabulary(video_id,jsonld,conceptVocabulary)
+            burst_graph["@graph"].append(localVocabulary)
+        burst_graph["@graph"].extend([{"id": "concept_"+concept, "type": "skos:Concept"} for concept in concepts])
+        
         graph_to_mongo={"video_id":video_id,
                         "annotator_id":"Burst Analysis",
                         "annotator_name":"Burst Analysis",
                         "email":"Burst Analysis",
                         "graph": burst_graph,
-                        "conceptVocabulary": {"@context": burst_graph["@context"], "@graph": localVocabulary}} 
-        db_mongo.insert_graph(graph_to_mongo)
-
-    # ---------------------
-
-    # select burst type
-    if syn_burst:
-        print("Starting Burst " + burstType + " with synonyms")
-        concept_map, definitions = burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary)
+                        "conceptVocabulary": {"@context": burst_graph["@context"], "@graph": localVocabulary}}
+        #db_mongo.insert_graph(graph_to_mongo)
+        
+        jsonld = burst_graph["@graph"]
     else:
-        print("Starting Burst " + burstType)
-        concept_map, definitions = burst_extraction(video_id,concepts)
-    
+        jsonld.append(create_localVocabulary(video_id,jsonld,conceptVocabulary))
 
-    results = data_summary(concept_map, definitions, video_id)
+    data_summary = compute_data_summary(video_id,concept_map,definitions)
     
     # checks whether video has been segmented and if so if it is classifies ad slide video or not in order to enable refinement
     segmentation_data = db_mongo.get_video_segmentation(video_id,returned_fields={"video_slidishness"},raise_error=False)
@@ -621,8 +620,8 @@ def burst_launch():
         "concepts": concepts,
         "concept_map": concept_map,
         "definitions": definitions,
-        "data_summary": results,
-        "burst_graph": get_burst_graph(conceptVocabulary),
+        "data_summary": data_summary,
+        "downloadable_json_LD_graph": jsonld,
         "agreement": None,
         "can_be_refined": can_be_refined
     }
@@ -658,20 +657,39 @@ def burst_launch():
     
     return json
 
-@app.route('/video_segmentation_refinement', methods=["GET", "POST"])
+@app.route('/refinement', methods=["GET", "POST"])
 def video_segmentation_refinement():
     data = request.json
     video_id = data["id"]
     definitions = data["definitions"]
-    from pprint import pprint
-    pprint(definitions)
+    #from pprint import pprint
+    #pprint(definitions)
 
     # from design should not return None
     segmentation_data = db_mongo.get_video_segmentation(video_id,returned_fields={"video_slidishness","slide_startends","slide_titles"},raise_error=False)
     definitions = VideoAnalyzer(video_id) \
                     .set(segmentation_data['video_slidishness'],segmentation_data['slide_startends'],titles=segmentation_data['slide_titles']) \
                     .adjust_or_insert_definitions_and_indepth_times(definitions,_show_output=False)
-    pprint(definitions)
+    #pprint(definitions)
+    burst_graph = db_mongo.get_graph(user="Burst Analysis",video=video_id)
+    
+    if burst_graph is None:
+        print("Saving graph on DB")
+        burst_graph = create_localVocabulary(conceptVocabulary)
+        for item in burst_graph["@graph"]:
+            if item["id"] == "localVocabulary":
+                localVocabulary = item["skos:member"]
+                burst_graph["@graph"].remove(item)
+                break
+        for concept in concepts:
+            burst_graph["@graph"].append({"id": "concept_"+concept, "type": "skos:Concept"})
+        graph_to_mongo={"video_id":video_id,
+                        "annotator_id":"Burst Analysis",
+                        "annotator_name":"Burst Analysis",
+                        "email":"Burst Analysis",
+                        "graph": burst_graph,
+                        "conceptVocabulary": {"@context": burst_graph["@context"], "@graph": localVocabulary}} 
+        db_mongo.insert_graph(graph_to_mongo)
     return {"definitions":definitions}
 
 # from color_histogram import get_image_from_video

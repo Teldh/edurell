@@ -27,10 +27,13 @@ from nltk import tokenize
 import time
 import datetime
 from nltk import WordNetLemmatizer
+from numpy import delete
+
 
 import json
 import pyld
 
+from itertools_extension import double_iterator
 
 oa = Namespace("http://www.w3.org/ns/oa#")
 dc = Namespace("http://purl.org/dc/elements/1.1/")
@@ -51,18 +54,14 @@ edurell = "https://teldh.github.io/edurell#"
 def burst_extraction(video_id, concepts, n=90):
     print("***** EDURELL - Video Annotation: burst_class.py::burst_extraction(): Inizio ******")
 
-    global videoid
-
-    videoid = video_id
-
     text, conll = get_text(video_id, return_conll=True)
     text = text.replace("-", " ")
 
 
-    concept_map_burst, burst_definitions = Burst(text, concepts, video_id, conll, threshold=0.7,
+    jsonld,concept_map_burst, burst_definitions = Burst(text, concepts, video_id, conll, threshold=0.7,
                                                  top_n=n, max_gap=1).launch_burst_analysis()
 
-    return concept_map_burst, burst_definitions
+    return jsonld, concept_map_burst, burst_definitions
 
 # Get mapping of concepts and synonyms to selected word (alphabetically)
 def get_synonyms_mappings(conceptVocabulary):
@@ -87,20 +86,16 @@ def get_synonyms_mappings(conceptVocabulary):
 def burst_extraction_with_synonyms(video_id, concepts, conceptVocabulary, n=90):
     print("***** EDURELL - Video Annotation: burst_class.py::burst_extraction_with_synonyms(): Inizio ******")
 
-    global videoid
-
-    videoid = video_id
-
     text, conll = get_text(video_id, return_conll=True)
     text = text.replace("-", " ")
 
     syn_map, new_concepts = get_synonyms_mappings(conceptVocabulary)
 
-    concept_map_burst, burst_definitions = Burst(text, new_concepts, video_id, conll, syn_map, threshold=0.7,
+    jsonld, concept_map_burst, burst_definitions = Burst(text, new_concepts, video_id, conll, syn_map, threshold=0.7,
                                                  top_n=n, max_gap=1).launch_burst_analysis()
 
     print("***** EDURELL - Video Annotation: burst_class.py::burst_extraction_with_synonyms(): Fine ******")
-    return concept_map_burst, burst_definitions
+    return jsonld,concept_map_burst, burst_definitions
 
 class Burst:
 
@@ -205,7 +200,25 @@ class Burst:
         # decide if preserve relations when giving direction to the burst matrix
         self.PRESERVE_RELATIONS = True
 
+    def _merge_contained_definitions(self,definitions:dict):
 
+        def parse_time(stringed_time:str):
+            #            h                    :              mm            :             ss          .            dddddd
+            return int(stringed_time[0])*3600 + int(stringed_time[2:4])*60 + int(stringed_time[5:7]) + float("0"+stringed_time[7:])
+
+        to_remove_indexes = []
+        for i,j,elem1,elem2 in double_iterator(definitions,enumerated=True):
+            if not i in to_remove_indexes \
+            and not j in to_remove_indexes \
+            and elem1["concept"] == elem2["concept"] \
+            and elem1["description_type"] == elem2["description_type"] \
+            and parse_time(elem1["start"]) < parse_time(elem2["end"]) \
+            and parse_time(elem2["start"]) <= parse_time(elem1["end"]):
+                elem1["end"] = elem2["end"]
+                elem1["end_sent_id"] = elem2["end_sent_id"]
+                to_remove_indexes.append(j)
+
+        return delete(definitions,to_remove_indexes).tolist()
 
     def launch_burst_analysis(self):
         print("***** EDURELL - Video Annotation: burst_class.py::launch_burst_analysis() ******")
@@ -281,8 +294,9 @@ class Burst:
             sorted_edgelist = pd.DataFrame(burst_proc.to_edgelist(directed_burst),
                                            columns=["prerequisite", "target", "weight"])
 
+            jsonld, concept_map, definitions = self.df_to_data(sorted_edgelist, burst_res, use_conll=True)
+            return jsonld, concept_map, self._merge_contained_definitions(definitions)
 
-            return self.df_to_data(sorted_edgelist, burst_res, use_conll=True)
 
         except ValueError as e:
             print("error:", sys.exc_info())
@@ -359,9 +373,9 @@ class Burst:
                     "creator": "Burst Analysis"
                 })
 
-        create_burst_graph(definitions, concept_map)
+        _,jsonld = create_burst_graph(self.video_id,definitions, concept_map)
 
-        return concept_map, definitions
+        return jsonld,concept_map, definitions
 
 
 def compute_agreement_burst(concept_map1, concept_map2):
@@ -403,15 +417,12 @@ def compute_agreement_burst(concept_map1, concept_map2):
 
 
 
-def create_burst_graph(definitions, concept_map):
+def create_burst_graph(video_id,definitions, concept_map):
 
     print("***** EDURELL - Video Annotation: burst_class.py::create_burst_graph(): Inizio ******")
 
     concepts_anno = definitions
     prereq_anno = concept_map
-    global videoid
-
-    video_id = videoid
 
     creator = URIRef("Burst Analysis")
     
@@ -582,24 +593,19 @@ def create_burst_graph(definitions, concept_map):
                                         del jsonld["@graph"][k]
                                         break
 
-    global data
-    data = jsonld
 
     #print(data)
     print("***** EDURELL - Video Annotation: burst_class.py::create_burst_graph(): Fine ******")
 
-    return g, data
+    return g, jsonld
 
 
-def get_burst_graph(conceptVocabulary):
-    global videoid
+def create_localVocabulary(video_id,jsonld,conceptVocabulary):
     context = ["http://www.w3.org/ns/anno.jsonld", {
-               "@base": "https://edurell.dibris.unige.it/annotator/auto/"+videoid+"/",
+               "@base": "https://edurell.dibris.unige.it/annotator/auto/"+video_id+"/",
       			"@version": 1.1,
       			"edu": "https://teldh.github.io/edurell#"
              } ]
-
-    global data
 
     graph = Graph()
 
@@ -613,10 +619,19 @@ def get_burst_graph(conceptVocabulary):
     jsonld = json.loads(graph.serialize(format='json-ld'))
     jsonld = pyld.jsonld.compact(jsonld, context)        
 
-    localVocabulary = {"id": "localVocabulary", "type": "skos:Collection", "skos:member": []}
+    return {"id": "localVocabulary", "type": "skos:Collection", "skos:member": jsonld["@graph"]}
 
-    localVocabulary["skos:member"] = jsonld["@graph"]
 
-    data["@graph"].append(localVocabulary)
-
-    return data
+if __name__ == "__main__":
+    #from pprint import pprint
+    #definitions = [{'concept': 'machine', 'start_sent_id': 0, 'end_sent_id': 7, 'start': '0:00:00.060000', 'end': '0:00:31.319000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, 
+    #               {'concept': 'machine', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, 
+    #               {'concept': 'machine learning', 'start_sent_id': 0, 'end_sent_id': 7, 'start': '0:00:00.060000', 'end': '0:00:31.319000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, 
+    #               {'concept': 'machine learning', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, 
+    #               {'concept': 'learning', 'start_sent_id': 0, 'end_sent_id': 3, 'start': '0:00:00.060000', 'end': '0:00:14.879000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, 
+    #               {'concept': 'learning', 'start_sent_id': 38, 'end_sent_id': 42, 'start': '0:03:29.250000', 'end': '0:04:25.850000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, 
+    #               {'concept': 'learning', 'start_sent_id': 45, 'end_sent_id': 50, 'start': '0:04:19.350000', 'end': '0:04:59.690000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, 
+    #               {'concept': 'learning', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, 
+    #               {'concept': 'checker', 'start_sent_id': 8, 'end_sent_id': 13, 'start': '0:00:24.609000', 'end': '0:01:13.349000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}]
+    #pprint(_merge_contained_definitions(definitions))
+    pass

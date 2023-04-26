@@ -34,13 +34,14 @@
         <ul class="navbar-nav">
 
           <li class="nav-item {{ 'active' if active_page == 'video_annotation' }}">
-            <a class="nav-link" href="{{ url_for('video_selection') }}">Video Annotation</a>
+            <a class="nav-link" href="{{ url_for('video_selection') }}">Manual Annotation</a>
           </li>
           <li class="nav-item {{ 'active' if active_page == 'analysis' }}">
-            <a class="nav-link" href="{{ url_for('analysis') }}">Analysis</a>
+            <a class="nav-link" href="{{ url_for('analysis') }}">Analysis and Agreement</a>
           </li>
           <li class="nav-item {{ 'active' if active_page == 'Burst' }}">
-            <a class="nav-link" href="{{ url_for('burst') }}">Burst</a>
+            <a class="nav-link" href="{{ url_for('burst') }}">Auto-annotation
+            </a>
           </li>
 {#          <li class="nav-item {{ 'active' if active_page == 'gold_standard' }}">#}
 {#            <a class="nav-link" href="{{ url_for('gold_standard') }}">Gold Standard</a>#}

@@ -157,9 +157,9 @@ def get_user_graphs(user):
 def get_graph(user, video):
     print("***** EDURELL - Video Annotation: db_mongo.py::get_graph() ******")
     collection = db.graphs
-    item = collection.find_one({"annotator_id":user, "video_id":video},{"_id":0,"graph":1})
+    item = collection.find_one({"annotator_id":user, "video_id":video},{"_id":0,"graph":1,"conceptVocabulary":1})
     if item is not None:
-        return item["graph"]
+        return item
     return None
 
 

@@ -48,7 +48,7 @@ def get_synonyms_from_list(concepts):
 Create skos dictionary from a dict with synonyms (word: [list of synonyms]).
 Returns the graph with the skos dictionary structure.
 '''
-def create_skos_dictionary(synonyms, video_id, isGoldCreation=False, isBurst=False):
+def create_skos_dictionary(synonyms, video_id, mode):
 
     print("***** EDURELL - Video Annotation: synonyms.py::create_skos_dictionary(): Inizio ******")
     
@@ -69,15 +69,9 @@ def create_skos_dictionary(synonyms, video_id, isGoldCreation=False, isBurst=Fal
     #graph.serialize(destination='output.txt', format='json-ld')
     #print graph.serialize(format='json-ld').decode('utf-8')
 
-    if not isGoldCreation and not isBurst: 
-        context = ["http://www.w3.org/ns/anno.jsonld", 
-            {"edu": uri_edurell, 
-            "@base": "https://edurell.dibris.unige.it/annotator/manu/"+video_id+"/", "@version": 1.1}]
-    else:
-        
-        context = ["http://www.w3.org/ns/anno.jsonld", 
-            {"edu": uri_edurell, 
-            "@base": "https://edurell.dibris.unige.it/annotator/auto/"+video_id+"/", "@version": 1.1}]            
+    context = ["http://www.w3.org/ns/anno.jsonld", 
+        {"edu": uri_edurell, 
+        "@base": "https://edurell.dibris.unige.it/annotator/"+mode+"/"+video_id+"/", "@version": 1.1}]        
 
     jsonld = json.loads(graph.serialize(format='json-ld'))
     jsonld = pyld.jsonld.compact(jsonld, context)

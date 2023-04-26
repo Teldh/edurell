@@ -208,8 +208,8 @@
                      data-toggle="tab" href="#rels" role="tab" aria-controls="contact" aria-selected="false">Relations</a>
                 </li>
               </ul>
-              <button type="button" onclick="downloadObjectAsJson($burstGraph,'graph')" class="btn btn-primary" style="float:right;">Download graph</button>
-              <button id="refinement-button" type="button" onclick="refineBurstWithVideoAnalysis()" class="btn btn-primary" style="display:none; margin-left:10%;">Refine analysis</button>
+              <button type="button" onclick="DownloadBurstResultAsJson($burstGraph)" class="btn btn-primary" style="float:right;">Download graph</button>
+              <button id="refinement-button" type="button" onclick="refineBurstWithVideoAnalysis()" title="Video signal analysis of textual elements within the video lesson" class="btn btn-primary" style="display:none; margin-left:10%;">Refine analysis</button>
             </div>
 
           <div class="tab-content" id="myTabContent">
@@ -271,6 +271,7 @@
 
 {% block scripts %}
 <!-- <script src="{{ url_for('static', filename='autocomplete.js') }}"></script> -->
+<script src="{{ url_for('static', filename='download.js') }}"></script>
 <script src="{{ url_for('static', filename='burstVocabulary.js') }}"></script>
 <script src="{{ url_for('static', filename='graph_visualization.js') }}"></script>
 <script>
@@ -293,6 +294,7 @@
     let $lemmatizedSubs = {{ lemmatized_subtitles|tojson }};
     let $video_id = {{ video_id|tojson }};
     let $allLemmas = {{ all_lemmas|tojson }};
+    let $hasBeenRefined = false
 
     let $typeAnalysis = {{ type|tojson }};
     let $title = {{ title|tojson }};

@@ -27,7 +27,7 @@ class Graph:
         self.graph[u].append(v)
 
 
-def data_summary(concept_map, definitions, video_id):
+def compute_data_summary(video_id,concept_map, definitions):
 
     unique_relations = []
     strong_relations = []

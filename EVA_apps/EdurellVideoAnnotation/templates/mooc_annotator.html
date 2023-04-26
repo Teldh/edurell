@@ -62,11 +62,11 @@
               Concepts & Synonyms
             </button>
 
-            <button onclick="downloadJson()" class="btn btn-primary btn-addrelation btn-dodgerblue">
+            <button onclick="uploadManuGraphOnDB()" class="btn btn-primary btn-addrelation btn-dodgerblue">
              Save graph
             </button>
 
-            <button onclick="downloadGraph()" class="btn btn-primary btn-addrelation btn-dodgerblue">
+            <button onclick="downloadManuGraphAsJson()" class="btn btn-primary btn-addrelation btn-dodgerblue">
               Download graph
             </button>
          </div>
@@ -408,6 +408,7 @@
   <script src="{{ url_for('static', filename='subtitles.js') }}"></script>
   <script src="{{ url_for('static', filename='segmentation.js') }}"></script>
   <script src="{{ url_for('static', filename='create_graph.js') }}"></script>
+  <script src="{{ url_for('static', filename='download.js') }}"></script>
   <script src="{{ url_for('static', filename='autocomplete.js') }}"></script>
 
 
