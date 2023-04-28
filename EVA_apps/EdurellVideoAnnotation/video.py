@@ -107,6 +107,7 @@ def download(url,_path:str=None):
     pytube and pafy not to work. Take this into account and maybe try downloading videos on your own.\n
     Then in the code allow skipping video informations retrival because those raise Exceptions.
     '''
+    print("starting video download...")
     video_link = url.split('&')[0]
     if '=' in video_link:
         video_id = video_link.split('=')[-1]
@@ -128,17 +129,45 @@ def download(url,_path:str=None):
     if os.path.isfile(os.path.join(path,video_id+'.mp4')):
         return video_id, title, author, length
 
-    youtube_video = YouTube(video_link)
-    # video_streams.get_highest_resolution() not working properly
-    all_video_streams = youtube_video.streams.filter(mime_type='video/mp4')
-    res_video_streams = []
-    for resolution in ['720p','480p','360p']:
-        res_video_streams = all_video_streams.filter(res=resolution)
-        if len(res_video_streams) > 0:
-            break
-    if len(res_video_streams) == 0: raise Exception("Can't find video stream with enough resolution")
-    res_video_streams[0].download(output_path=path,filename=video_id+'.mp4')
-    return video_id, title,author,length
+    try:
+        youtube_video = YouTube(video_link)
+        # video_streams.get_highest_resolution() not working properly
+        all_video_streams = youtube_video.streams.filter(mime_type='video/mp4')
+        res_video_streams = []
+        for resolution in ['720p','480p','360p']:
+            res_video_streams = all_video_streams.filter(res=resolution)
+            if len(res_video_streams) > 0:
+                break
+        if len(res_video_streams) == 0: raise Exception("Can't find video stream with enough resolution")
+        res_video_streams[0].download(output_path=path,filename=video_id+'.mp4')
+    except Exception:
+        import youtube_dl
+        youtube_dl.YoutubeDL().download([url])
+        path_downloaded_video = os.path.abspath(__file__).split("EVA_apps/")[0]
+        found = False
+        for file_name in os.listdir(path_downloaded_video):
+            if file_name.endswith(".mkv") or file_name.endswith(".mp4"):
+                video_file_name = video_id+"."+file_name.split(".")[-1]
+                os.rename(path_downloaded_video+"/"+file_name,path_downloaded_video+"/"+video_file_name)
+                if str(video_file_name).endswith(".mkv"):
+                    import subprocess
+                    subprocess.call(["ffmpeg","-y","-i",video_file_name,"-vcodec","copy","-acodec","copy",video_id+".mp4","-loglevel","quiet"])
+                    os.remove(path_downloaded_video+"/"+video_file_name)
+                    video_file_name = video_id+".mp4"
+                dest_dir = os.path.join(path_downloaded_video,"EVA_apps","EdurellVideoAnnotation","static","videos",video_id)
+                os.makedirs(dest_dir,exist_ok=True)
+                os.rename(os.path.join(path_downloaded_video,video_file_name),os.path.join(dest_dir,video_file_name))
+                vidcap = cv2.VideoCapture(os.path.join(dest_dir,video_file_name))
+                if vidcap.isOpened() and min((vidcap.get(cv2.CAP_PROP_FRAME_WIDTH),vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT))) >= 360:
+                    found = True
+                else:
+                    raise Exception("Video does not have enough definition to find text")
+                break
+        if not found:
+            raise Exception("Cannot find downloaded video")
+
+
+    return video_id,title,author,length
 
 class VideoSpeedManager:
     '''
@@ -391,7 +420,8 @@ if __name__ == '__main__':
     #vid_id = "g8w-IKUFoSU" # forensic arch
     #vid_id = 'GdPVu6vn034'
     #download('https://youtu.be/ujutUfgebdo')
-    print(download('https://www.youtube.com/watch?v='+vid_id))
+    #print(download('https://www.youtube.com/watch?v='+vid_id))
+    print(download("https://www.youtube.com/watch?v=FZ1qPqVeMSQ"))
     #color_scheme_for_analysis = ColorScheme.BGR
     #   BGR: is the most natural for Opencv video reader, so we avoid some matrix transformations
     #   RGB: should be used for debug visualization

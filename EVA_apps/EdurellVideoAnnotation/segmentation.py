@@ -1,7 +1,41 @@
-from dataclasses import dataclass
 from bisect import insort_left
 from typing_extensions import Literal
 from typing import List,Tuple
+from multiprocessing import Process
+from sklearn.feature_extraction.text import CountVectorizer
+from difflib import ndiff
+import re
+from nltk import tokenize
+from nltk.corpus import words
+from numpy import round,empty,prod,sum,array,clip,all,average,var,zeros,where,ones,dtype,quantile
+from numpy.linalg import norm
+from transformers import pipeline
+from collections import Counter
+from sentence_transformers import SentenceTransformer
+import os, sys
+from inspect import getfile
+import cv2
+from youtube_transcript_api import YouTubeTranscriptApi as YTTranscriptApi
+from math import floor, ceil
+from pprint import pprint
+from collections import deque
+from matplotlib import pyplot as plt
+import time
+from operator import itemgetter
+from itertools import groupby
+from conllu import parse
+
+from image import *
+from video import VideoSpeedManager, LocalVideo
+from xgboost_model import XGBoostModelAdapter
+from itertools_extension import double_iterator, pairwise_linked_iterator
+from collections_extension import LiFoStack
+from conll import get_text
+from words import get_keywords_from_title
+from Cluster import create_cluster_list, aggregate_short_clusters
+from audio_transcription import get_timed_sentences
+import db_mongo
+
 
 class TextCleaner:
 
@@ -91,14 +125,6 @@ class TimedAndFramedText:
         return 'TFT(txt={0}, on_screen_in_frames={1}, text_portions_with_bb_normzd={2})'.format(
             repr(self._full_text),repr(self.start_end_frames),repr(self._framed_sentences))
     
-from sklearn.feature_extraction.text import CountVectorizer
-from difflib import ndiff
-import re
-from nltk.corpus import words
-from numpy import dot,round,empty,prod,sum,array
-from numpy.linalg import norm
-from transformers import pipeline
-from collections import Counter
 
 COMPARISON_METHOD_TXT_SIM_RATIO:int=0
 COMPARISON_METHOD_TXT_MISS_RATIO:int=1
@@ -297,8 +323,7 @@ class TextSimilarityClassifier:
     def set_comparison_methods(self,methods:List[int]):
         self._comp_methods = set(methods)
 
-from nltk import tokenize
-import db_mongo
+
 
 #################################################################################
 # Issue with online server (incompatibility with gunicorn)
@@ -309,13 +334,6 @@ if incompatible_path in sys.path:
     sys.path.remove(incompatible_path)
 from punctuator import Punctuator
 #################################################################################
-
-from sentence_transformers import SentenceTransformer
-import os, sys
-
-from conll import get_text
-from Cluster import create_cluster_list, aggregate_short_clusters
-from audio_transcription import get_timed_sentences
 
 # from lexrank import LexRank
 # from lexrank.mappings.stopwords import STOPWORDS
@@ -348,26 +366,7 @@ variables to consider:
 
 #mooc = mooc_1
 
-from inspect import getfile
-import cv2
-from youtube_transcript_api import YouTubeTranscriptApi as YTTranscriptApi
-from math import floor, ceil
-from numpy import clip, all, array, empty, average, var, zeros, where, ones, dtype, quantile
-from pprint import pprint
-from collections import deque
-from matplotlib import pyplot as plt
-import time
-from operator import itemgetter
-from itertools import groupby
 
-from image import * #ImageClassifier,draw_bounding_boxes_on_image,COLOR_RGB,COLOR_BGR,DIST_MEAS_METHOD_COSINE_SIM
-from video import VideoSpeedManager, LocalVideo
-from xgboost_model import XGBoostModelAdapter
-from itertools_extension import double_iterator, pairwise_linked_iterator
-from collections_extension import LiFoStack
-from words import get_keywords_from_title
-from conll import get_text
-from conllu import parse
 
 class VideoAnalyzer:
     '''
@@ -381,6 +380,7 @@ class VideoAnalyzer:
         - Extract titles from the slides found\n
         - (TO BE TESTED) Create thumbnails based on the slides segmentation after having analyzed the text\n
         - (TO BE TESTED) Find definitions and in-depths of concepts expressed in the title of every slide
+    checks of valid session are performed sometimes to ensure user did not want to stop analysis
     '''
     _text_in_video: List[TimedAndFramedText] or None = None
     _video_slidishness = None
@@ -1105,13 +1105,13 @@ class VideoAnalyzer:
         '''
         Create thumbnails of keyframes from slide segmentation
 
-        -------------------------------
+        --------------
         Prerequisites
-        -------------
+        --------------
         Must have runned analyze_video() or set(slide_startends)
 
         -------------------------------
-        could replace previous creation of keyframes when video is enough slidish\n
+        it's used to replace previous creation of keyframes when video is enough slidish\n
         '''
 
         assert self._slide_startends is not None or self._text_in_video is not None, "Must firstly either set slides startends or analyze the video"
@@ -1353,7 +1353,7 @@ class VideoAnalyzer:
         concept_name_to_video_segm_concepts = {}
         video_segm_concepts_len = 0
         for dict_num,(concs_to_ids_dict,concs_dict) in enumerate([(vid_defs_to_ids,video_defs),(vid_indep_to_ids,video_in_depths)]):
-            concept_description_type = 'Definition (V)' if dict_num == 0 else 'In Depth (V)'
+            concept_description_type = 'Definition' if dict_num == 0 else 'In Depth'
             curr_text_indx = 0
             for concept_name in concs_to_ids_dict.keys():
                 if concept_name not in concept_name_to_video_segm_concepts.keys():
@@ -1366,7 +1366,7 @@ class VideoAnalyzer:
                                                 'start':seconds_to_h_mm_ss_dddddd(conc_elem[curr_text_indx][1]['start']),
                                                 'end':seconds_to_h_mm_ss_dddddd(conc_elem[timed_sent_end_id-timed_sent_start_id+curr_text_indx][1]['end']),
                                                 'description_type':concept_description_type,
-                                                'creator':'Video Analysis'})
+                                                'creator':'Video_Analysis'})
                     concept_name_to_video_segm_concepts[concept_name].append([video_segm_concepts_len,False])
                     video_segm_concepts_len += 1
                     curr_text_indx += timed_sent_end_id-timed_sent_start_id + 1 #TODO not tested because the alg is not designed to have concepts' definitions that span across multiple segments 
@@ -1387,12 +1387,14 @@ class VideoAnalyzer:
                             concept_name_to_video_segm_concepts[burst_concept['concept']][conc_indx][1] = True  # setting "has_been_used" param to True to avoid repetitions
         
         # adding remaining keywords that were not already present in burst
+        added_concepts = []
         for key in concept_name_to_video_segm_concepts.keys():
             for vid_segm_indx,has_been_used in concept_name_to_video_segm_concepts[key]:
                 if not has_been_used:
+                    added_concepts.append(video_segm_concepts[vid_segm_indx]["concept"])
                     burst_concepts.append(video_segm_concepts[vid_segm_indx])
 
-        return burst_concepts
+        return added_concepts,burst_concepts
 
     def reconstruct_slides_from_times_set(self):
         assert self._slide_startends is not None, "Must firstly load (set) startend frames read from database to run this function"
@@ -1423,6 +1425,40 @@ class VideoAnalyzer:
             self._slide_titles = titles
         return self
 
+def _run_jobs(queue):
+    global client
+    client = db_mongo.open_new_socket()
+    global db
+    db = client.edurell
+    while True:
+        if len(queue) > 0:
+            video_id = queue[0]
+            print("I have a job on "+video_id+" , working on it!!")
+            vid_analyzer = VideoAnalyzer(video_id)
+            # if there's no data in the database check the video slidishness
+            video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True)
+            # prepare data for upload
+            segmentation_data = {'video_id':video_id,'video_slidishness':video_slidishness,'slidish_frames_startend':slide_frames}
+            if vid_analyzer.is_slide_video():
+                # if it's classified as a slides video analyze it and insert results in the structure that will be uploaded online
+                vid_analyzer.analyze_video()
+                results = vid_analyzer.extract_titles()
+
+                #from pprint import pprint
+                #pprint(results)
+
+                # insert titles data in the structure that will be loaded on the db
+                segmentation_data = {**segmentation_data, 
+                                     **{'slide_titles':[{'start_end_seconds':start_end_seconds,'text':title,'xywh_normalized':bb} for (title,start_end_seconds,bb) in results],
+                                        'slide_startends': vid_analyzer.get_extracted_text(format='set[times]')}}
+                db_mongo.insert_video_text_segmentation(segmentation_data)
+            queue.pop(0)
+        time.sleep(10)
+
+def workers_queue_scheduler(queue):
+    Process(target=_run_jobs,args=(queue,)).start()    
+
+
 def _test_and_save_segment_video(vid_id):
     video = VideoAnalyzer(vid_id)
     try:
@@ -1449,10 +1485,10 @@ def _test_and_save_segment_video(vid_id):
                                                  'xywh_normalized':bb} 
                                                  for (title,start_end_seconds,bb) in video.extract_titles()]}}
         db_mongo.insert_video_text_segmentation(segmentation_data,update=True)
-    return
 
 
 def _main_in_segmentation():
+    # NOTE to test the analysis must set _debug to true otherwise it tries to check if there's a flask session running in order to validate the execution
     #vid_id = 'eVjQXLEX-78'
 
     # FOR TEST
@@ -1469,7 +1505,38 @@ def _main_in_segmentation():
     video._video_slidishness = segmentation_data['video_slidishness']
     video._frames_to_analyze = segmentation_data['slide_frames']
     video.set(titles=segmentation_data['slide_titles'])
-    concepts = [{'concept': 'machine', 'start_sent_id': 0, 'end_sent_id': 7, 'start': '0:00:00.060000', 'end': '0:00:31.319000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'machine', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'machine learning', 'start_sent_id': 0, 'end_sent_id': 7, 'start': '0:00:00.060000', 'end': '0:00:31.319000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'machine learning', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 0, 'end_sent_id': 3, 'start': '0:00:00.060000', 'end': '0:00:14.879000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 38, 'end_sent_id': 42, 'start': '0:03:29.250000', 'end': '0:04:25.850000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 45, 'end_sent_id': 50, 'start': '0:04:19.350000', 'end': '0:04:59.690000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, {'concept': 'learning', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, {'concept': 'checker', 'start_sent_id': 8, 'end_sent_id': 13, 'start': '0:00:24.609000', 'end': '0:01:13.349000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}]
+    concepts = [{'concept': 'machine', 'start_sent_id': 0, 
+                 'end_sent_id': 7, 
+                 'start': '0:00:00.060000', 
+                 'end': '0:00:31.319000', 
+                 'description_type': 'In Depth', 
+                 'creator': 'Burst Analysis'}, 
+                {'concept': 'machine', 
+                 'start_sent_id': 64, 
+                 'end_sent_id': 74, 
+                 'start': '0:05:37.310000', 
+                 'end': '0:07:06.509000', 
+                 'description_type': 'Definition', 
+                 'creator': 'Burst Analysis'}, 
+                {'concept': 'machine learning', 
+                 'start_sent_id': 0, 
+                 'end_sent_id': 7, 
+                 'start': '0:00:00.060000', 
+                 'end': '0:00:31.319000', 
+                 'description_type': 'In Depth', 
+                 'creator': 'Burst Analysis'}, 
+                {'concept': 'machine learning', 
+                 'start_sent_id': 64, 
+                 'end_sent_id': 74, 
+                 'start': '0:05:37.310000', 
+                 'end': '0:07:06.509000', 
+                 'description_type': 'Definition', 
+                 'creator': 'Burst Analysis'}, 
+                {'concept': 'learning', 'start_sent_id': 0, 'end_sent_id': 3, 'start': '0:00:00.060000', 'end': '0:00:14.879000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, 
+                {'concept': 'learning', 'start_sent_id': 38, 'end_sent_id': 42, 'start': '0:03:29.250000', 'end': '0:04:25.850000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, 
+                {'concept': 'learning', 'start_sent_id': 45, 'end_sent_id': 50, 'start': '0:04:19.350000', 'end': '0:04:59.690000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, 
+                {'concept': 'learning', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, 
+                {'concept': 'checker', 'start_sent_id': 8, 'end_sent_id': 13, 'start': '0:00:24.609000', 'end': '0:01:13.349000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}]
     concepts = video.adjust_or_insert_definitions_and_indepth_times(concepts)
     print(concepts)
     #results = video.extract_titles(quant=0.85)
@@ -1494,8 +1561,6 @@ def _main_in_segmentation():
             j+=1
 
     plt.show()
-
-import db_mongo
 
 if __name__ == '__main__':
     vid_id = "ujutUfgebdo"

@@ -61,7 +61,7 @@
     </div>
 
     <div id="videos" style="display: none">
-    <div class="row" style="">
+    <div class="row">
         <div class="col">
             <p class="titleLower"> Select a video</p>
         </div>
@@ -92,7 +92,7 @@
 
     <div class="container" id="loading" style="display: none; margin-top: 2%">
         <div class="text-center" style="margin-top: 4%">
-           <p class="titleLower"> Extracting keywords.. </p>
+           <p class="titleLower"> Finding keywords.. </p>
           <div class="spinner-border text-primary" role="status">
             <span class="sr-only">Loading...</span>
           </div>
@@ -126,7 +126,7 @@
 
 
 
-    function loading(){
+    function loadingVideosInBurst(){
         document.getElementById("videos").style.display = "none"
         document.getElementById("loading").style.display = "block"
         document.getElementById("urlForm").style.display = "none"
@@ -137,7 +137,7 @@
     $(".video_radio").click(function(e) {
         e.preventDefault();
 
-        loading()
+        loadingVideosInBurst()
         document.getElementById("youtube_url").value = this.getAttribute("video")
         document.getElementById("urlForm").submit();
     });
@@ -147,8 +147,8 @@
       document.getElementById("tab_analysis_type").style.display = "none";
       document.getElementById("videos").style.display = "block";
       var attrs = {"semi": "0",
-                   "auto": "1",
-                   "video": "2"}
+                   "auto": "1"}//,
+                   //"video": "2"}
       document.getElementById("type-"+attrs[$(this).attr('id')]).checked = true;
     })
 

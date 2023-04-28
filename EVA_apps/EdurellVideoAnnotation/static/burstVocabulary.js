@@ -353,35 +353,34 @@ async function launchBurstAnalysis(burstType){
 
   console.log("launchBurstAnalysis in burstVocabulary.js")
 
-    loading()
+  // Activate to use advanced synonym burst
+  const SYN_BURST = $burstSynonym; 
 
-    // Activate to use advanced synonym burst
-    const SYN_BURST = $burstSynonym; 
- 
-    let data = {
-        "id": $video_id,
-        "concepts":$concepts,
-        "conceptVocabulary":$conceptVocabulary,
-        "syn_burst":SYN_BURST,
-        "burst_type": burstType
-    }
+  let data = {
+      "id": $video_id,
+      "concepts":$concepts,
+      "conceptVocabulary":$conceptVocabulary,
+      "syn_burst":SYN_BURST,
+      "burst_type": burstType
+  }
 
-    console.log(data);
-
-    var js_data = JSON.stringify(data);
-
-    result = await $.ajax({
-        url: '/annotator/burst_launch',
-        type : 'post',
-        contentType: 'application/json',
-        dataType : 'json',
-        data : js_data
-    }).done(function(result) {
-      showResults(result)
-    })
-    $burstGraph = result.downloadable_json_LD_graph;
-    console.log($burstGraph)
-    return result
+  console.log(data);
+  var js_data = JSON.stringify(data);
+  
+  result = await $.ajax({
+      url: '/annotator/burst_launch',
+      type : 'post',
+      contentType: 'application/json',
+      dataType : 'json',
+      data : js_data
+  }).done(function(result) {
+    showResults(result)
+    $downloadableGraph = result.downloadable_jsonld_graph;
+    $hasBeenRefined = false;
+    $conceptMap = result.concept_map;
+  })
+  
+  return result
 }
 
 function refineBurstWithVideoAnalysis() {
@@ -389,6 +388,7 @@ function refineBurstWithVideoAnalysis() {
   var data = {
     "id": $video_id,
     "concepts": $concepts,
+    "concept_map":$conceptMap,
     "conceptVocabulary":$conceptVocabulary,
     "definitions":$definitions
   } 
@@ -397,12 +397,12 @@ function refineBurstWithVideoAnalysis() {
     document.getElementById("results").style.display = "none";
     var loading_text_elem = document.getElementById("loadingText")
     loading_text_elem.textContent = "Refining results..."
-    document.getElementById("loading").style.display = "block";
+    document.getElementById("loadingAutomatic").style.display = "block";
   }
 
   function hideRefinementLoading(prev_text) {
     document.getElementById("loadingText").textContent = prev_text;
-    document.getElementById("loading").style.display = "none";
+    document.getElementById("loadingAutomatic").style.display = "none";
     document.getElementById("results").style.display = "block";
   }
 
@@ -423,6 +423,7 @@ function refineBurstWithVideoAnalysis() {
       printDefinitions(result.definitions,true);
       $hasBeenRefined = true;
       document.getElementById("refinement-button").style.display = "none";
+      $downloadableGraph = result.downloadable_jsonld_graph
       $definitions = result.definitions;
   })
 }
@@ -433,7 +434,7 @@ function refineBurstWithVideoAnalysis() {
 
 function showResults(result){
     console.log("***** EDURELL - Video Annotation: burstVocabulary.js::showResults() ******")
-    document.getElementById("loading").style.display = "none"
+    document.getElementById("loadingAutomatic").style.display = "none"
     document.getElementById("results").style.display = "block"
     //document.getElementById("results").innerText += result
 
@@ -487,10 +488,6 @@ function showResults(result){
         }
     }
 
-    console.log("graphNode")
-    console.log(graphNodes)
-    console.log("relations")
-    console.log(relationsWithSynonyms)
     network = showNetwork(graphNodes, relationsWithSynonyms, "network")
     
     let data_summary = result.data_summary

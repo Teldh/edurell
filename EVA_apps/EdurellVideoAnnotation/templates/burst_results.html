@@ -62,11 +62,11 @@
     </script>
 
     <div style="padding-left: 5%; padding-right: 5%; height: 90vh; overflow-y: auto;" >
-        <div id="checkConcepts">
-            <p class="title"> Launch burst analysis </p>
-            <p> Add or remove concepts, then launch Burst Analysis</p>
+        <div id="checkConcepts" style="display:none;">
+            <p class="title"> Semi-Automatic Annotation </p>
+            <p> Add or remove concepts, then launch Automatic Annotation</p>
 
-            <div class="row" id="checkConcepts">
+            <div class="row">
 
               <div  class="col-7">
                 <div style="display: flex; justify-content: space-between; align-items: right;"> 
@@ -80,14 +80,14 @@
                       <a class="nav-link" id="add-tab" data-toggle="tab" href="#add-synonyms" role="tab" aria-controls="profile" aria-selected="false">Manage synonyms</a>
                     </li>
                   </ul>
-                  <button  onclick="runSemiBurst()" class="btn btn-primary" style="float: right;margin-right: 10%">Launch burst Analysis</button>
+                  <button  onclick="runSemiBurst()" class="btn btn-primary" style="float: right;margin-right: 10%">Launch Automatic Annotation</button>
                 </div>
 
                 <!-- Body of the modal Concepts & Synonyms -->
                 <div class="tab-content tab-body" id="myTabContent">
 
                   <!-- TAB 1 - Concepts Vocabulary -->
-                  <div class="tab-pane fade show active tab-body-1" id="concepts" role="tabpanel" aria-labelledby="concepts-tab" style="max-height:400px;overflow:auto;border-bottom:3px solid rgba(200,200,200,0.5);border-left:3px solid rgba(200,200,200,0.5);border-right:3px solid rgba(200,200,200,0.5);">
+                  <div class="tab-pane fade show active tab-body-1" id="concepts" role="tabpanel" aria-labelledby="concepts-tab" style="max-height:400px;overflow:auto;border:3px solid rgba(200,200,200,0.5);">
                       <!--<table class="table">
                         <tbody id="conceptsTable"></tbody>
                       </table>-->
@@ -182,9 +182,9 @@
 
         </div>
 
-        <div class="container" id="loading" style="display: none; margin-top: 2%">
+        <div class="container" id="loadingAutomatic" style="display: none; margin-top: 2%">
             <div class="text-center" style="margin-top: 4%">
-              <p id="loadingText" class="titleLower"> Extracting burst.. </p>
+              <p id="loadingText" class="titleLower"> Annotating automatically.. </p>
               <div class="spinner-border text-primary" role="status">
                 <span class="sr-only">Loading...</span>
               </div>
@@ -192,7 +192,7 @@
         </div>
 
         <div class="container" id="results" style="display: none;">
-            <p class="title"> Burst analysis results</p>
+            <p class="title"> Automatic Annotation results</p>
             <div style="display: flex; justify-content: space-around; align-items: right;"> 
               <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">
@@ -289,7 +289,8 @@
     let $concepts = {{ concepts|tojson }};
     $concepts.sort()
     let $conceptVocabulary = {};
-    let $burstGraph = null;
+    let $conceptMap = null;
+    let $downloadableGraph = null;
     let $synonymList = [];
     let $lemmatizedSubs = {{ lemmatized_subtitles|tojson }};
     let $video_id = {{ video_id|tojson }};
@@ -297,8 +298,16 @@
     let $hasBeenRefined = false
 
     let $typeAnalysis = {{ type|tojson }};
+    if ($typeAnalysis == "auto"){
+      loadingAutomatic()
+    } else {
+      document.getElementById("checkConcepts").style.display = "block";
+    }
+
     let $title = {{ title|tojson }};
+
     async function runSemiBurst() {
+      loadingAutomatic()
       $burstSynonym = await popup(); 
       let result = await launchBurstAnalysis("semi")
       if (result.can_be_refined) {
@@ -319,6 +328,7 @@
       }
       else{
         $burstSynonym = await popup();
+        loadingAutomatic()
         let result = await launchBurstAnalysis($typeAnalysis)
         if (result.can_be_refined) {
           enableRefinementButton()
@@ -329,7 +339,7 @@
       
       
     }
-    console.log("gettung vocabulary");
+    console.log("getting vocabulary");
     let video = document.getElementById("video-active");
     getVocabulary();
 
@@ -337,9 +347,9 @@
       document.getElementById("refinement-button").style.display = "block"
     }
 
-    function loading(){
+    function loadingAutomatic(){
         document.getElementById("checkConcepts").style.display = "none"
-        document.getElementById("loading").style.display = "block"
+        document.getElementById("loadingAutomatic").style.display = "block"
     }
 
 

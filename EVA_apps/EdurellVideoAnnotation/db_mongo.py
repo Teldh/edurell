@@ -157,9 +157,9 @@ def get_user_graphs(user):
 def get_graph(user, video):
     print("***** EDURELL - Video Annotation: db_mongo.py::get_graph() ******")
     collection = db.graphs
-    item = collection.find_one({"annotator_id":user, "video_id":video},{"_id":0,"graph":1,"conceptVocabulary":1})
+    item = collection.find_one({"annotator_id":user, "video_id":video},{"_id":0,"graph":1})
     if item is not None:
-        return item
+        return item["graph"]
     return None
 
 
@@ -491,6 +491,9 @@ def remove_account(email):
             return "Error"
         return "Done unverified removed"
     return "Not Found"
+
+def open_new_socket():
+    return pymongo.MongoClient("mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
 if __name__ == '__main__':
     #remove_video('PPLop4L2eGk')

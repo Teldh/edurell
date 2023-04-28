@@ -246,7 +246,8 @@ function uploadManuGraphOnDB(){
         "annotator": $annotator,
         "conceptVocabulary": $conceptVocabulary,
     }
-
+    savedText = document.getElementById("saveGraphText")
+    savedText.style.display = "block"
     console.log("uploadGraphOnDB")
 
     var js_data = JSON.stringify(annotations);
@@ -259,6 +260,17 @@ function uploadManuGraphOnDB(){
         data : js_data
     }).done(function(result) {
         console.log(result)
+        if(result.done == true) {
+            savedText.textContent = "Saved graph successfully!"
+            savedText.style.color = "green";
+            savedText.style.display = "block";
+            setTimeout(function() { 
+                savedText.textContent = "Saving graph...";
+                savedText.style.color = "black";
+                savedText.style.display = "none";
+
+            } ,2000)
+        }
     })
 }
   

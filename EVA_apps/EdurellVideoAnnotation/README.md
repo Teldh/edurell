@@ -2,6 +2,16 @@
 
 # Installation
 
+### Prerequisites: ffmpeg
+
+Open a Terminal and type:
+```    
+sudo apt update && sudo apt upgrade
+```
+```
+sudo apt install ffmpeg
+```
+
 ### Prerequisites: Anaconda  
 
 <br>
@@ -11,38 +21,44 @@ Start by running Anaconda/Conda terminal:
 <br>
 
 Create the virtual environment (if first time):
-
-    > conda create -n myenv python=3.7 pip pytorch
+```
+conda create -n myenv python=3.7 pip pytorch
+```
     
 Activate the environment:
-
-    > conda activate myenv
+```
+conda activate myenv
+```
 
 (Facoltative) Open VSCode with conda (if dev using VScode ide)
-
-    > code
+```
+code
+```
 
 Download the repository:
-    
-    > git clone https://github.com/Teldh/edurell.git
-    
-"cd" to the folder EdurellVideoAnnotation
+```    
+git clone https://github.com/Teldh/edurell.git
+```
 
-    > cd {path to the folder EdurellVideoAnnotation}
-    
+"cd" to the folder EdurellVideoAnnotation
+```
+cd {path to the folder EdurellVideoAnnotation}
+```
+
 Install requirements:
-    
-    > pip install -r requirements.txt
-    > python -m spacy download en
-    
+```    
+pip install -r requirements.txt
+python -m spacy download en
+```
+
 Create a folder "punctuator" (lowercase) in the same level of the .py files, and put inside the file downloaded at the link:
 https://drive.google.com/drive/folders/1NYyehpB5fAlL42_TwTnXLokLz8K-TS3W?usp=sharing
 
 
 Open the python console 
-
-    > python
-
+```
+python
+```
 and type:
 
     >>> import nltk

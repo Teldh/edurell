@@ -37,9 +37,6 @@ def annotations_to_jsonLD(annotations, isAutomatic:bool):
         creator = annotations["annotator"]
         creator = URIRef(creator)
 
-    print(concepts_anno)
-    print(prereq_anno)    
-
     g = Graph()
 
     g.bind("oa", oa)
@@ -227,7 +224,6 @@ def annotations_to_jsonLD(annotations, isAutomatic:bool):
                                         o["target"]["selector"]["endSelector"] = p
                                         del jsonld["@graph"][k]
                                         break
-    print(jsonld)
 
     #print(jsonld)
     data = {

@@ -110,5 +110,5 @@ werkzeug~=1.0.1
 wikipedia~=1.4.0
 wrapt==1.12.1
 wtforms==2.3.3
-# youtube-dl    switched to pytube since not working or downloading slow
+youtube-dl
 youtube-transcript-api
