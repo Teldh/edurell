@@ -4,4 +4,4 @@ __pycache__/
 src/
 svm_dataset/
 local.py
-test/videos/
+test/videos/*

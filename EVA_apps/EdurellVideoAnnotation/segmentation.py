@@ -1426,6 +1426,10 @@ class VideoAnalyzer:
         return self
 
 def _run_jobs(queue):
+    '''
+    Periodically checks if the segmentation queue is empty, if not it starts a segmentation and runs it until the end\n
+    if it's empty it goes to sleep to avoid cpu usage 
+    '''
     global client
     client = db_mongo.open_new_socket()
     global db
@@ -1433,7 +1437,7 @@ def _run_jobs(queue):
     while True:
         if len(queue) > 0:
             video_id = queue[0]
-            print("I have a job on "+video_id+" , working on it!!")
+            print("Segmentation job on "+video_id+" starts  working...")
             vid_analyzer = VideoAnalyzer(video_id)
             # if there's no data in the database check the video slidishness
             video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True)
@@ -1456,6 +1460,9 @@ def _run_jobs(queue):
         time.sleep(10)
 
 def workers_queue_scheduler(queue):
+    '''
+    Creates a separated process that runs the segmentation of every video in the queue
+    '''
     Process(target=_run_jobs,args=(queue,)).start()    
 
 

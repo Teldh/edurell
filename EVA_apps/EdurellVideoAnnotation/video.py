@@ -113,14 +113,19 @@ def download(url,_path:str=None):
         video_id = video_link.split('=')[-1]
     else:
         video_id = video_link.split('/')[-1]
+    
     if _path is None:
         current_path = os.path.dirname(os.path.abspath(__file__))
-        path = os.path.join(current_path, "static", "videos", video_id)
+        for folder_name in ["static","videos",video_id]:
+            current_path = os.path.join(current_path,folder_name)
+            if not os.path.exists(current_path):
+                os.mkdir(current_path)
+        path = current_path
     else:
         path = _path
-    if not os.path.exists(path):
-        os.mkdir(path)
     
+    
+
     response = requests.get(url)
     title = search(r'"title":"(.*?)"', response.text).group(1)
     author = search(r'"ownerChannelName":"(.*?)"', response.text).group(1)
