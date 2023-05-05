@@ -1,4 +1,8 @@
 from pytube import YouTube
+import pafy
+import yt_dlp as youtube_dl
+import ffmpeg
+#import subprocess
 import os
 import cv2
 from numpy import clip,reshape,divmod,array,round
@@ -22,7 +26,7 @@ class LocalVideo:
     ----------
 
     video_id : string to load video: /static/videos/{video_id}/{video_id}.mp4
-    output_colors : must be a value from the ``class(Enum) ColorScheme``and is used for format conversions
+    output_colors : must be a value of either COLOR_RGB,COLOR_BGR,COLOR_GRAY and is used for format conversions
     '''
     def __init__(self,video_id:str,output_colors:int=COLOR_BGR,forced_frame_size:'tuple[int,int] | None'= None,_testing_path=None):
         if output_colors!=COLOR_BGR and output_colors!=COLOR_RGB and output_colors!=COLOR_GRAY:
@@ -107,7 +111,6 @@ def download(url,_path:str=None):
     pytube and pafy not to work. Take this into account and maybe try downloading videos on your own.\n
     Then in the code allow skipping video informations retrival because those raise Exceptions.
     '''
-    print("starting video download...")
     video_link = url.split('&')[0]
     if '=' in video_link:
         video_id = video_link.split('=')[-1]
@@ -137,51 +140,67 @@ def download(url,_path:str=None):
     if os.path.isfile(os.path.join(path,video_id+'.mp4')):
         return video_id, title, author, length
 
+    downloaded_successfully = False
+
     try:
         youtube_video = YouTube(video_link)
         # video_streams.get_highest_resolution() not working properly
         all_video_streams = youtube_video.streams.filter(mime_type='video/mp4')
         res_video_streams = []
-        for resolution in ['720p','480p','360p']:
+        for resolution in ['480p','360p','720p']:
             res_video_streams = all_video_streams.filter(res=resolution)
             if len(res_video_streams) > 0:
                 break
         if len(res_video_streams) == 0: raise Exception("Can't find video stream with enough resolution")
         res_video_streams[0].download(output_path=path,filename=video_id+'.mp4')
-    except Exception:
+        downloaded_successfully = True
+    except Exception as e:
+        print(e)
+
+    if not downloaded_successfully:
         try:
-            import youtube_dl
-            youtube_dl.YoutubeDL().download([url])
-        except Exception:
-            try:
-                import pafy
-                pafy.new(url).getbest(preftype="mp4", resolution="360p").download()
-            except Exception:
-                raise Exception("There are no libraries to donwload the video beacuse each one gives an error")
-        path_downloaded_video = os.path.abspath(__file__).split("EVA_apps/")[0]
+            youtube_dl.YoutubeDL({'format':'bestvideo[height<=480]+bestaudio/best[height<=480]',"quiet":True}).download([url])
+            downloaded_successfully = True
+        except Exception as e:
+            print(e)
+    
+    if not downloaded_successfully:
+        try:
+            pafy.new(url).getbest(preftype="mp4", resolution="360p").download()
+            downloaded_successfully = True
+        except Exception as e:
+            print(e)
+            raise Exception("There are no libraries to donwload the video beacuse each one gives an error")
+        
+    if not os.path.isfile(os.path.join(path,video_id+'.mp4')): 
+        path_cache_video = os.getcwd()
         found = False
-        for file_name in os.listdir(path_downloaded_video):
-            if file_name.endswith(".mkv") or file_name.endswith(".mp4"):
-                video_file_name = video_id+"."+file_name.split(".")[-1]
-                os.rename(path_downloaded_video+"/"+file_name,path_downloaded_video+"/"+video_file_name)
-                if str(video_file_name).endswith(".mkv"):
-                    import subprocess
-                    subprocess.call(["ffmpeg","-y","-i",video_file_name,"-vcodec","copy","-acodec","copy",video_id+".mp4","-loglevel","quiet"])
-                    os.remove(path_downloaded_video+"/"+video_file_name)
-                    video_file_name = video_id+".mp4"
-                dest_dir = os.path.join(path_downloaded_video,"EVA_apps","EdurellVideoAnnotation","static","videos",video_id)
+        for file_name in os.listdir(path_cache_video):
+            if file_name.endswith(".mkv") or file_name.endswith(".mp4") or file_name.endswith(".webm"):
+                new_video_file_name = os.path.join(path_cache_video,video_id+"."+file_name.split(".")[-1])
+                os.rename(os.path.join(path_cache_video,file_name),new_video_file_name)
+                if not str(new_video_file_name).endswith(".mp4"):
+                    ffmpeg.run(
+                        ffmpeg.output(  ffmpeg.input(new_video_file_name), 
+                                        os.path.join(path_cache_video,video_id+".mp4"), 
+                                        vcodec="libx264", 
+                                        preset="ultrafast", 
+                                        crf=23),
+                        quiet=True)
+                    os.remove(new_video_file_name)
+                    new_video_file_name = os.path.join(path_cache_video,video_id+".mp4")
+                dest_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"static","videos",video_id)
                 os.makedirs(dest_dir,exist_ok=True)
-                os.rename(os.path.join(path_downloaded_video,video_file_name),os.path.join(dest_dir,video_file_name))
-                vidcap = cv2.VideoCapture(os.path.join(dest_dir,video_file_name))
+                os.rename(new_video_file_name,os.path.join(dest_dir,video_id+".mp4"))
+                vidcap = cv2.VideoCapture(os.path.join(dest_dir,video_id+".mp4"))
                 if vidcap.isOpened() and min((vidcap.get(cv2.CAP_PROP_FRAME_WIDTH),vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT))) >= 360:
                     found = True
+                    break
                 else:
                     raise Exception("Video does not have enough definition to find text")
-                break
         if not found:
             raise Exception("Cannot find downloaded video")
-
-
+            
     return video_id,title,author,length
 
 class VideoSpeedManager:
@@ -436,7 +455,7 @@ if __name__ == '__main__':
     #vid_id = 'GdPVu6vn034'
     #download('https://youtu.be/ujutUfgebdo')
     #print(download('https://www.youtube.com/watch?v='+vid_id))
-    print(download("https://www.youtube.com/watch?v=FZ1qPqVeMSQ"))
+    print(download("https://www.youtube.com/watch?v=PR_ykicOZYU"))
     #color_scheme_for_analysis = ColorScheme.BGR
     #   BGR: is the most natural for Opencv video reader, so we avoid some matrix transformations
     #   RGB: should be used for debug visualization
