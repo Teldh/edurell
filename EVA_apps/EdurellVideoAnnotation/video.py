@@ -124,7 +124,9 @@ def download(url,_path:str=None):
     else:
         path = _path
     
-    
+    # TODO fix pafy by commenting in 
+    # /home/<yourname>/anaconda3/envs/myenv/lib/python3.7/site-packages/pafy
+    # self._rating = self._ydl_info['average_rating']
 
     response = requests.get(url)
     title = search(r'"title":"(.*?)"', response.text).group(1)
@@ -146,8 +148,15 @@ def download(url,_path:str=None):
         if len(res_video_streams) == 0: raise Exception("Can't find video stream with enough resolution")
         res_video_streams[0].download(output_path=path,filename=video_id+'.mp4')
     except Exception:
-        import youtube_dl
-        youtube_dl.YoutubeDL().download([url])
+        try:
+            import youtube_dl
+            youtube_dl.YoutubeDL().download([url])
+        except Exception:
+            try:
+                import pafy
+                pafy.new(url).getbest(preftype="mp4", resolution="360p").download()
+            except Exception:
+                raise Exception("There are no libraries to donwload the video beacuse each one gives an error")
         path_downloaded_video = os.path.abspath(__file__).split("EVA_apps/")[0]
         found = False
         for file_name in os.listdir(path_downloaded_video):
