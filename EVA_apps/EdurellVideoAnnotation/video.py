@@ -125,8 +125,9 @@ def download(url,_path:str=None):
         path = _path
     
     # TODO fix pafy by commenting in 
-    # /home/<yourname>/anaconda3/envs/myenv/lib/python3.7/site-packages/pafy
+    # /home/<yourname>/anaconda3/envs/myenv/lib/python3.7/site-packages/pafy/backend_youtube_dl.py
     # self._rating = self._ydl_info['average_rating']
+    # in line 50
 
     response = requests.get(url)
     title = search(r'"title":"(.*?)"', response.text).group(1)
