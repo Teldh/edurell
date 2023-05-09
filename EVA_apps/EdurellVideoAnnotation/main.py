@@ -234,12 +234,14 @@ def video_selection():
             # find segmentation in server
             segmentation_data = db_mongo.get_video_segmentation(vid_id,returned_fields={"video_slidishness","slide_startends"},raise_error=False)
             if segmentation_data is None:
-                print("Video not already segmented: starting segmentation...")
-                global video_segmentations_queue
-                if vid_id not in video_segmentations_queue:
-                    video_segmentations_queue.insert(0,vid_id)
-                else:
-                    print("Segmentation process already started but has not finished...")
+                if vid_analyzer.can_be_analyzed():
+                    print("Video not already segmented: starting segmentation...")
+                    global video_segmentations_queue
+                    if vid_id not in video_segmentations_queue:
+                        video_segmentations_queue.insert(0,vid_id)
+                    else:
+                        print("Segmentation process for this video already started but has not finished...")
+                else: print("The video is too long to be analyzed")
                 # create thumbnails based on the previous segmentation
                 start_times,end_times,images_path,text = vid_analyzer.transcript_segmentation(subtitles)
             else:
@@ -639,7 +641,7 @@ def burst_launch():
         veo, pageRank, LO, PN, ged_sim = calculate_metrics(concept_map, concept_map_annotator, concepts)
 
         json["agreement"] = {
-            "name":graphs["annotators"][indx_annotator]["name"],
+            "name":graphs["annotators"][indx_annotator]["name"].replace("_"," "),
             "K": compute_agreement(concept_map, concept_map_annotator)["agreement"],
             "VEO": veo,
             "GED": ged_sim,
@@ -660,7 +662,9 @@ def video_segmentation_refinement():
     segmentation_data = db_mongo.get_video_segmentation(video_id,returned_fields={"video_slidishness","slide_startends","slide_titles"},raise_error=False)
     new_concepts,definitions = VideoAnalyzer(video_id) \
                                 .set(segmentation_data['video_slidishness'],segmentation_data['slide_startends'],titles=segmentation_data['slide_titles']) \
-                                .adjust_or_insert_definitions_and_indepth_times(data["definitions"],_show_output=False)
+                                .adjust_or_insert_definitions_and_indepth_times(data["definitions"],_show_output=True)
+    #from pprint import pprint
+    #pprint(definitions)
     _,burst_graph = create_burst_graph(video_id,definitions,data["concept_map"])
     local_vocabulary = create_local_vocabulary(video_id,concept_vocabulary)
     skos_concepts = local_vocabulary["skos:member"]

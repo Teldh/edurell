@@ -49,13 +49,13 @@ class TextCleaner:
 class TimedAndFramedText:
     """
     Structure made of:
-        - _framed_sentences: list of portions of a full_text composed field and their absolute location on the screen 
         - _full_text: full string built for comparison purposes
+        - _framed_sentences: list of portions of a full_text composed field and their absolute location on the screen 
         - start_end_frames: list of tuples of num start and num end frames of this text
         
     """
-    _framed_sentences: List[Tuple[Tuple[int,int],Tuple[int,int,int,int]]]
     _full_text: str
+    _framed_sentences: List[Tuple[Tuple[int,int],Tuple[int,int,int,int]]]
     start_end_frames: List[Tuple[(int,int)]]
 
     def __init__(self,framed_sentences:List[Tuple[str,Tuple[int,int,int,int]]],startend_frames:List[Tuple[(int,int)]]) -> None:
@@ -378,8 +378,8 @@ class VideoAnalyzer:
         - Get the extracted text in different formats (tipically only one is used and the others are for debug)\n
         - Check if the video contains slides (for now this means text around the center of the screen) and the proportion with respect to the whole video len\n
         - Extract titles from the slides found\n
-        - (TO BE TESTED) Create thumbnails based on the slides segmentation after having analyzed the text\n
-        - (TO BE TESTED) Find definitions and in-depths of concepts expressed in the title of every slide
+        - Create thumbnails based on the slides segmentation after having analyzed the text\n
+        - Find definitions and in-depths of concepts expressed in the title of every slide
     checks of valid session are performed sometimes to ensure user did not want to stop analysis
     '''
     _text_in_video: List[TimedAndFramedText] or None = None
@@ -404,7 +404,7 @@ class VideoAnalyzer:
         ----------
         cluster_list :
         S : scala per color histogram
-        seconds_range : aggiustare inizio e fine dei segmenti in base a differenza nel color histogram
+        seconds_range : Adjust the start and end of segments based on the difference in color histograms.
         """
         assert len(start_times) == len(end_times)
         vsm = VideoSpeedManager(self._video_id,output_colors=COLOR_RGB)
@@ -443,7 +443,7 @@ class VideoAnalyzer:
         threshold = S * (summation / curr_num_frame)
 
         '''
-        Controllo se c'è un cambio scena in un intorno di "seconds_range" frames dalla fine ed inizio di ciascun cluster.
+        checking if there is a scene change within a timeframe of "seconds_range" frames from the beginning and end of each cluster.
         '''
         fps = vid_ref.get_fps()
 
@@ -483,7 +483,6 @@ class VideoAnalyzer:
 
             vsm.close()
             #print(images_path)
-            ''' Ritorno le path delle immagini della timeline'''
             return images_path, start_times, end_times
         else:
             return start_times,end_times
@@ -618,6 +617,10 @@ class VideoAnalyzer:
             return start_times, end_times, punctuated_transcription
         
 
+    def can_be_analyzed(self,max_seconds=6000):
+        video = VideoSpeedManager(self._video_id).get_video() 
+        return video.get_count_frames() / video.get_fps() <= max_seconds
+
     def _preprocess_video(self, vsm:VideoSpeedManager,num_segments:int=150,estimate_threshold=False,_show_info=False):
         '''
         Split the video into `num_segments` windows frames, for every segment it's taken the frame that's far enough to guarantee a minimum sensibility\n
@@ -649,7 +652,6 @@ class VideoAnalyzer:
         txt_cleaner = TextCleaner()
         if estimate_threshold:
             cos_sim_values = empty((num_segments,vsm.get_video().get_dim_frame()[2]))
-            #dists = empty((num_segments,vsm.get_video().get_dim_frame()[2]))
 
         # Optimization is performed by doing a first coarse-grained analysis with the XGBoost model predictor
         # then set those windows inside the VideoSpeedManager
@@ -684,21 +686,13 @@ class VideoAnalyzer:
 
             if estimate_threshold:
                 cos_sim_values[iterations_counter,:] = prev_frame.get_cosine_similarity(curr_frame)
-                #dists[iterations_counter,:] = curr_frame.get_mean_distance(prev_frame)
             iterations_counter+=1
-            #print(answ_queue[0]);plt.imshow(curr_frame.get_img(),cmap='gray');plt.show()
-            #print(f" Estimating cosine_similarity_threshold: {ceil((iterations_counter)/num_segments * 100)}%",end='\r')
             if _show_info: print(f" Coarse-grained analysis: {ceil((iterations_counter)/num_segments * 100)}%",end='\r')
         if start_frame_num is not None:
             frames_to_analyze.append((start_frame_num,num_frames-1))
 
         if estimate_threshold:
             cos_sim_img_threshold = clip(average(cos_sim_values,axis=0)+var(cos_sim_values,axis=0)/2,0.9,0.9999)
-            #cos_sim_img_threshold = clip(cos_sim_values.min(axis=0),0.9,0.99999)
-            #   can't estimate correctly the cosine similarity threshold with average, too dependant from the segments chosen and also too low
-            #   neither can set to max because it's always more than 1 neither to min because it's too low
-            #diff_threshold = average(diffs,axis=0)+3*var(diffs,axis=0)
-            #dist_threshold = (dists.max(axis=0) - dists.min(axis=0)) / 2
         else:
             cos_sim_img_threshold = ones((1,num_colors))*0.9999
         
@@ -707,11 +701,10 @@ class VideoAnalyzer:
                 print(f"Estimated cosine similarity threshold: {cos_sim_img_threshold}")
             else:
                 print(f"Cosine_similarity threshold: {cos_sim_img_threshold}")
-                #print(f"Estimated mean_dist_threshold: {dist_threshold}")
             print(f"Frames to analyze: {frames_to_analyze} of {num_frames} total frames")
         self._video_slidishness = sum([frame_window[1] - frame_window[0] for frame_window in frames_to_analyze])/(num_frames-1)
         self._cos_sim_img_threshold = cos_sim_img_threshold 
-        self._frames_to_analyze = frames_to_analyze #dist_threshold, frames_to_analyze
+        self._frames_to_analyze = frames_to_analyze
 
     def _merge_and_cleanup(self,TFT_list:'list[TimedAndFramedText]',vsm: VideoSpeedManager,frame:ImageClassifier,frames_dist_tol:int):
         
@@ -1152,7 +1145,7 @@ class VideoAnalyzer:
             start_times.append(start_seconds)
             end_times.append(end_seconds)
             if not images_already_present:
-                video.set_num_frame(video.get_num_frame_from_time(start_seconds+2))
+                video.set_num_frame(video.get_num_frame_from_time(start_seconds+0.5))
                 image = video.extract_next_frame()
                 assert image is not None
                 file_name = str(i) + ".jpg"
@@ -1178,10 +1171,9 @@ class VideoAnalyzer:
         if self._slide_titles is None:
             raise Exception('slide titles not set')
         
-        def extract_defs_and_indepths(titles:'list[dict]',timed_sentences:dict,definition_tol_seconds:float,_show_output=False):
+        def extract_defs_and_indepths(titles:'list[dict]',timed_sentences:'list[dict]',definition_tol_seconds:float,_show_output=False):
             video_defs = {}
             video_in_depths = {}
-            used_sentences_in_trscr = []
             #txt_classif = TextSimilarityClassifier([COMPARISON_METHOD_TXT_MISS_RATIO])
             is_introductory_slide = True
 
@@ -1194,7 +1186,7 @@ class VideoAnalyzer:
                     start_time_title,end_time_title = title['start_end_seconds']
                     title_keyword = get_keywords_from_title(title['text'])[0] #TODO how to select best keyword in case more than 1 are found in the title?
 
-                    for timed_sent_id, timed_sentence in enumerate(timed_sentences):
+                    for sent_id, timed_sentence in enumerate(timed_sentences):
                         if title_keyword not in video_defs.keys() and \
                            abs(start_time_title - timed_sentence['start']) < definition_tol_seconds and \
                            title_keyword in timed_sentence['text']:
@@ -1205,9 +1197,8 @@ class VideoAnalyzer:
                                 print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
                                 print()
                             #timed_sentence['id'] = ts_id
-                            video_defs[title_keyword] = [(timed_sent_id,timed_sentence)]
-                            used_sentences_in_trscr.append((timed_sent_id,timed_sentence['text'].lower()))
-
+                            video_defs[title_keyword] = [(sent_id,timed_sentence)]
+                            
                         # enlarge end time threshold to incorporate split slides with the same title
                         if title_keyword in video_defs.keys() and \
                            end_time_title > timed_sentence['end'] - 1 and \
@@ -1219,124 +1210,21 @@ class VideoAnalyzer:
                                     print(f'keyword from title: {title_keyword}')
                                     print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
                                 #timed_sentence['id'] = ts_id
-                                video_in_depths[title_keyword] = [(timed_sent_id,timed_sentence)]
-                                used_sentences_in_trscr.append((timed_sent_id,timed_sentence['text'].lower()))
-
+                                video_in_depths[title_keyword] = [(sent_id,timed_sentence)]
+                                
                             elif not any([True for _,tmd_sentence in video_in_depths[title_keyword] if tmd_sentence['start'] == timed_sentence['start']]):
                                 #timed_sentence['id'] = ts_id
-                                video_in_depths[title_keyword].append((timed_sent_id,timed_sentence))
-                                used_sentences_in_trscr.append((timed_sent_id,timed_sentence['text'].lower()))
+                                video_in_depths[title_keyword].append((sent_id,timed_sentence))
                                 if _show_output:
                                     print(f"time: {str(timed_sentence['start'])[:5]} : {str(timed_sentence['end'])[:5]}  |  sentence: {timed_sentence['text']}")
             if _show_output:
                 print()
-            return video_defs,video_in_depths,used_sentences_in_trscr
+            return video_defs,video_in_depths
         
         # extract definitions and in-depths in the transcript of every title based on slide show time and concept citation (especially with definition)
         # alg is O(kn) with k titles and n sentences of the transcript 
-        video_defs, video_in_depths,used_sentences_in_trscr = extract_defs_and_indepths(self._slide_titles,self.get_transcript()[0],definition_tol_seconds,_show_output=_show_output)
-        
-        
-        def project_transcript_used_sentences_to_conll(video_id,used_sentences_in_trscr,):
-            txt_cleaner = TextCleaner()
-            conll = get_text(video_id,return_conll=True,return_text=False)
-            conll_sentences = [(int(sent.metadata['sent_id']),txt_cleaner.clean_text(sent.metadata['text'])) for sent in parse(conll)]
-            conll_indx=0
-            conll_len = len(conll_sentences)
-
-            # projecting timed sentences on conll sentences (not perfect due to imperfect match between conll and transcript) 
-            # this alg is O(n^2) with n sentences of the transcript
-            txt_classif = TextSimilarityClassifier([COMPARISON_METHOD_TXT_MISS_RATIO],max_removed_chars_over_txt=0.1)
-            timed_id_to_conll_ids:dict[int:list] = {}
-            for (timed_sent_id,sent) in used_sentences_in_trscr:
-                completed = False
-                while not completed:
-                    conll_elem_id, conll_elem_text = conll_sentences[conll_indx]
-                    if txt_classif.is_exactly_in_txt_version(sent,conll_elem_text) or txt_classif.is_partially_in_txt_version(sent,conll_elem_text):
-                        if timed_sent_id not in timed_id_to_conll_ids.keys():
-                            timed_id_to_conll_ids[timed_sent_id] = {conll_elem_id}
-                        else:
-                            timed_id_to_conll_ids[timed_sent_id].add(conll_elem_id)
-                        completed = True
-                    elif txt_classif.is_exactly_in_txt_version(conll_elem_text,sent) or txt_classif.is_partially_in_txt_version(conll_elem_text,sent):
-                        if timed_sent_id not in timed_id_to_conll_ids.keys():
-                            timed_id_to_conll_ids[timed_sent_id] = {conll_elem_id}
-                        else:
-                            if conll_elem_id not in timed_id_to_conll_ids[timed_sent_id]:
-                                timed_id_to_conll_ids[timed_sent_id].add(conll_elem_id)
-                            else:
-                                completed = True
-                        sent = txt_classif.subtract_common_text(sent,conll_elem_text)
-                    if not completed:
-                        conll_indx += 1
-                        if conll_indx == conll_len:
-                            conll_indx = 0
-            return timed_id_to_conll_ids
-        
-        timed_id_to_conll_ids = project_transcript_used_sentences_to_conll(self._video_id,used_sentences_in_trscr)
-
-        # cleanup errors by sorting, grouping and picking largest group
-        timed_id_to_conll_ids_keys = sorted(timed_id_to_conll_ids)    
-        #procrastinate_first = False
-        #is_first = True
-        for key in timed_id_to_conll_ids_keys:
-            groups = []
-            for _,g in groupby(enumerate(sorted(timed_id_to_conll_ids[key])),lambda x:x[0]-x[1]):
-                groups.append(list(map(lambda x:x[1], g)))
-            max_group_len_index = max(range(len(groups)), key=lambda i: len(groups[i]))
-            timed_id_to_conll_ids[key] = [*groups[max_group_len_index]]
-            # in this case it works but in case of timed_to_conll[timed_to_conll_keys[0]] == {3,5,7} 
-            # i can't group and whatever index can be valid
-            # thus must procrastinate to find which index is best
-            # and in case of no big group the first occurence might not be correct
-            
-            #if is_first and len(groups[max_group_index]) == 1:
-            #    procrastinate_first = True
-            #    temp = groups
-            #    is_first = False
-            #elif is_first:
-            #    is_first = False
-            #elif procrastinate_first:
-            #    nearest = groups[max_group_index][0]
-            #    for elem in temp:
-            #        if nearest-2 <= elem <= nearest:
-            #            timed_to_conll[timed_to_conll_keys[0]] = {elem}
-            #            break
-            #    procrastinate_first = False
-            #    timed_to_conll[key] = {*groups[max_group_index]}
-            #elif len(groups[max_group_index]) > 1:
-        del timed_id_to_conll_ids_keys,_,g,max_group_len_index,groups,key
-        #for (c_id1,sent1),(c_id2,sent2) in pairwise_linked_iterator(conll_sentences):
-        #    for s_id,sentence in used_sentences_in_trscr:
-        #        if txt_classif.is_partially_in_txt_version(sentence,sent1):
-        #            timed_to_conll[s_id] = [c_id1]
-        #        elif txt_classif.is_partially_in_txt_version(sentence,sent1+sent2):
-        #            timed_to_conll[s_id] = [c_id1,c_id2]
-        
-        # mapping concepts definitions extracted from video, to list of start_end_ids 
-        vid_defs_to_ids = {}
-        vid_indep_to_ids = {}
-        for from_dict,to_dict in [(video_defs,vid_defs_to_ids),(video_in_depths,vid_indep_to_ids)]:
-            for key in from_dict.keys():
-                this_elem_startends = []
-                start_id = None
-                ids_counter = None
-                for curr_id,_ in from_dict[key]:
-                    #curr_id = timed_def['id']
-                    if start_id is None:
-                        start_id = curr_id
-                        ids_counter = curr_id
-                    elif curr_id > ids_counter+1:
-                        this_elem_startends.append((start_id,ids_counter))
-                        start_id = curr_id
-                        ids_counter = curr_id
-                    else:
-                        ids_counter += 1
-                else:
-                    this_elem_startends.append((start_id,curr_id))
-                to_dict[key] = this_elem_startends
-        del from_dict,to_dict,key,this_elem_startends,start_id,ids_counter,curr_id,_,_show_output
-        
+        timed_sentences = get_timed_sentences(self.get_transcript()[0],[sent.metadata["text"] for sent in parse(get_text(self._video_id,return_conll=True)[1])])
+        video_defs, video_in_depths = extract_defs_and_indepths(self._slide_titles,timed_sentences,definition_tol_seconds,_show_output=_show_output)
 
         def seconds_to_h_mm_ss_dddddd(time:float):
             millisec = str(time%1)[2:8]
@@ -1348,52 +1236,34 @@ class VideoAnalyzer:
             hours = str(int(time/3600))
             return hours+':'+minutes+':'+seconds+'.'+millisec
 
-        # creating burst_concept_objects of the video results 
-        video_segm_concepts = []
-        concept_name_to_video_segm_concepts = {}
-        video_segm_concepts_len = 0
-        for dict_num,(concs_to_ids_dict,concs_dict) in enumerate([(vid_defs_to_ids,video_defs),(vid_indep_to_ids,video_in_depths)]):
-            concept_description_type = 'Definition' if dict_num == 0 else 'In Depth'
-            curr_text_indx = 0
-            for concept_name in concs_to_ids_dict.keys():
-                if concept_name not in concept_name_to_video_segm_concepts.keys():
-                    concept_name_to_video_segm_concepts[concept_name] = []
-                conc_elem:list[Tuple[int,dict]] = concs_dict[concept_name]    # has an id and a concept object
-                for timed_sent_start_id,timed_sent_end_id in concs_to_ids_dict[concept_name]:
-                    video_segm_concepts.append({'concept':concept_name,
-                                                'start_sent_id':min(timed_id_to_conll_ids[timed_sent_start_id]),
-                                                'end_sent_id':max(timed_id_to_conll_ids[timed_sent_end_id]),
-                                                'start':seconds_to_h_mm_ss_dddddd(conc_elem[curr_text_indx][1]['start']),
-                                                'end':seconds_to_h_mm_ss_dddddd(conc_elem[timed_sent_end_id-timed_sent_start_id+curr_text_indx][1]['end']),
-                                                'description_type':concept_description_type,
-                                                'creator':'Video_Analysis'})
-                    concept_name_to_video_segm_concepts[concept_name].append([video_segm_concepts_len,False])
-                    video_segm_concepts_len += 1
-                    curr_text_indx += timed_sent_end_id-timed_sent_start_id + 1 #TODO not tested because the alg is not designed to have concepts' definitions that span across multiple segments 
-                    # i.e. for now there's just one definition and one in_depth segment for every keyword
-        del concept_name,concept_description_type,video_segm_concepts_len,curr_text_indx,dict_num,concs_to_ids_dict,concs_dict,conc_elem
-
-        # checking for every burst keyword whether it must be replaced
-        for indx,burst_concept in reversed(list(enumerate(burst_concepts))): # TODO continue
-            if burst_concept['concept'] in concept_name_to_video_segm_concepts.keys():
-                for conc_indx,(vid_segm_indx,has_been_used) in enumerate(concept_name_to_video_segm_concepts[burst_concept['concept']]):
-                    if not has_been_used:
-                        this_video_segm_concept = video_segm_concepts[vid_segm_indx]
-                        burst_concept_descr = burst_concept['description_type']; vid_concept_descr = this_video_segm_concept['description_type'].split(' (')[0]
-                        if burst_concept_descr == vid_concept_descr:
-                            if this_video_segm_concept['start_sent_id'] != burst_concept['start_sent_id'] or \
-                               this_video_segm_concept['end_sent_id'] != burst_concept['end_sent_id']:
-                                burst_concepts.pop(indx); burst_concepts.insert(indx,this_video_segm_concept)
-                            concept_name_to_video_segm_concepts[burst_concept['concept']][conc_indx][1] = True  # setting "has_been_used" param to True to avoid repetitions
-        
-        # adding remaining keywords that were not already present in burst
+        # creating or modifying burst_concept_objects of the video results 
         added_concepts = []
-        for key in concept_name_to_video_segm_concepts.keys():
-            for vid_segm_indx,has_been_used in concept_name_to_video_segm_concepts[key]:
-                if not has_been_used:
-                    added_concepts.append(video_segm_concepts[vid_segm_indx]["concept"])
-                    burst_concepts.append(video_segm_concepts[vid_segm_indx])
+        for dict_num,concepts_video_dict in enumerate([video_defs,video_in_depths]):
+            concepts_used = {concept:False for concept in concepts_video_dict.keys()}
+            concept_description_type = 'Definition' if dict_num == 0 else 'In Depth'
+            for burst_concept in burst_concepts:
+                if burst_concept["concept"] in concepts_video_dict.keys() and burst_concept["description_type"] == concept_description_type:
+                    if burst_concept["start_sent_id"] != concepts_video_dict[burst_concept["concept"]][0][0] or \
+                       burst_concept["end_sent_id"] != concepts_video_dict[burst_concept["concept"]][-1][0]:
+                        
+                        burst_concept['start_sent_id'] = concepts_video_dict[burst_concept["concept"]][0][0]
+                        burst_concept['end_sent_id'] = concepts_video_dict[burst_concept["concept"]][-1][0]
+                        burst_concept['start'] = seconds_to_h_mm_ss_dddddd(concepts_video_dict[burst_concept["concept"]][0][1]["start"])
+                        burst_concept['end'] = seconds_to_h_mm_ss_dddddd(concepts_video_dict[burst_concept["concept"]][-1][1]["end"])
+                        burst_concept['creator'] = "Video_Analysis"
+                        concepts_used[burst_concept["concept"]] = True
 
+            for concept_name in concepts_video_dict.keys():
+                if not concepts_used[concept_name]:
+                    burst_concepts.append({ 'concept':concept_name,
+                                            'start_sent_id':concepts_video_dict[concept_name][0][0],
+                                            'end_sent_id':concepts_video_dict[concept_name][-1][0],
+                                            'start':seconds_to_h_mm_ss_dddddd(concepts_video_dict[concept_name][0][1]['start']),
+                                            'end':seconds_to_h_mm_ss_dddddd(concepts_video_dict[concept_name][-1][1]["end"]),
+                                            'description_type':concept_description_type,
+                                            'creator':'Video_Analysis'})
+                    added_concepts.append(concept_name)
+                    
         return added_concepts,burst_concepts
 
     def reconstruct_slides_from_times_set(self):
@@ -1407,11 +1277,9 @@ class VideoAnalyzer:
             loc_video.set_num_frame(slide_frames_startend[0])
             frame.set_img(loc_video.extract_next_frame())
             text_extracted = frame.extract_text(return_text=True,with_contours=True)
-            #show_image(draw_bounding_boxes_on_image_classifier(frame))
             TFT_list.append(TimedAndFramedText(text_extracted,[slide_frames_startend]))
         self._text_in_video = TFT_list
-        #self._text_in_video = self._merge_and_cleanup(TFT_list,VideoSpeedManager(self._video_id),frame,int(loc_video.get_fps()*10))
-
+        
 
 
     def set(self,video_slidishness=None,slidish_frames_startend=None,slide_startends=None,titles=None):
@@ -1435,17 +1303,18 @@ def _run_jobs(queue):
     global db
     db = client.edurell
     while True:
+        print(" Scheduler says: No jobs",end="\r")
         if len(queue) > 0:
-            video_id = queue[0]
+            video_id = queue.pop(0)
             print("Segmentation job on "+video_id+" starts  working...")
             vid_analyzer = VideoAnalyzer(video_id)
             # if there's no data in the database check the video slidishness
-            video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True)
+            video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True,_show_info=True)
             # prepare data for upload
             segmentation_data = {'video_id':video_id,'video_slidishness':video_slidishness,'slidish_frames_startend':slide_frames}
             if vid_analyzer.is_slide_video():
                 # if it's classified as a slides video analyze it and insert results in the structure that will be uploaded online
-                vid_analyzer.analyze_video()
+                vid_analyzer.analyze_video(_show_info=True)
                 results = vid_analyzer.extract_titles()
 
                 #from pprint import pprint
@@ -1455,8 +1324,8 @@ def _run_jobs(queue):
                 segmentation_data = {**segmentation_data, 
                                      **{'slide_titles':[{'start_end_seconds':start_end_seconds,'text':title,'xywh_normalized':bb} for (title,start_end_seconds,bb) in results],
                                         'slide_startends': vid_analyzer.get_extracted_text(format='set[times]')}}
-                db_mongo.insert_video_text_segmentation(segmentation_data)
-            queue.pop(0)
+            db_mongo.insert_video_text_segmentation(segmentation_data)
+            print(f"Job on {video_id} done!"+" "*20)
         time.sleep(10)
 
 def workers_queue_scheduler(queue):
@@ -1570,5 +1439,12 @@ def _main_in_segmentation():
     plt.show()
 
 if __name__ == '__main__':
-    vid_id = "ujutUfgebdo"
-    _test_and_save_segment_video(vid_id)
+    vid_id = "JDmNvQj0I5A"
+    segmentation_data = db_mongo.get_video_segmentation(vid_id)
+    video = VideoAnalyzer(vid_id)
+    video.set(segmentation_data['video_slidishness'],segmentation_data['slidish_frames_startend'])
+    video.set(slide_startends = segmentation_data['slide_startends'])
+    video.reconstruct_slides_from_times_set()
+    video.set(titles=segmentation_data["slide_titles"])
+    video.adjust_or_insert_definitions_and_indepth_times(None)
+    #_test_and_save_segment_video(vid_id)

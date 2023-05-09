@@ -2,7 +2,6 @@ from pytube import YouTube
 import pafy
 import yt_dlp as youtube_dl
 import ffmpeg
-#import subprocess
 import os
 import cv2
 from numpy import clip,reshape,divmod,array,round
@@ -99,109 +98,6 @@ class LocalVideo:
     
     def set_frame_size(self,value:'tuple[int,int]'):
         self._frame_size = value
-
-def download(url,_path:str=None):
-    '''
-    Downloads the video from the url provided (YouTube video)\n
-    _path parameter is used for testing purposes and should be left None
-    
-    --------------
-    # Warning
-    NOTE: there are problems very often with (maybe) YouTube APIs that lead both
-    pytube and pafy not to work. Take this into account and maybe try downloading videos on your own.\n
-    Then in the code allow skipping video informations retrival because those raise Exceptions.
-    '''
-    video_link = url.split('&')[0]
-    if '=' in video_link:
-        video_id = video_link.split('=')[-1]
-    else:
-        video_id = video_link.split('/')[-1]
-    
-    if _path is None:
-        current_path = os.path.dirname(os.path.abspath(__file__))
-        for folder_name in ["static","videos",video_id]:
-            current_path = os.path.join(current_path,folder_name)
-            if not os.path.exists(current_path):
-                os.mkdir(current_path)
-        path = current_path
-    else:
-        path = _path
-    
-    # TODO fix pafy by commenting in 
-    # /home/<yourname>/anaconda3/envs/myenv/lib/python3.7/site-packages/pafy/backend_youtube_dl.py
-    # self._rating = self._ydl_info['average_rating']
-    # in line 50
-
-    response = requests.get(url)
-    title = search(r'"title":"(.*?)"', response.text).group(1)
-    author = search(r'"ownerChannelName":"(.*?)"', response.text).group(1)
-    length = str(int(search(r'"approxDurationMs":"(\d+)"', response.text).group(1)) // 1000)
-
-    if os.path.isfile(os.path.join(path,video_id+'.mp4')):
-        return video_id, title, author, length
-
-    downloaded_successfully = False
-
-    try:
-        youtube_video = YouTube(video_link)
-        # video_streams.get_highest_resolution() not working properly
-        all_video_streams = youtube_video.streams.filter(mime_type='video/mp4')
-        res_video_streams = []
-        for resolution in ['480p','360p','720p']:
-            res_video_streams = all_video_streams.filter(res=resolution)
-            if len(res_video_streams) > 0:
-                break
-        if len(res_video_streams) == 0: raise Exception("Can't find video stream with enough resolution")
-        res_video_streams[0].download(output_path=path,filename=video_id+'.mp4')
-        downloaded_successfully = True
-    except Exception as e:
-        print(e)
-
-    if not downloaded_successfully:
-        try:
-            youtube_dl.YoutubeDL({'format':'bestvideo[height<=480]+bestaudio/best[height<=480]',"quiet":True}).download([url])
-            downloaded_successfully = True
-        except Exception as e:
-            print(e)
-    
-    if not downloaded_successfully:
-        try:
-            pafy.new(url).getbest(preftype="mp4", resolution="360p").download()
-            downloaded_successfully = True
-        except Exception as e:
-            print(e)
-            raise Exception("There are no libraries to donwload the video beacuse each one gives an error")
-        
-    if not os.path.isfile(os.path.join(path,video_id+'.mp4')): 
-        path_cache_video = os.getcwd()
-        found = False
-        for file_name in os.listdir(path_cache_video):
-            if file_name.endswith(".mkv") or file_name.endswith(".mp4") or file_name.endswith(".webm"):
-                new_video_file_name = os.path.join(path_cache_video,video_id+"."+file_name.split(".")[-1])
-                os.rename(os.path.join(path_cache_video,file_name),new_video_file_name)
-                if not str(new_video_file_name).endswith(".mp4"):
-                    ffmpeg.run(
-                        ffmpeg.output(  ffmpeg.input(new_video_file_name), 
-                                        os.path.join(path_cache_video,video_id+".mp4"), 
-                                        vcodec="libx264", 
-                                        preset="ultrafast", 
-                                        crf=23),
-                        quiet=True)
-                    os.remove(new_video_file_name)
-                    new_video_file_name = os.path.join(path_cache_video,video_id+".mp4")
-                dest_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"static","videos",video_id)
-                os.makedirs(dest_dir,exist_ok=True)
-                os.rename(new_video_file_name,os.path.join(dest_dir,video_id+".mp4"))
-                vidcap = cv2.VideoCapture(os.path.join(dest_dir,video_id+".mp4"))
-                if vidcap.isOpened() and min((vidcap.get(cv2.CAP_PROP_FRAME_WIDTH),vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT))) >= 360:
-                    found = True
-                    break
-                else:
-                    raise Exception("Video does not have enough definition to find text")
-        if not found:
-            raise Exception("Cannot find downloaded video")
-            
-    return video_id,title,author,length
 
 class VideoSpeedManager:
     '''
@@ -385,6 +281,9 @@ class VideoSpeedManager:
         return m + m%step_size # align to the step_size
 
     def collide_and_get_fixed_num_frame(self):
+        '''
+        if there's a collision rolls back to the first frame of that text occurence
+        '''
         curr_num_frame = self._curr_num_frame
         max_rollback_frame = int(clip(curr_num_frame - self._curr_window_frame_size, 0, curr_num_frame))
         if self._curr_start_end_frames is not None:
@@ -396,12 +295,18 @@ class VideoSpeedManager:
         return self._curr_num_frame
 
     def end_collision(self):
+        '''
+        sets some internal parameters to flag the end of the collision
+        '''
         self._is_collided = False
         self._is_cong_avoid = True
         self._curr_x = 0
         self._y0_lin = self._min_window_frame_size
 
     def rewind_to(self,num_frame:int):
+        '''
+        Rolls back the frames until the num_frame 
+        '''
         if not self._is_forced_speed:
             if self._is_collided:
                 prev_size_window_frame = self._min_window_frame_size
@@ -421,6 +326,9 @@ class VideoSpeedManager:
         self.__init__(*self._init_params)
 
     def lock_speed(self,num_frames_skipped:'int | None'= None):
+        '''
+        Locks the skipping frames number to the minimum possible
+        '''
         self._is_forced_speed = True
         if num_frames_skipped is None:
             self._curr_window_frame_size = self._min_window_frame_size
@@ -430,6 +338,9 @@ class VideoSpeedManager:
                 self._curr_num_frame = -num_frames_skipped
     
     def _get_frame_offset(self,offset:int):
+        '''
+        Returns the i+offset frame with respect to the one set inside the structure
+        '''
         prev_speed = self._curr_window_frame_size
         was_forced = self._is_forced_speed
         self._is_forced_speed = True
@@ -440,13 +351,121 @@ class VideoSpeedManager:
         return frame
 
     def get_following_frame(self):
+        '''
+        Returns the i+1 frame with respect to the one set inside the structure
+        '''
         if self._is_video_ended or self._curr_num_frame + self._min_window_frame_size > self.get_video().get_count_frames()-1:
             self._curr_num_frame -= (self._min_window_frame_size+1)
         return self._get_frame_offset(self._min_window_frame_size)
 
     def set_analysis_frames(self,frames:'list[tuple[int,int]]'):
         self._frames = sorted(frames,reverse=True)
+
+def download(url,_path:str=None):
+    '''
+    Downloads the video from the url provided (YouTube video)\n
+    _path parameter is used for testing purposes and should be left None
     
+    --------------
+    # Warning
+    NOTE: there are problems very often with (maybe) YouTube APIs that lead both
+    pytube and pafy not to work. Take this into account and maybe try downloading videos on your own.\n
+    Then in the code allow skipping video informations retrival because those raise Exceptions.
+    '''
+    video_link = url.split('&')[0]
+    if '=' in video_link:
+        video_id = video_link.split('=')[-1]
+    else:
+        video_id = video_link.split('/')[-1]
+    
+    if _path is None:
+        current_path = os.path.dirname(os.path.abspath(__file__))
+        for folder_name in ["static","videos",video_id]:
+            current_path = os.path.join(current_path,folder_name)
+            if not os.path.exists(current_path):
+                os.mkdir(current_path)
+        path = current_path
+    else:
+        path = _path
+    
+    # TODO fix pafy by commenting in 
+    # /home/<yourname>/anaconda3/envs/myenv/lib/python3.7/site-packages/pafy/backend_youtube_dl.py
+    # self._rating = self._ydl_info['average_rating']
+    # in line 50
+
+    response = requests.get(url)
+    title = search(r'"title":"(.*?)"', response.text).group(1)
+    author = search(r'"ownerChannelName":"(.*?)"', response.text).group(1)
+    length = str(int(search(r'"approxDurationMs":"(\d+)"', response.text).group(1)) // 1000)
+
+    if os.path.isfile(os.path.join(path,video_id+'.mp4')):
+        return video_id, title, author, length
+
+    downloaded_successfully = False
+
+    try:
+        youtube_video = YouTube(video_link)
+        # video_streams.get_highest_resolution() not working properly
+        all_video_streams = youtube_video.streams.filter(mime_type='video/mp4')
+        res_video_streams = []
+        for resolution in ['480p','360p','720p']:
+            res_video_streams = all_video_streams.filter(res=resolution)
+            if len(res_video_streams) > 0:
+                break
+        if len(res_video_streams) == 0: raise Exception("Can't find video stream with enough resolution")
+        res_video_streams[0].download(output_path=path,filename=video_id+'.mp4')
+        downloaded_successfully = True
+    except Exception as e:
+        print(e)
+
+    if not downloaded_successfully:
+        try:
+            youtube_dl.YoutubeDL({'format':'bestvideo[height<=480]+bestaudio/best[height<=480]',"quiet":True}).download([url])
+            downloaded_successfully = True
+        except Exception as e:
+            print(e)
+    
+    if not downloaded_successfully:
+        try:
+            pafy.new(url).getbest(preftype="mp4", resolution="360p").download()
+            downloaded_successfully = True
+        except Exception as e:
+            print(e)
+            raise Exception("There are no libraries to donwload the video beacuse each one gives an error")
+        
+    if not os.path.isfile(os.path.join(path,video_id+'.mp4')): 
+        path_cache_video = os.getcwd()
+        found = False
+        for file_name in os.listdir(path_cache_video):
+            if file_name.endswith(".mkv") or file_name.endswith(".mp4") or file_name.endswith(".webm"):
+                new_video_file_name = os.path.join(path_cache_video,video_id+"."+file_name.split(".")[-1])
+                os.rename(os.path.join(path_cache_video,file_name),new_video_file_name)
+                if not str(new_video_file_name).endswith(".mp4"):
+                    ffmpeg.run(
+                        ffmpeg.output(  ffmpeg.input(new_video_file_name), 
+                                        os.path.join(path_cache_video,video_id+".mp4"), 
+                                        vcodec="libx264", 
+                                        preset="ultrafast", 
+                                        crf=23),
+                        quiet=True)
+                    os.remove(new_video_file_name)
+                    new_video_file_name = os.path.join(path_cache_video,video_id+".mp4")
+                dest_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"static","videos",video_id)
+                os.makedirs(dest_dir,exist_ok=True)
+                os.rename(new_video_file_name,os.path.join(dest_dir,video_id+".mp4"))
+                vidcap = cv2.VideoCapture(os.path.join(dest_dir,video_id+".mp4"))
+                if vidcap.isOpened() and min((vidcap.get(cv2.CAP_PROP_FRAME_WIDTH),vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT))) >= 360:
+                    found = True
+                    break
+                else:
+                    raise Exception("Video does not have enough definition to find text")
+        if not found:
+            raise Exception("Cannot find downloaded video")
+            
+    return video_id,title,author,length
+
+
+
 if __name__ == '__main__':
     vid_id = "ujutUfgebdo" # slide video
     #vid_id = "YI3tsmFsrOg" # not slide video

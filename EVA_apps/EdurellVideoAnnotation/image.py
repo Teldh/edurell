@@ -91,6 +91,9 @@ class ImageClassifier:
                 return bool(self._faces.detections)
 
     def _convert_grayscale(self,third_dimension:bool=False):
+        '''
+        Converts from RGB or BGR to GRAYSCALE with shape (img_height, img_width)
+        '''
         img = self._image
         if self._color_scheme==COLOR_BGR:
             img_bw = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -118,12 +121,15 @@ class ImageClassifier:
         '''
         Read of text is made in this way:
             - scan with pytesseract every word of the image (which is passed as cropped) and return as dict of words and other infos
-            - for every word in the structure i check if is regognized with a confidence above conf and save the delta line with respect to the previous
+            - for every word in the structure i: check if is regognized with a confidence above conf, then save the delta line with respect to the previous
+            
             - if there's a delta line equal to zero i check if the previous line is ended ( -> there's a new sentence)
             - otherwise we are in the middle of a sentence so width of the sentence must be accumulated (accounting also for spaces)
             - the heights and start Y of every sentence are calculated as the average of every word (sometimes there's noise or other elemens like mouse cursors)
-            - if instead there's a delta line != 0 the sentence element is formed. New line is appended and bbs are normalized with respect to the original size of the full image
-            - lastly if there's still some text in the structure but the iterator has ended, flush it as before
+            
+            - if instead there's a delta line > 0 the sentence element is formed. 
+            - New line is appended and bounding boxes are normalized with respect to the original size of the full image
+            - lastly if there's still some text in the structure but the iterator has ended, save it
         '''
         data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
         texts = data['text']
@@ -148,8 +154,6 @@ class ImageClassifier:
                     if ended_line:
                         start_x = xs[i]
                         ys_words = []
-                        #min_y = img_h; 
-                        #max_y = 0
                         hs_words = []
                         cumul_w = 0
                         ended_line = False
@@ -158,9 +162,7 @@ class ImageClassifier:
                         cumul_w += xs[i]-(xs[i-1]+ws[i-1])
                     text += word + ' '
                     ys_words.append(ys[i])
-                    #min_y = min(ys[i],min_y)
                     hs_words.append(hs[i])
-                    #max_y = max(hs[i]+ys[i]+y_off,max_y)
                     cumul_w += ws[i]
                 # there will be line change
                 else:
@@ -168,8 +170,6 @@ class ImageClassifier:
                     if ended_line:
                         start_x = xs[i]
                         ys_words = [ys[i]]
-                        #min_y = img_h; 
-                        #max_y = 0
                         hs_words = [hs[i]]; 
                         cumul_w = 0
                     # last word of sentence before new line: add width for previous space
@@ -180,10 +180,8 @@ class ImageClassifier:
                     if text.strip(): 
                         texts_with_bb.append((text,((start_x+x_off)/img_w,
                                                     (mean(ys_words)+y_off)/img_h,
-                                                    #(min(ys[i],min_y)+y_off)/img_h,
                                                     (cumul_w + ws[i])/img_w,
                                                     mean(hs_words)/img_h)))
-                                                    #(max(hs[i]+ys[i]+y_off,max_y)-(ys[i]+y_off))/img_h)))
                     text = ''
                     ended_line = True    
         else:
@@ -191,10 +189,9 @@ class ImageClassifier:
             if not ended_line:
                 texts_with_bb.append((text,((start_x+x_off)/img_w,
                                             (mean(ys_words)+y_off)/img_h,
-                                            #(min(ys[i],min_y)+y_off)/img_h,
                                             (cumul_w + ws[i])/img_w,
                                             mean(hs_words)/img_h)))
-                                            #(max(hs[i]+ys[i]+y_off,max_y)-(ys[i]+y_off))/img_h)))
+
         return texts_with_bb
 
     def _scan_image_for_text_and_bounding_boxes(self):
@@ -203,8 +200,8 @@ class ImageClassifier:
         
         Prerequisite
         ------------
-        RGB, BGR or GRAYSCALED but with len(image_shape) == 3 always\n
-        __future__ (grayscale as image input of this function is deprecated because face recognition require 3 channels image)
+        RGB, BGR but with len(image_shape) == 3 always\n
+        DEPRECATED grayscale as image input of this function is deprecated because face recognition require 3 channels image
         '''
         img_bw = self._convert_grayscale()
         img_height,img_width = img_bw.shape
@@ -266,6 +263,9 @@ class ImageClassifier:
         return self._image.shape
 
     def is_similar_to(self,other_image:'ImageClassifier') -> bool:
+        '''
+        Compares two images in terms of comparison methods set at the initialization
+        '''
         comp_method = self._comp_method
         if comp_method == DIST_MEAS_METHOD_COSINE_SIM:
             return all(self.get_cosine_similarity(other_image) >= self._threshold)
@@ -318,6 +318,9 @@ class ImageClassifier:
             return mean(reshape(dists,(dists.shape[0]*dists.shape[1],dists.shape[2])),axis=0)
 
     def _get_grayscaled_img(self):
+        '''
+        Converts to grayscale
+        '''
         if self._color_scheme == COLOR_BGR:
             return cv2.cvtColor(self._image, cv2.COLOR_BGR2GRAY)
         elif self._color_scheme == COLOR_RGB:
@@ -386,6 +389,9 @@ class ImageClassifier:
 
 
 def draw_bounding_boxes_on_image(img, bounding_boxes:'list[tuple[(int,int,int,int)]]'):
+    '''
+    given an image and bounding boxes obtained with detect text
+    '''
     img = img.copy()
     if len(img.shape) == 3:
         img_h,img_w,_ = img.shape
@@ -399,6 +405,9 @@ def draw_bounding_boxes_on_image(img, bounding_boxes:'list[tuple[(int,int,int,in
     return img
 
 def draw_bounding_boxes_on_image_classifier(image:ImageClassifier):
+    '''
+    Draws on the image classifier text already extracted
+    '''
     assert image.get_img() is not None and image.get_detected_text() is not None
     return draw_bounding_boxes_on_image(image.get_img(),[bbs for _,bbs in image.get_detected_text()])
 
