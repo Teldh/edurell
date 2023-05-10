@@ -1298,10 +1298,7 @@ def _run_jobs(queue):
     Periodically checks if the segmentation queue is empty, if not it starts a segmentation and runs it until the end\n
     if it's empty it goes to sleep to avoid cpu usage 
     '''
-    global client
-    client = db_mongo.open_new_socket()
-    global db
-    db = client.edurell
+    #db_mongo.open_socket()
     while True:
         print(" Scheduler says: No jobs",end="\r")
         if len(queue) > 0:
@@ -1440,6 +1437,7 @@ def _main_in_segmentation():
 
 if __name__ == '__main__':
     vid_id = "JDmNvQj0I5A"
+    db_mongo.open_socket()
     segmentation_data = db_mongo.get_video_segmentation(vid_id)
     video = VideoAnalyzer(vid_id)
     video.set(segmentation_data['video_slidishness'],segmentation_data['slidish_frames_startend'])

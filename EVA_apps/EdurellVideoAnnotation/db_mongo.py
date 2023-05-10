@@ -116,9 +116,12 @@ def get_video_segmentation(video_id, returned_fields={},raise_error=True):
         raise Exception("Video has not been segmented yet, it must be firstly analyzed")
     return item
 
-def insert_video_data(data):
+def insert_video_data(data,update=False):
     collection = db.videos
     if collection.find_one({"video_id": data["video_id"]}) is None:
+        collection.insert_one(data)
+    elif update:
+        collection.delete_one({'video_id':data['video_id']})
         collection.insert_one(data)
     # else:
     #     new_graph = {"$set": {"extracted_keywords": data["extracted_keywords"]}}
@@ -491,9 +494,6 @@ def remove_account(email):
             return "Error"
         return "Done unverified removed"
     return "Not Found"
-
-def open_new_socket():
-    return pymongo.MongoClient("mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
 
 if __name__ == '__main__':
     #remove_video('PPLop4L2eGk')
