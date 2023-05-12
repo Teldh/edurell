@@ -7,7 +7,9 @@ import Listvideo from './Listvideo.js';
 import { StyledEngineProvider } from '@mui/material/styles';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { ContextComparison } from './ContextComparison';
-import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors'
+import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors';
+import Button from '@mui/material/Button';
+import C_Start from './C_Start.js';
 import {
     Link,
     Redirect,
@@ -23,6 +25,9 @@ export default function Comparison(){
     const context = useContext(TokenContext);
     const nameSurname  = context.nameSurname;
     const [nomatch,setNomatch]=useState(false);
+    const [firsttime, setFirstTime] = useState(true);
+
+
     let checker = (big, small) => small.every(v => big.includes(v));
     useEffect(() => {
         console.log("effect")
@@ -134,6 +139,27 @@ export default function Comparison(){
         
     }
 
+    function Endcstart(){
+      setFirstTime(false);
+      console.log("ENDSTART")
+    }
+    
+    
+    async function testf() {
+      console.log("TESTCLICK");
+      const risposta = await fetch('/api/ConceptVideoData/JDmNvQj0I5A/thing', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + btoa(context.token+':unused')
+        },
+      })
+
+      var data = await risposta.json();
+      console.log("risposta: ",risposta);
+      console.log("data: ",data);
+    }
+
     const theme = createTheme({
         palette: {
           primary: {
@@ -158,9 +184,19 @@ export default function Comparison(){
         <StyledEngineProvider injectFirst> {/* to override the default style with your custom css */}
         <Header page="dashboard" login={nameSurname}/>
         <ContextComparison.Provider value={[AddVideo,RemoveVideo]}>
-            <Querybar listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch}/>
-            <br/>
-            <Listvideo catalog={catalog} loading={loading}/>
+            {
+              firsttime?
+                <C_Start Endcstart={Endcstart}/>
+              :
+                <>
+                <Querybar listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch}/>
+                <br/>
+                <Listvideo catalog={catalog} loading={loading}/>
+                </>
+            }
+            
+
+
         </ContextComparison.Provider>
         </StyledEngineProvider>
         </ThemeProvider>

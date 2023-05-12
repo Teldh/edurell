@@ -1,0 +1,11 @@
+body{
+    background-color: rgb(160,220,196);
+}
+
+.logofirstpage{
+    margin: 0.25rem;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 100px
+  }

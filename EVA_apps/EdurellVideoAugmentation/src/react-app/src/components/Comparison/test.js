@@ -1,4 +1,10 @@
-
+import C_Start from './C_Start.js'
 export default function main(){
-    return(<div>test</div>);
+    return(
+    <>
+        <C_Start/>
+    
+    </>
+    
+        );
 }

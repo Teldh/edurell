@@ -122,7 +122,7 @@ export default class AuthExample extends React.Component {
               <PrivateRoute path="/app/:id/:title" children={<AppPage/>}/>
               <PrivateRoute path="/editProfile/:user" children={<EditProfilePage/>}/>
               <PrivateRoute path="/comparison" children={<Comparison/>}/>
-              <Route path="/test" element={<Test/>}></Route>
+              <Route path="/test" children={<Test/>}></Route>
             </Switch>
           </div>
         </Router>

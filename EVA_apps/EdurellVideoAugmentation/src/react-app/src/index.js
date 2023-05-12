@@ -1,14 +1,14 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import Edurell from './Edurell';
 
-ReactDOM.render(
+
+createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-      <Edurell />
-  </React.StrictMode>,
-  document.getElementById('root')
+    <Edurell />
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

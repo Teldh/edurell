@@ -14,6 +14,7 @@ import { Typography } from '@mui/material';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 
+
 export default function Querybar({listvideo, listconcepts, AddQueryElement, nomatch}){
  
     listvideo = listvideo.map((video,index) =>

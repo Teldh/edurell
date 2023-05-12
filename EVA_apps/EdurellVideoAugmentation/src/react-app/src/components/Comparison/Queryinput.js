@@ -20,7 +20,7 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch}){
                            className="backColor" 
                            id="outlined-basic" 
                            variant="outlined" {...params} 
-                           label={nomatch?"No match. Try new concepts.":"select the concepts" }
+                           label={nomatch?"No match. Try new concepts.":"search" }
                            placeholder="Concepts" />
             )}
             sx={{ width: '500px' }}
