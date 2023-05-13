@@ -14,9 +14,11 @@ import { useContext,useState,useEffect } from 'react';
 import {TokenContext} from '../account-management/TokenContext';
 import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors';
 import {
-    Link,
-    Redirect,
-  } from "react-router-dom";
+  Link,
+  Redirect,
+  Switch, 
+  Route
+} from "react-router-dom";
 import Autocomplete from '@mui/material/Autocomplete';
 import Popper from '@mui/material/Popper';
 import { useHistory } from "react-router-dom";
@@ -103,10 +105,10 @@ export default function C_Start({Endcstart}){
 
 
     function SendData(value){
-        console.log("historypush");
+        console.log("historypush: ",value);
         history.push({
             pathname: '/comparisonSearch',
-            state: { conceptselected: value },
+            state: { data: value },
         });
     }
 
@@ -131,6 +133,7 @@ export default function C_Start({Endcstart}){
                 </Typography>
         
                 <Autocomplete
+                
                     id="free-solo-demo"
                     freeSolo
                     options={listConcepts}

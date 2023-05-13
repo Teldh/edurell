@@ -15,7 +15,7 @@ import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 
 
-export default function Querybar({listvideo, listconcepts, AddQueryElement, nomatch}){
+export default function Querybar({listvideo, listconcepts, AddQueryElement, nomatch, location}){
  
     listvideo = listvideo.map((video,index) =>
     
@@ -38,7 +38,7 @@ export default function Querybar({listvideo, listconcepts, AddQueryElement, noma
                     alignItems="center"
                     spacing={2}
                 >
-                <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch}/>
+                <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
                 <Secondarybutton/>            
                 </Stack>
                 <Box sx={{paddingTop:1}}>

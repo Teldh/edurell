@@ -13,7 +13,11 @@ import C_Start from './C_Start.js';
 import {
     Link,
     Redirect,
+    Switch, 
+    Route,
+    useLocation
   } from "react-router-dom";
+
 
 
 export default function Comparison(){
@@ -26,6 +30,13 @@ export default function Comparison(){
     const nameSurname  = context.nameSurname;
     const [nomatch,setNomatch]=useState(false);
     const [firsttime, setFirstTime] = useState(true);
+    let location = useLocation();
+
+
+    useEffect(() => {
+      if(location.state != undefined)
+      console.log("data from previous search comparison: ", location.state.data);
+    }, [location]);
 
 
     let checker = (big, small) => small.every(v => big.includes(v));
@@ -186,7 +197,7 @@ export default function Comparison(){
         <ContextComparison.Provider value={[AddVideo,RemoveVideo]}>
        
             <>
-            <Querybar listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch}/>
+            <Querybar listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>
             <Listvideo catalog={catalog} loading={loading}/>
             </>
