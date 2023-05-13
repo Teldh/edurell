@@ -1,6 +1,4 @@
-body{
-    background-color: rgb(160,220,196);
-}
+
 
 .logofirstpage{
     margin: 0.25rem;
@@ -8,4 +6,9 @@ body{
     color: white;
     font-weight: bold;
     font-size: 100px
+  }
+
+
+  .bgcolordiv{
+    background-color: #8cc7ae;
   }

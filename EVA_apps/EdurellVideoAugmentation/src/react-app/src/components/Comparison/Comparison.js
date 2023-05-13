@@ -184,19 +184,13 @@ export default function Comparison(){
         <StyledEngineProvider injectFirst> {/* to override the default style with your custom css */}
         <Header page="dashboard" login={nameSurname}/>
         <ContextComparison.Provider value={[AddVideo,RemoveVideo]}>
-            {
-              firsttime?
-                <C_Start Endcstart={Endcstart}/>
-              :
-                <>
-                <Querybar listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch}/>
-                <br/>
-                <Listvideo catalog={catalog} loading={loading}/>
-                </>
-            }
+       
+            <>
+            <Querybar listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch}/>
+            <br/>
+            <Listvideo catalog={catalog} loading={loading}/>
+            </>
             
-
-
         </ContextComparison.Provider>
         </StyledEngineProvider>
         </ThemeProvider>
