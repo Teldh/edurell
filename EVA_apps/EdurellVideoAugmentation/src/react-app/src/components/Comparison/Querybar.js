@@ -15,7 +15,12 @@ import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import Filters from './Filters.js'
 
+<<<<<<< HEAD
 export default function Querybar({searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
+=======
+
+export default function Querybar({listvideo, listconcepts, AddQueryElement, nomatch, location}){
+>>>>>>> 3c208b315d0d766c0e979e22c9f9354fc2d161c9
  
     listvideo = listvideo.map((video,index) =>
     
@@ -46,11 +51,17 @@ export default function Querybar({searchClicked, listvideo, listconcepts, AddQue
                     
                 alignItems="center"
                 >
+<<<<<<< HEAD
                     <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
                   
                   
                     <Filters/>
                 </Grid>
+=======
+                <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
+                <Secondarybutton/>            
+                </Stack>
+>>>>>>> 3c208b315d0d766c0e979e22c9f9354fc2d161c9
                 <Box sx={{paddingTop:1}}>
                     {
                         listvideo.length<4?<Chip label={listvideo.length+"/4 video selected"} size="small" />:<Chip color="error" label="4/4 max reached" size="small" />
