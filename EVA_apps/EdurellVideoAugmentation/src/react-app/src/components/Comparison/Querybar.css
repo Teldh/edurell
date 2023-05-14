@@ -12,3 +12,8 @@
   background-color: blanchedalmond;
   color:aqua;
 }
+
+.alignItems{
+  justify-content: center;
+  align-items: center;
+}

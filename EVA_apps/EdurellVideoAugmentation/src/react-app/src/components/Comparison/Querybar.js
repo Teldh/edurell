@@ -13,9 +13,9 @@ import Skeleton from '@mui/material/Skeleton';
 import { Typography } from '@mui/material';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
+import Filters from './Filters.js'
 
-
-export default function Querybar({listvideo, listconcepts, AddQueryElement, nomatch}){
+export default function Querybar({searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
  
     listvideo = listvideo.map((video,index) =>
     
@@ -31,16 +31,26 @@ export default function Querybar({listvideo, listconcepts, AddQueryElement, noma
     return(
         <>
         <Container maxWidth="false" className="containerBig">
-            <Container maxWidth = "xl" >
-                <Stack
-                    direction="row"
-                    justifyContent="flex-start"
-                    alignItems="center"
-                    spacing={2}
+            <Container 
+                maxWidth = "xl" 
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    }}>
+              
+            
+                <Grid
+          
+                container
+                direction="column"
+                    
+                alignItems="center"
                 >
-                <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch}/>
-                <Secondarybutton/>            
-                </Stack>
+                    <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
+                  
+                  
+                    <Filters/>
+                </Grid>
                 <Box sx={{paddingTop:1}}>
                     {
                         listvideo.length<4?<Chip label={listvideo.length+"/4 video selected"} size="small" />:<Chip color="error" label="4/4 max reached" size="small" />
@@ -50,39 +60,53 @@ export default function Querybar({listvideo, listconcepts, AddQueryElement, noma
             </Container>
             <br/>
             <br/>
-            <Container maxWidth = "xl">
-                <Stack
-                    direction="row"
-                    justifyContent="flex-start"
-                    alignItems="center"
-                    spacing={2}
-                >
-                    {listvideo.length < 4? 
-                            ( <>
-                             {listvideo}
-                            <Stack spacing={0}>
-                               
-                            <Skeleton variant="rounded" width={200} height={110} />
-                            <Skeleton variant="text" sx={{ fontSize: '1rem' ,marginTop: 1}} />
-                            <Skeleton variant="text" sx={{ fontSize: '1rem' ,width: "69%"/* xd */}} />
-                            
-                            </Stack>
-                            
-                            </>
-                            ) :
-                            <>
-                            {listvideo}
-                            
-                            </>
-                        }
-                    
-                </Stack>
-                <br/>
-                <br/>
-                <br/>
-               
+            {
+                searchClicked == false?
+                <></>
+                :
+
+
+
+                <Container maxWidth = "xl">
+                    <Stack
+                        direction="row"
+                        justifyContent="flex-start"
+                        alignItems="center"
+                        spacing={2}
+                    >
+                        {listvideo.length < 4? 
+                                ( <>
+                                {listvideo}
+                                <Stack spacing={0}>
+                                
+                                <Skeleton variant="rounded" width={200} height={110} />
+                                <Skeleton variant="text" sx={{ fontSize: '1rem' ,marginTop: 1}} />
+                                <Skeleton variant="text" sx={{ fontSize: '1rem' ,width: "69%"/* xd */}} />
+                                
+                                </Stack>
+                                
+                                </>
+                                ) :
+                                <>
+                                {listvideo}
+                                
+                                </>
+                            }
+                        
+                    </Stack>
+                    <br/>
+                    <br/>
+                    <br/>
                 
-            </Container>
+                    
+                </Container>
+
+
+
+
+
+            }
+            
         </Container>
 
 

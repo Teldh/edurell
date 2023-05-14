@@ -8,18 +8,20 @@ import './Queryinput.css';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
-import 'bootstrap/dist/css/bootstrap.css';
 import Header from '../Header/Header';
 import { useContext,useState,useEffect } from 'react';
 import {TokenContext} from '../account-management/TokenContext';
 import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors';
 import {
-    Link,
-    Redirect,
-  } from "react-router-dom";
+  Link,
+  Redirect,
+  Switch, 
+  Route
+} from "react-router-dom";
 import Autocomplete from '@mui/material/Autocomplete';
 import Popper from '@mui/material/Popper';
 import { useHistory } from "react-router-dom";
+import Box from '@mui/material/Box';
 
 export default function C_Start({Endcstart}){
     const context = useContext(TokenContext);
@@ -103,10 +105,10 @@ export default function C_Start({Endcstart}){
 
 
     function SendData(value){
-        console.log("historypush");
+        console.log("historypush: ",value);
         history.push({
             pathname: '/comparisonSearch',
-            state: { conceptselected: value },
+            state: { data: value },
         });
     }
 
@@ -114,16 +116,23 @@ export default function C_Start({Endcstart}){
         <>
         <Header page="dashboard" login={nameSurname}/>
         
-        <div className="container-fluid bgcolordiv vh-100">
-     
-            <Stack spacing={1} className="justify-content-center align-items-center h-75">
+        
+        <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+      }}
+      className="bgcolordiv"
+    >
+   
+            <Stack spacing={1} sx={{justifyContent:'center', alignItems:'center'}}>
                 <Typography variant="h1" 
                     gutterBottom  
                     className="logofirstpage"
                     style={{
-                      
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        align:'center',
                         fontWeight: 'bold',
                         margin: '0'
                     }}>
@@ -131,6 +140,7 @@ export default function C_Start({Endcstart}){
                 </Typography>
         
                 <Autocomplete
+                
                     id="free-solo-demo"
                     freeSolo
                     options={listConcepts}
@@ -166,11 +176,10 @@ export default function C_Start({Endcstart}){
             
      
           
-        
-        
-            
-   
-        </div>
+          
+          
+              
+      </Box>
 
 
 

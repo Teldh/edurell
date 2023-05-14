@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { styled, withTheme } from "@material-ui/core/styles"
 import Button from '@mui/material/Button';
-
+import './buttonsecondary.css';
 
 
 const SecondaryColor = styled(withTheme(Button))({
@@ -13,6 +13,9 @@ const SecondaryColor = styled(withTheme(Button))({
     },
   });
 
-export default function Buttonsecondary(){
-    return <SecondaryColor variant="contained" size="large" ><b>Compare</b></SecondaryColor>
+export default function Buttonsecondary({AddQueryElement, cs}){
+    return <SecondaryColor variant="contained" className="buttonSize" onClick={() => {
+      AddQueryElement(cs);
+      console.log("SearchButton: ",cs);
+    }}><b>Compare</b></SecondaryColor>
 }
