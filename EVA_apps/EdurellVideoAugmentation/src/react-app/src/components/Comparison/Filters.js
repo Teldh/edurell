@@ -68,16 +68,32 @@ export default function Filters(){
         setExpanded(!expanded);
     };
 
-    const [anchorEl, setAnchorEl] = useState(null);
-
-    const handlePopoverOpen = (event) => {
-        setAnchorEl(event.currentTarget);
+    const [anchorEl1, setAnchorEl1] = useState(null);
+    const handlePopoverOpen1 = (event) => {
+        setAnchorEl1(event.currentTarget);
     };
-
-    const handlePopoverClose = () => {
-        setAnchorEl(null);
+    const handlePopoverClose1 = () => {
+        setAnchorEl1(null);
     };
-    const open = Boolean(anchorEl);
+    const open1 = Boolean(anchorEl1);
+
+    const [anchorEl2, setAnchorEl2] = useState(null);
+    const handlePopoverOpen2 = (event) => {
+        setAnchorEl2(event.currentTarget);
+    };
+    const handlePopoverClose2 = () => {
+        setAnchorEl2(null);
+    };
+    const open2 = Boolean(anchorEl2);
+
+    const [anchorEl3, setAnchorEl3] = useState(null);
+    const handlePopoverOpen3 = (event) => {
+        setAnchorEl3(event.currentTarget);
+    };
+    const handlePopoverClose3 = () => {
+        setAnchorEl3(null);
+    };
+    const open3 = Boolean(anchorEl3);
 
 
     const [alignment1, setAlignment1] = useState('web');
@@ -157,8 +173,8 @@ export default function Filters(){
                             >
                                 <Grid item>
                                     <HelpIcon
-                                    onMouseEnter={handlePopoverOpen}
-                                    onMouseLeave={handlePopoverClose}
+                                    onMouseEnter={handlePopoverOpen1}
+                                    onMouseLeave={handlePopoverClose1}
                                     sx={{color:"rgb(255,128,0)"}}/>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
                                         · Adatto a:
@@ -168,8 +184,8 @@ export default function Filters(){
                                                 sx={{
                                                     pointerEvents: 'none',
                                                 }}
-                                                open={open}
-                                                anchorEl={anchorEl}
+                                                open={open1}
+                                                anchorEl={anchorEl1}
                                                 anchorOrigin={{
                                                     vertical: 'bottom',
                                                     horizontal: 'left',
@@ -178,7 +194,7 @@ export default function Filters(){
                                                     vertical: 'top',
                                                     horizontal: 'right',
                                                 }}
-                                                onClose={handlePopoverClose}
+                                                onClose={handlePopoverClose1}
                                                 disableRestoreFocus
                                                 >
                                                 <Box sx={{ width: '100%', maxWidth: 200 }}>
@@ -191,9 +207,9 @@ export default function Filters(){
                                 <Grid item>
                                     <StyledToggleButtonGroup
                                     
-                                    value={alignment}
+                                    value={alignment1}
                                     exclusive
-                                    onChange={handleChange}
+                                    onChange={handleChange1}
                                     aria-label="Platform"
                                     >
                                     <ToggleButton value="esperti">Esperti</ToggleButton>
@@ -212,8 +228,8 @@ export default function Filters(){
                             >
                                 <Grid item>
                                     <HelpIcon
-                                    onMouseEnter={handlePopoverOpen}
-                                    onMouseLeave={handlePopoverClose}
+                                    onMouseEnter={handlePopoverOpen2}
+                                    onMouseLeave={handlePopoverClose2}
                                     sx={{color:"rgb(255,128,0)"}}/>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
                                         · Adatto a:
@@ -223,8 +239,8 @@ export default function Filters(){
                                                 sx={{
                                                     pointerEvents: 'none',
                                                 }}
-                                                open={open}
-                                                anchorEl={anchorEl}
+                                                open={open2}
+                                                anchorEl={anchorEl2}
                                                 anchorOrigin={{
                                                     vertical: 'bottom',
                                                     horizontal: 'left',
@@ -233,7 +249,7 @@ export default function Filters(){
                                                     vertical: 'top',
                                                     horizontal: 'right',
                                                 }}
-                                                onClose={handlePopoverClose}
+                                                onClose={handlePopoverClose2}
                                                 disableRestoreFocus
                                                 >
                                                 <Box sx={{ width: '100%', maxWidth: 200 }}>
@@ -246,13 +262,13 @@ export default function Filters(){
                                 <Grid item>
                                     <StyledToggleButtonGroup
                                     
-                                    value={alignment}
+                                    value={alignment2}
                                     exclusive
-                                    onChange={handleChange}
+                                    onChange={handleChange2}
                                     aria-label="Platform"
                                     >
-                                    <ToggleButton value="esperti">Esperti</ToggleButton>
-                                    <ToggleButton value="principianti">Principianti</ToggleButton>
+                                    <ToggleButton value="esperti">Essenziale</ToggleButton>
+                                    <ToggleButton value="principianti">Approfondita</ToggleButton>
                                     </StyledToggleButtonGroup>
                                 </Grid>
                             
@@ -266,7 +282,51 @@ export default function Filters(){
                             alignItems="flex-start"
                             id="TIPO DI LEZIONE"
                             >
-                            
+                                <Grid item>
+                                    <HelpIcon
+                                    onMouseEnter={handlePopoverOpen3}
+                                    onMouseLeave={handlePopoverClose3}
+                                    sx={{color:"rgb(255,128,0)"}}/>
+                                    <Typography variant="subtitle2" display="inline" gutterBottom>
+                                        · Adatto a:
+                                    </Typography>
+                                    
+                                                <Popover 
+                                                sx={{
+                                                    pointerEvents: 'none',
+                                                }}
+                                                open={open3}
+                                                anchorEl={anchorEl3}
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'left',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'right',
+                                                }}
+                                                onClose={handlePopoverClose3}
+                                                disableRestoreFocus
+                                                >
+                                                <Box sx={{ width: '100%', maxWidth: 200 }}>
+                                                    <Typography variant="body2" gutterBottom>
+                                                        Scegli video con slide se preferisci seguire una presentazione. Scegli senza slide se preferisci altre modalita'
+                                                    </Typography>
+                                                </Box>
+                                                </Popover>
+                                </Grid>
+                                <Grid item>
+                                    <StyledToggleButtonGroup
+                                    
+                                    value={alignment3}
+                                    exclusive
+                                    onChange={handleChange3}
+                                    aria-label="Platform"
+                                    >
+                                    <ToggleButton value="esperti">Con slide</ToggleButton>
+                                    <ToggleButton value="principianti">Senza slide</ToggleButton>
+                                    </StyledToggleButtonGroup>
+                                </Grid>
                             </Grid>
                         </Grid>
                     
