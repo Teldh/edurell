@@ -3,7 +3,6 @@ import { Autocomplete } from '@mui/material';
 import { TextField } from '@material-ui/core';
 import './Queryinput.css';
 import {useState} from 'react'
-<<<<<<< HEAD
 import Secondarybutton from './Buttonsecondary.js'
 import ButtonGroup from '@mui/material/ButtonGroup';
 import Button from '@mui/material/Button';
@@ -15,18 +14,10 @@ import Stack from '@mui/material/Stack';
 export default function Queryinput({listconcepts,AddQueryElement, nomatch, location}){
     const options = listconcepts;//['Option 1', 'Option 2', 'Option 3', 'Option 4'];
     const [valac, SetValac] = useState(null);
-=======
-
-
-export default function Queryinput({listconcepts,AddQueryElement, nomatch, location}){
-    const options = listconcepts;//['Option 1', 'Option 2', 'Option 3', 'Option 4'];
-
->>>>>>> 3c208b315d0d766c0e979e22c9f9354fc2d161c9
     console.log("inputq: ",location);
  
 
     return(<>{
-<<<<<<< HEAD
         location!=null?  
         <Stack
         direction="row"
@@ -134,11 +125,6 @@ OLD AUTOCOMPLETE
 <Autocomplete
             className="bg-primary"
             defaultValue={[location]}
-=======
-        location!=null?
-
-        <Autocomplete
-            defaultValue={[location]}
             freeSolo
             multiple
             limitTags={2}
@@ -159,40 +145,5 @@ OLD AUTOCOMPLETE
               }}
         
         />
-
-              :
-    
-        <Autocomplete
-         
->>>>>>> 3c208b315d0d766c0e979e22c9f9354fc2d161c9
-            freeSolo
-            multiple
-            limitTags={2}
-            id="multiple-limit-tags "
-            options={options}
-            getOptionLabel={(option) => option}
-            renderInput={(params) => (
-                <TextField error={nomatch}
-                           className="backColor" 
-                           id="outlined-basic" 
-                           variant="outlined" {...params} 
-                           label={nomatch?"No match. Try new concepts.":"search" }
-                           placeholder="Concepts" />
-            )}
-            sx={{ width: '500px' }}
-            onChange={(event, value) => {
-                AddQueryElement(value);
-              }}
-        
-        />
-<<<<<<< HEAD
 
 */
-=======
-        
-      
-            }
-            </>
-    );
-}
->>>>>>> 3c208b315d0d766c0e979e22c9f9354fc2d161c9

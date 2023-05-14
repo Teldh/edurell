@@ -31,11 +31,7 @@ export default function Comparison(){
     const [nomatch,setNomatch]=useState(false);
     const [firsttime, setFirstTime] = useState(true);
     let location = useLocation();
-<<<<<<< HEAD
     const [searchClicked, SetSearchClicked] = useState(false);
-=======
-
->>>>>>> 3c208b315d0d766c0e979e22c9f9354fc2d161c9
 
     useEffect(() => {
       if(location.state != undefined)
@@ -203,11 +199,7 @@ export default function Comparison(){
         <ContextComparison.Provider value={[AddVideo,RemoveVideo]}>
        
             <>
-<<<<<<< HEAD
             <Querybar searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
-=======
-            <Querybar listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
->>>>>>> 3c208b315d0d766c0e979e22c9f9354fc2d161c9
             <br/>
             <Listvideo catalog={catalog} loading={loading}/>
             </>
