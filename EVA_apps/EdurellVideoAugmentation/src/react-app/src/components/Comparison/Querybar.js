@@ -15,7 +15,7 @@ import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import Filters from './Filters.js'
 
-export default function Querybar({searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
+export default function Querybar({setfilter, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
  
     listvideo = listvideo.map((video,index) =>
     
@@ -49,7 +49,7 @@ export default function Querybar({searchClicked, listvideo, listconcepts, AddQue
                     <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
                   
                   
-                    <Filters/>
+                    <Filters setfilter={setfilter}/>
                 </Grid>
                 <Box sx={{paddingTop:1}}>
                     {

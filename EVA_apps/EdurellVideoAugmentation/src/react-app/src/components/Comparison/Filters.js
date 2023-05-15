@@ -36,6 +36,7 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+import EastIcon from '@mui/icons-material/East';
 const ExpandMore = styled((props) => {
     const { expand, ...other } = props;
     return <IconButton {...other} />;
@@ -65,7 +66,7 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 },
 }));
   
-export default function Filters(){
+export default function Filters({setfilter}){
     console.log("THEM<E :",useTheme().palette.common.white);
     const [expanded, setExpanded] = useState(false);
     const handleExpandClick = () => {
@@ -133,6 +134,8 @@ export default function Filters(){
     const handleChange6 = (event, newAlignment) => {
         setAlignment6(newAlignment);
     };
+
+    const[radiog, Setradiog] = useState("recent")
     return(<>
         
         <Chip 
@@ -160,11 +163,9 @@ export default function Filters(){
         direction="column"
         justifyContent="center"
         alignItems="center"
-        style={{backgroundColor: "white"}}
-        sx={{ borderRadius: '50px' , p:5}}
         id="TWO COLUMN ONE IS FILTERS LOWER IS BUTTON"
         >
-        <Grid item>
+        <Grid item sx={{ p:5, borderRadius: '50px 50px 0 0', backgroundColor:"white"}}>
             <Grid 
             container
             direction="row"
@@ -566,6 +567,7 @@ export default function Filters(){
                                     aria-labelledby="demo-radio-buttons-group-label"
                                     defaultValue="recent"
                                     name="radio-buttons-group"
+                                    onChange={(event,value)=>Setradiog(value)}
                                 >
                                     <FormControlLabel value="recent" control={<Radio color="default"/>} 
                                         label={<Typography variant="subtitle2" display="inline" gutterBottom>Piu recente </Typography>}/>
@@ -587,21 +589,44 @@ export default function Filters(){
 
         {/* FROM HERE START PART FOR BUTTON */}
 
-        <Grid item sx={{ flexGrow: 1 }}>
-            <Box sx={{ flexGrow: 1 }}>
+        <Grid id="asd"item sx={{  display: 'flex' , width:'100%',pb:5}}>
+      
             <Grid
             container
             direction="row"
             justifyContent="flex-end"
             alignItems="flex-end"
+            sx={{backgroundColor:"white", borderRadius:'0 0 50px 50px'}}
             >
-                <Grid item xs="auto">
-                    asd
+                <Grid item xs >
+                </Grid>
+                <Grid item xs >
+                </Grid>
+                <Grid item xs="auto" sx={{p: 2 ,backgroundColor:'#B798f8', borderRadius:'50px 0 50px 0'}} onClick={()=>{
+                    
+                    console.log("filtri: ",alignment1," ",alignment2," ",alignment3," ",alignment4," ",alignment5," ",alignment6," ",radiog);
+                    console.log("send those baddies to daddy")
+                    setfilter([alignment1,alignment2,alignment3,alignment4,alignment5,alignment6,radiog])
+                }}>
+                    <Grid
+                    container
+                    direction="row"
+                    justifyContent="center"
+                    alignItems="center"
+                    >
+                        <Grid item>
+
+                            <p style={{color:'white'}}>Imposta Filtri</p>
+                        </Grid>
+                        <Grid item>
+                            <EastIcon sx={{color:"#FFFFFF"}}/>
+                        </Grid>
+                    </Grid>
                 </Grid>
 
 
             </Grid>
-            </Box>
+           
         </Grid>
 
 

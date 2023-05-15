@@ -32,7 +32,7 @@ export default function Comparison(){
     const [firsttime, setFirstTime] = useState(true);
     let location = useLocation();
     const [searchClicked, SetSearchClicked] = useState(false);
-
+    const [comparisonfilter, SetComparisonFilter] = useState([null,null,null,null,null,null,"recent"])
     useEffect(() => {
       if(location.state != undefined)
       console.log("data from previous search comparison: ", location.state.data);
@@ -193,6 +193,7 @@ export default function Comparison(){
           }
         },
       });
+      console.log("TESTTTTT: ",comparisonfilter);
     return(
         <>
         
@@ -202,7 +203,7 @@ export default function Comparison(){
         <ContextComparison.Provider value={[AddVideo,RemoveVideo]}>
 
             <>
-            <Querybar searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
+            <Querybar setfilter = {SetComparisonFilter} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>
             <Listvideo catalog={catalog} loading={loading}/>
             </>
