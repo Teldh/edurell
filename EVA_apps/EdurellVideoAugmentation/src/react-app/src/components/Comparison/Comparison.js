@@ -8,7 +8,7 @@ import { StyledEngineProvider } from '@mui/material/styles';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { ContextComparison } from './ContextComparison';
 import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors';
-
+import Button from '@mui/material/Button';
 import C_Start from './C_Start.js';
 import {
     Link,
@@ -187,6 +187,9 @@ export default function Comparison(){
           },
           closexexit:{
             main:"#e57373",
+          },
+          whito:{
+            main:'#FFFFFF',
           }
         },
       });
@@ -197,7 +200,7 @@ export default function Comparison(){
         <StyledEngineProvider injectFirst> {/* to override the default style with your custom css */}
         <Header page="dashboard" login={nameSurname}/>
         <ContextComparison.Provider value={[AddVideo,RemoveVideo]}>
-       
+
             <>
             <Querybar searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>

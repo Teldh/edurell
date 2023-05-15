@@ -31,7 +31,11 @@ import HelpIcon from '@mui/icons-material/Help';
 import Popover from '@mui/material/Popover';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
 const ExpandMore = styled((props) => {
     const { expand, ...other } = props;
     return <IconButton {...other} />;
@@ -62,7 +66,7 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 }));
   
 export default function Filters(){
-
+    console.log("THEM<E :",useTheme().palette.common.white);
     const [expanded, setExpanded] = useState(false);
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -96,25 +100,44 @@ export default function Filters(){
     const open3 = Boolean(anchorEl3);
 
 
-    const [alignment1, setAlignment1] = useState('web');
+    const [alignment1, setAlignment1] = useState(null);
 
     const handleChange1 = (event, newAlignment) => {
         setAlignment1(newAlignment);
     };
-    const [alignment2, setAlignment2] = useState('web');
+    const [alignment2, setAlignment2] = useState(null);
 
     const handleChange2 = (event, newAlignment) => {
         setAlignment2(newAlignment);
     };
-    const [alignment3, setAlignment3] = useState('web');
+    const [alignment3, setAlignment3] = useState(null);
 
     const handleChange3 = (event, newAlignment) => {
         setAlignment3(newAlignment);
     };
+
+    const [alignment4, setAlignment4] = useState(null);
+
+    const handleChange4 = (event, newAlignment) => {
+        setAlignment4(newAlignment);
+    };
+
+    const [alignment5, setAlignment5] = useState(null);
+
+    const handleChange5 = (event, newAlignment) => {
+        setAlignment5(newAlignment);
+    };
+
+    const [alignment6, setAlignment6] = useState(null);
+
+    const handleChange6 = (event, newAlignment) => {
+        setAlignment6(newAlignment);
+    };
     return(<>
         
         <Chip 
-            sx={{width:'auto', margin:'5px'}}
+            sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px'}}
+            
             avatar={<TuneRoundedIcon/>}
             label="Clickable" 
             onClick={handleExpandClick}
@@ -132,20 +155,31 @@ export default function Filters(){
         />
 
         <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        style={{backgroundColor: "white"}}
+        sx={{ borderRadius: '50px' , p:5}}
+        id="TWO COLUMN ONE IS FILTERS LOWER IS BUTTON"
+        >
+        <Grid item>
             <Grid 
             container
             direction="row"
             justifyContent="center"
-            alignItems="center"
+            alignItems="flex-start"
             spacing={2}
             id="TRE COLONNE PRINCIPALI"
+            
             >
                 <Grid item>
                     <Grid
                     container
                     direction="column"
                     justifyContent="center"
-                    alignItems="center"
+                    alignItems="flex-start"
                     id="CARATTERISTICHE"
                     >
                         <Grid item>
@@ -156,8 +190,8 @@ export default function Filters(){
                             alignItems="flex-start"
                             id="TITOLO"
                             >
-                                <Grid item>
-                                    <Typography variant="h6" gutterBottom>
+                                <Grid item sx={{mb:3}}>
+                                    <Typography variant="button" gutterBottom >
                                         CARATTERISTICHE:
                                     </Typography>
                                 </Grid>
@@ -172,13 +206,24 @@ export default function Filters(){
                             id="ADATTO A"
                             >
                                 <Grid item>
+                                <Grid
+                                container
+                                direction="row"
+                                justifyContent="center"
+                                alignItems="center"
+                                >
+                                    <Grid item>
                                     <HelpIcon
                                     onMouseEnter={handlePopoverOpen1}
                                     onMouseLeave={handlePopoverClose1}
                                     sx={{color:"rgb(255,128,0)"}}/>
+                                    </Grid>
+                                    <Grid item>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
                                         · Adatto a:
                                     </Typography>
+                                    </Grid>
+                                </Grid>
                                     
                                                 <Popover 
                                                 sx={{
@@ -212,8 +257,12 @@ export default function Filters(){
                                     onChange={handleChange1}
                                     aria-label="Platform"
                                     >
-                                    <ToggleButton value="esperti">Esperti</ToggleButton>
-                                    <ToggleButton value="principianti">Principianti</ToggleButton>
+                                    <ToggleButton value="esperti" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>Esperti</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="principianti" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>Principianti</Typography>
+                                    </ToggleButton>
                                     </StyledToggleButtonGroup>
                                 </Grid>
                             </Grid>
@@ -227,13 +276,23 @@ export default function Filters(){
                             id="SPIEGAZIONE"
                             >
                                 <Grid item>
+                                <Grid
+                                container
+                                direction="row"
+                                justifyContent="center"
+                                alignItems="center"
+                                >
+                                    <Grid item>
                                     <HelpIcon
                                     onMouseEnter={handlePopoverOpen2}
                                     onMouseLeave={handlePopoverClose2}
                                     sx={{color:"rgb(255,128,0)"}}/>
+                                    </Grid>
+                                    <Grid item>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
                                         · Adatto a:
                                     </Typography>
+                                    </Grid>
                                     
                                                 <Popover 
                                                 sx={{
@@ -259,6 +318,7 @@ export default function Filters(){
                                                 </Box>
                                                 </Popover>
                                 </Grid>
+                                </Grid>
                                 <Grid item>
                                     <StyledToggleButtonGroup
                                     
@@ -267,8 +327,12 @@ export default function Filters(){
                                     onChange={handleChange2}
                                     aria-label="Platform"
                                     >
-                                    <ToggleButton value="esperti">Essenziale</ToggleButton>
-                                    <ToggleButton value="principianti">Approfondita</ToggleButton>
+                                    <ToggleButton value="essential" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>Essenziale</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="detailed" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>Approfondita</Typography>
+                                    </ToggleButton>
                                     </StyledToggleButtonGroup>
                                 </Grid>
                             
@@ -283,13 +347,23 @@ export default function Filters(){
                             id="TIPO DI LEZIONE"
                             >
                                 <Grid item>
+                                <Grid
+                                container
+                                direction="row"
+                                justifyContent="center"
+                                alignItems="center"
+                                >
+                                    <Grid item>
                                     <HelpIcon
                                     onMouseEnter={handlePopoverOpen3}
                                     onMouseLeave={handlePopoverClose3}
                                     sx={{color:"rgb(255,128,0)"}}/>
+                                    </Grid>
+                                    <Grid item>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
                                         · Adatto a:
                                     </Typography>
+                                    </Grid>
                                     
                                                 <Popover 
                                                 sx={{
@@ -315,6 +389,7 @@ export default function Filters(){
                                                 </Box>
                                                 </Popover>
                                 </Grid>
+                                </Grid>
                                 <Grid item>
                                     <StyledToggleButtonGroup
                                     
@@ -323,8 +398,12 @@ export default function Filters(){
                                     onChange={handleChange3}
                                     aria-label="Platform"
                                     >
-                                    <ToggleButton value="esperti">Con slide</ToggleButton>
-                                    <ToggleButton value="principianti">Senza slide</ToggleButton>
+                                    <ToggleButton value="withslide" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>Con slide</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="withoutslide" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>Senza slide</Typography>
+                                    </ToggleButton>
                                     </StyledToggleButtonGroup>
                                 </Grid>
                             </Grid>
@@ -343,23 +422,190 @@ export default function Filters(){
                     container
                     direction="column"
                     justifyContent="center"
-                    alignItems="center"
+                    alignItems="flex-start"
+                    id="DURATE"
                     >
-                    
+                        <Grid item>
+                            <Grid
+                            container
+                            direction="column"
+                            justifyContent="center"
+                            alignItems="flex-start"
+                            id="TITOLO"
+                            >
+                                <Grid item sx={{mb:3}}>
+                                    <Typography variant="button" gutterBottom>
+                                        DURATE:
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+
+
+                        <Grid item>
+                            <Grid
+                            container
+                            direction="column"
+                            justifyContent="center"
+                            alignItems="flex-start"
+                            id="DEFINIZIONE"
+                            >
+                                <Grid item>
+                                    <Typography variant="subtitle2" display="inline" gutterBottom>
+                                        · Definizione:
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <StyledToggleButtonGroup
+                                    
+                                    value={alignment4}
+                                    exclusive
+                                    onChange={handleChange4}
+                                    aria-label="Platform"
+                                    >
+                                    <ToggleButton value="less4" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&lt;4 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="4to20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>4 to 20 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="greater20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&gt;20 min</Typography>
+                                    </ToggleButton>
+                                    
+                                    </StyledToggleButtonGroup>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="subtitle2" display="inline" gutterBottom>
+                                        · Approfondimento:
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <StyledToggleButtonGroup
+                                    
+                                    value={alignment5}
+                                    exclusive
+                                    onChange={handleChange5}
+                                    aria-label="Platform"
+                                    >
+                                    <ToggleButton value="less4" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&lt;4 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="4to20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>4 to 20 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="greater20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&gt;20 min</Typography>
+                                    </ToggleButton>
+                                    
+                                    </StyledToggleButtonGroup>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="subtitle2" display="inline" gutterBottom>
+                                        · Video intero:
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <StyledToggleButtonGroup
+                                    
+                                    value={alignment6}
+                                    exclusive
+                                    onChange={handleChange6}
+                                    aria-label="Platform"
+                                    >
+                                    <ToggleButton value="less4" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&lt;4 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="4to20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>4 to 20 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="greater20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&gt;20 min</Typography>
+                                    </ToggleButton>
+                                    
+                                    </StyledToggleButtonGroup>
+                                </Grid>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 <Grid item>
                     <Grid
                     container
                     direction="column"
                     justifyContent="center"
-                    alignItems="center"
+                    alignItems="flex-start"
+                    id="ORDINA PER"
                     >
+                        <Grid item sx={{mb:2}}>
+                            <Typography variant="button" gutterBottom>ORDINA PER</Typography>
+                        </Grid>
+                        <Grid item>
+                            <FormControl>
+                            
+                               
+                                
+                                <RadioGroup
+                                    aria-labelledby="demo-radio-buttons-group-label"
+                                    defaultValue="recent"
+                                    name="radio-buttons-group"
+                                >
+                                    <FormControlLabel value="recent" control={<Radio color="default"/>} 
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Piu recente </Typography>}/>
+                                    <FormControlLabel value="videolength" control={<Radio color="default"/>} 
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>durata del video</Typography> }/>
+                                    <FormControlLabel value="deflength" control={<Radio color="default"/>} 
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Durata della definizione</Typography>} />
+                                    <FormControlLabel value="detailedlength" control={<Radio color="default"/>} 
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>durata dell'approfondimento"</Typography>}/>
+                                </RadioGroup>
+                            </FormControl>
+                        </Grid>
                     
                     </Grid>
                 </Grid>
 
             </Grid>
+        </Grid>
+
+        {/* FROM HERE START PART FOR BUTTON */}
+
+        <Grid item sx={{ flexGrow: 1 }}>
+            <Box sx={{ flexGrow: 1 }}>
+            <Grid
+            container
+            direction="row"
+            justifyContent="flex-end"
+            alignItems="flex-end"
+            >
+                <Grid item xs="auto">
+                    asd
+                </Grid>
+
+
+            </Grid>
+            </Box>
+        </Grid>
+
+
+        </Grid>
         </Collapse>
         
         

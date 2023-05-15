@@ -758,6 +758,7 @@ def ConceptVideoData(video_id, concept_searched):
     result = {
         'concept_starttime':[],
         'concept_endtime':[],
+        'explain':[],
         'list_preconcept': [],
         'list_derivatedconcept':[],
         'derivatedconcept_starttime':[],
@@ -808,7 +809,7 @@ def ConceptVideoData(video_id, concept_searched):
 
 
     ## --------------------------------------------------------------------------------------------------------------------------------------
-    ## ---------------------------------------------------------QUERYCONCEPTTIMELINE---------------------------------------------------------
+    ## ---------------------------------------------------QUERYCONCEPTTIMELINE&SKOSNOTE------------------------------------------------------
     ## --------------------------------------------------------------------------------------------------------------------------------------
     qr = """
                 PREFIX oa: <http://www.w3.org/ns/oa#>
@@ -816,7 +817,7 @@ def ConceptVideoData(video_id, concept_searched):
                 PREFIX dctypes: <http://purl.org/dc/dcmitype/>
                 PREFIX dcterms: <http://purl.org/dc/terms/>
                 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-                SELECT ?concept_starttime ?concept_endtime
+                SELECT ?concept_starttime ?concept_endtime ?explain
                 WHERE {
                         
                         ?who oa:hasBody ?c_id.
@@ -827,7 +828,8 @@ def ConceptVideoData(video_id, concept_searched):
                         ?selector oa:hasStartSelector ?startselector.
                         ?startselector rdf:value ?concept_starttime.
                         ?selector oa:hasEndSelector ?endselector.
-                        ?endselector rdf:value ?concept_endtime.               
+                        ?endselector rdf:value ?concept_endtime.
+                        ?who skos:note ?explain               
                     }
 
 
@@ -841,6 +843,7 @@ def ConceptVideoData(video_id, concept_searched):
         print(row['concept_starttime'],"\n",row['concept_endtime'])
         result['concept_starttime'].append(row['concept_starttime'])
         result['concept_endtime'].append(row['concept_endtime'])
+        result['explain'].append(row['explain'])
     
 
     ## --------------------------------------------------------------------------------------------------------------------------------------
