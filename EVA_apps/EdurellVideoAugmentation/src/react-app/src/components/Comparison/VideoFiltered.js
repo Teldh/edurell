@@ -50,7 +50,7 @@ export default function VideoFiltered({titleurl,imageurl,idxurl,concepts,creator
             sx={{ maxWidth: 250 , border: add?"2px solid #C6EBDC": '0px'}}
             onMouseEnter={()=>setshadow(5)}
             onMouseLeave={()=>setshadow(0)}
-            onClick={()=>console.log("click")/*THI FOR OPEN THE MODAL BUT NOW ITS CHANGED. OLD CODE. JUST FOR REFERENCE setOpen(!open)*/}
+            onClick={()=>handleExpandClick()/*THI FOR OPEN THE MODAL BUT NOW ITS CHANGED. OLD CODE. JUST FOR REFERENCE setOpen(!open)*/}
             align="left"
             >
 
@@ -119,7 +119,64 @@ export default function VideoFiltered({titleurl,imageurl,idxurl,concepts,creator
         
         
         
-        
+        <Collapse in={expanded} timeout="auto" unmountOnExit style={{position:'fixed',bottom: 0, left:0, right:0}}>
+            <Grid
+            container
+            direction="row"
+            justifyContent="center"
+            alignItems="center"
+            id="1 COLONNA CENTRALE DATI"
+            >
+                <Grid item xs={2}></Grid>
+                <Grid item>
+                    <Grid
+                    container
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="center"
+                    id="2 SOPRA DATI SOTTO BOTTONE"
+                    >
+                    <Grid item>
+                        <Grid
+                        container
+                        direction="row"
+                        justifyContent="center"
+                        alignItems="center"
+                        id="3 SX VIDEO, DX DATI"
+                        >
+                            <Grid item>
+                                <img src={"http://img.youtube.com/vi/"+imageurl+"/mqdefault.jpg"} alt={titleurl} width="100%" height="auto"/>
+                            </Grid>
+                            <Grid item>
+                                <Grid
+                                container
+                                direction="column"
+                                justifyContent="center"
+                                alignItems="center"
+                                id="4 ROW TITOLO DATI BOTTONE"
+                                >
+                                
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+
+
+
+
+
+
+
+                    {/* DA QUI SOTTO CE BOTTONE */}
+                    <Grid item>
+
+                    </Grid>
+                    </Grid>
+                </Grid>
+                <Grid item xs={2}></Grid>
+            </Grid>
+
+        </Collapse>
         
         
         
