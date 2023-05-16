@@ -66,7 +66,7 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 },
 }));
   
-export default function Filters({setfilter}){
+export default function Filters({ApplyFilters}){
     console.log("THEM<E :",useTheme().palette.common.white);
     const [expanded, setExpanded] = useState(false);
     const handleExpandClick = () => {
@@ -606,7 +606,7 @@ export default function Filters({setfilter}){
                     
                     console.log("filtri: ",alignment1," ",alignment2," ",alignment3," ",alignment4," ",alignment5," ",alignment6," ",radiog);
                     console.log("send those baddies to daddy")
-                    setfilter([alignment1,alignment2,alignment3,alignment4,alignment5,alignment6,radiog])
+                    ApplyFilters([alignment1,alignment2,alignment3,alignment4,alignment5,alignment6,radiog])
                 }}>
                     <Grid
                     container

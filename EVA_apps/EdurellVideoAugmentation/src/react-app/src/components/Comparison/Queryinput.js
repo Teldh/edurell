@@ -17,13 +17,7 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
     console.log("queryinput: ",location);
   
 
-    useEffect(() => {
-        if (location != null) { // It's used here...
-          //SetValac(location);
-        } else {
-          // ...
-        }
-      }, [location]);
+
 
     return(<>{
         location!=null?  

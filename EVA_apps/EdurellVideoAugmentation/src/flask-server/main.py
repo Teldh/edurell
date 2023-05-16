@@ -765,47 +765,71 @@ def ConceptVideoData(video_id, concept_searched):
         'derivatedconcept_endtime':[]
     }
 
-    # search for the newest in term of timestamp and get the idx of the newest document
-    # maybe it's pointless if the lastest is always the newest
-    # but in case the order changes in the future, this piece of code will make the ode work right regardless
+    # two options:
+    ## 1. search newest annotation
+    ### 2. combine every annotation of a video into a unique graph and make the query of that
     cursor = collection.find({"video_id":video_id})
-    lastest = "1970-01-01T00:00:00.000000Z"
-    lastest_idx = 0
-    for idx,document in enumerate(cursor):
-        if document is None:
-            continue
-        gr=Graph().parse(data=json.dumps(document["graph"]), format='json-ld')
-        qr = """
-                PREFIX oa: <http://www.w3.org/ns/oa#>
-                PREFIX edu: <https://teldh.github.io/edurell#>
-                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
-                PREFIX dcterms: <http://purl.org/dc/terms/>
-                
-                SELECT DISTINCT ?timestamp
-                WHERE {
-                        ?who dcterms:created ?timestamp
-                    }
+    optiongraph = 1
+    gr=Graph()
 
-            """
-        qres = gr.query(qr)
-        print("query result: ",qres)
-        for row in qres:
-            print("current_timestamp: ",lastest," / selected_timestamp: ",row['timestamp'])
-            if row['timestamp'] > lastest:
-                lastest = row['timestamp']
-                lastest_idx = idx
-    print("lastest_timestamp: ",lastest," lastest_idx: ",lastest_idx)
-    print("TESTTTTTTTTT       ",cursor)
 
-    # select the newest document
-    document = collection.find({"video_id":video_id})[lastest_idx]
-    
+    if optiongraph == 1:
+        ## 1. search newest annotation
+        ## search for the newest in term of timestamp and get the idx of the newest document
+        ## maybe it's pointless if the lastest is always the newest
+        ## but in case the order changes in the future, this piece of code will make the ode work right regardless
+        lastest = "1970-01-01T00:00:00.000000Z"
+        lastest_idx = 0
+        for idx,document in enumerate(cursor):
+            if document is None:
+                continue
+            gr=Graph().parse(data=json.dumps(document["graph"]), format='json-ld')
+            qr = """
+                    PREFIX oa: <http://www.w3.org/ns/oa#>
+                    PREFIX edu: <https://teldh.github.io/edurell#>
+                    PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                    PREFIX dcterms: <http://purl.org/dc/terms/>
+                    
+                    SELECT DISTINCT ?timestamp
+                    WHERE {
+                            ?who dcterms:created ?timestamp
+                        }
 
-    # Query the concept timeline and duration
-    gr = Graph().parse(data=json.dumps(document["graph"]), format='json-ld')
+                """
+            qres = gr.query(qr)
+            print("query result: ",qres)
+            for row in qres:
+                print("current_timestamp: ",lastest," / selected_timestamp: ",row['timestamp'])
+                if row['timestamp'] > lastest:
+                    lastest = row['timestamp']
+                    lastest_idx = idx
+        print("lastest_timestamp: ",lastest," lastest_idx: ",lastest_idx)
+        print("TESTTTTTTTTT       ",cursor)
 
-    # initialize conceptVocabulary for the query
-    gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+        # select the newest document
+        document = collection.find({"video_id":video_id})[lastest_idx]
+        
+
+        # Query the concept timeline and duration
+        gr.parse(data=json.dumps(document["graph"]), format='json-ld')
+
+        # initialize conceptVocabulary for the query
+        gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+
+    else:
+        ### 2. combine all annotation of a video together
+        ### in mongodb we collect all annotation of a single video
+        ### made by different people or the same
+        ### this mode combine from the oldest to the newest into a single graph
+
+        for document in cursor:
+            # Query the concept timeline and duration
+            gr.parse(data=json.dumps(document["graph"]), format='json-ld')
+
+            # initialize conceptVocabulary for the query
+            gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+
+
 
 
     ## --------------------------------------------------------------------------------------------------------------------------------------
@@ -954,7 +978,7 @@ def ConceptVideoData(video_id, concept_searched):
     
 
     ## --------------------------------------------------------------------------------------------------------------------------------------
-    ## ---------------------------------------------------------QUERYCONCEPTDERIVATED--------------------------------------------------------
+    ## ---------------------------------------------------------SLIDISHNESS------------------------------------------------------------------
     ## --------------------------------------------------------------------------------------------------------------------------------------
     VTS=VideoTextSegmentation.objects(video_id = video_id)
     for VTSdoc in VTS:

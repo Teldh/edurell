@@ -18,7 +18,14 @@ import {
     useLocation
   } from "react-router-dom";
 
+/*
 
+
+DEVI CAMBIARE FLASK MAIN.PY PER FAR IN MODO CHE NON PRENDE
+IL PIU RECENTE MA ANCHE LA SOMMA DI TUTTI I GRAFI E FARCI LA SOMMA
+
+
+*/
 
 export default function Comparison(){
     const [listvideo, setListVideo]= useState([]);
@@ -113,7 +120,9 @@ export default function Comparison(){
         }
       }, [loading]);
 
-    function AddQueryElement(concept){
+
+    //OLD, sort the video based on concept on query
+    function AddQueryElementOLD(concept){
         SetSearchClicked(true);
         //bug resettare la querylist coi elementi aggiornati
         if(catalog.length > 0 ){
@@ -138,6 +147,38 @@ export default function Comparison(){
 
         }
     }
+    function AddQueryElement(concept){
+      SetSearchClicked(true);
+      //bug resettare la querylist coi elementi aggiornati
+      if(catalog.length > 0 ){
+          if(concept.length==0){
+              //setCatalog(originalList);
+          }
+          console.log("addquery ",concept)
+          const newquerylist = [...concept];
+          setQueryList(newquerylist);
+          console.log("newquerylist: ",newquerylist)
+          
+          
+          let newcatalog = catalog.filter(video=>checker(video.extracted_keywords,concept));
+          if(concept.length>0 && newcatalog.length==0){
+              setNomatch(true)
+          }else if(concept.length!=querylist.length){
+              setNomatch(false);
+          }
+          newcatalog = [...newcatalog, ...catalog.filter(video=>!checker(video.extracted_keywords,concept))]
+          setCatalog(newcatalog)
+          
+
+      }
+    }
+
+    function ApplyFilters(listfilters){
+      SetComparisonFilter(listfilters)
+
+    }
+
+  
 
     function AddVideo(img, title,setAdd,idxurl){
         const newListVideo = [...listvideo,{img:img,title:title,idx:idxurl, setAdd:setAdd}];
@@ -204,7 +245,7 @@ export default function Comparison(){
         <ContextComparison.Provider value={[AddVideo,RemoveVideo]}>
 
             <>
-            <Querybar setfilter = {SetComparisonFilter} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
+            <Querybar ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>
             <Listvideo catalog={catalog} loading={loading}/>
             </>
