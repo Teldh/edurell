@@ -155,7 +155,41 @@ export default function VideoFiltered({titleurl,imageurl,idxurl,concepts,creator
                                 alignItems="center"
                                 id="4 ROW TITOLO DATI BOTTONE"
                                 >
-                                
+                                    <Grid item>
+                                        <Grid
+                                        container
+                                        direction="row"
+                                        justifyContent="space-between"
+                                        alignItems="center"
+                                        id="TITOLO"
+                                        >
+                                            <Grid item>
+                                            <Typography variant="subtitle2" gutterBottom>
+                                                {titleurl}    
+                                            </Typography>
+                                            <Divider orientation="vertical" flexItem/>
+                                            <Typography variant="caption" gutterBottom>
+                                                {creator}
+                                            </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Chip label={<><Typography variant="caption" gutterBottom>
+                                                        X
+                                                    </Typography> 
+                                                    <Divider orientation="vertical" flexItem/>
+                                                    <Typography variant="caption" gutterBottom>
+                                                        chiudi anteprima
+                                                    </Typography></>}
+                                                    onClick={()=>handleExpandClick()} />
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item>
+
+                                    </Grid>
+                                    <Grid item>
+
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
