@@ -15,7 +15,8 @@ const SecondaryColor = styled(withTheme(Button))({
 
 export default function Buttonsecondary({AddQueryElement, cs}){
     return <SecondaryColor variant="contained" className="buttonSize" onClick={() => {
-      AddQueryElement(cs);
       console.log("SearchButton: ",cs);
+      AddQueryElement(cs);
+      
     }}><b>Compare</b></SecondaryColor>
 }

@@ -120,9 +120,10 @@ export default function Comparison(){
             if(concept.length==0){
                 //setCatalog(originalList);
             }
-            console.log("addquery")
+            console.log("addquery ",concept)
             const newquerylist = [...concept];
             setQueryList(newquerylist);
+            console.log("newquerylist: ",newquerylist)
             
             
             let newcatalog = catalog.filter(video=>checker(video.extracted_keywords,concept));

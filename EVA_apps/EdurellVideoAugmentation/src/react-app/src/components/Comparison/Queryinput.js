@@ -2,7 +2,7 @@ import React from 'react';
 import { Autocomplete } from '@mui/material';
 import { TextField } from '@material-ui/core';
 import './Queryinput.css';
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import Secondarybutton from './Buttonsecondary.js'
 import ButtonGroup from '@mui/material/ButtonGroup';
 import Button from '@mui/material/Button';
@@ -13,9 +13,17 @@ import Popper from '@mui/material/Popper';
 import Stack from '@mui/material/Stack';
 export default function Queryinput({listconcepts,AddQueryElement, nomatch, location}){
     const options = listconcepts;//['Option 1', 'Option 2', 'Option 3', 'Option 4'];
-    const [valac, SetValac] = useState(null);
-    console.log("inputq: ",location);
- 
+    const [valac, SetValac] = useState([location]);
+    console.log("queryinput: ",location);
+  
+
+    useEffect(() => {
+        if (location != null) { // It's used here...
+          //SetValac(location);
+        } else {
+          // ...
+        }
+      }, [location]);
 
     return(<>{
         location!=null?  
@@ -58,7 +66,7 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
             sx={{ width: '500px' }}
             onChange={(event,value)=>{
                 SetValac(value)
-                console.log("auto: ",valac)
+                console.log("auto: ",value)
             }}
          
         
