@@ -740,6 +740,108 @@ def graph(annotator_id, video_id):
 
     return {"conceptsList": concept_graph, "conceptVocabulary": conceptVocabulary}
 
+@app.route('/api/GetVideoTypeAndPrerequisite')
+@auth.login_required
+def GetVideoTypeAndPrerequisite():
+    user = "luca"
+    password = "vSmAZ6c1ZOg2IEVw"
+    client = pymongo.MongoClient(
+        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+
+    # retrieve from mongodb collection=graphs the all elements with the value of video_id
+    db = client.edurell
+    collection = db.graphs
+
+    videos = Videos.objects()
+    result={}
+    for v in videos:
+        cursor = collection.find({"video_id":v.video_id})
+
+
+        
+        for document in cursor:
+            #print("per ogni document in cursor: ",document["_id"]," ",document["conceptVocabulary"])
+            #print("\n asd \n")
+            if document["conceptVocabulary"] == "":
+                print("NONE")
+                continue
+
+            gr=Graph()
+            print("Generato grafo: ")
+            # Query the concept timeline and duration
+            gr.parse(data=json.dumps(document["graph"]), format='json-ld')
+
+            # initialize conceptVocabulary for the query
+            gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+           
+        
+        qr="""
+                PREFIX oa: <http://www.w3.org/ns/oa#>
+                PREFIX edu: <https://teldh.github.io/edurell#>
+                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                PREFIX dcterms: <http://purl.org/dc/terms/>
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+                SELECT DISTINCT ?video_id ?prerequisite ?typedef
+                WHERE{
+                    ?id_descr oa:motivatedBy oa:describing.
+                    ?id_descr oa:hasTarget ?target_descr.
+                    ?target_descr oa:hasSource ?video_id.
+                    ?id_descr skos:note  ?typedef.
+
+                    ?id_pre oa:motivatedBy edu:linkingPrerequisite.
+                    ?id_pre oa:hasTarget ?target_link.
+                    ?target_link oa:hasSource ?video_id.
+                    ?id_pre oa:hasBody ?prerequisiteIRI.
+                    ?prerequisiteIRI skos:prefLabel ?prerequisite.
+                    
+
+                }
+        
+        """
+        print("applico la query")
+        qres = gr.query(qr)
+        print("qres: ",len(qres)," ",qr)
+        for row in qres:
+            #print("_________________________________________")
+            #print(row['video_id']," ",row['prerequisite']," ",row['typedef'])
+            if v.video_id in result:
+                if "prerequisite" in result[v.video_id]:
+                    result[v.video_id]["prerequisite"].append(row['prerequisite'])
+                else:
+                    result[v.video_id]["prerequisite"] = []
+                    result[v.video_id]["prerequisite"].append(row['prerequisite'])
+                
+                if "typedef" in result[v.video_id]:
+                    result[v.video_id]["typedef"].append(row['typedef'])
+                else:
+                    result[v.video_id]["typedef"] = []
+                    result[v.video_id]["typedef"].append(row['typedef'])
+            else:
+                result[v.video_id] = {}
+                if "prerequisite" in result[v.video_id]:
+                    result[v.video_id]["prerequisite"].append(row['prerequisite'])
+                else:
+                    result[v.video_id]["prerequisite"] = []
+                    result[v.video_id]["prerequisite"].append(row['prerequisite'])
+                
+                if "typedef" in result[v.video_id]:
+                    result[v.video_id]["typedef"].append(row['typedef'])
+                else:
+                    result[v.video_id]["typedef"] = []
+                    result[v.video_id]["typedef"].append(row['typedef'])
+    
+        VTS=VideoTextSegmentation.objects(video_id = v.video_id)
+        for VTSdoc in VTS:
+            print(VTSdoc.video_id)
+            print(VTSdoc.video_slidishness)
+            if v.video_id in result:
+                result[v.video_id]['video_slidishness'] = VTSdoc.video_slidishness
+            else:
+                result[v.video_id] = {}
+                result[v.video_id]['video_slidishness'] = VTSdoc.video_slidishness
+    return result
+
 @app.route('/api/ConceptVideoData/<video_id>/<concept_searched>')
 @auth.login_required
 def ConceptVideoData(video_id, concept_searched):

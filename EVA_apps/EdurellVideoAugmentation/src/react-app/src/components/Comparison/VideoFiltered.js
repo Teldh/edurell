@@ -1,0 +1,109 @@
+import * as React from 'react';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import imag from './imgtest/brainicon.PNG'
+import {useState} from 'react';
+import { useTheme } from '@material-ui/core/styles';
+import CancelIcon from '@mui/icons-material/Cancel';
+import Paper from '@mui/material/Paper';
+import Fade from '@mui/material/Fade';
+import Modal from '@mui/material/Modal';
+import Backdrop from '@mui/material/Backdrop';
+import Grid from '@mui/material/Grid';
+import Chip from '@mui/material/Chip';
+import Badge from '@mui/material/Badge';
+import Stack from '@mui/material/Stack';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import { styled } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Collapse from '@mui/material/Collapse';
+import { useContext } from 'react';
+import { ContextComparison } from './ContextComparison';
+import {TokenContext} from '../account-management/TokenContext';
+import {
+  Link,
+  Redirect,
+} from "react-router-dom";
+//style={{position:'fixed'}}
+export default function VideoFiltered({titleurl,imageurl,idxurl,concepts,creator}){
+    const addvideo = useContext(ContextComparison)[0];
+    const removevideo = useContext(ContextComparison)[1];
+    const [shadow, setshadow] = useState(0);
+    const [open, setOpen] = useState(0);
+    const [expanded, setExpanded] = useState(false);
+    const [add, setAdd] = useState(false);
+    //const title="Kurzesgast - The power of loveKurzesgast ";
+    const handleExpandClick = () => {
+      setExpanded(!expanded);
+    };
+    return(
+        <>
+        <Card elevation={shadow}
+            color="primary" 
+            sx={{ maxWidth: 250 , border: add?"2px solid #C6EBDC": '0px'}}
+            onMouseEnter={()=>setshadow(5)}
+            onMouseLeave={()=>setshadow(0)}
+            onClick={()=>console.log("click")/*THI FOR OPEN THE MODAL BUT NOW ITS CHANGED. OLD CODE. JUST FOR REFERENCE setOpen(!open)*/}
+            align="left"
+            >
+      <Link className="testText"  numberOfLines={2} to={'/app/'+imageurl+'/'+titleurl}>
+        <CardMedia
+        sx={{   height: 140,
+                margin: 2,
+                marginBottom:0,
+                }}
+        image={"http://img.youtube.com/vi/"+imageurl+"/mqdefault.jpg"}
+        title={titleurl}
+      />
+        <CardContent disableSpacing >
+
+        <Typography noWrap variant="subtitle2" gutterBottom sx={{margin:0}}>
+        <b>{titleurl}</b>
+        </Typography>
+        <Typography noWrap variant="subtitle2" gutterBottom sx={{marginTop:0}}>
+        {creator}
+        </Typography>
+        
+        </CardContent>
+        <CardActions disableSpacing>
+            
+            
+            <Chip label={"1 match"} size="small" sx={{backgroundColor:"rgb(255,128,0)", color:"white"}}/>
+
+           
+            
+           
+        </CardActions>
+        </Link>
+      </Card>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        </>
+    );
+}

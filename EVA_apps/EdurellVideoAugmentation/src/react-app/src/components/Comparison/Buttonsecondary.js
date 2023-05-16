@@ -18,5 +18,5 @@ export default function Buttonsecondary({AddQueryElement, cs}){
       console.log("SearchButton: ",cs);
       AddQueryElement(cs);
       
-    }}><b>Compare</b></SecondaryColor>
+    }}><b>Search</b></SecondaryColor>
 }

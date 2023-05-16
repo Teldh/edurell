@@ -258,10 +258,10 @@ export default function Filters({ApplyFilters}){
                                     onChange={handleChange1}
                                     aria-label="Platform"
                                     >
-                                    <ToggleButton value="esperti" style={{textTransform: 'none'}}>
+                                    <ToggleButton value="expert" style={{textTransform: 'none'}}>
                                         <Typography variant="body2" display="block" gutterBottom>Esperti</Typography>
                                     </ToggleButton>
-                                    <ToggleButton value="principianti" style={{textTransform: 'none'}}>
+                                    <ToggleButton value="novice" style={{textTransform: 'none'}}>
                                         <Typography variant="body2" display="block" gutterBottom>Principianti</Typography>
                                     </ToggleButton>
                                     </StyledToggleButtonGroup>
@@ -291,7 +291,7 @@ export default function Filters({ApplyFilters}){
                                     </Grid>
                                     <Grid item>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
-                                        · Adatto a:
+                                        · Spiegazione:
                                     </Typography>
                                     </Grid>
                                     
@@ -362,7 +362,7 @@ export default function Filters({ApplyFilters}){
                                     </Grid>
                                     <Grid item>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
-                                        · Adatto a:
+                                        · Tipo di lezione:
                                     </Typography>
                                     </Grid>
                                     

@@ -26,7 +26,10 @@ import Collapse from '@mui/material/Collapse';
 import { useContext } from 'react';
 import { ContextComparison } from './ContextComparison';
 import {TokenContext} from '../account-management/TokenContext';
-
+import {
+  Link,
+  Redirect,
+} from "react-router-dom";
 const ExpandMore = styled((props) => {
     const { expand, ...other } = props;
     return <IconButton {...other} />;
@@ -55,15 +58,16 @@ export default function Videoavailable({titleurl,imageurl,idxurl,concepts,creato
  
     return (
         <>
+       
       <Card elevation={shadow}
             color="primary" 
             sx={{ maxWidth: 250 , border: add?"2px solid #C6EBDC": '0px'}}
             onMouseEnter={()=>setshadow(5)}
             onMouseLeave={()=>setshadow(0)}
-            onClick={()=>setOpen(!open)}
+            onClick={()=>console.log("click")/*THI FOR OPEN THE MODAL BUT NOW ITS CHANGED. OLD CODE. JUST FOR REFERENCE setOpen(!open)*/}
             align="left"
             >
-     
+      <Link className="testText"  numberOfLines={2} to={'/app/'+imageurl+'/'+titleurl}>
         <CardMedia
         sx={{   height: 140,
                 margin: 2,
@@ -87,18 +91,13 @@ export default function Videoavailable({titleurl,imageurl,idxurl,concepts,creato
             
             <Chip label={"Concepts: "+concepts.length} size="small" color="primary"/>
 
-            {
-                add?
-                
-                <Chip color="error" sx={{marginLeft: 'auto'}} size="small" label="remove" onClick={(e)=>{ e.stopPropagation();setAdd(!add);removevideo(idxurl);}} />
-                :
-                
-                <Chip color="success" sx={{marginLeft: 'auto'}} size="small" label="add" onClick={(e)=>{ e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);}} />
-            }
+           
             
            
         </CardActions>
+        </Link>
       </Card>
+     
         {/*start of modal*/}
 
         <Modal
