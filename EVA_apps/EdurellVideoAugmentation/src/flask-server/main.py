@@ -20,6 +20,7 @@ from smtplib import SMTPException, SMTPRecipientsRefused
 import urllib.request
 import json
 import urllib
+import urllib.parse
 
 import data
 import handle_data
@@ -557,22 +558,27 @@ def add_history():
 def get_history():
     student= g.student
     video_title_list = []
+    print("GET HISTORY")
     for i in student.video_history_list:
         video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
+        print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
     return (jsonify({'email': student.email, 'videoHistory' : student.video_history_list, 'videoHistoryTitles': video_title_list}), 201)
 
 
 # used in the function above to get youtube video title based on their id
 def get_video_title_from_url(video_id):
+    print("GET VIDEO: ",video_id)
     params = {"format": "json", "url": "https://www.youtube.com/watch?v=%s" % video_id}
     url = "https://www.youtube.com/oembed"
     query_string = urllib.parse.urlencode(params)
     url = url + "?" + query_string
+    print("url ",url)
 
+    print("dopo")
     with urllib.request.urlopen(url) as response:
         response_text = response.read()
         data = json.loads(response_text.decode())
-
+    
     return data['title']
 
 # return the fragment of a video and their progress, can be taken from the Video mongodb collection or from the user's history if he already watched it
