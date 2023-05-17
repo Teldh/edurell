@@ -58,7 +58,7 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
     const [expanded, setExpanded] = useState(false);
     const [add, setAdd] = useState(false);
     const [hoverm, setHoverm] = useState(false);
-
+    
     const [anchorEl, setAnchorEl] = useState(null);
     const handlePopoverOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -212,36 +212,64 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
             
             
             <Chip label={"1 match"} size="small" sx={{backgroundColor:"rgb(255,128,0)", color:"white"}}/>
-
-           <Box
-                sx={{marginLeft: 'auto',
-                    backgroundColor:'#B798f8', 
-                    color:"white",
-                    borderRadius:'20px 0 0 0',
-                    width:'auto',
-                    maxWidth:'200px',
-                    height:"auto"}}
-                onMouseEnter={()=>setHoverm(true)}
-                onMouseLeave={()=>setHoverm(false)}
+            {!add?
+            <>
+                <Box
+                        sx={{marginLeft: 'auto',
+                            backgroundColor:'#B798f8', 
+                            color:"white",
+                            borderRadius:'20px 0 0 0',
+                            width:'auto',
+                            maxWidth:'200px',
+                            height:"auto"}}
+                        onMouseEnter={()=>setHoverm(true)}
+                        onMouseLeave={()=>setHoverm(false)}
+                        onClick={e => {e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);}}
                 
-           
-           >
-            {
-                hoverm?
-                <>
-                <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Aggiungi</Typography>
-                <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>al confronto</Typography>
-                </>
-                :
-                <>
-                <Typography variant="body2" display="block" sx={{m:0, p:0.5, pl:3, pr:3}} gutterBottom>VS</Typography>
-                </>
+                >
+                    {
+                        hoverm?
+                        <>
+                        <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Aggiungi</Typography>
+                        <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>al confronto</Typography>
+                        </>
+                        :
+                        <>
+                        <Typography variant="body2" display="block" sx={{m:0, p:0.5, pl:3, pr:3}} gutterBottom>VS</Typography>
+                        </>
+                    }
+                    
+                    
+                    </Box>
+            </>
+            :
+            <>
+                    <Box
+                    sx={{marginLeft: 'auto',
+                        backgroundColor:'grey', 
+                        color:"black",
+                        borderRadius:'20px 0 0 0',
+                        width:'auto',
+                        maxWidth:'200px',
+                        height:"auto"}}
+                    onMouseEnter={()=>setHoverm(true)}
+                    onMouseLeave={()=>setHoverm(false)}
+                    
+            
+                    >
+                    
+                        <>
+                        <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Hai gia aggiunto</Typography>
+                        <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>questo video</Typography>
+                        </>
+                        
+                
+                    
+                    
+                    
+                    </Box>
+            </>
             }
-            
-            
-            </Box>
-            
-            
         </CardActions>
      
       </Card>
@@ -262,6 +290,7 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
             justifyContent="center"
             alignItems="center"
             id="1 COLONNA CENTRALE DATI"
+            sx={{p:5}}
             >
                 <Grid item xs={2}></Grid>
                 <Grid item>
@@ -637,33 +666,64 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
                             id="BOTTONE AGIGUNTA"
                             >
                                 <Grid item>
-                                    <Box
-                                    sx={{marginLeft: 'auto',
-                                        backgroundColor:'#B798f8', 
-                                        color:"white",
-                                        borderRadius:'20px 0 0 0',
-                                        width:'auto',
-                                        maxWidth:'200px',
-                                        height:"auto"}}
-                                    onMouseEnter={()=>setHoverm(true)}
-                                    onMouseLeave={()=>setHoverm(false)}
-                            
-                    
-                                    >
-                                        {
-                                            hoverm?
-                                            <>
-                                            <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Aggiungi</Typography>
-                                            <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>al confronto</Typography>
-                                            </>
-                                            :
-                                            <>
-                                            <Typography variant="body2" display="block" sx={{m:0, p:0.5, pl:3, pr:3}} gutterBottom>VS</Typography>
-                                            </>
-                                        }
+                                    {!add?
+                                        <>
+                                            <Box
+                                                    sx={{marginLeft: 'auto',
+                                                        backgroundColor:'#B798f8', 
+                                                        color:"white",
+                                                        borderRadius:'20px 0 0 0',
+                                                        width:'auto',
+                                                        maxWidth:'200px',
+                                                        height:"auto"}}
+                                                    onMouseEnter={()=>setHoverm(true)}
+                                                    onMouseLeave={()=>setHoverm(false)}
+                                                    onClick={e => {e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);}}
+                                            
+                                            >
+                                                {
+                                                    hoverm?
+                                                    <>
+                                                    <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Aggiungi</Typography>
+                                                    <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>al confronto</Typography>
+                                                    </>
+                                                    :
+                                                    <>
+                                                    <Typography variant="body2" display="block" sx={{m:0, p:0.5, pl:3, pr:3}} gutterBottom>VS</Typography>
+                                                    </>
+                                                }
+                                                
+                                                
+                                                </Box>
+                                        </>
+                                        :
+                                        <>
+                                                <Box
+                                                sx={{marginLeft: 'auto',
+                                                    backgroundColor:'grey', 
+                                                    color:"black",
+                                                    borderRadius:'20px 0 0 0',
+                                                    width:'auto',
+                                                    maxWidth:'200px',
+                                                    height:"auto"}}
+                                                onMouseEnter={()=>setHoverm(true)}
+                                                onMouseLeave={()=>setHoverm(false)}
+                                                
                                         
-                                        
-                                    </Box>
+                                                >
+                                                
+                                                    <>
+                                                    <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Hai gia aggiunto</Typography>
+                                                    <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>questo video</Typography>
+                                                    </>
+                                                    
+                                            
+                                                
+                                                
+                                                
+                                                </Box>
+                                        </>
+                                    }
                                 </Grid>
                             </Grid>
                         </Grid>
