@@ -31,9 +31,26 @@ import {
   Link,
   Redirect,
 } from "react-router-dom";
+import HelpIcon from '@mui/icons-material/Help';
+import Popover from '@mui/material/Popover';
 import { borders } from '@mui/system';
 //style={{position:'fixed'}}
+const ExpandMore = styled((props) => {
+    const { expand, ...other } = props;
+    return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+    transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+    margin: '0',
+    padding:'0',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shortest,
+    }),
+}));
 export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator}){
+    const [expanded2, setExpanded2] = useState(false);
+    const handleExpandClick2 = () => {
+        setExpanded2(!expanded2);
+    };
     const addvideo = useContext(ContextComparison)[0];
     const removevideo = useContext(ContextComparison)[1];
     const [shadow, setshadow] = useState(0);
@@ -41,6 +58,15 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
     const [expanded, setExpanded] = useState(false);
     const [add, setAdd] = useState(false);
     const [hoverm, setHoverm] = useState(false);
+
+    const [anchorEl, setAnchorEl] = useState(null);
+    const handlePopoverOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handlePopoverClose = () => {
+        setAnchorEl(null);
+    };
+    const opens = Boolean(anchorEl);
 
     //const title="Kurzesgast - The power of loveKurzesgast ";
     const handleExpandClick = () => {
@@ -243,7 +269,7 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
                     container
                     direction="column"
                     justifyContent="center"
-                    alignItems="center"
+                    alignItems="stretch"
                     id="2 SOPRA DATI SOTTO BOTTONE"
                     >
                         <Grid item>
@@ -262,7 +288,7 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
                                     container
                                     direction="column"
                                     justifyContent="center"
-                                    alignItems="flex-start"
+                                    lignItems="stretch"
                                     id="4 ROW TITOLO DATI BOTTONE"
                                     >
                                         <Grid item sx={{mb:3}}>
@@ -510,7 +536,85 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
                                             </Grid>
                                         </Grid>
                                         <Grid item>
-
+                                            <Box sx={{borderTop: 1,borderBottom: 1, borderColor:"rgb(255,168,37)", m:2}}>
+                                            <Grid
+                                            container
+                                            direction="column"
+                                            justifyContent="center"
+                                            alignItems="stretch"
+                                            id="COLLAPSE"
+                                            onClick={handleExpandClick2}
+                                            >
+                                                <Grid item>
+                                                    <Grid
+                                                    container
+                                                    direction="row"
+                                                    justifyContent="space-between"
+                                                    alignItems="center"
+                                                    id="SX NOME DX FRECCIA PER GIU"
+                                                    >
+                                                        <Grid item>
+                                                            <Grid
+                                                            container
+                                                            direction="row"
+                                                            justifyContent="flex-start"
+                                                            alignItems="center"
+                                                            >
+                                                                <Grid item>
+                                                                    <Typography variant="caption" display="block" gutterBottom>
+                                                                        Guarda la mappa concettuale
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    <HelpIcon
+                                                                    onMouseEnter={handlePopoverOpen}
+                                                                    onMouseLeave={handlePopoverClose}
+                                                                    sx={{color:"rgb(255,168,37)"}}/>
+                                                                </Grid>
+                                                                            <Popover 
+                                                                            sx={{
+                                                                                pointerEvents: 'none',
+                                                                            }}
+                                                                            open={opens}
+                                                                            anchorEl={anchorEl}
+                                                                            anchorOrigin={{
+                                                                                vertical: 'bottom',
+                                                                                horizontal: 'left',
+                                                                            }}
+                                                                            transformOrigin={{
+                                                                                vertical: 'top',
+                                                                                horizontal: 'right',
+                                                                            }}
+                                                                            onClose={handlePopoverClose}
+                                                                            disableRestoreFocus
+                                                                            >
+                                                                            <Box sx={{ width: '100%', maxWidth: 200 }}>
+                                                                                <Typography variant="body2" gutterBottom>
+                                                                                    Questa sezione mostra la mappa concettuale per mostrare come il concetto che hai cercato si lega agli altri concetti del video
+                                                                                </Typography>
+                                                                            </Box>
+                                                                            </Popover>
+                                                            </Grid>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <ExpandMore
+                                                            expand={expanded2}
+                                                    
+                                                            aria-expanded={expanded2}
+                                                            aria-label="show more"
+                                                            >
+                                                                <ExpandMoreIcon />
+                                                            </ExpandMore>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid item>
+                                                <Collapse in={expanded2} timeout="auto" unmountOnExit>
+                                                                            INSERT CONCEPTUAL MAP
+                                                    </Collapse>
+                                                </Grid>
+                                            </Grid>
+                                            </Box>
                                         </Grid>
                                     </Grid>
                                 </Grid>
@@ -525,7 +629,43 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
 
                         {/* DA QUI SOTTO CE BOTTONE */}
                         <Grid item>
-
+                            <Grid
+                            container
+                            direction="row"
+                            justifyContent="flex-end"
+                            alignItems="center"
+                            id="BOTTONE AGIGUNTA"
+                            >
+                                <Grid item>
+                                    <Box
+                                    sx={{marginLeft: 'auto',
+                                        backgroundColor:'#B798f8', 
+                                        color:"white",
+                                        borderRadius:'20px 0 0 0',
+                                        width:'auto',
+                                        maxWidth:'200px',
+                                        height:"auto"}}
+                                    onMouseEnter={()=>setHoverm(true)}
+                                    onMouseLeave={()=>setHoverm(false)}
+                            
+                    
+                                    >
+                                        {
+                                            hoverm?
+                                            <>
+                                            <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Aggiungi</Typography>
+                                            <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>al confronto</Typography>
+                                            </>
+                                            :
+                                            <>
+                                            <Typography variant="body2" display="block" sx={{m:0, p:0.5, pl:3, pr:3}} gutterBottom>VS</Typography>
+                                            </>
+                                        }
+                                        
+                                        
+                                    </Box>
+                                </Grid>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
