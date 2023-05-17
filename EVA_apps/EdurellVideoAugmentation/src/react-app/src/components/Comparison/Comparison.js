@@ -238,12 +238,37 @@ export default function Comparison(){
           }else if(concept.length!=querylist.length){
               setNomatch(false);
           }
-          
+
+
+  
       
           setCatalog(newcatalog)
           
 
       }
+    }
+
+    function ComputeDuration(start,end){
+      let duration=0
+      for(let i=0; i<start.length;i++){
+        const time1 = end[i] .split("^^")[0];
+        const time2 = start[i] .split("^^")[0];
+
+        let [hours1, minutes1, seconds1] = time1.split(":");
+        seconds1=Math.floor(seconds1)
+        seconds1=seconds1+hours1*3600
+        seconds1=seconds1+minutes1*60
+
+        let [hours2, minutes2, seconds2] = time2.split(":");
+        seconds2=Math.floor(seconds2)
+        seconds2=seconds2+hours2*3600
+        seconds2=seconds2+minutes2*60
+
+        let resultseconds = Math.abs(seconds2-seconds1);
+        duration = duration+resultseconds;
+      }
+
+        return duration
     }
 
     function ApplyFilters(listfilters){
@@ -256,83 +281,114 @@ export default function Comparison(){
       //concettiextraperfiltri
       // const [catalogFilter, SetCatalogFilter]=useState([])
 
-      //adatto a
-      let newcatalog=null;
-      if(comparisonfilter[0] == "novice"){
-        //filtro, tutti i preconcetti concenuti nei concetti
-        newcatalog = catalog.filter(video=>{
-          console.log("NOVICE ",video.extracted_keywords," ",catalogFilter[video.video_id]["prerequisite"]);
-          return checker(video.extracted_keywords, catalogFilter[video.video_id]["prerequisite"])});
-      //  SetCatalogAfterFilter(newcatalog);
-      }else if(comparisonfilter[0] == "expert"){
-        newcatalog = catalog.filter(video=>{
-          console.log("EXPERT ",video.extracted_keywords," ",catalogFilter[video.video_id]["prerequisite"]);
-          return !checker(video.extracted_keywords, catalogFilter[video.video_id]["prerequisite"]);
-        })
+       //applicare filtri
+       let catalogfiltered=null;
+        console.log("inizio filtri: ",listfilters)
+        console.log("applyfilter catalogextra: ",catalogExtra)
+       if(listfilters[0] == "novice"){
+         //filtro, tutti i preconcetti concenuti nei concetti
+         catalogfiltered = catalog.filter(video=>{
+           console.log("NOVICE ",video.extracted_keywords," ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["list_preconcept"]);
+           if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["list_preconcept"].length == 0){
+            return true;
+           }
+           return checker(video.extracted_keywords, catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["list_preconcept"])});
+       //  SetCatalogAfterFilter(newcatalog);
+       }else if(listfilters[0] == "expert"){
+         catalogfiltered = catalog.filter(video=>{
+           console.log("EXPERT ",video.extracted_keywords," ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["list_preconcept"]);
+           if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["list_preconcept"].length == 0){
+            return false;
+           }
+           return !checker(video.extracted_keywords, catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["list_preconcept"]);
+         })
        // SetCatalogAfterFilter(newcatalog);
-      }
+       }
 
-      //spiegazione
-      if(comparisonfilter[1] == "essential"){
-        newcatalog = catalog.filter(video=>{
-          console.log("essential ",catalogFilter[video.video_id]["typedef"]);
-          return !checker(catalogFilter[video.video_id]["typedef"],"conceptExpansion");
-        })
-      ///  SetCatalogAfterFilter(newcatalog);
+       //spiegazione
+       if(listfilters[1] == "essential"){
+         catalogfiltered = catalog.filter(video=>{
+           console.log("essential ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["explain"]);
+           //if conceptexpansion array is empty, return always true
+           if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["explain"].length == 0){
+            return true;
+           }
+           return !checker(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["explain"],"conceptExpansion");
+         })
+       ///  SetCatalogAfterFilter(newcatalog);
 
-      }else if(comparisonfilter[1]=="detailed"){
-        newcatalog = catalog.filter(video=>{
-          console.log("detailed ",catalogFilter[video.video_id]["typedef"]);
-          return checker(catalogFilter[video.video_id]["typedef"],"conceptExpansion");
-        })
+       }else if(listfilters[1]=="detailed"){
+         catalogfiltered = catalog.filter(video=>{
+           console.log("detailed ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["explain"]);
+           if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["explain"].length == 0){
+            return true;
+           }
+           return checker(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["explain"],"conceptExpansion");
+         })
        // SetCatalogAfterFilter(newcatalog);
-      }
+       }
 
-      //tipo di lezione
-      if(comparisonfilter[2] == "withslide"){
-        newcatalog = catalog.filter(video=>{
-          console.log("wihslide ",catalogFilter[video.video_id]["video_slidishness"]);
-          return catalogFilter[video.video_id]["video_slidishness"] > 0.1? true:false;
-        })
+       //tipo di lezione
+       if(listfilters[2] == "withslide"){
+         catalogfiltered = catalog.filter(video=>{
+           console.log("wihslide ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["video_slidishness"]);
+           return catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["video_slidishness"] > 0.1? true:false;
+         })
        // SetCatalogAfterFilter(newcatalog);
-      }else if(comparisonfilter[2] == "withoutslide"){
-        newcatalog = catalog.filter(video=>{
-          console.log("wihslide ",catalogFilter[video.video_id]["video_slidishness"]);
-          return catalogFilter[video.video_id]["video_slidishness"] <= 0.1? true:false;
-        })
+       }else if(listfilters[2] == "withoutslide"){
+         catalogfiltered = catalog.filter(video=>{
+           console.log("wihslide ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["video_slidishness"]);
+           return catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["video_slidishness"] <= 0.1? true:false;
+         })
        // SetCatalogAfterFilter(newcatalog);
-      }
+       }
 
-      //definizione
-      if(comparisonfilter[3]=="less4"){
+       //definizione
+       if(listfilters[3]=="less4"){
+          catalogfiltered = catalog.filter(video=>{
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_endtime"]
+            return ComputeDuration(endtime, starttime) < 240
+          });
+       }else if(listfilters[3]="4to20"){
+          catalogfiltered = catalog.filter(video=>{
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_endtime"]
+            return ComputeDuration(endtime, starttime) >= 240 || ComputeDuration(endtime, starttime) <= 1200
+          });
+       }else if(listfilters[3]="greater20"){
+          catalogfiltered = catalog.filter(video=>{
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_endtime"]
+            return ComputeDuration(endtime, starttime) > 1200
+          });
+       }
 
-      }else if(comparisonfilter[3]="4to20"){
+       //approfondimento
+       if(listfilters[4]=="less4"){
+          catalogfiltered = catalog.filter(video=>{
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["derivatedconcept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["derivatedconcept_endtime"]
+            return ComputeDuration(endtime, starttime) < 240
+          });
+       }else if(listfilters[4]="4to20"){
+          catalogfiltered = catalog.filter(video=>{
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["derivatedconcept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["derivatedconcept_endtime"]
+            return ComputeDuration(endtime, starttime) >= 240 || ComputeDuration(endtime, starttime) <= 1200
+          });
+       }else if(listfilters[4]="greater20"){
 
-      }else if(comparisonfilter[3]="greater20"){
+       }
 
-      }
+       //video intero
+       if(listfilters[5]=="less4"){
 
-      //approfondimento
-      if(comparisonfilter[4]=="less4"){
+       }else if(listfilters[5]="4to20"){
 
-      }else if(comparisonfilter[4]="4to20"){
+       }else if(listfilters[5]="greater20"){
 
-      }else if(comparisonfilter[4]="greater20"){
-
-      }
-
-      //video intero
-      if(comparisonfilter[5]=="less4"){
-
-      }else if(comparisonfilter[5]="4to20"){
-
-      }else if(comparisonfilter[5]="greater20"){
-
-      }
-
-
-
-
+       }
     }
 
   

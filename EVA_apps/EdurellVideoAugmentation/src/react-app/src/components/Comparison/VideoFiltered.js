@@ -72,7 +72,7 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
     const handleExpandClick = () => {
       setExpanded(!expanded);
     };
-    console.log("videofitlered ",conceptextra, " ", conceptextra[0])
+    //console.log("videofitlered ",conceptextra, " ", conceptextra[0])
     let duration=0
     let approfondimenti=0
     let duratatot=0
@@ -84,14 +84,14 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
     }
     if(tottime != undefined){
         let hours = Math.floor(tottime /3600)
-        console.log("hour: ",hours," remain: ",Math.abs(hours - (tottime /3600)))
+        //console.log("hour: ",hours," remain: ",Math.abs(hours - (tottime /3600)))
         let remainminutes = Math.abs(hours - (tottime /3600))
         let minutes = Math.floor(remainminutes * 60);
-        console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
+        //console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
         let seconds = Math.abs(minutes - (remainminutes * 60))
         seconds = seconds*60
-        console.log("seconds: ",seconds);
-        console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
+        //console.log("seconds: ",seconds);
+        //console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
         duratatot = hours+":"+minutes+":"+Math.floor(seconds)
     }
 
@@ -103,19 +103,19 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
             let [hours1, minutes1, seconds1] = time1.split(":");
             seconds1=Math.floor(seconds1)
             seconds1=seconds1+hours1*3600
-            console.log("hours1: ",hours1*3600," ",seconds1)
+            //console.log("hours1: ",hours1*3600," ",seconds1)
             seconds1=seconds1+minutes1*60
-            console.log("minutes: ",minutes1*60," ",seconds1)
+            //console.log("minutes: ",minutes1*60," ",seconds1)
     
             let [hours2, minutes2, seconds2] = time2.split(":");
             seconds2=Math.floor(seconds2)
             seconds2=seconds2+hours2*3600
-            console.log("hours2: ",hours2*3600," ",seconds2)
+            //console.log("hours2: ",hours2*3600," ",seconds2)
             seconds2=seconds2+minutes2*60
-            console.log("hours2: ",minutes2*60," ",seconds2)
+            //console.log("hours2: ",minutes2*60," ",seconds2)
     
             let resultseconds = Math.abs(seconds2-seconds1);
-            console.log("difference: ",resultseconds);
+            //console.log("difference: ",resultseconds);
           
        
     
@@ -125,14 +125,14 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
 
         
         let hours = Math.floor(duration /3600)
-        console.log("hour: ",hours," remain: ",Math.abs(hours - (duration /3600)))
+        //console.log("hour: ",hours," remain: ",Math.abs(hours - (duration /3600)))
         let remainminutes = Math.abs(hours - (duration /3600))
         let minutes = Math.floor(remainminutes * 60);
-        console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
+        //console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
         let seconds = Math.abs(minutes - (remainminutes * 60))
         seconds = seconds*60
-        console.log("seconds: ",seconds);
-        console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
+       /// console.log("seconds: ",seconds);
+       // console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
         duration = hours+":"+minutes+":"+Math.floor(seconds)
     }
 
@@ -146,19 +146,19 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
             let [hours1, minutes1, seconds1] = time1.split(":");
             seconds1=Math.floor(seconds1)
             seconds1=seconds1+hours1*3600
-            console.log("hours1: ",hours1*3600," ",seconds1)
+            //console.log("hours1: ",hours1*3600," ",seconds1)
             seconds1=seconds1+minutes1*60
-            console.log("minutes: ",minutes1*60," ",seconds1)
+            //console.log("minutes: ",minutes1*60," ",seconds1)
     
             let [hours2, minutes2, seconds2] = time2.split(":");
             seconds2=Math.floor(seconds2)
             seconds2=seconds2+hours2*3600
-            console.log("hours2: ",hours2*3600," ",seconds2)
+            //console.log("hours2: ",hours2*3600," ",seconds2)
             seconds2=seconds2+minutes2*60
-            console.log("hours2: ",minutes2*60," ",seconds2)
+            //console.log("hours2: ",minutes2*60," ",seconds2)
     
             let resultseconds = Math.abs(seconds2-seconds1);
-            console.log("difference: ",resultseconds);
+            //console.log("difference: ",resultseconds);
           
        
     
@@ -168,14 +168,14 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
         }
 
         let hours = Math.floor(approfondimenti /3600)
-        console.log("hour: ",hours," remain: ",Math.abs(hours - (approfondimenti /3600)))
+        //console.log("hour: ",hours," remain: ",Math.abs(hours - (approfondimenti /3600)))
         let remainminutes = Math.abs(hours - (approfondimenti /3600))
         let minutes = Math.floor(remainminutes * 60);
-        console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
+        //console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
         let seconds = Math.abs(minutes - (remainminutes * 60))
         seconds = seconds*60
-        console.log("seconds: ",seconds);
-        console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
+       // console.log("seconds: ",seconds);
+       // console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
         approfondimenti = hours+":"+minutes+":"+Math.floor(seconds)
 
     }
