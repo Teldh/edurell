@@ -11,12 +11,14 @@ import InputAdornment from '@mui/material/InputAdornment'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import Popper from '@mui/material/Popper';
 import Stack from '@mui/material/Stack';
+import { useContext } from 'react';
+import { ContextComparison } from './ContextComparison';
 export default function Queryinput({listconcepts,AddQueryElement, nomatch, location}){
     const options = listconcepts;//['Option 1', 'Option 2', 'Option 3', 'Option 4'];
     const [valac, SetValac] = useState([location]);
     console.log("queryinput: ",location);
   
-
+    const setSearchFilterClicked = useContext(ContextComparison)[2];
 
 
     return(<>{
@@ -60,7 +62,8 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
             sx={{ width: '500px' }}
             onChange={(event,value)=>{
                 SetValac(value)
-                console.log("auto: ",value)
+                console.log("autocomplete: ",value)
+                setSearchFilterClicked(false)
             }}
          
         
@@ -107,7 +110,8 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
                         sx={{ width: '500px' }}
                         onChange={(event,value)=>{
                             SetValac(value)
-                            console.log("auto: ",valac)
+                            console.log("autocomplete: ",value)
+                            setSearchFilterClicked(false)
                         }}
                     
                     />

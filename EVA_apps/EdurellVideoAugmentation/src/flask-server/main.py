@@ -565,13 +565,19 @@ def get_history():
     video_title_list = []
     print("GET HISTORY")
     for i in student.video_history_list:
+        video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
+    return (jsonify({'email': student.email, 'videoHistory' : student.video_history_list, 'videoHistoryTitles': video_title_list}), 201)
+"""
+  video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
+        print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
+
+
         try:
             video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
             print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
         except Exception:
             pass
-    return (jsonify({'email': student.email, 'videoHistory' : student.video_history_list, 'videoHistoryTitles': video_title_list}), 201)
-
+"""
 
 # used in the function above to get youtube video title based on their id
 def get_video_title_from_url(video_id):
@@ -881,7 +887,7 @@ def ConceptVideoData(video_id, concept_searched):
     ## 1. search newest annotation
     ### 2. combine every annotation of a video into a unique graph and make the query of that
     cursor = collection.find({"video_id":video_id})
-    optiongraph = 1
+    optiongraph = 2
     gr=Graph()
 
 

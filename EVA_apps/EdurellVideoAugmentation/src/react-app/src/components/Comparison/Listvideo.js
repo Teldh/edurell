@@ -31,6 +31,7 @@ export default function Listvideo({catalogExtra, catalog,loading, searchFilterCl
             catalog.map(video=>{
                 console.log("LISTVIDEO: ",catalogExtra)
                 let singlecatExtra = catalogExtra.filter(extra =>video.video_id == extra.video_id)
+                console.log(video.video_id," extra ",singlecatExtra)
                 return(
                     
                     <Grid key={video._id.$oid} item xs={12} xl={2} md={3} >

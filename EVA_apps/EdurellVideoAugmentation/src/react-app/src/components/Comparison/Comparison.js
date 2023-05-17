@@ -164,6 +164,23 @@ export default function Comparison(){
         }
       }, [loading]);
 
+      useEffect(()=>{
+
+        if(searchFilterClicked){
+          SetCatalogExtra(catalogExtra=>[])
+          console.log("queryextra use effect ",catalog)
+          let asd = catalogExtra
+          catalog.map(video=>{
+          console.log("sto facendo query")
+          
+            
+            QueryConceptExtra(video.video_id, querylist)
+          })
+        
+          
+        }
+      },[searchFilterClicked])
+
 
     //OLD, sort the video based on concept on query
     function AddQueryElementOLD(concept){
@@ -178,7 +195,7 @@ export default function Comparison(){
             setQueryList(newquerylist);
             console.log("newquerylist: ",newquerylist)
             
-            
+            setSearchFilterClicked(true)
             let newcatalog = catalog.filter(video=>checker(video.extracted_keywords,concept));
             if(concept.length>0 && newcatalog.length==0){
                 setNomatch(true)
@@ -194,14 +211,17 @@ export default function Comparison(){
     function AddQueryElement(concept){
       //attiva la lista video selected
       SetSearchClicked(true);
-      console.log(catalog," ",catalogoriginal)
+      console.log("DOPOCLICKBUTTON: ",searchFilterClicked)
       //SetCatalogOriginal(catalog);
       //setCatalog(catalogoriginal);
       //bug resettare la querylist coi elementi aggiornati
+      console.log(catalog," ",catalogoriginal)
       if(catalog.length > 0 ){
           setCatalog(catalogoriginal);
-          if(concept.length==0){
-              setSearchFilterClicked(false);
+         
+          if(concept[0]==null){
+              //setSearchFilterClicked(false);
+              console.log("addqueryelement return")
               return;
           }
           setSearchFilterClicked(true);
@@ -218,10 +238,7 @@ export default function Comparison(){
           }else if(concept.length!=querylist.length){
               setNomatch(false);
           }
-          SetCatalogExtra([])
-          newcatalog.map(video=>{
-            QueryConceptExtra(video.video_id, concept)
-          })
+          
       
           setCatalog(newcatalog)
           
@@ -351,19 +368,31 @@ export default function Comparison(){
     //query to the extra data for a specific concept
     async function QueryConceptExtra(videoid, concept) {
       console.log("START queryconceptextra");
-      const risposta = await fetch('/api/ConceptVideoData/'+videoid+"/"+concept, {
+      let risposta=null
+      try{
+
+       risposta = await fetch('/api/ConceptVideoData/'+videoid+"/"+concept, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Basic ' + btoa(context.token+':unused')
         },
       })
+      }
+      catch(err){
+        console.log(err)
+      }
+      if(risposta===undefined){
+        alert("problem  qeury")
+        return
+      }else{
+        var data = await risposta.json();
+        console.log("data catalogextra: ",data);
+        SetCatalogExtra(catalogExtra=>[...catalogExtra,data]);
+        console.log("catalogextra: ",catalogExtra)
+      }
+      
 
-      var data = await risposta.json();
-      console.log("risposta: ",risposta);
-      console.log("data: ",data);
-      SetCatalogExtra([...[data]]);
-      console.log("CATALOGEXTRA: ",catalogExtra);
     }
 
     const theme = createTheme({
@@ -394,7 +423,7 @@ export default function Comparison(){
         <ThemeProvider theme={theme}>
         <StyledEngineProvider injectFirst> {/* to override the default style with your custom css */}
         <Header page="dashboard" login={nameSurname}/>
-        <ContextComparison.Provider value={[AddVideo,RemoveVideo]}>
+        <ContextComparison.Provider value={[AddVideo,RemoveVideo,setSearchFilterClicked]}>
 
             <>
             <Querybar ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
