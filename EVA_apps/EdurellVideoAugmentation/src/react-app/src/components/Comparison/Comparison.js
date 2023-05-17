@@ -280,7 +280,7 @@ export default function Comparison(){
 
       //concettiextraperfiltri
       // const [catalogFilter, SetCatalogFilter]=useState([])
-
+      
        //applicare filtri
        let catalogfiltered=null;
         console.log("inizio filtri: ",listfilters)
@@ -305,6 +305,8 @@ export default function Comparison(){
        // SetCatalogAfterFilter(newcatalog);
        }
 
+       setCatalog(catalog=>catalogfiltered)
+
        //spiegazione
        if(listfilters[1] == "essential"){
          catalogfiltered = catalog.filter(video=>{
@@ -327,6 +329,7 @@ export default function Comparison(){
          })
        // SetCatalogAfterFilter(newcatalog);
        }
+       setCatalog(catalog=>catalogfiltered)
 
        //tipo di lezione
        if(listfilters[2] == "withslide"){
@@ -342,53 +345,145 @@ export default function Comparison(){
          })
        // SetCatalogAfterFilter(newcatalog);
        }
+       setCatalog(catalog=>catalogfiltered)
 
+        console.log("definizione")
        //definizione
        if(listfilters[3]=="less4"){
           catalogfiltered = catalog.filter(video=>{
-            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_starttime"]
-            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_endtime"]
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["concept_endtime"]
+            console.log("starttime: ",starttime, " endtime: ",endtime," catalogextra: ",catalogExtra)
             return ComputeDuration(endtime, starttime) < 240
           });
        }else if(listfilters[3]="4to20"){
           catalogfiltered = catalog.filter(video=>{
-            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_starttime"]
-            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_endtime"]
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["concept_endtime"]
+            console.log("starttime: ",starttime, " endtime: ",endtime," catalogextra: ",catalogExtra," ",listfilters)
             return ComputeDuration(endtime, starttime) >= 240 || ComputeDuration(endtime, starttime) <= 1200
           });
        }else if(listfilters[3]="greater20"){
           catalogfiltered = catalog.filter(video=>{
-            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_starttime"]
-            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["concept_endtime"]
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["concept_endtime"]
+            console.log("starttime: ",starttime, " endtime: ",endtime)
             return ComputeDuration(endtime, starttime) > 1200
           });
        }
+       setCatalog(catalog=>catalogfiltered)
 
+        console.log("approfondimento")
        //approfondimento
        if(listfilters[4]=="less4"){
           catalogfiltered = catalog.filter(video=>{
-            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["derivatedconcept_starttime"]
-            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["derivatedconcept_endtime"]
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["derivatedconcept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["derivatedconcept_endtime"]
+            console.log("starttime: ",starttime, " endtime: ",endtime)
             return ComputeDuration(endtime, starttime) < 240
           });
        }else if(listfilters[4]="4to20"){
           catalogfiltered = catalog.filter(video=>{
-            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["derivatedconcept_starttime"]
-            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video,video_id)["derivatedconcept_endtime"]
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["derivatedconcept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["derivatedconcept_endtime"]
+            console.log("starttime: ",starttime, " endtime: ",endtime)
             return ComputeDuration(endtime, starttime) >= 240 || ComputeDuration(endtime, starttime) <= 1200
           });
        }else if(listfilters[4]="greater20"){
-
+          catalogfiltered = catalog.filter(video=>{
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["derivatedconcept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["derivatedconcept_endtime"]
+            console.log("starttime: ",starttime, " endtime: ",endtime)
+            return ComputeDuration(endtime, starttime) > 1200
+          });
        }
+       setCatalog(catalog=>catalogfiltered)
 
+        console.log("video intero")
        //video intero
        if(listfilters[5]=="less4"){
-
+          catalogfiltered = catalog.filter(video=>video.duration < 240)
        }else if(listfilters[5]="4to20"){
-
+          catalogfiltered = catalog.filter(video=>video.duration >= 240 || video.duration < 1200)
        }else if(listfilters[5]="greater20"){
-
+          catalogfiltered = catalog.filter(video=>video.duration > 1200)
        }
+       setCatalog(catalog=>catalogfiltered)
+
+       console.log("sort")
+       if(listfilters[6]=="recent"){
+          catalogfiltered = catalog.sort(
+            function(a,b){
+              let date1=catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)["created"];
+              let date2=catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id)["created"];
+              if(date1 >date2){
+                return 1;
+              }else if(date2 > date1){
+                return -1;
+              }else{
+                return 0;
+              }
+            }
+          )
+       }else if(listfilters[6]=="videolength"){
+          catalogfiltered = catalog.sort(
+              function(a,b){
+                if(a.duration > b.duration){
+                  return 1;
+                }else if(a.duration < b.duration){
+                  return -1;
+                }else{
+                  return 0;
+                }
+              }
+
+
+
+          )
+       }else if(listfilters[6]=="deflength"){
+        catalogfiltered = catalog.sort(
+          function(a,b){
+            let start1=catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)["concept_starttime"];
+            let end1=catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)["concept_endtime"];
+            let duration1 = ComputeDuration(end1,start1)
+
+            let start2=catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id)["concept_starttime"];
+            let end2=catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id)["concept_endtime"];
+            let duration2 = ComputeDuration(end2,start2)
+            if(duration1 >duration2){
+              return 1;
+            }else if(duration2 > duration1){
+              return -1;
+            }else{
+              return 0;
+            }
+          }
+        )
+
+       }else if(listfilters[6]=="detailedlength"){
+        catalogfiltered = catalog.sort(
+          function(a,b){
+            let start1=catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)["derivatedconcept_starttime"];
+            let end1=catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)["derivatedconcept_endtime"];
+            let duration1 = ComputeDuration(end1,start1)
+
+            let start2=catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id)["derivatedconcept_starttime"];
+            let end2=catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id)["derivatedconcept_endtime"];
+            let duration2 = ComputeDuration(end2,start2)
+            if(duration1 >duration2){
+              return 1;
+            }else if(duration2 > duration1){
+              return -1;
+            }else{
+              return 0;
+            }
+          }
+        )
+       }
+       setCatalog(catalog=>catalogfiltered)
+
+
+
     }
 
   

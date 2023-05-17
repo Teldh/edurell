@@ -947,7 +947,35 @@ def ConceptVideoData(video_id, concept_searched):
             # initialize conceptVocabulary for the query
             gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
 
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------QUERYCREATED-----------------------------------------------------------------
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    qr = """
+                PREFIX oa: <http://www.w3.org/ns/oa#>
+                PREFIX edu: <https://teldh.github.io/edurell#>
+                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                PREFIX dcterms: <http://purl.org/dc/terms/>
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
+                SELECT DISTINCT ?created
+                WHERE{
+
+
+                        ?who oa:motivatedBy oa:describing.
+                        ?who dcterms:created ?created.
+                }
+
+
+    """
+    qres = gr.query(qr)
+    print("query created")
+    print("qres: ",len(qres)," ",qr)
+    for row in qres:
+        print("_________________________________________")
+        print(row['created'])
+        result['created']=row['created']
+
+    print(result)
 
 
     ## --------------------------------------------------------------------------------------------------------------------------------------
