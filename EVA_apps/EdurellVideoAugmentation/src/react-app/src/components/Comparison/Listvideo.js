@@ -10,7 +10,7 @@ import VideoFiltered from "./VideoFiltered.js"
 import {TokenContext} from '../account-management/TokenContext';
 import { useContext } from 'react';
 
-export default function Listvideo({catalog,loading, searchFilterClicked, catalogoriginal}){
+export default function Listvideo({catalogExtra, catalog,loading, searchFilterClicked, catalogoriginal}){
     
     
     const context = useContext(TokenContext);
@@ -29,11 +29,12 @@ export default function Listvideo({catalog,loading, searchFilterClicked, catalog
               :
             searchFilterClicked?
             catalog.map(video=>{
-          
+                console.log("LISTVIDEO: ",catalogExtra)
+                let singlecatExtra = catalogExtra.filter(extra =>video.video_id == extra.video_id)
                 return(
                     
                     <Grid key={video._id.$oid} item xs={12} xl={2} md={3} >
-                        <VideoFiltered titleurl={video.title} imageurl={video.video_id} idxurl={video._id.$oid} concepts={video.extracted_keywords} creator={video.creator}/>
+                        <VideoFiltered conceptextra={singlecatExtra} titleurl={video.title} imageurl={video.video_id} idxurl={video._id.$oid} concepts={video.extracted_keywords} creator={video.creator}/>
                     </Grid>
                 );
                 

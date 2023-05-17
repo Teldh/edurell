@@ -218,6 +218,10 @@ export default function Comparison(){
           }else if(concept.length!=querylist.length){
               setNomatch(false);
           }
+          SetCatalogExtra([])
+          newcatalog.map(video=>{
+            QueryConceptExtra(video.video_id, concept)
+          })
       
           setCatalog(newcatalog)
           
@@ -358,7 +362,7 @@ export default function Comparison(){
       var data = await risposta.json();
       console.log("risposta: ",risposta);
       console.log("data: ",data);
-      SetCatalogExtra([...data]);
+      SetCatalogExtra([...[data]]);
       console.log("CATALOGEXTRA: ",catalogExtra);
     }
 
@@ -395,7 +399,7 @@ export default function Comparison(){
             <>
             <Querybar ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>
-            <Listvideo catalog={catalog} loading={loading} searchFilterClicked={searchFilterClicked} catalogoriginal={catalogoriginal}/>
+            <Listvideo catalogExtra={catalogExtra} catalog={catalog} loading={loading} searchFilterClicked={searchFilterClicked} catalogoriginal={catalogoriginal}/>
             </>
             
         </ContextComparison.Provider>

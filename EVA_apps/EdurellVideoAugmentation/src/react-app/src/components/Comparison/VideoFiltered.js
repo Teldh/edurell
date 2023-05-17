@@ -31,7 +31,7 @@ import {
   Redirect,
 } from "react-router-dom";
 //style={{position:'fixed'}}
-export default function VideoFiltered({titleurl,imageurl,idxurl,concepts,creator}){
+export default function VideoFiltered({conceptextra, titleurl,imageurl,idxurl,concepts,creator}){
     const addvideo = useContext(ContextComparison)[0];
     const removevideo = useContext(ContextComparison)[1];
     const [shadow, setshadow] = useState(0);
@@ -161,7 +161,7 @@ export default function VideoFiltered({titleurl,imageurl,idxurl,concepts,creator
                                         direction="row"
                                         justifyContent="space-between"
                                         alignItems="center"
-                                        id="TITOLO"
+                                        id="4 TITOLO"
                                         >
                                             <Grid item>
                                             <Typography variant="subtitle2" gutterBottom>
@@ -185,7 +185,67 @@ export default function VideoFiltered({titleurl,imageurl,idxurl,concepts,creator
                                         </Grid>
                                     </Grid>
                                     <Grid item>
+                                        <Grid
+                                        container
+                                        direction="row"
+                                        justifyContent="center"
+                                        alignItems="center"
+                                        id="4 DATI"
+                                        >
+                                            <Grid item>
+                                                <Grid
+                                                container
+                                                direction="column"
+                                                justifyContent="center"
+                                                alignItems="flex-start"
+                                                id="SX"
+                                                >
+                                                    <Grid item>
+                                                        <Typography variant="caption" display="block" gutterBottom>
+                                                            Cosa devi sapere prima di vedere questo video
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Grid
+                                                        container
+                                                        direction="row"
+                                                        justifyContent="flex-start"
+                                                        alignItems="flex-start"
+                                                        id="lista di prerequisiti"
+                                                        >
+                                                            {concepts.map(keyword=>
+                                                                <Grid item xs="auto">
+                                                                    <Chip label={keyword} size="small" color="primary"/>
+                                                                </Grid>
+                                                            )}
+                                                        </Grid>
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Typography variant="caption" display="block" gutterBottom>
+                                                            Cosa imparerai in questo video
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item>
+                                                        <Grid
+                                                        container
+                                                        direction="row"
+                                                        justifyContent="flex-start"
+                                                        alignItems="flex-start"
+                                                        id="lista di concetti"
+                                                        >
+                                                            {concepts.map(keyword=>
+                                                                <Grid item xs="auto">
+                                                                    <Chip label={keyword} size="small" color="primary"/>
+                                                                </Grid>
+                                                            )}
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                            <Grid item>
 
+                                            </Grid>
+                                        </Grid>
                                     </Grid>
                                     <Grid item>
 

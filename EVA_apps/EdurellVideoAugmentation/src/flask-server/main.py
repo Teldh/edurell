@@ -41,6 +41,11 @@ app.config['MONGODB_SETTINGS'] = {
     'host': "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority"
 }
 
+#pymongo db config for query sparql
+client = pymongo.MongoClient(
+        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+dbsparql = client.edurell
+
 #mail server config (gmail account date of birth : 01/01/1900)
 #old: <project.edurell@gmail.com> <work$package>
 app.config['MAIL_SERVER']='smtp.gmail.com'
@@ -851,19 +856,14 @@ def GetVideoTypeAndPrerequisite():
 @app.route('/api/ConceptVideoData/<video_id>/<concept_searched>')
 @auth.login_required
 def ConceptVideoData(video_id, concept_searched):
-    # Logging into the mongodb database
-  
-    user = "luca"
-    password = "vSmAZ6c1ZOg2IEVw"
-    client = pymongo.MongoClient(
-        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
-
+   
     # retrieve from mongodb collection=graphs the all elements with the value of video_id
-    db = client.edurell
-    collection = db.graphs
+    dbsparql = client.edurell
+    collection = dbsparql.graphs
     
     # initialize the dicitonary where we save our results
     result = {
+        'video_id':video_id,
         'concept_starttime':[],
         'concept_endtime':[],
         'explain':[],
@@ -871,6 +871,7 @@ def ConceptVideoData(video_id, concept_searched):
         'list_derivatedconcept':[],
         'derivatedconcept_starttime':[],
         'derivatedconcept_endtime':[]
+        
     }
 
     # two options:
