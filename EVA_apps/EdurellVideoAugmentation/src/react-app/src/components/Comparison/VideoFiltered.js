@@ -31,8 +31,9 @@ import {
   Link,
   Redirect,
 } from "react-router-dom";
+import { borders } from '@mui/system';
 //style={{position:'fixed'}}
-export default function VideoFiltered({conceptextra, titleurl,imageurl,idxurl,concepts,creator}){
+export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator}){
     const addvideo = useContext(ContextComparison)[0];
     const removevideo = useContext(ContextComparison)[1];
     const [shadow, setshadow] = useState(0);
@@ -47,12 +48,28 @@ export default function VideoFiltered({conceptextra, titleurl,imageurl,idxurl,co
     };
     console.log("videofitlered ",conceptextra, " ", conceptextra[0])
     let duration=0
+    let approfondimenti=0
+    let duratatot=0
+    let slidishness=0
+
+    if(conceptextra[0]!=undefined){
+
+        slidishness = (conceptextra[0].video_slidishness*100)+"%"
+    }
+    if(tottime != undefined){
+        let hours = Math.floor(tottime /3600)
+        console.log("hour: ",hours," remain: ",Math.abs(hours - (tottime /3600)))
+        let remainminutes = Math.abs(hours - (tottime /3600))
+        let minutes = Math.floor(remainminutes * 60);
+        console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
+        let seconds = Math.abs(minutes - (remainminutes * 60))
+        seconds = seconds*60
+        console.log("seconds: ",seconds);
+        console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
+        duratatot = hours+":"+minutes+":"+Math.floor(seconds)
+    }
 
     if(conceptextra[0]!=undefined&& conceptextra[0].concept_starttime.length>0){
-    
-       
-        
-        
         for(let i=0; i<conceptextra[0].concept_starttime.length;i++){
             const time1 = conceptextra[0].concept_endtime[i] .split("^^")[0];
             const time2 = conceptextra[0].concept_starttime[i] .split("^^")[0];
@@ -90,7 +107,51 @@ export default function VideoFiltered({conceptextra, titleurl,imageurl,idxurl,co
         seconds = seconds*60
         console.log("seconds: ",seconds);
         console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
-        duration = hours+":"+minutes+":"+seconds
+        duration = hours+":"+minutes+":"+Math.floor(seconds)
+    }
+
+
+    if(conceptextra[0]!=undefined&& conceptextra[0].concept_starttime.length>0){
+        for(let i=0; i<conceptextra[0].derivatedconcept_starttime.length;i++){
+
+            const time1 = conceptextra[0].derivatedconcept_endtime[i] .split("^^")[0];
+            const time2 = conceptextra[0].derivatedconcept_starttime[i] .split("^^")[0];
+    
+            let [hours1, minutes1, seconds1] = time1.split(":");
+            seconds1=Math.floor(seconds1)
+            seconds1=seconds1+hours1*3600
+            console.log("hours1: ",hours1*3600," ",seconds1)
+            seconds1=seconds1+minutes1*60
+            console.log("minutes: ",minutes1*60," ",seconds1)
+    
+            let [hours2, minutes2, seconds2] = time2.split(":");
+            seconds2=Math.floor(seconds2)
+            seconds2=seconds2+hours2*3600
+            console.log("hours2: ",hours2*3600," ",seconds2)
+            seconds2=seconds2+minutes2*60
+            console.log("hours2: ",minutes2*60," ",seconds2)
+    
+            let resultseconds = Math.abs(seconds2-seconds1);
+            console.log("difference: ",resultseconds);
+          
+       
+    
+           
+            approfondimenti = approfondimenti+resultseconds;
+
+        }
+
+        let hours = Math.floor(approfondimenti /3600)
+        console.log("hour: ",hours," remain: ",Math.abs(hours - (approfondimenti /3600)))
+        let remainminutes = Math.abs(hours - (approfondimenti /3600))
+        let minutes = Math.floor(remainminutes * 60);
+        console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
+        let seconds = Math.abs(minutes - (remainminutes * 60))
+        seconds = seconds*60
+        console.log("seconds: ",seconds);
+        console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
+        approfondimenti = hours+":"+minutes+":"+Math.floor(seconds)
+
     }
     return(
         <>
@@ -193,41 +254,50 @@ export default function VideoFiltered({conceptextra, titleurl,imageurl,idxurl,co
                             alignItems="center"
                             id="3 SX VIDEO, DX DATI"
                             >
-                                <Grid item>
+                                <Grid item sx={{m:0.5}}>
                                     <img src={"http://img.youtube.com/vi/"+imageurl+"/mqdefault.jpg"} alt={titleurl} width="100%" height="auto"/>
                                 </Grid>
-                                <Grid item>
+                                <Grid item sx={{m:0.5}}>
                                     <Grid
                                     container
                                     direction="column"
                                     justifyContent="center"
-                                    alignItems="center"
+                                    alignItems="flex-start"
                                     id="4 ROW TITOLO DATI BOTTONE"
                                     >
-                                        <Grid item>
+                                        <Grid item sx={{mb:3}}>
                                             <Grid
                                             container
                                             direction="row"
                                             justifyContent="space-between"
-                                            alignItems="center"
+                                            alignItems="flex-start"
                                             id="4 TITOLO"
+                                            spacing={2}
                                             >
                                                 <Grid item>
-                                                <Typography variant="subtitle2" gutterBottom>
-                                                    {titleurl}    
-                                                </Typography>
-                                                <Divider orientation="vertical" flexItem/>
-                                                <Typography variant="caption" gutterBottom>
-                                                    {creator}
-                                                </Typography>
+                                                    <Grid
+                                                    container
+                                                    direction="column"
+                                                    justifyContent="flex-start"
+                                                    alignItems="flex-start"
+                                                    id="titolo e creatore"
+                                                    >
+                                                        <Grid item>
+                                                            <Typography variant="subtitle2" gutterBottom>
+                                                                {titleurl}    
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <Typography variant="caption" gutterBottom>
+                                                                {creator}
+                                                            </Typography>
+                                                        </Grid>
+                                                    </Grid>
                                                 </Grid>
                                                 <Grid item>
-                                                    <Chip label={<><Typography variant="caption" gutterBottom>
-                                                            X
-                                                        </Typography> 
-                                                        <Divider orientation="vertical" flexItem/>
+                                                    <Chip label={<>
                                                         <Typography variant="caption" gutterBottom>
-                                                            chiudi anteprima
+                                                             X | chiudi anteprima
                                                         </Typography></>}
                                                         onClick={()=>handleExpandClick()} />
                                                 </Grid>
@@ -240,6 +310,7 @@ export default function VideoFiltered({conceptextra, titleurl,imageurl,idxurl,co
                                             justifyContent="center"
                                             alignItems="center"
                                             id="4 DATI"
+                                            spacing={3}
                                             >
                                                 <Grid item>
                                                     <Grid
@@ -248,29 +319,31 @@ export default function VideoFiltered({conceptextra, titleurl,imageurl,idxurl,co
                                                     justifyContent="center"
                                                     alignItems="flex-start"
                                                     id="SX"
+                                                    sx={{maxWidth: 500}}
                                                     >
                                                         <Grid item>
                                                             <Typography variant="caption" display="block" gutterBottom>
                                                                 Cosa devi sapere prima di vedere questo video
                                                             </Typography>
                                                         </Grid>
-                                                        <Grid item>
+                                                        <Grid item sx={{mb:2}}>
                                                             <Grid
                                                             container
                                                             direction="row"
                                                             justifyContent="flex-start"
                                                             alignItems="flex-start"
                                                             id="lista di prerequisiti"
+                                                            
                                                             >
                                                             
                                                                 {(conceptextra[0]!=undefined&& conceptextra[0].list_preconcept.length>0)?
                                                                 conceptextra[0].list_preconcept.map(keyword=>
-                                                                    <Grid item xs="auto" key={keyword}>
-                                                                        <Chip label={keyword} size="small" color="primary"/>
+                                                                    <Grid item xs="auto" key={keyword} sx={{m:0.2}}>
+                                                                        <Chip label={keyword} size="small" sx={{backgroundColor:"rgb(232,246,241)"}}/>
                                                                     </Grid>
                                                                 ):
-                                                                <Grid item xs="auto" >
-                                                                        <Chip label="empty" size="small" color="primary"/>
+                                                                <Grid item xs="auto" sx={{m:0.2}}>
+                                                                        <Chip label="empty" size="small" sx={{backgroundColor:"rgb(232,246,241)"}}/>
                                                                     </Grid>
                                                                 
                                                                 }
@@ -290,8 +363,8 @@ export default function VideoFiltered({conceptextra, titleurl,imageurl,idxurl,co
                                                             id="lista di concetti"
                                                             >
                                                                 {concepts.map(keyword=>
-                                                                    <Grid item xs="auto" key={keyword}>
-                                                                        <Chip label={keyword} size="small" color="primary"/>
+                                                                    <Grid item xs="auto" key={keyword} sx={{m:0.2}}>
+                                                                        <Chip label={keyword} size="small" color="primary" />
                                                                     </Grid>
                                                                 )}
                                                             </Grid>
@@ -328,27 +401,109 @@ export default function VideoFiltered({conceptextra, titleurl,imageurl,idxurl,co
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item>
-                                                                    <Typography variant="subtitle2" gutterBottom>
+                                                                
                                                                         {(conceptextra[0]!=undefined&& conceptextra[0].concept_starttime.length>0)?
                                                                             
-                                                                            <Typography variant="caption" gutterBottom>{duration}</Typography>
+                                                                            <Typography variant="subtitle2" gutterBottom>{duration}</Typography>
                                                                             :
-                                                                            <Typography variant="caption" gutterBottom>null</Typography>
+                                                                            <Typography variant="subtitle2" gutterBottom>null</Typography>
 
                                                                         }
-                                                                    </Typography>
+                                                             
                                                                 </Grid>
                                                             </Grid>
                                                             
                                                         </Grid>
                                                         <Grid item>
+                                                            <Grid
+                                                            container
+                                                            direction="row"
+                                                            justifyContent="center"
+                                                            alignItems="center"
+                                                            id="approfondimenti"
+                                                            >
+                                                                <Grid item>
+                                                                    <CircleIcon sx={{color:"rgb(255,255,181)"}}/>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    <Typography variant="caption" gutterBottom>
+                                                                        Approfondimenti:
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                
+                                                                        {(conceptextra[0]!=undefined&& conceptextra[0].derivatedconcept_starttime.length>0)?
+                                                                            
+                                                                            <Typography variant="subtitle2" gutterBottom>{approfondimenti}</Typography>
+                                                                            :
+                                                                            <Typography variant="subtitle2" gutterBottom>null</Typography>
+
+                                                                        }
+                                                              
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <Grid
+                                                            container
+                                                            direction="row"
+                                                            justifyContent="center"
+                                                            alignItems="center"
+                                                            id="durata totale"
+                                                            >
+                                                                <Grid item>
+                                                                    <CircleIcon sx={{color:"rgb(255,255,255)", p:0, m:0}}style={{
+                                                                        border: '1px solid grey', // Specifica lo stile del bordo desiderato
+                                                                        borderRadius: '50%', // Assicura che il bordo sia arrotondato per creare una forma circolare
+                                                                    }}/>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    <Typography variant="caption" gutterBottom>
+                                                                        Video intero:
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item>
+                                                             
+                                                                        {(conceptextra[0]!=undefined&& conceptextra[0].derivatedconcept_starttime.length>0)?
+                                                                            
+                                                                            <Typography variant="subtitle2" gutterBottom>{duratatot}</Typography>
+                                                                            :
+                                                                            <Typography variant="subtitle2" gutterBottom>null</Typography>
+
+                                                                        }
+                                                               
+                                                                </Grid>
+                                                            </Grid>
                                                         
                                                         </Grid>
                                                         <Grid item>
-                                                        
-                                                        </Grid>
-                                                        <Grid item>
-                                                        
+                                                            <Grid
+                                                            container
+                                                            direction="row"
+                                                            justifyContent="center"
+                                                            alignItems="center"
+                                                            id="slide"
+                                                            >
+                                                                <Grid item>
+                                                                    <Typography variant="caption" gutterBottom>
+                                                                        Presenza di slide:
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    {/* PUT SLIDE ICON HERE*/}
+                                                                </Grid>
+                                                                <Grid item>
+                                                             
+                                                                        {(conceptextra[0]!=undefined&& conceptextra[0].derivatedconcept_starttime.length>0)?
+                                                                            
+                                                                            <Typography variant="subtitle2" gutterBottom>{slidishness}</Typography>
+                                                                            :
+                                                                            <Typography variant="subtitle2" gutterBottom>null</Typography>
+
+                                                                        }
+                                                               
+                                                                </Grid>
+                                                            </Grid>
                                                         </Grid>
                                                     </Grid>                           
                                                 </Grid>

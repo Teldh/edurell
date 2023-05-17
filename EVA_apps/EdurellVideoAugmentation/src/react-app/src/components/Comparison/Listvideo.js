@@ -35,7 +35,7 @@ export default function Listvideo({catalogExtra, catalog,loading, searchFilterCl
                 return(
                     
                     <Grid key={video._id.$oid} item xs={12} xl={2} md={3} >
-                        <VideoFiltered conceptextra={singlecatExtra} titleurl={video.title} imageurl={video.video_id} idxurl={video._id.$oid} concepts={video.extracted_keywords} creator={video.creator}/>
+                        <VideoFiltered tottime={video.duration} conceptextra={singlecatExtra} titleurl={video.title} imageurl={video.video_id} idxurl={video._id.$oid} concepts={video.extracted_keywords} creator={video.creator}/>
                     </Grid>
                 );
                 
