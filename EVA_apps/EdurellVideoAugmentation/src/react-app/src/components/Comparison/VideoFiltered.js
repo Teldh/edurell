@@ -549,7 +549,7 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
                                                                 </Grid>
                                                                 <Grid item>
                                                              
-                                                                        {(conceptextra[0]!=undefined&& conceptextra[0].derivatedconcept_starttime.length>0)?
+                                                                        {(conceptextra[0]!=undefined)?
                                                                             
                                                                             <Typography variant="subtitle2" gutterBottom>{slidishness}</Typography>
                                                                             :
