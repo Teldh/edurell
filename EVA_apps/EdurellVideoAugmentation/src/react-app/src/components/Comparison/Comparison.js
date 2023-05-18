@@ -221,7 +221,10 @@ export default function Comparison(){
       console.log(catalog," ",catalogoriginal)
       if(catalog.length > 0 ){
           setCatalog(catalogoriginal);
-         
+          console.log("addquery ",concept)
+          const newquerylist = [...concept];
+          setQueryList(newquerylist);
+          console.log("newquerylist: ",newquerylist)
           if(concept[0]==null){
               //setSearchFilterClicked(false);
               console.log("addqueryelement return")
@@ -229,10 +232,7 @@ export default function Comparison(){
           }
           setSearchFilterClicked(true);
           
-          console.log("addquery ",concept)
-          const newquerylist = [...concept];
-          setQueryList(newquerylist);
-          console.log("newquerylist: ",newquerylist)
+          
           
           
           let newcatalog = catalogoriginal.filter(video=>checker(video.extracted_keywords,concept));
@@ -616,7 +616,7 @@ export default function Comparison(){
             <>
             <Querybar ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>
-            <Listvideo catalogExtra={catalogExtra} catalog={catalog} loading={loading} searchFilterClicked={searchFilterClicked} catalogoriginal={catalogoriginal}/>
+            <Listvideo catalogExtra={catalogExtra} catalog={catalog} loading={loading} querylist={querylist} catalogoriginal={catalogoriginal}/>
             </>
             
         </ContextComparison.Provider>

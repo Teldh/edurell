@@ -32,7 +32,7 @@ export default function Videoselected({imageurl,title,idx,setAdd}) {
         >
    
     
-      <Card sx={{ maxWidth: 200 }}>
+      <Card sx={{ width: 200 }}>
         <CardMedia
           sx={{ height: 110 }}
           image={"http://img.youtube.com/vi/"+imageurl+"/mqdefault.jpg"}

@@ -10,11 +10,11 @@ import VideoFiltered from "./VideoFiltered.js"
 import {TokenContext} from '../account-management/TokenContext';
 import { useContext } from 'react';
 
-export default function Listvideo({catalogExtra, catalog,loading, searchFilterClicked, catalogoriginal}){
+export default function Listvideo({catalogExtra, catalog,loading, querylist, catalogoriginal}){
     
     
     const context = useContext(TokenContext);
-    
+    console.log("listvideo querylist ",querylist)
 
 
       
@@ -27,7 +27,7 @@ export default function Listvideo({catalogExtra, catalog,loading, searchFilterCl
         {loading
               ? null
               :
-            searchFilterClicked?
+            querylist.length > 0?
             catalog.map(video=>{
                 console.log("LISTVIDEO: ",catalogExtra)
                 let singlecatExtra = catalogExtra.filter(extra =>video.video_id == extra.video_id)
