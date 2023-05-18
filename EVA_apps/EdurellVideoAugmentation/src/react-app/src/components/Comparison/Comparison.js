@@ -293,7 +293,7 @@ export default function Comparison(){
             return true;
            }
            return checker(video.extracted_keywords, catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["list_preconcept"])});
-       //  SetCatalogAfterFilter(newcatalog);
+           setCatalog(catalog=>catalogfiltered)
        }else if(listfilters[0] == "expert"){
          catalogfiltered = catalog.filter(video=>{
            console.log("EXPERT ",video.extracted_keywords," ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["list_preconcept"]);
@@ -302,10 +302,10 @@ export default function Comparison(){
            }
            return !checker(video.extracted_keywords, catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["list_preconcept"]);
          })
-       // SetCatalogAfterFilter(newcatalog);
+         setCatalog(catalog=>catalogfiltered)
        }
 
-       setCatalog(catalog=>catalogfiltered)
+       
 
        //spiegazione
        if(listfilters[1] == "essential"){
@@ -317,7 +317,7 @@ export default function Comparison(){
            }
            return !checker(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["explain"],"conceptExpansion");
          })
-       ///  SetCatalogAfterFilter(newcatalog);
+         setCatalog(catalog=>catalogfiltered)
 
        }else if(listfilters[1]=="detailed"){
          catalogfiltered = catalog.filter(video=>{
@@ -327,9 +327,9 @@ export default function Comparison(){
            }
            return checker(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["explain"],"conceptExpansion");
          })
-       // SetCatalogAfterFilter(newcatalog);
+         setCatalog(catalog=>catalogfiltered)
        }
-       setCatalog(catalog=>catalogfiltered)
+     
 
        //tipo di lezione
        if(listfilters[2] == "withslide"){
@@ -337,15 +337,15 @@ export default function Comparison(){
            console.log("wihslide ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["video_slidishness"]);
            return catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["video_slidishness"] > 0.1? true:false;
          })
-       // SetCatalogAfterFilter(newcatalog);
+         setCatalog(catalog=>catalogfiltered)
        }else if(listfilters[2] == "withoutslide"){
          catalogfiltered = catalog.filter(video=>{
            console.log("wihslide ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["video_slidishness"]);
            return catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["video_slidishness"] <= 0.1? true:false;
          })
-       // SetCatalogAfterFilter(newcatalog);
+         setCatalog(catalog=>catalogfiltered)
        }
-       setCatalog(catalog=>catalogfiltered)
+       
 
         console.log("definizione")
        //definizione
@@ -356,6 +356,7 @@ export default function Comparison(){
             console.log("starttime: ",starttime, " endtime: ",endtime," catalogextra: ",catalogExtra)
             return ComputeDuration(endtime, starttime) < 240
           });
+          setCatalog(catalog=>catalogfiltered)
        }else if(listfilters[3]="4to20"){
           catalogfiltered = catalog.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["concept_starttime"]
@@ -363,6 +364,7 @@ export default function Comparison(){
             console.log("starttime: ",starttime, " endtime: ",endtime," catalogextra: ",catalogExtra," ",listfilters)
             return ComputeDuration(endtime, starttime) >= 240 || ComputeDuration(endtime, starttime) <= 1200
           });
+          setCatalog(catalog=>catalogfiltered)
        }else if(listfilters[3]="greater20"){
           catalogfiltered = catalog.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["concept_starttime"]
@@ -370,8 +372,9 @@ export default function Comparison(){
             console.log("starttime: ",starttime, " endtime: ",endtime)
             return ComputeDuration(endtime, starttime) > 1200
           });
+          setCatalog(catalog=>catalogfiltered)
        }
-       setCatalog(catalog=>catalogfiltered)
+   
 
         console.log("approfondimento")
        //approfondimento
@@ -382,6 +385,7 @@ export default function Comparison(){
             console.log("starttime: ",starttime, " endtime: ",endtime)
             return ComputeDuration(endtime, starttime) < 240
           });
+          setCatalog(catalog=>catalogfiltered)
        }else if(listfilters[4]="4to20"){
           catalogfiltered = catalog.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["derivatedconcept_starttime"]
@@ -389,6 +393,7 @@ export default function Comparison(){
             console.log("starttime: ",starttime, " endtime: ",endtime)
             return ComputeDuration(endtime, starttime) >= 240 || ComputeDuration(endtime, starttime) <= 1200
           });
+          setCatalog(catalog=>catalogfiltered)
        }else if(listfilters[4]="greater20"){
           catalogfiltered = catalog.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)["derivatedconcept_starttime"]
@@ -396,19 +401,23 @@ export default function Comparison(){
             console.log("starttime: ",starttime, " endtime: ",endtime)
             return ComputeDuration(endtime, starttime) > 1200
           });
+          setCatalog(catalog=>catalogfiltered)
        }
-       setCatalog(catalog=>catalogfiltered)
+
 
         console.log("video intero")
        //video intero
        if(listfilters[5]=="less4"){
           catalogfiltered = catalog.filter(video=>video.duration < 240)
+          setCatalog(catalog=>catalogfiltered)
        }else if(listfilters[5]="4to20"){
           catalogfiltered = catalog.filter(video=>video.duration >= 240 || video.duration < 1200)
+          setCatalog(catalog=>catalogfiltered)
        }else if(listfilters[5]="greater20"){
           catalogfiltered = catalog.filter(video=>video.duration > 1200)
+          setCatalog(catalog=>catalogfiltered)
        }
-       setCatalog(catalog=>catalogfiltered)
+
 
        console.log("sort")
        if(listfilters[6]=="recent"){
@@ -425,6 +434,7 @@ export default function Comparison(){
               }
             }
           )
+          setCatalog(catalog=>catalogfiltered)
        }else if(listfilters[6]=="videolength"){
           catalogfiltered = catalog.sort(
               function(a,b){
@@ -440,6 +450,7 @@ export default function Comparison(){
 
 
           )
+          setCatalog(catalog=>catalogfiltered)
        }else if(listfilters[6]=="deflength"){
         catalogfiltered = catalog.sort(
           function(a,b){
@@ -459,7 +470,7 @@ export default function Comparison(){
             }
           }
         )
-
+        setCatalog(catalog=>catalogfiltered)
        }else if(listfilters[6]=="detailedlength"){
         catalogfiltered = catalog.sort(
           function(a,b){
@@ -479,8 +490,9 @@ export default function Comparison(){
             }
           }
         )
+        setCatalog(catalog=>catalogfiltered)
        }
-       setCatalog(catalog=>catalogfiltered)
+
 
 
 
