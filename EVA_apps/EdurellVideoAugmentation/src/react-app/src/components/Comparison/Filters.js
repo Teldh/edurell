@@ -604,7 +604,7 @@ export default function Filters({ApplyFilters}){
                 </Grid>
                 <Grid item xs="auto" sx={{p: 2 ,backgroundColor:'#B798f8', borderRadius:'50px 0 50px 0'}} onClick={()=>{
                     
-                    console.log("filtri: ",alignment1," ",alignment2," ",alignment3," ",alignment4," ",alignment5," ",alignment6," ",radiog);
+                    console.log("filtri: ",[alignment1,alignment2,alignment3,alignment4,alignment5,alignment6,radiog]);
                     console.log("send those baddies to daddy")
                     ApplyFilters([alignment1,alignment2,alignment3,alignment4,alignment5,alignment6,radiog])
                 }}>

@@ -882,7 +882,9 @@ def ConceptVideoData(video_id, concept_searched):
         'derivatedconcept_endtime':[]
         
     }
-
+    print("?????????????????????????????START??????????????????????????????????")
+    print("start query: ",video_id," ",concept_searched)
+    print("result: ",result)
     # two options:
     ## 1. search newest annotation
     ### 2. combine every annotation of a video into a unique graph and make the query of that
@@ -939,12 +941,21 @@ def ConceptVideoData(video_id, concept_searched):
         ### in mongodb we collect all annotation of a single video
         ### made by different people or the same
         ### this mode combine from the oldest to the newest into a single graph
-
-        for document in cursor:
+        print("start cursor for: ",video_id)
+        for idx,document in enumerate(cursor):
+            print("document ",video_id," idx: ",idx," \n\nGRAPH: ",document["graph"]," \n\nCONCEPT:  ",document["conceptVocabulary"]," \n\n")
+            print("\n")
             # Query the concept timeline and duration
+            if document["graph"]=="":
+                print("\nIGNORE GRAPH: ",document["graph"]," ",video_id," idx: ",idx)
+                continue
+            if document["conceptVocabulary"] == "":
+                print("\nIGNORE CONCEPT: ",document["conceptVocabulary"]," ",video_id," idx: ",idx)
+                continue
             gr.parse(data=json.dumps(document["graph"]), format='json-ld')
 
             # initialize conceptVocabulary for the query
+            
             gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
 
     ## --------------------------------------------------------------------------------------------------------------------------------------
@@ -969,7 +980,7 @@ def ConceptVideoData(video_id, concept_searched):
     """
     qres = gr.query(qr)
     print("query created")
-    print("qres: ",len(qres)," ",qr)
+    print("qres: ",len(qres))
     for row in qres:
         print("_________________________________________")
         print(row['created'])
@@ -1006,7 +1017,7 @@ def ConceptVideoData(video_id, concept_searched):
             """
  
     qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
-    print("qres: ",len(qres)," ",qr)
+    print("qres: ",len(qres))
     for row in qres:
         #print("result: ",row['concept_starttime']," ",row['concept_endtime'])
         print("_________________________________________")
@@ -1040,7 +1051,7 @@ def ConceptVideoData(video_id, concept_searched):
     """
     qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
     print("preconcept")
-    print("qres: ",len(qres)," ",qr)
+    print("qres: ",len(qres))
     for row in qres:
         print("a_________________________________________")
         print(row['preconcept'])
@@ -1077,7 +1088,7 @@ def ConceptVideoData(video_id, concept_searched):
     """
     qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
     print("c_derivated")
-    print("qres: ",len(qres)," ",qr)
+    print("qres: ",len(qres))
     for row in qres:
         print("b_________________________________________")
         print(row['c_derivated'])
@@ -1113,7 +1124,7 @@ def ConceptVideoData(video_id, concept_searched):
             """
  
         qres = gr.query(qr, initBindings = {"c_selected":Literal(dc, lang="en")})
-        print("qres: ",len(qres)," ",qr)
+        print("qres: ",len(qres))
         for row in qres:
             #print("result: ",row['concept_starttime']," ",row['concept_endtime'])
             print("_________________________________________")
