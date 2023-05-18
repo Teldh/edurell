@@ -614,7 +614,7 @@ export default function Comparison(){
         <ContextComparison.Provider value={[AddVideo,RemoveVideo,setSearchFilterClicked]}>
 
             <>
-            <Querybar ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
+            <Querybar catalog = {catalog} catalogExtra = {catalogExtra} ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>
             <Listvideo catalogExtra={catalogExtra} catalog={catalog} loading={loading} querylist={querylist} catalogoriginal={catalogoriginal}/>
             </>

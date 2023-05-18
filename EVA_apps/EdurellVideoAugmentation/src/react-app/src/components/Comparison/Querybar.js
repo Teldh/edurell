@@ -15,15 +15,35 @@ import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import Filters from './Filters.js'
 import EastIcon from '@mui/icons-material/East';
-
-export default function Querybar({ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
+import { useHistory } from "react-router-dom";
+export default function Querybar({catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
     
-
+    const history = useHistory();
     function GoToComparisonResult(){
-
+        
+        history.push({
+            pathname: '/comparisonResult',
+            state: { 
+                concept: location,
+                catalog: catalog.filter(video=>{
+                    if(listvideo.filter(lv=>lv.img==video.video_id).length > 0){
+                        return video.video_id == listvideo.filter(lv=>lv.img == video.video_id)[0].img
+                    }else{
+                        return false
+                    }
+                    }),
+                catalogExtra: catalogExtra.filter(video=>{
+                    if(listvideo.filter(lv=>lv.img==video.video_id).length > 0){
+                        return video.video_id == listvideo.filter(lv=>lv.img == video.video_id)[0].img
+                    }else{
+                        return false
+                    }
+                    })
+            },
+        });
     }
 
-    listvideo = listvideo.map((video,index) =>
+    let videos = listvideo.map((video,index) =>
     
         <>
         <Videoselected imageurl={video.img} title={video.title} idx={video.idx} setAdd={video.setAdd}/>
@@ -62,7 +82,7 @@ export default function Querybar({ApplyFilters, searchClicked, listvideo, listco
             <br/>
             {
                 //searchClicked == false?
-                listvideo.length == 0?
+                videos.length == 0?
                 <></>
                 :
 
@@ -75,9 +95,9 @@ export default function Querybar({ApplyFilters, searchClicked, listvideo, listco
                         alignItems="center"
                         spacing={2}
                     >
-                        {listvideo.length < 4? 
+                        {videos.length < 4? 
                                 ( <>
-                                {listvideo}
+                                {videos}
                                 <Stack spacing={0}>
                                 
                                 <Skeleton variant="rounded" width={200} height={110} />
@@ -96,14 +116,14 @@ export default function Querybar({ApplyFilters, searchClicked, listvideo, listco
                                     <Grid item>
                                         <Box sx={{paddingTop:1}}>
                                             {
-                                                listvideo.length<4?<Chip sx={{backgroundColor:"rgb(198,203,239)"}}label={listvideo.length+"/4 video selected"} />:<Chip sx={{backgroundColor:"rgb(177,150,255)"}} label="4/4 max reached"  />
+                                                videos.length<4?<Chip sx={{backgroundColor:"rgb(198,203,239)"}}label={videos.length+"/4 video selected"} />:<Chip sx={{backgroundColor:"rgb(177,150,255)"}} label="4/4 max reached"  />
                                             }
                                         
                                         </Box>
                                     </Grid>
                                     <Grid item>
                                         {
-                                            listvideo.length >1?
+                                            videos.length >1?
                                             <>
                                                 <Typography variant="body2" display="block" gutterBottom>
                                                     Hai selezionato tutti i
@@ -126,7 +146,7 @@ export default function Querybar({ApplyFilters, searchClicked, listvideo, listco
                                     </Grid>
                                     <Grid item>
                                         <Chip
-                                        disabled={listvideo.length>1?false:true}
+                                        disabled={videos.length>1?false:true}
                                         label={<Typography variant="body2" gutterBottom sx={{pt:1}}>
                                        Vai al confronto
                                       </Typography>}
@@ -142,7 +162,7 @@ export default function Querybar({ApplyFilters, searchClicked, listvideo, listco
                                 </>
                                 ) :
                                 <>
-                                {listvideo}
+                                {videos}
                                 <Grid
                                 container
                                 direction="column"
@@ -154,7 +174,7 @@ export default function Querybar({ApplyFilters, searchClicked, listvideo, listco
                                     <Grid item>
                                         <Box sx={{paddingTop:1}}>
                                             {
-                                                listvideo.length<4?<Chip sx={{backgroundColor:"rgb(198,203,239)"}}label={listvideo.length+"/4 video selected"} />:<Chip sx={{backgroundColor:"rgb(177,150,255)"}} label="4/4 max reached"  />
+                                                videos.length<4?<Chip sx={{backgroundColor:"rgb(198,203,239)"}}label={videos.length+"/4 video selected"} />:<Chip sx={{backgroundColor:"rgb(177,150,255)"}} label="4/4 max reached"  />
                                             }
                                         
                                         </Box>
