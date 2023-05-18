@@ -567,9 +567,22 @@ export default function Result(){
                 </Container>  
             </Grid>
 
+            
+
         </Grid>
-    
-    
+        <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        sx={{backgroundColor:"#9BDDC1", m:0, p:5}}
+        >
+            <Grid item>
+                <Typography variant="overline" display="block" gutterBottom sx={{color:"white"}}>
+                   Congratulation, you've made it to the footer :&#41;
+                </Typography>
+            </Grid>
+        </Grid>
     
     </>);
 }

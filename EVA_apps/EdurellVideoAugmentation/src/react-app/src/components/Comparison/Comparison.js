@@ -1,5 +1,6 @@
 import Header from '../Header/Header';
 import React from 'react';
+import Grid from '@mui/material/Grid';
 import { useContext,useState,useEffect } from 'react';
 import {TokenContext} from '../account-management/TokenContext';
 import Querybar from './Querybar.js';
@@ -10,6 +11,7 @@ import { ContextComparison } from './ContextComparison';
 import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors';
 import Button from '@mui/material/Button';
 import C_Start from './C_Start.js';
+import Typography from '@mui/material/Typography';
 import {
     Link,
     Redirect,
@@ -622,6 +624,19 @@ export default function Comparison(){
         </ContextComparison.Provider>
         </StyledEngineProvider>
         </ThemeProvider>
+        <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        sx={{backgroundColor:"#9BDDC1", m:0, p:5}}
+        >
+            <Grid item>
+                <Typography variant="overline" display="block" gutterBottom sx={{color:"white"}}>
+                   Congratulation, you've made it to the footer :&#41;
+                </Typography>
+            </Grid>
+        </Grid>
         </>
     );
 }

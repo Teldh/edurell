@@ -3,6 +3,9 @@ import Container from '@mui/material/Container';
 import { Autocomplete } from '@mui/material';
 import { TextField } from '@material-ui/core';
 import './Querybar.css';
+import Chip from '@mui/material/Chip';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Videoavailable from "./Videoavailable.js"
@@ -21,7 +24,14 @@ export default function Listvideo({catalogExtra, catalog,loading, querylist, cat
     return (
     <>
     <Container maxWidth = "xl" >
-        <Grid  align = "center" justify = "center" alignItems = "center" container spacing={2}>
+            <Grid
+        container
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+        spacing={2}
+        sx={{p:5}}
+        >
 
 
         {loading
@@ -55,6 +65,48 @@ export default function Listvideo({catalogExtra, catalog,loading, querylist, cat
             
             
         })}
+        
+        
+        </Grid>
+
+        <Grid
+  container
+  direction="column"
+  justifyContent="center"
+  alignItems="center"
+  spacing={2}
+>
+        {
+            querylist.length>0?<>
+            <Grid item>
+                <Box
+                sx={{
+                    m:0,
+                    p:0,
+                    width: '100px',
+                    height: '2px',
+                    backgroundColor: "#9BDDC1",
+                }}
+                />
+        </Grid>
+        <Grid item>
+            <Typography variant="h6" gutterBottom>
+                Sembra non ci siano altri video con il concetti che cerchi :&#40;
+            </Typography>
+            
+        </Grid>
+        <Grid item>
+            <Typography variant="overline" display="block" gutterBottom sx={{color:"black"}}>
+                Ti serve altro? Dai un'occhiata agli altri concetti presenti in questi video!
+            </Typography>
+        </Grid>
+        <Grid item>
+            {/*INSERT HERE MORE CONCEPTS */}
+        </Grid>
+        </>
+        :
+        <></>
+        }
         </Grid>
     </Container>
     </>
