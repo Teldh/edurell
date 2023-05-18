@@ -142,7 +142,9 @@ export default function Filters({ApplyFilters}){
             sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px'}}
             
             avatar={<TuneRoundedIcon/>}
-            label="Clickable" 
+            label={<Typography variant="button" display="block" gutterBottom sx={{m:2}}>
+            Filters
+          </Typography>} 
             onClick={handleExpandClick}
             onDelete={handleExpandClick}
             deleteIcon={
@@ -170,12 +172,14 @@ export default function Filters({ApplyFilters}){
             container
             direction="row"
             justifyContent="center"
-            alignItems="flex-start"
+            alignItems="stretch"
             spacing={2}
             id="TRE COLONNE PRINCIPALI"
             
             >
-                <Grid item>
+                <Grid item sx={{
+                        borderRight: '1px solid #CCCCCC',
+                    }}>
                     <Grid
                     container
                     direction="column"
@@ -415,10 +419,9 @@ export default function Filters({ApplyFilters}){
 
 
 
-
-
-
-                <Grid item>
+                <Grid item sx={{
+                        borderRight: '1px solid #CCCCCC',
+                    }}>
                     <Grid
                     container
                     direction="column"
@@ -547,7 +550,7 @@ export default function Filters({ApplyFilters}){
 
 
 
-                <Grid item>
+                <Grid item >
                     <Grid
                     container
                     direction="column"

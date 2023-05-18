@@ -68,8 +68,8 @@ export default function Querybar({catalog, catalogExtra, ApplyFilters, searchCli
                 <Grid
           
                 container
-                direction="column"
-                    
+                direction="row"
+                justifyContent="center"
                 alignItems="center"
                 >
                     <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
