@@ -12,6 +12,8 @@ import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import Filters from './Filters.js'
 import EastIcon from '@mui/icons-material/East';
 import '../Header/Header.css';
@@ -27,6 +29,9 @@ import { useContext,useState,useEffect } from 'react';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import {TokenContext} from '../account-management/TokenContext';
 import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+
 import {
     Link,
     Redirect,
@@ -37,8 +42,16 @@ import {
 import Autocomplete from '@mui/material/Autocomplete';
 import Popper from '@mui/material/Popper';
 import { useHistory } from "react-router-dom";
-
+import NetworkGraph from './NetworkGraph.js';
+import Barro from './BarroGraph.js';
 export default function Result(){
+    
+    //for second graph
+    const [graphcontrol2, setGraphControl2] = useState("one");
+    const handleChange = (event, newValue) => {
+        setGraphControl2(newValue);
+      };
+
     const context = useContext(TokenContext);
     const nameSurname  = context.nameSurname;
     //get from the previous page the data of the video selected for comparison
@@ -309,6 +322,8 @@ export default function Result(){
                             }}
                             >
                             {/*INSERT GRAPH HERE */}
+                            
+                                <Barro/>    
                             </Box>
                         </Grid>
                         <Grid item sx={{m:5}}>
@@ -343,7 +358,7 @@ export default function Result(){
                     direction="column"
                     justifyContent="center"
                     alignItems="stretch"
-                    id="CONFRONTO DURATE"
+                    id="CONFRONTO MAPPE"
                     >
                         <Grid item>
                             <Grid
@@ -392,19 +407,24 @@ export default function Result(){
                                     spacing={2}
                                     >
                                         <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Riepilogo
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                cosa devi sapere?
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Cosa imparerai?
-                                            </Typography>
+                                        <Tabs
+                                        value={graphcontrol2}
+                                        onChange={handleChange}
+                                        textColor="secondary"
+                                        indicatorColor="secondary"
+                                        aria-label="secondary tabs example"
+                                       
+                                    >
+                                        <Tab value="one" label={<Typography variant="caption" display="block" gutterBottom>
+                                            Riepilogo
+                                        </Typography>} />
+                                        <Tab value="two" label={<Typography variant="caption" display="block" gutterBottom>
+                                            Cosa devi gia sapere?
+                                        </Typography>} />
+                                        <Tab value="three" label={<Typography variant="caption" display="block" gutterBottom>
+                                            Cosa imparerai?
+                                        </Typography>}/>
+                                    </Tabs>
                                         </Grid>
                                        
                                     </Grid>
@@ -417,12 +437,38 @@ export default function Result(){
                             sx={{
                                 width: '100%',
                                 backgroundColor: 'white',
-                                borderRadius: '20px',
+                                borderRadius: '10px',
                                 height:"500px",
                                 border: '1px solid grey',
                             }}
                             >
-                            {/*INSERT GRAPH HERE */}
+                                <Grid
+                                    container
+                                    direction="row"
+                                    justifyContent="space-between"
+                                    alignItems="stretch"
+                                    sx={{
+                                        width:"100%",
+                                        height:"100%"
+                                    }}
+                                >
+                                    {/*INSERT GRAPH HERE */}
+                                    {
+                                        
+                                        location.state.catalogExtra.map((catExtra,idx)=>{
+                                            console.log("catalogExtraFULL: ",location.state.catalogExtra);
+                                            console.log("catExtra: ",catExtra)
+                                            return(<>
+                                                <Grid item xs>
+                                                    <NetworkGraph width="100%" height="100%" concept={location.state.concept} conceptExtra={catExtra} idx={idx} graphcontrol={graphcontrol2}/>
+                                                </Grid>
+                                                <Divider orientation="vertical" variant="middle" flexItem  />
+                                            </>
+                                            );
+                                        })
+                                    }
+                            <NetworkGraph width="100%" height="100%"/>
+                                </Grid>
                             </Box>
                         </Grid>
                         <Grid item sx={{m:5}}>
@@ -457,7 +503,7 @@ export default function Result(){
                     direction="column"
                     justifyContent="center"
                     alignItems="stretch"
-                    id="CONFRONTO DURATE"
+                    id="CONFRONTO SLIDE"
                     >
                         <Grid item>
                             <Grid
