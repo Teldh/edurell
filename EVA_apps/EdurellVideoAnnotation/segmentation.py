@@ -1171,7 +1171,7 @@ class VideoAnalyzer:
         if self._slide_titles is None:
             raise Exception('slide titles not set')
         
-        def extract_defs_and_indepths(titles:'list[dict]',timed_sentences:'list[dict]',definition_tol_seconds:float,_show_output=False):
+        def extract_defs_and_indepths(burst_concepts: List[dict],titles:'list[dict]',timed_sentences:'list[dict]',definition_tol_seconds:float,_show_output=False):
             video_defs = {}
             video_in_depths = {}
             #txt_classif = TextSimilarityClassifier([COMPARISON_METHOD_TXT_MISS_RATIO])
@@ -1184,7 +1184,12 @@ class VideoAnalyzer:
 
                 else:
                     start_time_title,end_time_title = title['start_end_seconds']
-                    title_keyword = get_keywords_from_title(title['text'])[0] #TODO how to select best keyword in case more than 1 are found in the title?
+                    title_lowered = title["text"].lower()
+                    title_keyword = [burst_concept['concept'] for burst_concept in burst_concepts if burst_concept['concept'] in title_lowered]
+                    if len(title_keyword) > 0:
+                        title_keyword = title_keyword[0]
+                    else:
+                        title_keyword = get_keywords_from_title(title['text'])[0]
 
                     for sent_id, timed_sentence in enumerate(timed_sentences):
                         if title_keyword not in video_defs.keys() and \
@@ -1221,10 +1226,11 @@ class VideoAnalyzer:
                 print()
             return video_defs,video_in_depths
         
+        #print(burst_concepts)
         # extract definitions and in-depths in the transcript of every title based on slide show time and concept citation (especially with definition)
         # alg is O(kn) with k titles and n sentences of the transcript 
         timed_sentences = get_timed_sentences(self.get_transcript()[0],[sent.metadata["text"] for sent in parse(get_text(self._video_id,return_conll=True)[1])])
-        video_defs, video_in_depths = extract_defs_and_indepths(self._slide_titles,timed_sentences,definition_tol_seconds,_show_output=_show_output)
+        video_defs, video_in_depths = extract_defs_and_indepths(burst_concepts,self._slide_titles,timed_sentences,definition_tol_seconds,_show_output=_show_output)
 
         def seconds_to_h_mm_ss_dddddd(time:float):
             millisec = str(time%1)[2:8]
@@ -1267,6 +1273,9 @@ class VideoAnalyzer:
         return added_concepts,burst_concepts
 
     def reconstruct_slides_from_times_set(self):
+        '''
+        From the slides_startends previously set, reads the text in the first frame for each slide and converts it into TimedAndFramedText
+        '''
         assert self._slide_startends is not None, "Must firstly load (set) startend frames read from database to run this function"
         slide_startends = self._slide_startends
         frame = ImageClassifier(image_and_scheme=[None,COLOR_BGR])
@@ -1283,6 +1292,13 @@ class VideoAnalyzer:
 
 
     def set(self,video_slidishness=None,slidish_frames_startend=None,slide_startends=None,titles=None):
+        '''
+        Set parameters at various steps:
+            - video_slidishness : percentage of slide frames overall
+            - slidish_frames_startend : list of timeframes of probably slides computed after the preprocess
+            - slide_startends : list of timeframes of the exact slides
+            - titles : list of TimedAndFramedTexts that represent titles of their respective slides
+        '''
         if video_slidishness is not None:
             self._video_slidishness = video_slidishness
         if slidish_frames_startend is not None:
@@ -1376,7 +1392,7 @@ def _main_in_segmentation():
     #video = VideoAnalyzer('rFRO8IwB8aY') # Lesson Med 33 minutes low score and very slow
     segmentation_data = db_mongo.get_video_segmentation('PPLop4L2eGk',raise_error=False)
     video._video_slidishness = segmentation_data['video_slidishness']
-    video._frames_to_analyze = segmentation_data['slide_frames']
+    video._frames_to_analyze = segmentation_data['slidish_frames_startend']
     video.set(titles=segmentation_data['slide_titles'])
     concepts = [{'concept': 'machine', 'start_sent_id': 0, 
                  'end_sent_id': 7, 
@@ -1436,8 +1452,8 @@ def _main_in_segmentation():
     plt.show()
 
 if __name__ == '__main__':
+    _main_in_segmentation()
     vid_id = "JDmNvQj0I5A"
-    db_mongo.open_socket()
     segmentation_data = db_mongo.get_video_segmentation(vid_id)
     video = VideoAnalyzer(vid_id)
     video.set(segmentation_data['video_slidishness'],segmentation_data['slidish_frames_startend'])

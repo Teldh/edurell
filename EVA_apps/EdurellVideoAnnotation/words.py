@@ -33,7 +33,7 @@ def extract_keywords(text:str,maxWords=3,minFrequency=1):
             concepts.append(c[0])
 
     concepts = lemmatize(concepts)
-
+    
     for i, concept in enumerate(concepts):
         concepts[i] = concept.replace("-", " ").replace("/", " / ")
 
