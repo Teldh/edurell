@@ -45,7 +45,7 @@ import { useHistory } from "react-router-dom";
 import NetworkGraph from './NetworkGraph.js';
 import Barro from './BarroGraph.js';
 export default function Result(){
-    
+    const [rerenderdaddy, setRerenderDaddy]=useState(false)
     //for second graph
     const [graphcontrol2, setGraphControl2] = useState("one");
     const handleChange = (event, newValue) => {
@@ -62,6 +62,16 @@ export default function Result(){
       }, [location]);
 
 
+  
+
+
+      /*
+
+      
+        
+
+
+      */
 
     return(<>
         <Header page="dashboard" login={nameSurname}/>
@@ -458,16 +468,18 @@ export default function Result(){
                                         location.state.catalogExtra.map((catExtra,idx)=>{
                                             console.log("catalogExtraFULL: ",location.state.catalogExtra);
                                             console.log("catExtra: ",catExtra)
+                                            
                                             return(<>
                                                 <Grid item xs>
-                                                    <NetworkGraph width="100%" height="100%" concept={location.state.concept} conceptExtra={catExtra} idx={idx} graphcontrol={graphcontrol2}/>
+                                                    <NetworkGraph width="100%" height="100%" setRerenderDaddy = {setRerenderDaddy} concept={location.state.concept} conceptExtra={catExtra} idx={idx} graphcontrol={graphcontrol2}/>
                                                 </Grid>
                                                 <Divider orientation="vertical" variant="middle" flexItem  />
                                             </>
                                             );
                                         })
+                                       
                                     }
-                            <NetworkGraph width="100%" height="100%"/>
+                         
                                 </Grid>
                             </Box>
                         </Grid>
@@ -629,6 +641,9 @@ export default function Result(){
                 </Typography>
             </Grid>
         </Grid>
+        {
+            
+        }
     
     </>);
 }

@@ -565,11 +565,7 @@ def get_history():
     video_title_list = []
     print("GET HISTORY")
     for i in student.video_history_list:
-        try:
-            video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-            print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-        except Exception:
-            pass
+        video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
     return (jsonify({'email': student.email, 'videoHistory' : student.video_history_list, 'videoHistoryTitles': video_title_list}), 201)
 """
   video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
@@ -585,14 +581,14 @@ def get_history():
 
 # used in the function above to get youtube video title based on their id
 def get_video_title_from_url(video_id):
-    print("GET VIDEO: ",video_id)
+    #print("GET VIDEO: ",video_id)
     params = {"format": "json", "url": "https://www.youtube.com/watch?v=%s" % video_id}
     url = "https://www.youtube.com/oembed"
     query_string = urllib.parse.urlencode(params)
     url = url + "?" + query_string
-    print("url ",url)
+    #print("url ",url)
 
-    print("dopo")
+    #print("dopo")
     with urllib.request.urlopen(url) as response:
         response_text = response.read()
         data = json.loads(response_text.decode())
@@ -871,7 +867,6 @@ def GetVideoTypeAndPrerequisite():
 def ConceptVideoData(video_id, concept_searched):
    
     # retrieve from mongodb collection=graphs the all elements with the value of video_id
-    dbsparql = client.edurell
     collection = dbsparql.graphs
     
     # initialize the dicitonary where we save our results
@@ -951,10 +946,10 @@ def ConceptVideoData(video_id, concept_searched):
             print("\n")
             # Query the concept timeline and duration
             if document["graph"]=="":
-                print("\nIGNORE GRAPH: ",document["graph"]," ",video_id," idx: ",idx)
+                print("\nIGNORE GRAPH: ")
                 continue
             if document["conceptVocabulary"] == "":
-                print("\nIGNORE CONCEPT: ",document["conceptVocabulary"]," ",video_id," idx: ",idx)
+                print("\nIGNORE CONCEPT: ")
                 continue
             gr.parse(data=json.dumps(document["graph"]), format='json-ld')
 
@@ -974,15 +969,14 @@ def ConceptVideoData(video_id, concept_searched):
 
                 SELECT DISTINCT ?created
                 WHERE{
-
-
                         ?who oa:motivatedBy oa:describing.
                         ?who dcterms:created ?created.
+                        ?who a oa:Annotation.
+                        ?who oa:hasBody ?c_id.
+                        ?c_id skos:prefLabel ?c_selected.
                 }
-
-
     """
-    qres = gr.query(qr)
+    qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
     print("query created")
     print("qres: ",len(qres))
     for row in qres:
@@ -1145,7 +1139,7 @@ def ConceptVideoData(video_id, concept_searched):
     for VTSdoc in VTS:
         print(VTSdoc.video_id)
         print(VTSdoc.video_slidishness)
-        result['video_slidishness'] = VTSdoc.video_slidishness
+        result['video_slidishness'] = str(VTSdoc.video_slidishness)
 
     print(result)
     return result

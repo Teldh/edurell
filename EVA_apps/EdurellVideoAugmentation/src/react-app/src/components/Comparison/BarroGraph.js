@@ -47,7 +47,7 @@ export default function Barro(){
     return(<>
     
         <Bar
-        style={{width:"auto",height:"100%"}}
+        style={{width:"auto",height:"500px"}}
         data={data}
         options={options}
         >
