@@ -417,11 +417,18 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
                                                             alignItems="flex-start"
                                                             id="lista di concetti"
                                                             >
-                                                                {concepts.map(keyword=>
+                                                               
+                                                                {(conceptextra[0]!=undefined&& conceptextra[0].list_derivatedconcept.length>0)?
+                                                                conceptextra[0].list_derivatedconcept.map(keyword=>
                                                                     <Grid item xs="auto" key={keyword} sx={{m:0.2}}>
-                                                                        <Chip label={keyword} size="small" color="primary" />
+                                                                        <Chip label={keyword} size="small" color="primary"/>
                                                                     </Grid>
-                                                                )}
+                                                                ):
+                                                                <Grid item xs="auto" sx={{m:0.2}}>
+                                                                        <Chip label="empty" size="small" color="primary"/>
+                                                                    </Grid>
+                                                                
+                                                                }
                                                             </Grid>
                                                         </Grid>
                                                     </Grid>
