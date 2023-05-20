@@ -46,7 +46,7 @@ const ExpandMore = styled((props) => {
       duration: theme.transitions.duration.shortest,
     }),
 }));
-export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator}){
+export default function VideoFiltered({UpdateCatalogExtra, tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator}){
     const [expanded2, setExpanded2] = useState(false);
     const handleExpandClick2 = () => {
         setExpanded2(!expanded2);
@@ -74,7 +74,9 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
     };
     //console.log("videofitlered ",conceptextra, " ", conceptextra[0])
     let duration=0
+    let durationSeconds =0;
     let approfondimenti=0
+    let approfondimentiSeconds=0;
     let duratatot=0
     let slidishness=0
 
@@ -123,7 +125,7 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
             duration = duration+resultseconds;
         }
 
-        
+        durationSeconds = duration;
         let hours = Math.floor(duration /3600)
         //console.log("hour: ",hours," remain: ",Math.abs(hours - (duration /3600)))
         let remainminutes = Math.abs(hours - (duration /3600))
@@ -166,7 +168,7 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
             approfondimenti = approfondimenti+resultseconds;
 
         }
-
+        approfondimentiSeconds = approfondimenti;
         let hours = Math.floor(approfondimenti /3600)
         //console.log("hour: ",hours," remain: ",Math.abs(hours - (approfondimenti /3600)))
         let remainminutes = Math.abs(hours - (approfondimenti /3600))
@@ -177,7 +179,7 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
        // console.log("seconds: ",seconds);
        // console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
         approfondimenti = hours+":"+minutes+":"+Math.floor(seconds)
-
+        
     }
     return(
         <>
@@ -224,7 +226,7 @@ export default function VideoFiltered({tottime, conceptextra, titleurl,imageurl,
                             height:"auto"}}
                         onMouseEnter={()=>setHoverm(true)}
                         onMouseLeave={()=>setHoverm(false)}
-                        onClick={e => {e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);}}
+                        onClick={e => {e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);UpdateCatalogExtra(imageurl, durationSeconds, approfondimentiSeconds);}}
                 
                 >
                     {

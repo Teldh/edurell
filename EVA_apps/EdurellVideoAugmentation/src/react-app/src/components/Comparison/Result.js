@@ -65,13 +65,6 @@ export default function Result(){
   
 
 
-      /*
-
-      
-        
-
-
-      */
 
     return(<>
         <Header page="dashboard" login={nameSurname}/>
@@ -333,7 +326,7 @@ export default function Result(){
                             >
                             {/*INSERT GRAPH HERE */}
                             
-                                <Barro/>    
+                                <Barro catalog={location.state.catalog} catalogExtra={location.state.catalogExtra}/>    
                             </Box>
                         </Grid>
                         <Grid item sx={{m:5}}>

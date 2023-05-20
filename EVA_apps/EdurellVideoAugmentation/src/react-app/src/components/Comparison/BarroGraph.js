@@ -20,21 +20,29 @@ ChartJS.register(
     Legend
 )
 
-export default function Barro(){
+export default function Barro({catalog, catalogExtra}){
+    
     const data = {
         labels: ['lun','mar','mer'],
         datasets:[
             {
-                label:'369',
-                data:[3,6,1],
+                label:'video intero',
+                data:catalog.map(video=>video.duration),
                 backgroundColor:'aqua',
                 borderColor: 'black',
                 borderWidth: 1,
             },
             {
-                label:'"asd"',
-                data:[1,2,3],
+                label:'definizione',
+                data:catalogExtra.map(video=>video.conceptLength),
                 backgroundColor:'green',
+                borderColor: 'black',
+                borderWidth: 1,
+            },
+            {
+                label:'approfondimento',
+                data: catalogExtra.map(video=>video.derivatedLength),
+                backgroundColor:'red',
                 borderColor: 'black',
                 borderWidth: 1,
             },
@@ -47,7 +55,7 @@ export default function Barro(){
     return(<>
     
         <Bar
-        style={{width:"auto",height:"500px"}}
+        style={{width:"10px",height:"50px"}}
         data={data}
         options={options}
         >

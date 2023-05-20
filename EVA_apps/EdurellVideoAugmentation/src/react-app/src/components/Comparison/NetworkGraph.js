@@ -45,7 +45,7 @@ export default function Example({ width, height, concept, conceptExtra, idx, gra
     if(concept==undefined || conceptExtra == undefined){
         return;
     }
-    console.log("NETWORK: ",concept," ",conceptExtra)
+
     let prenodes = []
     if(conceptExtra["list_preconcept"].length > 0){
         for(let i=0; i<conceptExtra["list_preconcept"].length; i++){
@@ -79,13 +79,7 @@ export default function Example({ width, height, concept, conceptExtra, idx, gra
         links
     }
 
-    const handleDrag = (e, { deltaX, deltaY }) => {
-        console.log("DRAGGING")
-        setGraphPosition((prevPosition) => ({
-          x: prevPosition.x + deltaX,
-          y: prevPosition.y + deltaY,
-        }));
-      };
+   
   return (<>
   <svg
       ref={svgRef}

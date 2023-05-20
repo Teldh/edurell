@@ -606,6 +606,22 @@ export default function Comparison(){
           }
         },
       });
+    
+      function UpdateCatalogExtra(video_id, conceptLength, derivatedLength){
+        console.log("UPDATECATALOGEXTRA")
+        let newcatalogExtra = catalogExtra.map(video=>{
+          if(video.video_id == video_id){
+            video["conceptLength"] = conceptLength;
+            video["derivatedLength"] = derivatedLength;
+            return video
+          }else{
+            return video
+          }
+          
+        })
+
+        SetCatalogExtra(newcatalogExtra);
+      }
       
     return(
         <>
@@ -618,7 +634,7 @@ export default function Comparison(){
             <>
             <Querybar catalog = {catalog} catalogExtra = {catalogExtra} ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>
-            <Listvideo catalogExtra={catalogExtra} catalog={catalog} loading={loading} querylist={querylist} catalogoriginal={catalogoriginal}/>
+            <Listvideo UpdateCatalogExtra={UpdateCatalogExtra}  catalogExtra={catalogExtra} catalog={catalog} loading={loading} querylist={querylist} catalogoriginal={catalogoriginal}/>
             </>
             
         </ContextComparison.Provider>

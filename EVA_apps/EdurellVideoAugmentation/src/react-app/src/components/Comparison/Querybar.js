@@ -16,7 +16,7 @@ import Box from '@mui/material/Box';
 import Filters from './Filters.js'
 import EastIcon from '@mui/icons-material/East';
 import { useHistory } from "react-router-dom";
-export default function Querybar({catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
+export default function Querybar({ catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
     
     const history = useHistory();
     function GoToComparisonResult(){
