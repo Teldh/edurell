@@ -50,31 +50,19 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
                 label:'video intero',
                 data:catalog.map(video=>video.duration),
                 backgroundColor:"white",
-                borderColor: graphcontrol=="two"||graphcontrol=="three"?"grey":["red","blue","purple","green"],
+                borderColor: graphcontrol=="two"?"grey":["red","blue","purple","green"],
                 borderWidth: 5,
             },
             {
-                label:'definizione',
-                data:catalogExtra.map(video=>video.conceptLength),
-                backgroundColor:graphcontrol=="three" || graphcontrol=="four"?"grey":["red","blue","purple","green"],
+                label:'slide',
+                data:catalogExtra.map(video=>video.video_slidishness*catalog.filter(cat=>cat.video_id == video.video_id)[0].duration),
+                backgroundColor:graphcontrol=="three"?"grey":["red","blue","purple","green"],
             },
-            {
-                label:'approfondimento',
-                data: catalogExtra.map(video=>video.derivatedLength),
-                backgroundColor:graphcontrol=="two"||graphcontrol =="four"?createDiagonalPattern('grey'):[createDiagonalPattern('red'),createDiagonalPattern('blue'),createDiagonalPattern('purple'),createDiagonalPattern('green')],
-                borderColor: graphcontrol=="two" || graphcontrol=="four"?"grey":["red","blue","purple","green"],
-                borderWidth: 5,
-            },
+       
         ]
     }
 
     const options ={
-       
-            labels: {
-                fontColor: "blue",
-                fontSize: 18
-            },
-        
         responsive: true, // Abilita la risposta al ridimensionamento
         maintainAspectRatio: false, // Disabilita il mantenimento dell'aspect ratio
         // Imposta le dimensioni desiderate

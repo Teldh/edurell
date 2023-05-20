@@ -44,12 +44,25 @@ import Popper from '@mui/material/Popper';
 import { useHistory } from "react-router-dom";
 import NetworkGraph from './NetworkGraph.js';
 import Barro from './BarroGraph.js';
+import Barro2 from './BarroGraph2.js';
 export default function Result(){
-    const [rerenderdaddy, setRerenderDaddy]=useState(false)
+
+    //for first graph
+    const [graphcontrol1, setGraphControl1] = useState("one");
+    const handleChange1 = (event, newValue) => {
+        setGraphControl1(newValue);
+      };
+
     //for second graph
     const [graphcontrol2, setGraphControl2] = useState("one");
-    const handleChange = (event, newValue) => {
+    const handleChange2 = (event, newValue) => {
         setGraphControl2(newValue);
+      };
+
+    //for third graph
+    const [graphcontrol3, setGraphControl3] = useState("one");
+    const handleChange3 = (event, newValue) => {
+        setGraphControl3(newValue);
       };
 
     const context = useContext(TokenContext);
@@ -291,25 +304,29 @@ export default function Result(){
                                     spacing={2}
                                     >
                                         <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Riepilogo
-                                            </Typography>
+                                        <Tabs
+                                        value={graphcontrol1}
+                                        onChange={handleChange1}
+                                        textColor="secondary"
+                                        indicatorColor="secondary"
+                                        aria-label="secondary tabs example"
+                                       
+                                    >
+                                        <Tab value="one" label={<Typography variant="caption" display="block" gutterBottom>
+                                            Riepilogo
+                                        </Typography>} />
+                                        <Tab value="two" label={<Typography variant="caption" display="block" gutterBottom>
+                                            Definizione
+                                        </Typography>} />
+                                        <Tab value="three" label={<Typography variant="caption" display="block" gutterBottom>
+                                            Approfondimento
+                                        </Typography>}/>
+                                        <Tab value="four" label={<Typography variant="caption" display="block" gutterBottom>
+                                            Video Intero
+                                        </Typography>}/>
+                                    </Tabs>
                                         </Grid>
-                                        <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Definizione
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Approfondimento
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Video Intero
-                                            </Typography>
-                                        </Grid>
+                                        
                                     </Grid>
                                 </Grid>
                             </Grid>
@@ -326,7 +343,7 @@ export default function Result(){
                             >
                             {/*INSERT GRAPH HERE */}
                             
-                                <Barro catalog={location.state.catalog} catalogExtra={location.state.catalogExtra}/>    
+                                <Barro catalog={location.state.catalog} catalogExtra={location.state.catalogExtra} graphcontrol ={graphcontrol1}/>    
                             </Box>
                         </Grid>
                         <Grid item sx={{m:5}}>
@@ -412,7 +429,7 @@ export default function Result(){
                                         <Grid item>
                                         <Tabs
                                         value={graphcontrol2}
-                                        onChange={handleChange}
+                                        onChange={handleChange2}
                                         textColor="secondary"
                                         indicatorColor="secondary"
                                         aria-label="secondary tabs example"
@@ -464,7 +481,7 @@ export default function Result(){
                                             
                                             return(<>
                                                 <Grid item xs>
-                                                    <NetworkGraph width="100%" height="100%" setRerenderDaddy = {setRerenderDaddy} concept={location.state.concept} conceptExtra={catExtra} idx={idx} graphcontrol={graphcontrol2}/>
+                                                    <NetworkGraph width="100%" height="100%" concept={location.state.concept} conceptExtra={catExtra} idx={idx} graphcontrol={graphcontrol2}/>
                                                 </Grid>
                                                 <Divider orientation="vertical" variant="middle" flexItem  />
                                             </>
@@ -556,24 +573,25 @@ export default function Result(){
                                     spacing={2}
                                     >
                                         <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Riepilogo
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Definizione
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Approfondimento
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
-                                                Video Intero
-                                            </Typography>
+                                        <Tabs
+                                        value={graphcontrol3}
+                                        onChange={handleChange3}
+                                        textColor="secondary"
+                                        indicatorColor="secondary"
+                                        aria-label="secondary tabs example"
+                                       
+                                    >
+                                        <Tab value="one" label={<Typography variant="caption" display="block" gutterBottom>
+                                            Riepilogo
+                                        </Typography>} />
+                                        <Tab value="two" label={<Typography variant="caption" display="block" gutterBottom>
+                                            Slide
+                                        </Typography>} />
+                                        <Tab value="three" label={<Typography variant="caption" display="block" gutterBottom>
+                                            Video Intero
+                                        </Typography>}/>
+                                
+                                    </Tabs>
                                         </Grid>
                                     </Grid>
                                 </Grid>
@@ -590,6 +608,7 @@ export default function Result(){
                             }}
                             >
                             {/*INSERT GRAPH HERE */}
+                            <Barro2 catalog={location.state.catalog} catalogExtra={location.state.catalogExtra} graphcontrol = {graphcontrol3}/>
                             </Box>
                         </Grid>
                         <Grid item sx={{m:5}}>
