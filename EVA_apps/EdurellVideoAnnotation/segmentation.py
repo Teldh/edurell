@@ -1242,32 +1242,72 @@ class VideoAnalyzer:
             hours = str(int(time/3600))
             return hours+':'+minutes+':'+seconds+'.'+millisec
 
-        # creating or modifying burst_concept_objects of the video results 
+        # Creating or modifying burst_concept definition of the video results 
         added_concepts = []
-        for dict_num,concepts_video_dict in enumerate([video_defs,video_in_depths]):
-            concepts_used = {concept:False for concept in concepts_video_dict.keys()}
-            concept_description_type = 'Definition' if dict_num == 0 else 'In Depth'
-            for burst_concept in burst_concepts:
-                if burst_concept["concept"] in concepts_video_dict.keys() and burst_concept["description_type"] == concept_description_type:
-                    if burst_concept["start_sent_id"] != concepts_video_dict[burst_concept["concept"]][0][0] or \
-                       burst_concept["end_sent_id"] != concepts_video_dict[burst_concept["concept"]][-1][0]:
-                        
-                        burst_concept['start_sent_id'] = concepts_video_dict[burst_concept["concept"]][0][0]
-                        burst_concept['end_sent_id'] = concepts_video_dict[burst_concept["concept"]][-1][0]
-                        burst_concept['start'] = seconds_to_h_mm_ss_dddddd(concepts_video_dict[burst_concept["concept"]][0][1]["start"])
-                        burst_concept['end'] = seconds_to_h_mm_ss_dddddd(concepts_video_dict[burst_concept["concept"]][-1][1]["end"])
-                        burst_concept['creator'] = "Video_Analysis"
-                        concepts_used[burst_concept["concept"]] = True
+        concepts_used = {concept:False for concept in video_defs.keys()}
+        concept_description_type = "Definition"
+        for burst_concept in burst_concepts:
+            if burst_concept["concept"] in video_defs.keys() and burst_concept["description_type"] == concept_description_type:
 
-            for concept_name in concepts_video_dict.keys():
-                if not concepts_used[concept_name]:
-                    burst_concepts.append({ 'concept':concept_name,
-                                            'start_sent_id':concepts_video_dict[concept_name][0][0],
-                                            'end_sent_id':concepts_video_dict[concept_name][-1][0],
-                                            'start':seconds_to_h_mm_ss_dddddd(concepts_video_dict[concept_name][0][1]['start']),
-                                            'end':seconds_to_h_mm_ss_dddddd(concepts_video_dict[concept_name][-1][1]["end"]),
-                                            'description_type':concept_description_type,
-                                            'creator':'Video_Analysis'})
+                if burst_concept["start_sent_id"] != video_defs[burst_concept["concept"]][0][0] or \
+                   burst_concept["end_sent_id"] != video_defs[burst_concept["concept"]][-1][0]:
+                    burst_concept_name = burst_concept['concept']
+                    burst_concept['start_sent_id'] = video_defs[burst_concept_name][0][0]
+                    burst_concept['end_sent_id'] = video_defs[burst_concept_name][-1][0]
+                    burst_concept['start'] = seconds_to_h_mm_ss_dddddd(video_defs[burst_concept_name][0][1]["start"])
+                    burst_concept['end'] = seconds_to_h_mm_ss_dddddd(video_defs[burst_concept_name][-1][1]["end"])
+                    burst_concept['creator'] = "Video_Analysis"
+                    concepts_used[burst_concept_name] = True
+        
+        for concept_name in video_defs.keys():
+            if not concepts_used[concept_name]:
+                burst_concepts.append({ 'concept':concept_name,
+                                        'start_sent_id':video_defs[concept_name][0][0],
+                                        'end_sent_id':video_defs[concept_name][-1][0],
+                                        'start':seconds_to_h_mm_ss_dddddd(video_defs[concept_name][0][1]['start']),
+                                        'end':seconds_to_h_mm_ss_dddddd(video_defs[concept_name][-1][1]["end"]),
+                                        'description_type':concept_description_type,
+                                        'creator':'Video_Analysis'})
+                if not concept_name in added_concepts:
+                    added_concepts.append(concept_name)
+
+        # In Depths must be managed differently since there can be more than one
+        concepts_used = {concept:False for concept in video_in_depths.keys()}
+        concept_description_type = "In Depth"
+        for video_concept_name in video_in_depths.keys():
+            most_proximal = {'found':False}
+            for id_, burst_concept in reversed(list(enumerate(burst_concepts))):
+                
+                if burst_concept["concept"] == video_concept_name and burst_concept["description_type"] == concept_description_type:
+                    if not most_proximal["found"]:
+                        most_proximal['found'] = True
+                        most_proximal["id"] = id_
+                        most_proximal['diff_start_sent_id'] = abs(burst_concept['start_sent_id']-video_in_depths[video_concept_name][0][0])
+                        most_proximal['diff_end_sent_id'] = abs(burst_concept['end_sent_id']-video_in_depths[video_concept_name][-1][0])
+                    else:
+                        if most_proximal['diff_start_sent_id'] > abs(burst_concept['start_sent_id']-video_in_depths[video_concept_name][0][0]):
+                            most_proximal["id"] = id_
+                            most_proximal['diff_start_sent_id'] = abs(burst_concept['start_sent_id']-video_in_depths[video_concept_name][0][0])
+                            most_proximal['diff_end_sent_id'] = abs(burst_concept['end_sent_id']-video_in_depths[video_concept_name][-1][0])
+                
+                elif most_proximal['found'] and burst_concept["concept"] != video_concept_name:
+                    target_concept = burst_concepts[most_proximal['id']]
+                    target_concept['start'] = seconds_to_h_mm_ss_dddddd(video_in_depths[video_concept_name][0][1]["start"])
+                    target_concept['end'] = seconds_to_h_mm_ss_dddddd(video_in_depths[video_concept_name][-1][1]["end"])
+                    target_concept['start_sent_id'] = video_in_depths[video_concept_name][0][0]
+                    target_concept['end_sent_id'] = video_in_depths[video_concept_name][-1][0]
+                    target_concept['creator'] = 'Video_Analysis'
+                    break
+                
+            if not most_proximal['found']:
+                burst_concepts.append({ 'concept':video_concept_name,
+                                        'start_sent_id':video_in_depths[video_concept_name][0][0],
+                                        'end_sent_id':video_in_depths[video_concept_name][-1][0],
+                                        'start':seconds_to_h_mm_ss_dddddd(video_in_depths[video_concept_name][0][1]['start']),
+                                        'end':seconds_to_h_mm_ss_dddddd(video_in_depths[video_concept_name][-1][1]["end"]),
+                                        'description_type':concept_description_type,
+                                        'creator':'Video_Analysis'})
+                if not concept_name in added_concepts:
                     added_concepts.append(concept_name)
                     
         return added_concepts,burst_concepts
