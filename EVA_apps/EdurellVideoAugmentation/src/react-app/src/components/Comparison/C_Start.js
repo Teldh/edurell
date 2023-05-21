@@ -138,7 +138,7 @@ export default function C_Start({Endcstart}){
                     }}>
                         Edurell
                 </Typography>
-                    <FlowChart/>
+       
                 <Autocomplete
                 
                     id="free-solo-demo"

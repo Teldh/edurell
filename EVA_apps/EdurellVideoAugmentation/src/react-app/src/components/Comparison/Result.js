@@ -31,7 +31,7 @@ import {TokenContext} from '../account-management/TokenContext';
 import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-
+import FlowChart from './FlowChart.js'
 import {
     Link,
     Redirect,
