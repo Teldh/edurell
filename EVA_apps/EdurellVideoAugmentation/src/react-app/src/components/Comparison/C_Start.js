@@ -22,7 +22,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import Popper from '@mui/material/Popper';
 import { useHistory } from "react-router-dom";
 import Box from '@mui/material/Box';
-
+import FlowChart from './FlowChart.js'
 export default function C_Start({Endcstart}){
     const context = useContext(TokenContext);
     const nameSurname  = context.nameSurname;
@@ -138,7 +138,7 @@ export default function C_Start({Endcstart}){
                     }}>
                         Edurell
                 </Typography>
-        
+                    <FlowChart/>
                 <Autocomplete
                 
                     id="free-solo-demo"

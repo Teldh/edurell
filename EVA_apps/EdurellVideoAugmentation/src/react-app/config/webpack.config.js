@@ -393,7 +393,7 @@ module.exports = function (webpackEnv) {
             // The preset includes JSX, Flow, TypeScript, and some ESnext features.
             {
               test: /\.(js|mjs|jsx|ts|tsx)$/,
-              include: paths.appSrc,
+              include: [paths.appSrc,/node_modules[\\/]@?reactflow/],
               loader: require.resolve('babel-loader'),
               options: {
                 customize: require.resolve(
@@ -438,6 +438,7 @@ module.exports = function (webpackEnv) {
             {
               test: /\.(js|mjs)$/,
               exclude: /@babel(?:\/|\\{1,2})runtime/,
+              include: /node_modules[\\/]@?reactflow/,
               loader: require.resolve('babel-loader'),
               options: {
                 babelrc: false,
