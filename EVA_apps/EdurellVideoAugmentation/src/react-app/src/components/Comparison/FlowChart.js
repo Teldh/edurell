@@ -6,9 +6,14 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   Background, 
-  MarkerType 
+  MarkerType,
+  MiniMap,
+  Controls,
+  ReactFlowProvider,
+  useReactFlow 
 } from 'reactflow';
 import dagre from 'dagre';
+
 
 
 import 'reactflow/dist/style.css';
@@ -50,12 +55,20 @@ const getLayoutedElements = (nodes, edges, direction = 'TB') => {
 
   return { nodes, edges };
 };
-
-
+const nodeColor = (node) => {
+    switch (node.type) {
+      case 'input':
+        return '#6ede87';
+      case 'output':
+        return '#6865A5';
+      default:
+        return '#ff0072';
+    }
+  };
 
 const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
 
-    
+
     const position = { x: 0, y: 0 };
 
     let prenodes = []
@@ -77,7 +90,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
 
     if(conceptExtra["list_derivatedconcept"].length>0){
         for(let i=0; i<conceptExtra["list_derivatedconcept"].length; i++){
-            dernodes=[...dernodes,{
+            postnodes=[...postnodes,{
                 id:flowidx++,
                 type:'output',
                 data:{label:conceptExtra["list_derivatedconcept"][i]},
@@ -140,17 +153,22 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
   );
 
   return (
+    <ReactFlowProvider>
     <ReactFlow
       nodes={nodes}
       edges={edges}
 
       fitView
     >
+        <MiniMap nodeColor={nodeColor} nodeStrokeWidth={3} zoomable pannable />
+        <Background color="#ccc" variant="cross" />
+        <Controls />
       <Panel position="top-right">
         <button onClick={() => onLayout('TB')}>vertical layout</button>
         <button onClick={() => onLayout('LR')}>horizontal layout</button>
       </Panel>
     </ReactFlow>
+    </ReactFlowProvider>
   );
 };
 

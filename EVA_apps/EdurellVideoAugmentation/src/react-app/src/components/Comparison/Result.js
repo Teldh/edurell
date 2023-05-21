@@ -32,6 +32,7 @@ import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import FlowChart from './FlowChart.js'
+import ReactFlow, { ReactFlowProvider, useReactFlow } from 'reactflow';
 import {
     Link,
     Redirect,
@@ -481,7 +482,9 @@ export default function Result(){
                                             
                                             return(<>
                                                 <Grid item xs>
-                                                    <NetworkGraph width="100%" height="100%" concept={location.state.concept} conceptExtra={catExtra} idx={idx} graphcontrol={graphcontrol2}/>
+                                           
+                                                    <FlowChart concept={location.state.concept} conceptExtra={catExtra} idx={idx} graphcontrol={graphcontrol2}/>
+                                               
                                                 </Grid>
                                                 <Divider orientation="vertical" variant="middle" flexItem  />
                                             </>
