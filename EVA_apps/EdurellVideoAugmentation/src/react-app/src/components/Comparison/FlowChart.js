@@ -68,6 +68,12 @@ const nodeColor = (node) => {
 
 const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
 
+    const colorPick=[
+      "red",
+      "blue",
+      "purple",
+      "green"
+  ]
 
     const position = { x: 0, y: 0 };
 
@@ -89,6 +95,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
                 type:'input',
                 data:{label:conceptExtra["list_preconcept"][i]},
                 position,
+                style:{backgroundColor:"white", borderColor:graphcontrol=="three"?"grey":colorPick[idx], borderWidth:"2px",fontWeight:"bold"}
             }];
             prenodesnote=[...prenodesnote,conceptExtra["list_prenotes"][i]]
         }
@@ -101,6 +108,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
                 type:'output',
                 data:{label:conceptExtra["list_derivatedconcept"][i]},
                 position,
+                style:{backgroundColor:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx],borderStyle:"dashed", borderWidth:"2px",fontWeight:"bold"}
             }];
             postnodesnote=[...postnodesnote,conceptExtra["list_postnotes"][i]]
         }    
@@ -110,6 +118,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
         id:"conceptSelected",
         data:{label:concept},
         position,
+        style:{backgroundColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], color:"white", borderColor:colorPick[idx], fontWeight:"bold"}
     }]
 
     for(let i=0; i<prenodes.length; i++){
@@ -118,10 +127,11 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
             source:prenodes[i].id,
             target:"conceptSelected",
             markerEnd:{
-                type: MarkerType.Arrow,
+                type: MarkerType.ArrowClosed,
+                
             },
             style: {
-              strokeWidth: prenodesnote[i]=="strongPrerequisite"? 2:1
+              strokeWidth: prenodesnote[i]=="strongPrerequisite"?5:1
             }
         }]
     }
@@ -132,10 +142,11 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
             source:"conceptSelected",
             target:postnodes[i].id,
             markerEnd:{
-                type: MarkerType.Arrow,
+                type: MarkerType.ArrowClosed,
+
             },
             style:{
-              strokeWidth: postnodesnote[i]=="strongPrerequisite"?2:1
+              strokeWidth: postnodesnote[i]=="strongPrerequisite"?5:1
             }
         }]
     }
@@ -166,22 +177,22 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
   );
 
   return (
-    <ReactFlowProvider>
+
     <ReactFlow
       nodes={nodes}
       edges={edges}
-
+      id={idx}
       fitView
     >
         <MiniMap nodeColor={nodeColor} nodeStrokeWidth={3} zoomable pannable />
-        <Background color="#ccc" variant="cross" />
+
         <Controls />
       <Panel position="top-right">
         <button onClick={() => onLayout('TB')}>vertical layout</button>
         <button onClick={() => onLayout('LR')}>horizontal layout</button>
       </Panel>
     </ReactFlow>
-    </ReactFlowProvider>
+
   );
 };
 
