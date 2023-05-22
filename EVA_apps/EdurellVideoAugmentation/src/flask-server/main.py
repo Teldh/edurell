@@ -565,11 +565,7 @@ def get_history():
     video_title_list = []
     print("GET HISTORY")
     for i in student.video_history_list:
-        try:
-            video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-            print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-        except Exception:
-            pass
+        print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
     return (jsonify({'email': student.email, 'videoHistory' : student.video_history_list, 'videoHistoryTitles': video_title_list}), 201)
 """
   video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
@@ -881,6 +877,7 @@ def ConceptVideoData(video_id, concept_searched):
         'explain':[],
         'list_preconcept': [],
         'list_prenotes':[],
+        'list_postnodes':[],
         'list_derivatedconcept':[],
         'derivatedconcept_starttime':[],
         'derivatedconcept_endtime':[]
@@ -1074,7 +1071,7 @@ def ConceptVideoData(video_id, concept_searched):
                 PREFIX dcterms: <http://purl.org/dc/terms/>
                 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-                SELECT ?c_derivated
+                SELECT ?c_derivated ?postnode
                 WHERE{
                         ?who oa:hasBody ?c_id.
                         ?c_id skos:prefLabel ?c_selected.
@@ -1082,6 +1079,7 @@ def ConceptVideoData(video_id, concept_searched):
                         ?who oa:hasTarget ?target.
                         ?target dcterms:subject ?c_derivatedIRI.
                         ?c_derivatedIRI skos:prefLabel ?c_derivated.
+                        ?who skos:note ?postnode
                 }
 
 
@@ -1098,6 +1096,7 @@ def ConceptVideoData(video_id, concept_searched):
         print("b_________________________________________")
         print(row['c_derivated'])
         result['list_derivatedconcept'].append(row['c_derivated'])
+        result['list_postnodes'].append(row['postnode'])
 
     
 
