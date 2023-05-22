@@ -41,10 +41,7 @@ app.config['MONGODB_SETTINGS'] = {
     'host': "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority"
 }
 
-#pymongo db config for query sparql
-client = pymongo.MongoClient(
-        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
-dbsparql = client.edurell
+
 
 #mail server config (gmail account date of birth : 01/01/1900)
 #old: <project.edurell@gmail.com> <work$package>
@@ -869,7 +866,12 @@ def GetVideoTypeAndPrerequisite():
 @app.route('/api/ConceptVideoData/<video_id>/<concept_searched>')
 @auth.login_required
 def ConceptVideoData(video_id, concept_searched):
-   
+    user = "luca"
+    password = "vSmAZ6c1ZOg2IEVw"
+    #pymongo db config for query sparql
+    client = pymongo.MongoClient(
+            "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+    dbsparql = client.edurell
     # retrieve from mongodb collection=graphs the all elements with the value of video_id
     collection = dbsparql.graphs
     
@@ -1041,7 +1043,7 @@ def ConceptVideoData(video_id, concept_searched):
                 PREFIX dcterms: <http://purl.org/dc/terms/>
                 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-                SELECT ?preconcept ?prenote
+                SELECT DISTINCT ?preconcept ?prenote
                 WHERE{
                         ?who oa:hasBody ?preconceptIRI.
                         ?c_id skos:prefLabel ?c_selected.
@@ -1075,7 +1077,7 @@ def ConceptVideoData(video_id, concept_searched):
                 PREFIX dcterms: <http://purl.org/dc/terms/>
                 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-                SELECT ?c_derivated ?postnote
+                SELECT DISTINCT ?c_derivated ?postnote
                 WHERE{
                         ?who oa:hasBody ?c_id.
                         ?c_id skos:prefLabel ?c_selected.

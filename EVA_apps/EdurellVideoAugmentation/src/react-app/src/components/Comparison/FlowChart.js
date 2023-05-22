@@ -67,7 +67,7 @@ const nodeColor = (node) => {
   };
 
 const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
-
+    console.log("GRAPH CONTROL: ",graphcontrol)
     const colorPick=[
       "red",
       "blue",
