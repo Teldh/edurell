@@ -72,8 +72,13 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
     const position = { x: 0, y: 0 };
 
     let prenodes = []
+    let prenodesnote=[]
+
     let initialNodes=[]
+
     let postnodes=[]
+    let postnodesnote=[]
+
     let initialEdges=[]
     let flowidx=0
 
@@ -84,7 +89,8 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
                 type:'input',
                 data:{label:conceptExtra["list_preconcept"][i]},
                 position,
-            }]
+            }];
+            prenodesnote=[...prenodesnote,conceptExtra["list_prenotes"][i]]
         }
     }
 
@@ -95,7 +101,8 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
                 type:'output',
                 data:{label:conceptExtra["list_derivatedconcept"][i]},
                 position,
-            }]
+            }];
+            postnodesnote=[...postnodesnote,conceptExtra["list_postnotes"][i]]
         }    
     }
 
@@ -112,6 +119,9 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
             target:"conceptSelected",
             markerEnd:{
                 type: MarkerType.Arrow,
+            },
+            style: {
+              strokeWidth: prenodesnote[i]=="strongPrerequisite"? 2:1
             }
         }]
     }
@@ -123,6 +133,9 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
             target:postnodes[i].id,
             markerEnd:{
                 type: MarkerType.Arrow,
+            },
+            style:{
+              strokeWidth: postnodesnote[i]=="strongPrerequisite"?2:1
             }
         }]
     }

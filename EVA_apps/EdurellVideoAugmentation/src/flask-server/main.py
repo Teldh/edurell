@@ -877,7 +877,7 @@ def ConceptVideoData(video_id, concept_searched):
         'explain':[],
         'list_preconcept': [],
         'list_prenotes':[],
-        'list_postnodes':[],
+        'list_postnotes':[],
         'list_derivatedconcept':[],
         'derivatedconcept_starttime':[],
         'derivatedconcept_endtime':[]
@@ -1071,7 +1071,7 @@ def ConceptVideoData(video_id, concept_searched):
                 PREFIX dcterms: <http://purl.org/dc/terms/>
                 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-                SELECT ?c_derivated ?postnode
+                SELECT ?c_derivated ?postnote
                 WHERE{
                         ?who oa:hasBody ?c_id.
                         ?c_id skos:prefLabel ?c_selected.
@@ -1079,7 +1079,7 @@ def ConceptVideoData(video_id, concept_searched):
                         ?who oa:hasTarget ?target.
                         ?target dcterms:subject ?c_derivatedIRI.
                         ?c_derivatedIRI skos:prefLabel ?c_derivated.
-                        ?who skos:note ?postnode
+                        ?who skos:note ?postnote
                 }
 
 
@@ -1096,7 +1096,7 @@ def ConceptVideoData(video_id, concept_searched):
         print("b_________________________________________")
         print(row['c_derivated'])
         result['list_derivatedconcept'].append(row['c_derivated'])
-        result['list_postnodes'].append(row['postnode'])
+        result['list_postnotes'].append(row['postnote'])
 
     
 
