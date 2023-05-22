@@ -55,16 +55,6 @@ const getLayoutedElements = (nodes, edges, direction = 'TB') => {
 
   return { nodes, edges };
 };
-const nodeColor = (node) => {
-    switch (node.type) {
-      case 'input':
-        return '#6ede87';
-      case 'output':
-        return '#6865A5';
-      default:
-        return '#ff0072';
-    }
-  };
 
 const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
     console.log("GRAPH CONTROL: ",graphcontrol)
@@ -74,6 +64,18 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
       "purple",
       "green"
   ]
+  const nodeColor = (node) => {
+    switch (node.type) {
+      case 'input':
+        return '#6ede87';
+      case 'output':
+        return '#6865A5';
+      default:
+        return '#ff0072';
+    }
+
+    
+  };
 
     const position = { x: 0, y: 0 };
 
@@ -187,7 +189,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
       fitView
     >
         <MiniMap nodeColor={nodeColor} nodeStrokeWidth={3} zoomable pannable />
-
+        <Background color="black"  variant="cross"/>
         <Controls />
       <Panel position="top-right">
         <button onClick={() => onLayout('TB')}>vertical layout</button>
