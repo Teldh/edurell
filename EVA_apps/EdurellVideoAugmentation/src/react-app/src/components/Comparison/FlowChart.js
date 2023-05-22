@@ -1,4 +1,4 @@
-import React, { useCallback,useState } from 'react';
+import React, { useCallback,useState ,useEffect } from 'react';
 import ReactFlow, {
   addEdge,
   ConnectionLineType,
@@ -161,7 +161,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
 
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
- 
+
   const onLayout = useCallback(
     (direction) => {
       const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
@@ -175,6 +175,8 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
     },
     [nodes, edges]
   );
+  
+
 
   return (
 
