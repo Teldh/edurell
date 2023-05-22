@@ -33,6 +33,17 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import FlowChart from './FlowChart.js'
 import ReactFlow, { ReactFlowProvider, useReactFlow } from 'reactflow';
+import IconButton from '@mui/material/IconButton';
+import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Tooltip from '@mui/material/Tooltip';
+import PersonAdd from '@mui/icons-material/PersonAdd';
+import Settings from '@mui/icons-material/Settings';
+import Logout from '@mui/icons-material/Logout';
 import {
     Link,
     Redirect,
@@ -46,6 +57,33 @@ import { useHistory } from "react-router-dom";
 import NetworkGraph from './NetworkGraph.js';
 import Barro from './BarroGraph.js';
 import Barro2 from './BarroGraph2.js';
+import { styled } from '@mui/material/styles';
+
+
+
+function DP(color = 'black') {
+    // create a 10x10 px canvas for the pattern's base shape
+    let shape = document.createElement('canvas')
+    shape.width = 10
+    shape.height = 10
+    // get the context for drawing
+    let c = shape.getContext('2d')
+    c.lineWidth = 1;
+    // draw 1st line of the shape 
+    c.strokeStyle = color
+    c.beginPath()
+    c.moveTo(2, 0)
+    c.lineTo(10, 8)
+    c.stroke()
+    // draw 2nd line of the shape 
+    c.beginPath()
+    c.moveTo(0, 8)
+    c.lineTo(2, 10)
+    c.stroke()
+    // create the pattern from the shape
+    return c.createPattern(shape, 'repeat')
+  }
+
 export default function Result(){
 
     //for first graph
@@ -76,7 +114,31 @@ export default function Result(){
       }, [location]);
 
 
-  
+    //for legenda1
+    const ExpandMore1 = styled((props) => {
+        const { expand, ...other } = props;
+        return <IconButton {...other} />;
+    })(({ theme, expand }) => ({
+        transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+        margin: '0',
+        padding:'0',
+        transition: theme.transitions.create('transform', {
+          duration: theme.transitions.duration.shortest,
+        }),
+    }));
+    const [expanded1, setExpanded1] = useState(false);
+    const handleExpandClick1 = () => {
+        setExpanded1(!expanded1);
+    };
+    const [anchorEl1, setAnchorEl1] = useState(null);
+    const open1 = Boolean(anchorEl1);
+    const handleClick1 = (event) => {
+        setAnchorEl1(event.currentTarget);
+        handleExpandClick1();
+    };
+    const handleClose1 = () => {
+        setAnchorEl1(null);
+    };
 
 
 
@@ -292,10 +354,145 @@ export default function Result(){
                             sx={{pt:5}}
                             >
                                 <Grid item>
-                                    <Typography variant="caption" display="block" gutterBottom>
+                                    <Chip 
+                                        sx={{width:'auto',
+                                            margin:'5px',
+                                            backgroundColor:"rgb(0,0,0,0)"}}
+                                        
+                                        avatar={<ExpandMore1
+                                            expand={expanded1}
+                                    
+                                            aria-expanded={expanded1}
+                                            aria-label="show more"
+                                            >
+                                                <ExpandMoreIcon />
+                                            </ExpandMore1>}
+                                        label={<Typography variant="caption" display="block" gutterBottom sx={{mt:1}}>
                                         Legenda
-                                    </Typography>
+                                    </Typography>} 
+                                        onClick={handleClick1}
+                                       
+                                    />
+                                    
                                 </Grid>
+                                                    <Menu
+                                                    anchorEl={anchorEl1}
+                                                    id="account-menu"
+                                                    open={open1}
+                                                    onClose={handleClose1}
+                                                    onClick={handleClose1}
+                                                    PaperProps={{
+                                                    elevation: 0,
+                                                    sx: {
+                                                        overflow: 'visible',
+                                                        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                                        mt: 1.5,
+                                                        '& .MuiAvatar-root': {
+                                                        width: 32,
+                                                        height: 32,
+                                                        ml: -0.5,
+                                                        mr: 1,
+                                                        },
+                                                        '&:before': {
+                                                        content: '""',
+                                                        display: 'block',
+                                                        position: 'absolute',
+                                                        top: 0,
+                                                        right: 14,
+                                                        width: 10,
+                                                        height: 10,
+                                                        bgcolor: 'background.paper',
+                                                        transform: 'translateY(-50%) rotate(45deg)',
+                                                        zIndex: 0,
+                                                        },
+                                                    },
+                                                    }}
+                                                    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                                    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                                >
+                                                    <MenuItem>
+                                                        <Typography variant="caption"  gutterBottom>
+                                                            <b>Riepilogo:</b>
+                                                        </Typography>
+                                                    </MenuItem>
+                                                    <MenuItem sx={{mb:0, pb:0}}>
+                                                        <Box sx={{
+                                                            width:"15px",
+                                                            height:"15px",
+                                                            backgroundColor:"red",
+                                                   
+                                                        }}/>
+                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                            Video 1
+                                                        </Typography>
+                                                    </MenuItem>
+                                                    <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                        <Box sx={{
+                                                            width:"15px",
+                                                            height:"15px",
+                                                            backgroundColor:"blue"
+                                                        }}/>
+                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                            Video 2
+                                                        </Typography>
+                                                    </MenuItem>
+                                                    <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                        <Box sx={{
+                                                            width:"15px",
+                                                            height:"15px",
+                                                            backgroundColor:"purple"
+                                                        }}/>
+                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                            Video 3
+                                                        </Typography>
+                                                    </MenuItem>
+                                                    <MenuItem sx={{pt:0, pb:0}}>
+                                                        <Box sx={{
+                                                            width:"15px",
+                                                            height:"15px",
+                                                            backgroundColor:"green"
+                                                        }}/>
+                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                            Video 4
+                                                        </Typography>
+                                                    </MenuItem>
+                                                    <MenuItem sx={{mb:0, pb:0, mt:1}}>
+                                                        <Box sx={{
+                                                            width:"15px",
+                                                            height:"15px",
+                                                            backgroundColor:"white",
+                                                            border: '1px solid gray',
+                                                        }}/>
+                                                        <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+                                                            Video Intero
+                                                        </Typography>
+                                                    </MenuItem>
+                                                    <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                        <Box sx={{
+                                                            width:"15px",
+                                                            height:"15px",
+                                                            backgroundColor:"grey",
+                                                            opacity:"0.8",
+                                                            background:"repeating-linear-gradient( 45deg, black, black 1px, black 1px, white 5px )",
+                                                            border: '1px solid gray',
+                                                        }}/>
+                                                        <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+                                                            Approfondimento
+                                                        </Typography>
+                                                    </MenuItem>
+                                                    <MenuItem sx={{pt:0, mt:0}}>
+                                                        <Box sx={{
+                                                            width:"15px",
+                                                            height:"15px",
+                                                            backgroundColor:"grey",
+                                                            border: '1px solid gray',
+                                                        }}/>
+                                                        <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+                                                            Definizione
+                                                        </Typography>
+                                                    </MenuItem>
+                                                    
+                                                </Menu>
                                 <Grid item>
                                     <Grid
                                     container

@@ -565,7 +565,11 @@ def get_history():
     video_title_list = []
     print("GET HISTORY")
     for i in student.video_history_list:
-        video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
+        try:
+            video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
+            print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
+        except Exception:
+            pass
     return (jsonify({'email': student.email, 'videoHistory' : student.video_history_list, 'videoHistoryTitles': video_title_list}), 201)
 """
   video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
@@ -876,6 +880,7 @@ def ConceptVideoData(video_id, concept_searched):
         'concept_endtime':[],
         'explain':[],
         'list_preconcept': [],
+        'list_prenotes':[],
         'list_derivatedconcept':[],
         'derivatedconcept_starttime':[],
         'derivatedconcept_endtime':[]
@@ -1035,7 +1040,7 @@ def ConceptVideoData(video_id, concept_searched):
                 PREFIX dcterms: <http://purl.org/dc/terms/>
                 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-                SELECT ?preconcept
+                SELECT ?preconcept ?prenote
                 WHERE{
                         ?who oa:hasBody ?preconceptIRI.
                         ?c_id skos:prefLabel ?c_selected.
@@ -1043,6 +1048,7 @@ def ConceptVideoData(video_id, concept_searched):
                         ?who oa:hasTarget ?target.
                         ?target dcterms:subject ?c_id.
                         ?preconceptIRI skos:prefLabel ?preconcept.
+                        ?who skos:note ?prenote.
                 }
 
 
@@ -1054,6 +1060,7 @@ def ConceptVideoData(video_id, concept_searched):
         print("a_________________________________________")
         print(row['preconcept'])
         result['list_preconcept'].append(row['preconcept'])
+        result['list_prenotes'].append(row['prenote'])
 
     print(result)
     
