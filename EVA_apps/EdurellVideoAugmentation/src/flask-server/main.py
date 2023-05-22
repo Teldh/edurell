@@ -586,13 +586,12 @@ def get_video_title_from_url(video_id):
     #print("url ",url)
 
     #print("dopo")
-    try:
-        with urllib.request.urlopen(url) as response:
-            response_text = response.read()
-            data = json.loads(response_text.decode())
-        return data['title']
-    except Exception:
-        return "null"
+
+    with urllib.request.urlopen(url) as response:
+        response_text = response.read()
+        data = json.loads(response_text.decode())
+    return data['title']
+
     
 
 

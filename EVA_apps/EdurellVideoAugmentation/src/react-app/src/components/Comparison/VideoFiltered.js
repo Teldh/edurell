@@ -27,6 +27,7 @@ import { useContext } from 'react';
 import { ContextComparison } from './ContextComparison';
 import CircleIcon from '@mui/icons-material/Circle';
 import {TokenContext} from '../account-management/TokenContext';
+import FlowChart from './FlowChart.js'
 import {
   Link,
   Redirect,
@@ -46,7 +47,7 @@ const ExpandMore = styled((props) => {
       duration: theme.transitions.duration.shortest,
     }),
 }));
-export default function VideoFiltered({UpdateCatalogExtra, tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator}){
+export default function VideoFiltered({catalog, querylist,  UpdateCatalogExtra, tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator}){
     const [expanded2, setExpanded2] = useState(false);
     const handleExpandClick2 = () => {
         setExpanded2(!expanded2);
@@ -649,6 +650,7 @@ export default function VideoFiltered({UpdateCatalogExtra, tottime, conceptextra
                                                 <Grid item>
                                                 <Collapse in={expanded2} timeout="auto" unmountOnExit>
                                                                             INSERT CONCEPTUAL MAP
+                                                                        
                                                     </Collapse>
                                                 </Grid>
                                             </Grid>

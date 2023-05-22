@@ -45,7 +45,7 @@ export default function Listvideo({UpdateCatalogExtra, catalogExtra, catalog,loa
                 return(
                     
                     <Grid key={video._id.$oid} item xs={12} xl={2} md={3} >
-                        <VideoFiltered UpdateCatalogExtra={UpdateCatalogExtra} tottime={video.duration} conceptextra={singlecatExtra} titleurl={video.title} imageurl={video.video_id} idxurl={video._id.$oid} concepts={video.extracted_keywords} creator={video.creator}/>
+                        <VideoFiltered catalog={catalog} querylist={querylist} UpdateCatalogExtra={UpdateCatalogExtra} tottime={video.duration} conceptextra={singlecatExtra} titleurl={video.title} imageurl={video.video_id} idxurl={video._id.$oid} concepts={video.extracted_keywords} creator={video.creator}/>
                     </Grid>
                 );
                 
