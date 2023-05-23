@@ -13,12 +13,14 @@ import ReactFlow, {
   useReactFlow 
 } from 'reactflow';
 import dagre from 'dagre';
+import ELK from "elkjs";
 
 
 
 import 'reactflow/dist/style.css';
 
-const dagreGraph = new dagre.graphlib.Graph();
+/*
+const dagreGraph = new dagre.graphlib.Graph({directed:true,compound:true, multigraph:true});
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
 const nodeWidth = 172;
@@ -26,18 +28,18 @@ const nodeHeight = 36;
 
 const getLayoutedElements = (nodes, edges, direction = 'TB') => {
   const isHorizontal = direction === 'LR';
-  dagreGraph.setGraph({ rankdir: direction });
+  dagreGraph.setGraph({ rankdir: direction , align: "DL"});
 
   nodes.forEach((node) => {
     dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
   });
 
-  edges.forEach((edge) => {
+  edges.forEach((edge,idx) => {
     dagreGraph.setEdge(edge.source, edge.target);
   });
 
   dagre.layout(dagreGraph);
-
+  
   nodes.forEach((node) => {
     const nodeWithPosition = dagreGraph.node(node.id);
     node.targetPosition = isHorizontal ? 'left' : 'top';
@@ -45,6 +47,7 @@ const getLayoutedElements = (nodes, edges, direction = 'TB') => {
 
     // We are shifting the dagre node position (anchor=center center) to the top left
     // so it matches the React Flow node anchor point (top left).
+    
     node.position = {
       x: nodeWithPosition.x - nodeWidth / 2,
       y: nodeWithPosition.y - nodeHeight / 2,
@@ -52,12 +55,17 @@ const getLayoutedElements = (nodes, edges, direction = 'TB') => {
 
     return node;
   });
-
+  console.log("CREANDO NODO: ",dagre.graphlib.json.write(dagreGraph))
   return { nodes, edges };
 };
 
+*/
+
 const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
-    console.log("GRAPH CONTROL: ",graphcontrol)
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
+  const [direction, setDirection] = useState("DOWN")
+    console.log("FLOWCHART", idx)
     const colorPick=[
       "red",
       "blue",
@@ -77,6 +85,51 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
     
   };
 
+  const elk = new ELK();
+    const elkLayout = (nodes,edges,dir) => {
+      console.log("elklayout dir: ",dir)
+     const nodesForElk = nodes.map((node) => {
+      switch(dir){
+        case "LEFT":
+          node.targetPosition="right";
+          node.sourcePosition="left";
+          break;
+        case "RIGHT":
+          node.targetPosition="left";
+          node.sourcePosition="right";
+          break;
+        case "UP":
+          node.targetPosition="bottom";
+          node.sourcePosition="top";
+          break;
+        case "DOWN":
+          node.targetPosition="top";
+          node.sourcePsition="bottom";
+          break;
+      }
+        
+       return {
+         id: node.id,
+         width: 172,
+         height: 36
+       };
+     });
+     const graph = {
+       id: "root",
+       layoutOptions: {
+         "elk.algorithm": "layered",
+         "elk.direction": dir,
+         "nodePlacement.strategy": "SIMPLE"
+       },
+    
+       children: nodesForElk,
+       edges: edges
+     };
+     return elk.layout(graph);
+    };
+
+  useEffect(()=>{
+
     const position = { x: 0, y: 0 };
 
     let prenodes = []
@@ -93,7 +146,8 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
     if(conceptExtra["list_preconcept"].length > 0){
         for(let i=0; i<conceptExtra["list_preconcept"].length; i++){
             prenodes=[...prenodes,{
-                id:flowidx++,
+                id:(flowidx++).toString(),
+                //id:conceptExtra["list_preconcept"][i],
                 type:'input',
                 data:{label:conceptExtra["list_preconcept"][i]},
                 position,
@@ -106,7 +160,8 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
     if(conceptExtra["list_derivatedconcept"].length>0){
         for(let i=0; i<conceptExtra["list_derivatedconcept"].length; i++){
             postnodes=[...postnodes,{
-                id:flowidx++,
+                id:(flowidx++).toString(),
+                //id:conceptExtra["list_derivatedconcept"][i],
                 type:'output',
                 data:{label:conceptExtra["list_derivatedconcept"][i]},
                 position,
@@ -125,7 +180,8 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
 
     for(let i=0; i<prenodes.length; i++){
         initialEdges=[...initialEdges,{
-            id:flowidx++,
+            id:(flowidx++).toString(),
+            //id:prenodes[i].id+"_to_conceptSelected",
             source:prenodes[i].id,
             target:"conceptSelected",
             markerEnd:{
@@ -140,7 +196,8 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
 
     for(let i=0; i<postnodes.length; i++){
         initialEdges=[...initialEdges,{
-            id:flowidx++,
+            id:(flowidx++).toString(),
+            //id:"conceptSelected_to_"+postnodes[i].id,
             source:"conceptSelected",
             target:postnodes[i].id,
             markerEnd:{
@@ -153,17 +210,57 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
         }]
     }
 
-    initialNodes=[...initialNodes,...prenodes,...postnodes]
+    initialNodes=[...prenodes,...initialNodes,...postnodes]
 
+    /*
 
     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
     initialNodes,
-    initialEdges
+    initialEdges,
     );
+    */
 
-  const [nodes, setNodes] = useState(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+ 
+    
+    
 
+
+    elkLayout(initialNodes,initialEdges,direction).then((graph) => {
+      console.log("elklayout first call ",idx)
+      setNodes([...nodesForFlow(graph,initialNodes)]);
+      setEdges([...edgesForFlow(graph)]);
+    });
+
+  },[]);
+    const nodesForFlow = (graph, initialNodes) => {
+      return [
+        ...graph.children.map((node) => {
+          
+          return {
+            ...initialNodes.find((n) => n.id === node.id),
+            position: { x: node.x, y: node.y }
+          };
+        })
+      ];
+    };
+    const edgesForFlow = (graph) => {
+      return graph.edges;
+    };
+
+   
+    
+    
+
+    const onLayout = 
+      (nodes,edges,direction) => {
+        elkLayout(nodes,edges,direction).then((graph) => {
+          console.log("elklayout first call ",idx)
+          setNodes(nodesForFlow(graph,nodes));
+          setEdges(edgesForFlow(graph));
+        });
+      }
+    
+  /*
   const onLayout = useCallback(
     (direction) => {
       const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
@@ -177,27 +274,27 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
     },
     [nodes, edges]
   );
-  
-
+  <button onClick={() => onLayout('TB')}>vertical layout</button>
+        <button onClick={() => onLayout('LR')}>horizontal layout</button>
+*/
 
   return (
-
-    <ReactFlow
+<>    <ReactFlow
       nodes={nodes}
       edges={edges}
       id={idx}
       fitView
     >
-        <MiniMap nodeColor={nodeColor} nodeStrokeWidth={3} zoomable pannable />
-        <Background color="black"  variant="cross"/>
-        <Controls />
+      
       <Panel position="top-right">
-        <button onClick={() => onLayout('TB')}>vertical layout</button>
-        <button onClick={() => onLayout('LR')}>horizontal layout</button>
+        <button onClick={() => {onLayout(nodes,edges,'DOWN')}}>vertical layout</button>
+        <button onClick={() => {onLayout(nodes,edges,'RIGHT')}}>horizontal layout</button>
       </Panel>
     </ReactFlow>
-
+    <b>{direction}</b>
+    </>
   );
 };
+
 
 export default LayoutFlow;

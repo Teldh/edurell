@@ -85,7 +85,7 @@ function DP(color = 'black') {
   }
 
 export default function Result(){
-
+    console.log("RESULT PAGE CALLED")
     //for first graph
     const [graphcontrol1, setGraphControl1] = useState("one");
     const handleChange1 = (event, newValue) => {
@@ -876,6 +876,7 @@ export default function Result(){
                                         location.state.catalogExtra.map((catExtra,idx)=>{
                                             console.log("catalogExtraFULL: ",location.state.catalogExtra);
                                             console.log("catExtra: ",catExtra)
+                                            console.log("otside flowchart: ",idx)
                                             
                                             return(<>
                                                 <Grid item xs>

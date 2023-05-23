@@ -562,11 +562,7 @@ def get_history():
     video_title_list = []
     print("GET HISTORY")
     for i in student.video_history_list:
-        try:
-            video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-            print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-        except Exception:
-            pass
+        print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
     return (jsonify({'email': student.email, 'videoHistory' : student.video_history_list, 'videoHistoryTitles': video_title_list}), 201)
 """
   video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
