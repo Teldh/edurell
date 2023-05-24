@@ -20,6 +20,17 @@ ChartJS.register(
     Legend
 )
 
+function SecondsToTime(secondRaw){
+    let duration = secondRaw
+    let durationSeconds = duration;
+    let hours = Math.floor(duration /3600)
+    let remainminutes = Math.abs(hours - (duration /3600))
+    let minutes = Math.floor(remainminutes * 60);
+    let seconds = Math.abs(minutes - (remainminutes * 60))
+    seconds = seconds*60
+    return duration = (hours<10?("0"+hours):hours).toString()+":"+(minutes<10?("0"+minutes):minutes).toString()+":"+(Math.floor(seconds)<10?("0"+Math.floor(seconds)):Math.floor(seconds)).toString()
+}
+
 export default function Barro({catalog, catalogExtra, graphcontrol}){
     
     const data = {
@@ -58,7 +69,14 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
        scales:{
         x:{
             display:true
-        }
+        },
+        y:{
+            ticks:{
+                callback:function(value,index,ticks){
+                    return SecondsToTime(value)
+                }
+            }
+        },
        },
         responsive: true, // Abilita la risposta al ridimensionamento
         maintainAspectRatio: false, // Disabilita il mantenimento dell'aspect ratio
@@ -75,6 +93,18 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
         plugins: {  // 'legend' now within object 'plugins {}'
             legend: {
                 display: false,
+            },
+            tooltip:{
+                callbacks:{
+                    title:function(context){
+      
+                        return ""
+                    },
+                    label:function(context){
+                        
+                        return " "+context.dataset.label+" "+SecondsToTime(context.parsed.y)
+                    }
+                },
             },
            
           },
