@@ -880,9 +880,9 @@ export default function Result(){
                                             
                                             return(<>
                                                 <Grid item xs>
-                                           
+                                                <ReactFlowProvider>
                                                     <FlowChart concept={location.state.concept} conceptExtra={catExtra} idx={idx} graphcontrol={graphcontrol2}/>
-                                               
+                                                </ReactFlowProvider>
                                                 </Grid>
                                                 <Divider orientation="vertical" variant="middle" flexItem  />
                                             </>

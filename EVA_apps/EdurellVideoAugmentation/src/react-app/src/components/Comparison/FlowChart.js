@@ -1,4 +1,4 @@
-import React, { useCallback,useState ,useEffect } from 'react';
+import React, { useCallback,useState ,useEffect,useRef  } from 'react';
 import ReactFlow, {
   addEdge,
   ConnectionLineType,
@@ -10,7 +10,9 @@ import ReactFlow, {
   MiniMap,
   Controls,
   ReactFlowProvider,
-  useReactFlow 
+  useReactFlow ,
+  ControlButton,
+
 } from 'reactflow';
 import dagre from 'dagre';
 import ELK from "elkjs";
@@ -62,6 +64,7 @@ const getLayoutedElements = (nodes, edges, direction = 'TB') => {
 */
 
 const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
+  const reactFlowInstance = useReactFlow();
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [direction, setDirection] = useState("DOWN")
@@ -103,8 +106,10 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
           node.sourcePosition="top";
           break;
         case "DOWN":
+          console.log("BEFORE DOWN: ",node)
           node.targetPosition="top";
-          node.sourcePsition="bottom";
+          node.sourcePosition="bottom";
+          console.log("AFTER DOWN: ",node)
           break;
       }
         
@@ -227,8 +232,8 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
 
     elkLayout(initialNodes,initialEdges,direction).then((graph) => {
       console.log("elklayout first call ",idx)
-      setNodes([...nodesForFlow(graph,initialNodes)]);
-      setEdges([...edgesForFlow(graph)]);
+      setNodes(nodesForFlow(graph,initialNodes));
+      setEdges(edgesForFlow(graph));
     });
 
   },[]);
@@ -247,16 +252,18 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
       return graph.edges;
     };
 
-   
-    
+    useEffect(() => {
+      console.log("CALLING FITVIEW")
+      reactFlowInstance.fitView();
+    });
     
 
     const onLayout = 
       (nodes,edges,direction) => {
         elkLayout(nodes,edges,direction).then((graph) => {
-          console.log("elklayout first call ",idx)
-          setNodes(nodesForFlow(graph,nodes));
-          setEdges(edgesForFlow(graph));
+          console.log("elklayout second call ",idx)
+          setNodes([...nodesForFlow(graph,nodes)]);
+          setEdges([...edgesForFlow(graph)]);
         });
       }
     
@@ -285,13 +292,14 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
       id={idx}
       fitView
     >
-      
+      <Controls />
+      <MiniMap nodeColor={nodeColor} nodeStrokeWidth={3} zoomable pannable />
       <Panel position="top-right">
+      
         <button onClick={() => {onLayout(nodes,edges,'DOWN')}}>vertical layout</button>
         <button onClick={() => {onLayout(nodes,edges,'RIGHT')}}>horizontal layout</button>
       </Panel>
     </ReactFlow>
-    <b>{direction}</b>
     </>
   );
 };
