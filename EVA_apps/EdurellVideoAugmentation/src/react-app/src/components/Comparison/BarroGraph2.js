@@ -21,36 +21,20 @@ ChartJS.register(
 )
 
 export default function Barro({catalog, catalogExtra, graphcontrol}){
-    function createDiagonalPattern(color = 'black') {
-        // create a 10x10 px canvas for the pattern's base shape
-        let shape = document.createElement('canvas')
-        shape.width = 10
-        shape.height = 10
-        // get the context for drawing
-        let c = shape.getContext('2d')
-        c.lineWidth = 3;
-        // draw 1st line of the shape 
-        c.strokeStyle = color
-        c.beginPath()
-        c.moveTo(2, 0)
-        c.lineTo(10, 8)
-        c.stroke()
-        // draw 2nd line of the shape 
-        c.beginPath()
-        c.moveTo(0, 8)
-        c.lineTo(2, 10)
-        c.stroke()
-        // create the pattern from the shape
-        return c.createPattern(shape, 'repeat')
-      }
+    
     const data = {
-        labels: catalog.map(video=>video.title),
+        labels: catalogExtra.map(video=>(video.video_slidishness*100).toString()+"%"),
         datasets:[
             {
                 label:'video intero',
                 data:catalog.map(video=>video.duration),
                 backgroundColor:"white",
-                borderColor: graphcontrol=="two"?"grey":["red","blue","purple","green"],
+                borderColor: graphcontrol=="two"?"grey":[
+                    "#FF4545",
+                    "#3E7FFF",
+                    "#CE3FFF",
+                    "#71D89A"
+                ],
                 borderWidth: 5,
                 grouped:false,
                 order:10,
@@ -58,7 +42,12 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
             {
                 label:'slide',
                 data:catalogExtra.map(video=>video.video_slidishness*catalog.filter(cat=>cat.video_id == video.video_id)[0].duration),
-                backgroundColor:graphcontrol=="three"?"grey":["red","blue","purple","green"],
+                backgroundColor:graphcontrol=="three"?"grey":[
+                    "#FF4545",
+                    "#3E7FFF",
+                    "#CE3FFF",
+                    "#71D89A"
+                ],
                 categoryPercentage:0.7,
             },
        
@@ -66,6 +55,11 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
     }
 
     const options ={
+       scales:{
+        x:{
+            display:true
+        }
+       },
         responsive: true, // Abilita la risposta al ridimensionamento
         maintainAspectRatio: false, // Disabilita il mantenimento dell'aspect ratio
         // Imposta le dimensioni desiderate
@@ -81,8 +75,10 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
         plugins: {  // 'legend' now within object 'plugins {}'
             legend: {
                 display: false,
-            }
+            },
+           
           },
+          
     }
     return(<>
     

@@ -99,7 +99,11 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
     }
 
     const options ={
-       
+        scales:{
+            x:{
+                display:false
+            }
+           },
         plugins: {  // 'legend' now within object 'plugins {}'
             legend: {
                 display: false,
