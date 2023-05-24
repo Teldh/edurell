@@ -1,4 +1,5 @@
 import React, { useCallback,useState ,useEffect,useRef  } from 'react';
+import './FlowChart.css';
 import ReactFlow, {
   addEdge,
   ConnectionLineType,
@@ -67,7 +68,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
   const reactFlowInstance = useReactFlow();
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
-  const [direction, setDirection] = useState("DOWN")
+  const [direction, setDirection] = useState("DOWN");
     console.log("FLOWCHART", idx)
     const colorPick=[
       "red",
@@ -76,23 +77,96 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
       "green"
   ]
   const nodeColor = (node) => {
-    switch (node.type) {
-      case 'input':
-        return '#6ede87';
-      case 'output':
-        return '#6865A5';
-      default:
-        return '#ff0072';
+    if(idx == 0){
+      switch (node.type) {
+        case 'input':
+          return '#FFFFFF';
+        case 'output':
+          return '#B50000';
+        default:
+          return '#FF4545';
+      }
+    }else if(idx == 1){
+      switch (node.type) {
+        case 'input':
+          return '#FFFFFF';
+        case 'output':
+          return '#0039AB';
+        default:
+          return '#3E7FFF';
+      }
+    }else if(idx == 2){
+      switch (node.type) {
+        case 'input':
+          return '#FFFFFF';
+        case 'output':
+          return '#8000AB';
+        default:
+          return '#CE3FFF';
+      }
+    }else if(idx == 3){
+      switch (node.type) {
+        case 'input':
+          return '#FFFFFF';
+        case 'output':
+          return '#00A241';
+        default:
+          return '#71D89A';
+      }
+    }else{
+      switch (node.type) {
+        case 'input':
+          return '#6ede87';
+        case 'output':
+          return '#6865A5';
+        default:
+          return '#ff0072';
+      }
     }
-
     
+  };
+
+  
+
+  const nodeStrokeColor = (node) => {
+    if(idx == 0){
+
+
+          return '#FF4545';
+    
+    }else if(idx == 1){
+     
+          return '#3E7FFF';
+      
+    }else if(idx == 2){
+      
+          return '#CE3FFF';
+      
+    }else if(idx == 3){
+     
+          return '#71D89A';
+      
+    }else{
+      switch (node.type) {
+        case 'input':
+          return '#6ede87';
+        case 'output':
+          return '#6865A5';
+        default:
+          return '#ff0072';
+      }
+    }
+  
   };
 
   const elk = new ELK();
     const elkLayout = (nodes,edges,dir) => {
-      console.log("elklayout dir: ",dir)
+      console.log("elklayout: graphcontrol", graphcontrol)
      const nodesForElk = nodes.map((node) => {
+      console.log("node: ",node)
+
       switch(dir){
+       
         case "LEFT":
           node.targetPosition="right";
           node.sourcePosition="left";
@@ -106,10 +180,8 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
           node.sourcePosition="top";
           break;
         case "DOWN":
-          console.log("BEFORE DOWN: ",node)
           node.targetPosition="top";
           node.sourcePosition="bottom";
-          console.log("AFTER DOWN: ",node)
           break;
       }
         
@@ -124,7 +196,8 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
        layoutOptions: {
          "elk.algorithm": "layered",
          "elk.direction": dir,
-         "nodePlacement.strategy": "SIMPLE"
+         "nodePlacement.strategy": "SIMPLE",
+         "spacing.nodeNodeBetweenLayers":100,
        },
     
        children: nodesForElk,
@@ -180,7 +253,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
         id:"conceptSelected",
         data:{label:concept},
         position,
-        style:{backgroundColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], color:"white", borderColor:colorPick[idx], fontWeight:"bold"}
+        style:{backgroundColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], color:"white", borderColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], fontWeight:"bold"}
     }]
 
     for(let i=0; i<prenodes.length; i++){
@@ -189,12 +262,13 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
             //id:prenodes[i].id+"_to_conceptSelected",
             source:prenodes[i].id,
             target:"conceptSelected",
+            type: 'smoothstep',
             markerEnd:{
-                type: MarkerType.ArrowClosed,
+                type: MarkerType.Arrow,
                 
             },
             style: {
-              strokeWidth: prenodesnote[i]=="strongPrerequisite"?5:1
+              strokeWidth: prenodesnote[i]=="strongPrerequisite"?3:1
             }
         }]
     }
@@ -205,12 +279,13 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
             //id:"conceptSelected_to_"+postnodes[i].id,
             source:"conceptSelected",
             target:postnodes[i].id,
+            type: 'smoothstep',
             markerEnd:{
-                type: MarkerType.ArrowClosed,
+                type: MarkerType.Arrow,
 
             },
             style:{
-              strokeWidth: postnodesnote[i]=="strongPrerequisite"?5:1
+              strokeWidth: postnodesnote[i]=="strongPrerequisite"?3:1
             }
         }]
     }
@@ -237,6 +312,8 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
     });
 
   },[]);
+
+
     const nodesForFlow = (graph, initialNodes) => {
       return [
         ...graph.children.map((node) => {
@@ -252,11 +329,32 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
       return graph.edges;
     };
 
-    useEffect(() => {
-      console.log("CALLING FITVIEW")
+   
+
+    useEffect(()=>{
       reactFlowInstance.fitView();
-    });
+    })
     
+    useEffect(()=>{
+      console.log("graphcontrol")
+      if(nodes!=undefined){
+        console.log("nodes: ",nodes)
+        let newnode = nodes.map(node=>{
+          console.log("node: ",node)
+          if(node.type == "input"){
+            node.style={backgroundColor:"white", borderColor:graphcontrol=="three"?"grey":colorPick[idx], borderWidth:"2px",fontWeight:"bold"}
+          }else if(node.type == "output"){
+            node.style={backgroundColor:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx],borderStyle:"dashed", borderWidth:"2px",fontWeight:"bold"}
+          }else{
+            node.style={backgroundColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], color:"white", borderColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], fontWeight:"bold"}
+          }
+          return node
+        })
+        console.log("newnodes: ",newnode)
+        setNodes([...newnode])
+      }
+     
+    },[graphcontrol])
 
     const onLayout = 
       (nodes,edges,direction) => {
@@ -293,7 +391,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
       fitView
     >
       <Controls />
-      <MiniMap nodeColor={nodeColor} nodeStrokeWidth={3} zoomable pannable />
+      <MiniMap nodeColor={nodeColor} nodeStrokeColor={nodeStrokeColor} nodeStrokeWidth={5} zoomable pannable />
       <Panel position="top-right">
       
         <button onClick={() => {onLayout(nodes,edges,'DOWN')}}>vertical layout</button>
