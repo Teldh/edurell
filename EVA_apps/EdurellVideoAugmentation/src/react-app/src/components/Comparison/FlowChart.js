@@ -71,10 +71,10 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
   const [direction, setDirection] = useState("DOWN");
     console.log("FLOWCHART", idx)
     const colorPick=[
-      "red",
-      "blue",
-      "purple",
-      "green"
+      "#FF4545",
+      "#3E7FFF",
+      "#CE3FFF",
+      "#71D89A"
   ]
   const nodeColor = (node) => {
     if(idx == 0){
