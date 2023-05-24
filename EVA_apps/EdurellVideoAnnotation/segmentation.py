@@ -617,8 +617,9 @@ class VideoAnalyzer:
             return start_times, end_times, punctuated_transcription
         
 
-    def can_be_analyzed(self,max_seconds=6000):
-        video = VideoSpeedManager(self._video_id).get_video() 
+    def can_be_analyzed(self,video:LocalVideo=None,max_seconds=6000):
+        if video is None:
+            video = VideoSpeedManager(self._video_id).get_video()
         return video.get_count_frames() / video.get_fps() <= max_seconds
 
     def _preprocess_video(self, vsm:VideoSpeedManager,num_segments:int=150,estimate_threshold=False,_show_info=False):
@@ -1088,9 +1089,16 @@ class VideoAnalyzer:
                     indices_above_threshold.remove(indx_text)
 
         # selects the texts from the list of texts
+        if len(indices_above_threshold) == 0:
+            return None
+        
         if not with_times:
-            return itemgetter(*indices_above_threshold)(list(zip(*list(zip(*texts_with_bb))[0:3:2])))
-        return itemgetter(*indices_above_threshold)(texts_with_bb)
+            if len(indices_above_threshold) > 1:
+                return itemgetter(*indices_above_threshold)(list(zip(*list(zip(*texts_with_bb))[0:3:2])))
+            return [itemgetter(*indices_above_threshold)(list(zip(*list(zip(*texts_with_bb))[0:3:2])))]
+        if len(indices_above_threshold) > 1:
+            return itemgetter(*indices_above_threshold)(texts_with_bb)
+        return [itemgetter(*indices_above_threshold)(texts_with_bb)]
         
         
 
@@ -1226,9 +1234,9 @@ class VideoAnalyzer:
                 print()
             return video_defs,video_in_depths
         
+        
         #print(burst_concepts)
         # extract definitions and in-depths in the transcript of every title based on slide show time and concept citation (especially with definition)
-        # alg is O(kn) with k titles and n sentences of the transcript 
         timed_sentences = get_timed_sentences(self.get_transcript()[0],[sent.metadata["text"] for sent in parse(get_text(self._video_id,return_conll=True)[1])])
         video_defs, video_in_depths = extract_defs_and_indepths(burst_concepts,self._slide_titles,timed_sentences,definition_tol_seconds,_show_output=_show_output)
 
@@ -1361,22 +1369,25 @@ def _run_jobs(queue):
             video_id = queue.pop(0)
             print("Segmentation job on "+video_id+" starts  working...")
             vid_analyzer = VideoAnalyzer(video_id)
-            # if there's no data in the database check the video slidishness
-            video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True,_show_info=True)
-            # prepare data for upload
-            segmentation_data = {'video_id':video_id,'video_slidishness':video_slidishness,'slidish_frames_startend':slide_frames}
-            if vid_analyzer.is_slide_video():
-                # if it's classified as a slides video analyze it and insert results in the structure that will be uploaded online
-                vid_analyzer.analyze_video(_show_info=True)
-                results = vid_analyzer.extract_titles()
+            if not vid_analyzer.can_be_analyzed(LocalVideo(video_id)):
+                segmentation_data = {'video_id':video_id,'video_slidishness':0.0,'slidish_frames_startend':[]}
+            else: 
+                # if there's no data in the database check the video slidishness
+                video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True,_show_info=True)
+                # prepare data for upload
+                segmentation_data = {'video_id':video_id,'video_slidishness':video_slidishness,'slidish_frames_startend':slide_frames}
+                if vid_analyzer.is_slide_video():
+                    # if it's classified as a slides video analyze it and insert results in the structure that will be uploaded online
+                    vid_analyzer.analyze_video(_show_info=True)
+                    results = vid_analyzer.extract_titles()
 
-                #from pprint import pprint
-                #pprint(results)
+                    #from pprint import pprint
+                    #pprint(results)
 
-                # insert titles data in the structure that will be loaded on the db
-                segmentation_data = {**segmentation_data, 
-                                     **{'slide_titles':[{'start_end_seconds':start_end_seconds,'text':title,'xywh_normalized':bb} for (title,start_end_seconds,bb) in results],
-                                        'slide_startends': vid_analyzer.get_extracted_text(format='set[times]')}}
+                    # insert titles data in the structure that will be loaded on the db
+                    segmentation_data = {**segmentation_data, 
+                                         **{'slide_titles':[{'start_end_seconds':start_end_seconds,'text':title,'xywh_normalized':bb} for (title,start_end_seconds,bb) in results] if results is not None else [],
+                                            'slide_startends': vid_analyzer.get_extracted_text(format='set[times]')}}
             db_mongo.insert_video_text_segmentation(segmentation_data)
             print(f"Job on {video_id} done!"+" "*20)
         time.sleep(10)

@@ -212,6 +212,11 @@ def get_graphs_info(selected_video=None):
     aggregation = list(collection.aggregate(pipeline))
     graphs_info = {}
 
+    # Remove possibly unavailable videos from resulting list
+    for vid in reversed(aggregation):
+        if not len(vid["creator"]) or not len(vid["title"]):
+            aggregation.remove(vid)
+
     for vid in aggregation:
 
         if "annotator_id" in vid:
@@ -468,7 +473,8 @@ def remove_video(video_id):
         collection = db.get_collection(coll_name)
         if collection.find_one(query):
             try:
-                collection.delete_one(query)
+                collection.delete_many(query)
+                #collection.delete_one(query)
                 print(f'removing from {coll_name}')
             except:
                 pass
@@ -497,5 +503,6 @@ def remove_account(email):
 
 if __name__ == '__main__':
     #remove_video('PPLop4L2eGk')
-    graph = get_graph("Burst Analysis","PPLop4L2eGk")
+    #graph = get_graph("Burst Analysis","PPLop4L2eGk")
     print("***** EDURELL - Video Annotation: db_mongo.py::__main__ ******")
+    #remove_video("FZ1qPqVeMSQ")

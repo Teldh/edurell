@@ -560,13 +560,17 @@ def add_history():
 def get_history():
     student= g.student
     video_title_list = []
+    
+    # Removing videos that have been removed from videos collection
+    for video_in_history in reversed(student.video_history_list):
+        if not Videos.objects(video_id = video_in_history.video_url.split("watch?v=")[1]):
+            student.video_history_list.remove(video_in_history)
+
     print("GET HISTORY")
-    for i in student.video_history_list:
-        try:
-            video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-            print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-        except Exception:
-            pass
+    for video in student.video_history_list:
+        video_title_list.append(get_video_title_from_url(video.video_url.split("watch?v=")[1]))
+        #print(video," ",get_video_title_from_url(video.video_url.split("watch?v=")[1]))
+    
     return (jsonify({'email': student.email, 'videoHistory' : student.video_history_list, 'videoHistoryTitles': video_title_list}), 201)
 """
   video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))

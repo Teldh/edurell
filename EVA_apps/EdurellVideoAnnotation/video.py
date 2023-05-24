@@ -10,8 +10,10 @@ from re import search
 from math import floor, ceil, log2
 from inspect import getfile
 from typing import Tuple
+import shutil
 
 from image import ImageClassifier,COLOR_BGR,COLOR_RGB,COLOR_GRAY
+from db_mongo import remove_video
 
 
 class LocalVideo:
@@ -364,6 +366,7 @@ class VideoSpeedManager:
 def download(url,_path:str=None):
     '''
     Downloads the video from the url provided (YouTube video)\n
+    If the video has been removed from youtube, it attempts to remove the folder from both the drive and the database, then raises an Exception\n
     _path parameter is used for testing purposes and should be left None
     
     --------------
@@ -392,8 +395,17 @@ def download(url,_path:str=None):
     # /home/<yourname>/anaconda3/envs/myenv/lib/python3.7/site-packages/pafy/backend_youtube_dl.py
     # self._rating = self._ydl_info['average_rating']
     # in line 50
-
+    print(path)
     response = requests.get(url)
+    if response.status_code == 200 and ("Video non disponibile" in response.text or "Video unavailable" in response.text):
+        remove_video(video_id)
+        try:
+            shutil.rmtree(path)
+            print(f"The folder {path} has been removed.")
+        except OSError:
+            print("Folder removal abort: Not found")
+        raise Exception("video unavailable")
+        
     title = search(r'"title":"(.*?)"', response.text).group(1)
     author = search(r'"ownerChannelName":"(.*?)"', response.text).group(1)
     length = str(int(search(r'"approxDurationMs":"(\d+)"', response.text).group(1)) // 1000)
@@ -474,7 +486,8 @@ if __name__ == '__main__':
     #vid_id = 'GdPVu6vn034'
     #download('https://youtu.be/ujutUfgebdo')
     #print(download('https://www.youtube.com/watch?v='+vid_id))
-    print(download("https://www.youtube.com/watch?v=PR_ykicOZYU"))
+    print(download("https://www.youtube.com/watch?v=FZ1qPqVeMSQ"))
+    
     #color_scheme_for_analysis = ColorScheme.BGR
     #   BGR: is the most natural for Opencv video reader, so we avoid some matrix transformations
     #   RGB: should be used for debug visualization
