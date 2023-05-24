@@ -95,35 +95,38 @@ export default function VideoFiltered({catalog, querylist,  UpdateCatalogExtra, 
         seconds = seconds*60
         //console.log("seconds: ",seconds);
         //console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
-        duratatot = hours+":"+minutes+":"+Math.floor(seconds)
+        duratatot = (hours<10?("0"+hours):hours).toString()+":"+(minutes<10?("0"+minutes):minutes).toString()+":"+(Math.floor(seconds)<10?("0"+Math.floor(seconds)):Math.floor(seconds)).toString()
     }
 
     if(conceptextra[0]!=undefined&& conceptextra[0].concept_starttime.length>0){
         for(let i=0; i<conceptextra[0].concept_starttime.length;i++){
-            const time1 = conceptextra[0].concept_endtime[i] .split("^^")[0];
-            const time2 = conceptextra[0].concept_starttime[i] .split("^^")[0];
-    
-            let [hours1, minutes1, seconds1] = time1.split(":");
-            seconds1=Math.floor(seconds1)
-            seconds1=seconds1+hours1*3600
-            //console.log("hours1: ",hours1*3600," ",seconds1)
-            seconds1=seconds1+minutes1*60
-            //console.log("minutes: ",minutes1*60," ",seconds1)
-    
-            let [hours2, minutes2, seconds2] = time2.split(":");
-            seconds2=Math.floor(seconds2)
-            seconds2=seconds2+hours2*3600
-            //console.log("hours2: ",hours2*3600," ",seconds2)
-            seconds2=seconds2+minutes2*60
-            //console.log("hours2: ",minutes2*60," ",seconds2)
-    
-            let resultseconds = Math.abs(seconds2-seconds1);
-            //console.log("difference: ",resultseconds);
-          
-       
-    
-           
-            duration = duration+resultseconds;
+            if(conceptextra[0].explain[i] == "conceptDefinition"){
+                const time1 = conceptextra[0].concept_endtime[i] .split("^^")[0];
+                const time2 = conceptextra[0].concept_starttime[i] .split("^^")[0];
+        
+                let [hours1, minutes1, seconds1] = time1.split(":");
+                seconds1=Math.floor(seconds1)
+                seconds1=seconds1+hours1*3600
+                //console.log("hours1: ",hours1*3600," ",seconds1)
+                seconds1=seconds1+minutes1*60
+                //console.log("minutes: ",minutes1*60," ",seconds1)
+        
+                let [hours2, minutes2, seconds2] = time2.split(":");
+                seconds2=Math.floor(seconds2)
+                seconds2=seconds2+hours2*3600
+                //console.log("hours2: ",hours2*3600," ",seconds2)
+                seconds2=seconds2+minutes2*60
+                //console.log("hours2: ",minutes2*60," ",seconds2)
+        
+                let resultseconds = Math.abs(seconds2-seconds1);
+                //console.log("difference: ",resultseconds);
+            
+        
+        
+            
+                duration = duration+resultseconds;
+            }
+            
         }
 
         durationSeconds = duration;
@@ -135,11 +138,57 @@ export default function VideoFiltered({catalog, querylist,  UpdateCatalogExtra, 
         let seconds = Math.abs(minutes - (remainminutes * 60))
         seconds = seconds*60
        /// console.log("seconds: ",seconds);
+        console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
+        console.log("0"+hours+" "+(minutes<10?("0"+minutes):minutes).toString())
+        duration = (hours<10?("0"+hours):hours).toString()+":"+(minutes<10?("0"+minutes):minutes).toString()+":"+(Math.floor(seconds)<10?("0"+Math.floor(seconds)):Math.floor(seconds)).toString()
+    }
+
+    if(conceptextra[0]!=undefined&& conceptextra[0].concept_starttime.length>0){
+        for(let i=0; i<conceptextra[0].concept_starttime.length;i++){
+            if(conceptextra[0].explain[i] == "conceptExpansion"){
+                const time1 = conceptextra[0].concept_endtime[i] .split("^^")[0];
+                const time2 = conceptextra[0].concept_starttime[i] .split("^^")[0];
+        
+                let [hours1, minutes1, seconds1] = time1.split(":");
+                seconds1=Math.floor(seconds1)
+                seconds1=seconds1+hours1*3600
+                //console.log("hours1: ",hours1*3600," ",seconds1)
+                seconds1=seconds1+minutes1*60
+                //console.log("minutes: ",minutes1*60," ",seconds1)
+        
+                let [hours2, minutes2, seconds2] = time2.split(":");
+                seconds2=Math.floor(seconds2)
+                seconds2=seconds2+hours2*3600
+                //console.log("hours2: ",hours2*3600," ",seconds2)
+                seconds2=seconds2+minutes2*60
+                //console.log("hours2: ",minutes2*60," ",seconds2)
+        
+                let resultseconds = Math.abs(seconds2-seconds1);
+                //console.log("difference: ",resultseconds);
+            
+        
+        
+            
+                approfondimenti = approfondimenti+resultseconds;
+            }
+            
+        }
+
+        approfondimentiSeconds = approfondimenti;
+        let hours = Math.floor(approfondimenti /3600)
+        //console.log("hour: ",hours," remain: ",Math.abs(hours - (approfondimenti /3600)))
+        let remainminutes = Math.abs(hours - (approfondimenti /3600))
+        let minutes = Math.floor(remainminutes * 60);
+        //console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
+        let seconds = Math.abs(minutes - (remainminutes * 60))
+        seconds = seconds*60
+       // console.log("seconds: ",seconds);
        // console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
-        duration = hours+":"+minutes+":"+Math.floor(seconds)
+        approfondimenti = (hours<10?("0"+hours):hours).toString()+":"+(minutes<10?("0"+minutes):minutes).toString()+":"+(Math.floor(seconds)<10?("0"+Math.floor(seconds)):Math.floor(seconds)).toString()
     }
 
 
+    /*
     if(conceptextra[0]!=undefined&& conceptextra[0].concept_starttime.length>0){
         for(let i=0; i<conceptextra[0].derivatedconcept_starttime.length;i++){
 
@@ -182,6 +231,7 @@ export default function VideoFiltered({catalog, querylist,  UpdateCatalogExtra, 
         approfondimenti = hours+":"+minutes+":"+Math.floor(seconds)
         
     }
+    */
     return(
         <>
         <Card elevation={shadow}
