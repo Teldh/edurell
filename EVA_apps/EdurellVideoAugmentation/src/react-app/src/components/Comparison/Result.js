@@ -85,7 +85,12 @@ function DP(color = 'black') {
   }
 
 export default function Result(){
-    console.log("RESULT PAGE CALLED")
+    const colorPick=[
+        "#FF4545",
+        "#3E7FFF",
+        "#CE3FFF",
+        "#71D89A"
+    ]
     //for first graph
     const [graphcontrol1, setGraphControl1] = useState("one");
     const handleChange1 = (event, newValue) => {
@@ -382,8 +387,8 @@ export default function Result(){
                             alignItems="center"
                             >
                                 <Grid item>
-                                <Typography variant="h4" gutterBottom sx={{mb:0,pb:0}}>
-                                    Confronto durate
+                                <Typography variant="h4" gutterBottom sx={{mb:0,pb:0,pt:10}}>
+                                    <b>Confronto durate</b>
                                 </Typography>
                                 <Box
                                 sx={{
@@ -609,9 +614,28 @@ export default function Result(){
                                     location.state.catalog.map((video,idx)=>{
                                         return(
                                             <Grid item key={idx}>
-                                                <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover">
-                                                    {video.title}
-                                                </Links>
+                                                <Stack direction="row" spacing={0.5}>
+                                       
+                                                    <Box
+                                                    sx={{
+                                                        backgroundColor:colorPick[idx],
+                                                        width:"10px",
+                                                        height:"20px",
+                                                        mr:0,
+                                                        pr:0
+                                                    }}/>
+                                             
+                                          
+                                                    <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover" style={{marginLeft:0,paddingLeft:5, color:"#3b3b3b"}}>
+                                                        <Typography variant="caption" gutterBottom>
+                                                            {video.title}
+                                                        </Typography>
+                                                    </Links>   
+                                                    <EastIcon sx={{pt:0.3, width:"15px", height:'15px'}}/> 
+                                            
+                                                </Stack>
+                                               
+                                                
                                             </Grid>
                                         );
                                     })
@@ -639,8 +663,8 @@ export default function Result(){
                             alignItems="center"
                             >
                                 <Grid item>
-                                <Typography variant="h4" gutterBottom sx={{mb:0,pb:0}}>
-                                    Confronto mappe del concetto, cose da sapere e approfondimenti
+                                <Typography variant="h4" gutterBottom sx={{mb:0,pb:0, pt:10}}>
+                                    <b>Confronto mappe del concetto, cose da sapere e approfondimenti</b>
                                 </Typography>
                                 <Box
                                 sx={{
@@ -906,9 +930,28 @@ export default function Result(){
                                     location.state.catalog.map((video,idx)=>{
                                         return(
                                             <Grid item key={idx}>
-                                                <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover">
-                                                    {video.title}
-                                                </Links>
+                                                <Stack direction="row" spacing={0.5}>
+                                       
+                                                    <Box
+                                                    sx={{
+                                                        backgroundColor:colorPick[idx],
+                                                        width:"10px",
+                                                        height:"20px",
+                                                        mr:0,
+                                                        pr:0
+                                                    }}/>
+                                             
+                                          
+                                                    <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover" style={{marginLeft:0,paddingLeft:5, color:"#3b3b3b"}}>
+                                                        <Typography variant="caption" gutterBottom>
+                                                            {video.title}
+                                                        </Typography>
+                                                    </Links>   
+                                                    <EastIcon sx={{pt:0.3, width:"15px", height:'15px'}}/> 
+                                            
+                                                </Stack>
+                                               
+                                                
                                             </Grid>
                                         );
                                     })
@@ -936,8 +979,8 @@ export default function Result(){
                             alignItems="center"
                             >
                                 <Grid item>
-                                <Typography variant="h4" gutterBottom sx={{mb:0,pb:0}}>
-                                    Confronto presenza slide all'interno del video
+                                <Typography variant="h4" gutterBottom sx={{mb:0,pb:0, pt:10}}>
+                                    <b>Confronto presenza slide all'interno del video</b>
                                 </Typography>
                                 <Box
                                 sx={{
@@ -1148,9 +1191,28 @@ export default function Result(){
                                     location.state.catalog.map((video,idx)=>{
                                         return(
                                             <Grid item key={idx}>
-                                                <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover">
-                                                    {video.title}
-                                                </Links>
+                                                <Stack direction="row" spacing={0.5}>
+                                       
+                                                    <Box
+                                                    sx={{
+                                                        backgroundColor:colorPick[idx],
+                                                        width:"10px",
+                                                        height:"20px",
+                                                        mr:0,
+                                                        pr:0
+                                                    }}/>
+                                             
+                                          
+                                                    <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover" style={{marginLeft:0,paddingLeft:5, color:"#3b3b3b"}}>
+                                                        <Typography variant="caption" gutterBottom>
+                                                            {video.title}
+                                                        </Typography>
+                                                    </Links>   
+                                                    <EastIcon sx={{pt:0.3, width:"15px", height:'15px'}}/> 
+                                            
+                                                </Stack>
+                                               
+                                                
                                             </Grid>
                                         );
                                     })
