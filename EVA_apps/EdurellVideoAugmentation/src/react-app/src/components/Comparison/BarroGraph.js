@@ -2,6 +2,7 @@
 // yarn add @nivo/bar
 
 import React from "react";
+import pattern from 'patternomaly';
 import{
     Chart as ChartJS,
     BarElement,
@@ -50,31 +51,68 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
                 label:'video intero',
                 data:catalog.map(video=>video.duration),
                 backgroundColor:"white",
-                borderColor: graphcontrol=="two"||graphcontrol=="three"?"grey":["red","blue","purple","green"],
+                borderColor: graphcontrol=="two"||graphcontrol=="three"?"grey":[
+                    "#FF4545",
+                    "#3E7FFF",
+                    "#CE3FFF",
+                    "#71D89A"
+                ],
                 borderWidth: 5,
+                grouped:false,
+                order:10,
+                
             },
             {
                 label:'definizione',
                 data:catalogExtra.map(video=>video.conceptLength),
-                backgroundColor:graphcontrol=="three" || graphcontrol=="four"?"grey":["red","blue","purple","green"],
+                backgroundColor:graphcontrol=="three" || graphcontrol=="four"?"grey":[
+                    "#FF4545",
+                    "#3E7FFF",
+                    "#CE3FFF",
+                    "#71D89A"
+                ],
+                order:1,
+                categoryPercentage:0.7,
+
             },
             {
                 label:'approfondimento',
                 data: catalogExtra.map(video=>video.derivatedLength),
-                backgroundColor:graphcontrol=="two"||graphcontrol =="four"?createDiagonalPattern('grey'):[createDiagonalPattern('red'),createDiagonalPattern('blue'),createDiagonalPattern('purple'),createDiagonalPattern('green')],
-                borderColor: graphcontrol=="two" || graphcontrol=="four"?"grey":["red","blue","purple","green"],
+                backgroundColor:
+                    graphcontrol=="two"||graphcontrol =="four"?createDiagonalPattern('grey'):
+                    [pattern.draw('diagonal-right-left', '#F2BABA'),
+                    pattern.draw('diagonal-right-left', '#B8CBF2'),
+                    pattern.draw('diagonal-right-left', '#E3B8F2'),
+                    pattern.draw('diagonal-right-left', '#C7E6D3')],
+                borderColor: graphcontrol=="two" || graphcontrol=="four"?"grey":[
+                    "#FF4545",
+                    "#3E7FFF",
+                    "#CE3FFF",
+                    "#71D89A"
+                ],
                 borderWidth: 5,
+                order:1,
+                categoryPercentage:0.7
+                
             },
         ]
     }
 
     const options ={
        
-            labels: {
-                fontColor: "blue",
-                fontSize: 18
-            },
+        plugins: {  // 'legend' now within object 'plugins {}'
+            legend: {
+                display: false,
+            }
+          },
         
+          layout: {
+            padding:{
+                top:50,
+                left:20,
+                right:20
+            } 
+        },
         responsive: true, // Abilita la risposta al ridimensionamento
         maintainAspectRatio: false, // Disabilita il mantenimento dell'aspect ratio
         // Imposta le dimensioni desiderate

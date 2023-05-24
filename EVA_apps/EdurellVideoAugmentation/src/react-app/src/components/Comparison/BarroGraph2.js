@@ -52,11 +52,14 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
                 backgroundColor:"white",
                 borderColor: graphcontrol=="two"?"grey":["red","blue","purple","green"],
                 borderWidth: 5,
+                grouped:false,
+                order:10,
             },
             {
                 label:'slide',
                 data:catalogExtra.map(video=>video.video_slidishness*catalog.filter(cat=>cat.video_id == video.video_id)[0].duration),
                 backgroundColor:graphcontrol=="three"?"grey":["red","blue","purple","green"],
+                categoryPercentage:0.7,
             },
        
         ]
@@ -67,7 +70,19 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
         maintainAspectRatio: false, // Disabilita il mantenimento dell'aspect ratio
         // Imposta le dimensioni desiderate
         width: 400,
-        height: 300
+        height: 300,
+        layout: {
+            padding:{
+                top:50,
+                left:20,
+                right:20
+            } 
+        },
+        plugins: {  // 'legend' now within object 'plugins {}'
+            legend: {
+                display: false,
+            }
+          },
     }
     return(<>
     
