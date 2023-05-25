@@ -1,4 +1,5 @@
 import React from 'react';
+import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
 import Container from '@mui/material/Container';
 import './Querybar.css';
 import Grid from '@mui/material/Grid';
@@ -16,9 +17,30 @@ import Box from '@mui/material/Box';
 import Filters from './Filters.js'
 import EastIcon from '@mui/icons-material/East';
 import { useHistory } from "react-router-dom";
-import { useContext } from 'react';
+import { useContext ,useState} from 'react';
 import { ContextComparison } from './ContextComparison';
+import IconButton from '@mui/material/IconButton';
+import { styled } from '@mui/material/styles';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+const ExpandMore = styled((props) => {
+    const { expand, ...other } = props;
+    return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+    transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+    margin: '0',
+    padding:'0',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shortest,
+    }),
+}));
+
+
 export default function Querybar({ querylist, catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
+    const [expanded, setExpanded] = useState(false);
+    const handleExpandClick = () => {
+        setExpanded(!expanded);
+    };
+    
     const listConcepts = useContext(ContextComparison)[3];
     const history = useHistory();
     function GoToComparisonResult(){
@@ -67,18 +89,53 @@ export default function Querybar({ querylist, catalog, catalogExtra, ApplyFilter
                     alignItems: 'center',
                     }}>
               
-            
-                <Grid
-          
+                <Grid 
                 container
-                direction="row"
+                direction="column"
                 justifyContent="center"
                 alignItems="center"
                 >
-                    <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
-                  
-                  
-                    <Filters ApplyFilters={ApplyFilters}/>
+                    <Grid item>
+                            <Grid
+                            container
+                            direction="row"
+                            justifyContent="center"
+                            alignItems="center"
+                            >
+                                <Grid item>
+                                    <Chip 
+                                        sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px'}}
+                                        
+                                        avatar={<TuneRoundedIcon/>}
+                                        label={<Typography variant="caption" display="block" gutterBottom sx={{m:0.5}}>
+                                        Filtri
+                                    </Typography>} 
+                                        onClick={handleExpandClick}
+                                        onDelete={handleExpandClick}
+                                        deleteIcon={
+                                            <ExpandMore
+                                            expand={expanded}
+                                    
+                                            aria-expanded={expanded}
+                                            aria-label="show more"
+                                            >
+                                                <ExpandMoreIcon />
+                                            </ExpandMore>
+                                        }
+                                    />
+                                </Grid>
+                                <Grid item>
+                                    <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
+                                </Grid>
+                            
+                            
+                            
+                                
+                            </Grid>
+                    </Grid>
+                    <Grid item>
+                        <Filters ApplyFilters={ApplyFilters} expanded={expanded}/>
+                    </Grid>
                 </Grid>
             </Container>
             <br/>

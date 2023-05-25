@@ -37,17 +37,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import EastIcon from '@mui/icons-material/East';
-const ExpandMore = styled((props) => {
-    const { expand, ...other } = props;
-    return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-    transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-    margin: '0',
-    padding:'0',
-    transition: theme.transitions.create('transform', {
-      duration: theme.transitions.duration.shortest,
-    }),
-}));
+
   
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
@@ -66,13 +56,9 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 },
 }));
   
-export default function Filters({ApplyFilters}){
-    console.log("THEM<E :",useTheme().palette.common.white);
-    const [expanded, setExpanded] = useState(false);
-    const handleExpandClick = () => {
-        setExpanded(!expanded);
-    };
+export default function Filters({ApplyFilters, expanded}){
 
+   
     const [anchorEl1, setAnchorEl1] = useState(null);
     const handlePopoverOpen1 = (event) => {
         setAnchorEl1(event.currentTarget);
@@ -138,26 +124,7 @@ export default function Filters({ApplyFilters}){
     const[radiog, Setradiog] = useState("recent")
     return(<>
         
-        <Chip 
-            sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px'}}
-            
-            avatar={<TuneRoundedIcon/>}
-            label={<Typography variant="button" display="block" gutterBottom sx={{m:2}}>
-            Filters
-          </Typography>} 
-            onClick={handleExpandClick}
-            onDelete={handleExpandClick}
-            deleteIcon={
-                <ExpandMore
-                expand={expanded}
-         
-                aria-expanded={expanded}
-                aria-label="show more"
-                >
-                    <ExpandMoreIcon />
-                </ExpandMore>
-            }
-        />
+       
 
         <Collapse in={expanded} timeout="auto" unmountOnExit>
         <Grid
