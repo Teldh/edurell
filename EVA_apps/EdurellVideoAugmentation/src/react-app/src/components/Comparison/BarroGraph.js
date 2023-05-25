@@ -134,7 +134,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
                         return ""
                     },
                     label:function(context){
-                        console.log("CONTEXT: ",context)
+                 
                         return " "+context.dataset.label+" "+SecondsToTime(context.parsed.y)
                     }
                 },

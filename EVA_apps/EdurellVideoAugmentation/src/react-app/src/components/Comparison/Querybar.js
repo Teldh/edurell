@@ -16,8 +16,10 @@ import Box from '@mui/material/Box';
 import Filters from './Filters.js'
 import EastIcon from '@mui/icons-material/East';
 import { useHistory } from "react-router-dom";
+import { useContext } from 'react';
+import { ContextComparison } from './ContextComparison';
 export default function Querybar({ catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
-    
+    const listConcepts = useContext(ContextComparison)[3];
     const history = useHistory();
     function GoToComparisonResult(){
         
@@ -38,7 +40,8 @@ export default function Querybar({ catalog, catalogExtra, ApplyFilters, searchCl
                     }else{
                         return false
                     }
-                    })
+                    }),
+                listConcepts: listConcepts
             },
         });
     }

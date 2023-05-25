@@ -86,7 +86,7 @@ export default function Comparison(){
 
     //a function used to check if small is included into big
     let checker = (big, small) => {
-      console.log("checker: ",big," ",small)
+      //console.log("checker: ",big," ",small)
       return small.every(v => big.includes(v));
     };
 
@@ -220,37 +220,38 @@ export default function Comparison(){
       //SetCatalogOriginal(catalog);
       //setCatalog(catalogoriginal);
       //bug resettare la querylist coi elementi aggiornati
-      console.log(catalog," ",catalogoriginal)
-      if(catalog.length > 0 ){
+      console.log(catalog," ",catalogoriginal," ",concept)
+  
           setCatalog(catalogoriginal);
           console.log("addquery ",concept)
           const newquerylist = [...concept];
           setQueryList(newquerylist);
           console.log("newquerylist: ",newquerylist)
-          if(concept[0]==null){
+          if(concept[0]==null || concept[0].trim().length===0){
               //setSearchFilterClicked(false);
-              console.log("addqueryelement return")
+              console.log("concept null")
+              setNomatch(false);
               return;
           }
           setSearchFilterClicked(true);
           
           
           
-          
+         
           let newcatalog = catalogoriginal.filter(video=>checker(video.extracted_keywords,concept));
+          console.log("check concept: ",concept.length," ",newcatalog.length," ",querylist.length)
           if(concept.length>0 && newcatalog.length==0){
               setNomatch(true)
           }else if(concept.length!=querylist.length){
               setNomatch(false);
           }
 
-
   
       
           setCatalog(newcatalog)
           
 
-      }
+      
     }
 
     function ComputeDuration(start,end){
@@ -629,7 +630,7 @@ export default function Comparison(){
         <ThemeProvider theme={theme}>
         <StyledEngineProvider injectFirst> {/* to override the default style with your custom css */}
         <Header page="dashboard" login={nameSurname}/>
-        <ContextComparison.Provider value={[AddVideo,RemoveVideo,setSearchFilterClicked]}>
+        <ContextComparison.Provider value={[AddVideo,RemoveVideo,setSearchFilterClicked, listConcepts]}>
 
             <>
             <Querybar catalog = {catalog} catalogExtra = {catalogExtra} ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>

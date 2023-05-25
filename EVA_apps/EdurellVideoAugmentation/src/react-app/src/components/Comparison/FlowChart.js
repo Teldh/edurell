@@ -69,7 +69,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [direction, setDirection] = useState("DOWN");
-    console.log("FLOWCHART", idx)
+ 
     const colorPick=[
       "#FF4545",
       "#3E7FFF",
@@ -182,10 +182,9 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
 
   const elk = new ELK();
     const elkLayout = (nodes,edges,dir) => {
-      console.log("elklayout: graphcontrol", graphcontrol)
+ 
      const nodesForElk = nodes.map((node) => {
-      console.log("node: ",node)
-
+   
       switch(dir){
        
         case "LEFT":
@@ -327,7 +326,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
 
 
     elkLayout(initialNodes,initialEdges,direction).then((graph) => {
-      console.log("elklayout first call ",idx)
+   
       setNodes(nodesForFlow(graph,initialNodes));
       setEdges(edgesForFlow(graph));
     });
@@ -357,11 +356,11 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
     })
     
     useEffect(()=>{
-      console.log("graphcontrol")
+  
       if(nodes!=undefined){
-        console.log("nodes: ",nodes)
+      
         let newnode = nodes.map(node=>{
-          console.log("node: ",node)
+          
           if(node.type == "input"){
             node.style={backgroundColor:"white", borderColor:graphcontrol=="three"?"grey":colorPick[idx], borderWidth:"5px",fontWeight:"bold"}
           }else if(node.type == "output"){
@@ -371,7 +370,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
           }
           return node
         })
-        console.log("newnodes: ",newnode)
+        
         setNodes([...newnode])
       }
      
@@ -380,7 +379,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
     const onLayout = 
       (nodes,edges,direction) => {
         elkLayout(nodes,edges,direction).then((graph) => {
-          console.log("elklayout second call ",idx)
+  
           setNodes([...nodesForFlow(graph,nodes)]);
           setEdges([...edgesForFlow(graph)]);
         });
