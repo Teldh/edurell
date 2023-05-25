@@ -12,6 +12,7 @@ import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors';
 import Button from '@mui/material/Button';
 import C_Start from './C_Start.js';
 import Typography from '@mui/material/Typography';
+import Tutorial from './Tutorial.js'
 import {
     Link,
     Redirect,
@@ -32,6 +33,23 @@ POSSO CHIAMARE SOLO LE QUERY SENZA AVERE PROBLEMI CON LE 500 CONNESSIONI
 
 export default function Comparison(){
     const [listTutorial, setListTutorial] = useState([]);
+    const [openTutorial, setOpenTutorial] = useState(false);
+    function closeTutorial(){
+      setOpenTutorial(false);
+    }
+
+    function openTutorialFunc(){
+      setOpenTutorial(true);
+      console.log("ID: ",document.getElementById("TEST"))
+    }
+
+    //tutoria;
+    useEffect(()=>{
+      let anchorlist=[]
+      anchorlist=[...anchorlist,document.getElementById("TUTORIALONE")]
+      anchorlist=[...anchorlist,document.getElementById("TUTORIALTWO")]
+      setListTutorial(anchorlist)
+    },[])
     //list of video selected for comparison
     const [listvideo, setListVideo]= useState([]);
 
@@ -186,7 +204,6 @@ export default function Comparison(){
           
         }
       },[searchFilterClicked])
-
 
     //OLD, sort the video based on concept on query
     function AddQueryElementOLD(concept){
@@ -627,14 +644,14 @@ export default function Comparison(){
       
     return(
         <>
-        
+        <Tutorial anchors={listTutorial} open={openTutorial} closeTutorial={closeTutorial}/>
         <ThemeProvider theme={theme}>
         <StyledEngineProvider injectFirst> {/* to override the default style with your custom css */}
         <Header page="dashboard" login={nameSurname}/>
         <ContextComparison.Provider value={[AddVideo,RemoveVideo,setSearchFilterClicked, listConcepts]}>
 
             <>
-            <Querybar querylist={querylist} catalog = {catalog} catalogExtra = {catalogExtra} ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
+            <Querybar openTutorial={openTutorialFunc} querylist={querylist} catalog = {catalog} catalogExtra = {catalogExtra} ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>
             <Listvideo UpdateCatalogExtra={UpdateCatalogExtra}  catalogExtra={catalogExtra} catalog={catalog} loading={loading} querylist={querylist} catalogoriginal={catalogoriginal}/>
             </>
@@ -643,6 +660,7 @@ export default function Comparison(){
         </StyledEngineProvider>
         </ThemeProvider>
         <Grid
+        
         container
         direction="column"
         justifyContent="center"

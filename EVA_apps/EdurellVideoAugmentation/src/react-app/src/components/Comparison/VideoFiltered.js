@@ -49,7 +49,7 @@ const ExpandMore = styled((props) => {
       duration: theme.transitions.duration.shortest,
     }),
 }));
-export default function VideoFiltered({catalog, querylist,  UpdateCatalogExtra, tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator}){
+export default function VideoFiltered({idx, catalog, querylist,  UpdateCatalogExtra, tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator}){
     const [expanded2, setExpanded2] = useState(false);
     const handleExpandClick2 = () => {
         setExpanded2(!expanded2);
@@ -276,6 +276,7 @@ export default function VideoFiltered({catalog, querylist,  UpdateCatalogExtra, 
             {!add?
             <>
                 <Box
+                    id="TUTORIALTWO"
                         sx={{marginLeft: 'auto',
                             backgroundColor:'#B798f8', 
                             color:"white",

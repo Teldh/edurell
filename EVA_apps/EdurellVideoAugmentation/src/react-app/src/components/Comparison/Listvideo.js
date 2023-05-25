@@ -38,14 +38,14 @@ export default function Listvideo({UpdateCatalogExtra, catalogExtra, catalog,loa
               ? null
               :
             querylist.length > 0?
-            catalog.map(video=>{
+            catalog.map((video,idx)=>{
                 //console.log("LISTVIDEO: ",catalogExtra)
                 let singlecatExtra = catalogExtra.filter(extra =>video.video_id == extra.video_id)
                 //console.log(video.video_id," extra ",singlecatExtra)
                 return(
                     
                     <Grid key={video._id.$oid} item xs={12} xl={2} md={3} >
-                        <VideoFiltered catalog={catalog} querylist={querylist} UpdateCatalogExtra={UpdateCatalogExtra} tottime={video.duration} conceptextra={singlecatExtra} titleurl={video.title} imageurl={video.video_id} idxurl={video._id.$oid} concepts={video.extracted_keywords} creator={video.creator}/>
+                        <VideoFiltered idx={idx} catalog={catalog} querylist={querylist} UpdateCatalogExtra={UpdateCatalogExtra} tottime={video.duration} conceptextra={singlecatExtra} titleurl={video.title} imageurl={video.video_id} idxurl={video._id.$oid} concepts={video.extracted_keywords} creator={video.creator}/>
                     </Grid>
                 );
                 

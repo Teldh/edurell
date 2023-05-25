@@ -210,6 +210,7 @@ export default class Dashboard extends React.Component {
                   </div>
               }
             </div>
+            
             <ButtonComp/>
         </div>
 

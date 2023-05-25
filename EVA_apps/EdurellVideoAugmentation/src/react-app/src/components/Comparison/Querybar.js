@@ -8,9 +8,11 @@ import Queryinput from './Queryinput.js'
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Secondarybutton from './Buttonsecondary.js'
+import { grey } from '@mui/material/colors';
 import Videoselected from './Videoselected';
 import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
+import HelpIcon from '@mui/icons-material/Help';
 import { Typography } from '@mui/material';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
@@ -35,7 +37,7 @@ const ExpandMore = styled((props) => {
 }));
 
 
-export default function Querybar({ querylist, catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
+export default function Querybar({ openTutorial,querylist, catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
     const [expanded, setExpanded] = useState(false);
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -104,6 +106,29 @@ export default function Querybar({ querylist, catalog, catalogExtra, ApplyFilter
                             >
                                 <Grid item>
                                     <Chip 
+                                        id="TUTORIALONE"
+                                        label={<Typography variant="caption" display="block" gutterBottom>
+                                            <b>Aiuto</b>
+                                            </Typography>}
+                                        deleteIcon={<HelpIcon sx={{color:grey[50]}}/>}
+                                        onClick={openTutorial}
+                                        onDelete={openTutorial}
+                                        sx={{
+                                            backgroundColor:"#FFA825"
+                                        }}
+                                    />
+
+                                        
+                              
+                                </Grid>
+                            
+                               
+                                <Grid item>
+                                    <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
+                                </Grid>
+                                
+                                <Grid item>
+                                    <Chip 
                                         sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px'}}
                                         
                                         avatar={<TuneRoundedIcon/>}
@@ -124,11 +149,6 @@ export default function Querybar({ querylist, catalog, catalogExtra, ApplyFilter
                                         }
                                     />
                                 </Grid>
-                                <Grid item>
-                                    <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
-                                </Grid>
-                            
-                            
                             
                                 
                             </Grid>
