@@ -25,6 +25,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse';
 import { useContext } from 'react';
 import { ContextComparison } from './ContextComparison';
+import ClickAwayListener from '@mui/base/ClickAwayListener';
 import CircleIcon from '@mui/icons-material/Circle';
 import {TokenContext} from '../account-management/TokenContext';
 import FlowChart from './FlowChart.js'
@@ -73,6 +74,10 @@ export default function VideoFiltered({catalog, querylist,  UpdateCatalogExtra, 
     const handleExpandClick = () => {
       setExpanded(!expanded);
     };
+
+    const handleClickAway=()=>{
+        setExpanded(false)
+    }
     //console.log("videofitlered ",conceptextra, " ", conceptextra[0])
     let duration=0
     let durationSeconds =0;
@@ -233,7 +238,9 @@ export default function VideoFiltered({catalog, querylist,  UpdateCatalogExtra, 
     }
     */
     return(
-        <>
+        <ClickAwayListener onClickAway={handleClickAway}>
+        <div>
+         
         <Card elevation={shadow}
             color="primary" 
             sx={{ maxWidth: 250 , border: add?"2px solid #C6EBDC": '0px'}}
@@ -334,7 +341,7 @@ export default function VideoFiltered({catalog, querylist,  UpdateCatalogExtra, 
         
         
         
-        
+      
         
         <Collapse in={expanded} timeout="auto" unmountOnExit style={{position:'fixed',bottom: 0, left:0, right:0, backgroundColor:"white"}}>
             <Grid
@@ -803,8 +810,9 @@ export default function VideoFiltered({catalog, querylist,  UpdateCatalogExtra, 
         
         
         
+      
+        </div>
         
-        
-        </>
+        </ClickAwayListener>
     );
 }
