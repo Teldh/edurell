@@ -15,6 +15,7 @@ import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Filters from './Filters.js'
+import pattern from 'patternomaly';
 import '../Header/Header.css';
 import './Comparison.css';
 import Links from '@mui/material/Link';
@@ -467,88 +468,269 @@ export default function Result(){
                                                     }}
                                                     transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                                                     anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                                                >
-                                                    <MenuItem>
-                                                        <Typography variant="caption"  gutterBottom>
-                                                            <b>Riepilogo:</b>
-                                                        </Typography>
-                                                    </MenuItem>
-                                                    <MenuItem sx={{mb:0, pb:0}}>
-                                                        <Box sx={{
-                                                            width:"15px",
-                                                            height:"15px",
-                                                            backgroundColor:"red",
-                                                   
-                                                        }}/>
-                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
-                                                            Video 1
-                                                        </Typography>
-                                                    </MenuItem>
-                                                    <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
-                                                        <Box sx={{
-                                                            width:"15px",
-                                                            height:"15px",
-                                                            backgroundColor:"blue"
-                                                        }}/>
-                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
-                                                            Video 2
-                                                        </Typography>
-                                                    </MenuItem>
-                                                    <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
-                                                        <Box sx={{
-                                                            width:"15px",
-                                                            height:"15px",
-                                                            backgroundColor:"purple"
-                                                        }}/>
-                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
-                                                            Video 3
-                                                        </Typography>
-                                                    </MenuItem>
-                                                    <MenuItem sx={{pt:0, pb:0}}>
-                                                        <Box sx={{
-                                                            width:"15px",
-                                                            height:"15px",
-                                                            backgroundColor:"green"
-                                                        }}/>
-                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
-                                                            Video 4
-                                                        </Typography>
-                                                    </MenuItem>
-                                                    <MenuItem sx={{mb:0, pb:0, mt:1}}>
-                                                        <Box sx={{
-                                                            width:"15px",
-                                                            height:"15px",
-                                                            backgroundColor:"white",
-                                                            border: '1px solid gray',
-                                                        }}/>
-                                                        <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
-                                                            Video Intero
-                                                        </Typography>
-                                                    </MenuItem>
-                                                    <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
-                                                        <Box sx={{
-                                                            width:"15px",
-                                                            height:"15px",
-                                                            backgroundColor:"grey",
-                                                            opacity:"0.8",
-                                                            background:"repeating-linear-gradient( 45deg, black, black 1px, black 1px, white 5px )",
-                                                            border: '1px solid gray',
-                                                        }}/>
-                                                        <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
-                                                            Approfondimento
-                                                        </Typography>
-                                                    </MenuItem>
-                                                    <MenuItem sx={{pt:0, mt:0}}>
-                                                        <Box sx={{
-                                                            width:"15px",
-                                                            height:"15px",
-                                                            backgroundColor:"grey",
-                                                            border: '1px solid gray',
-                                                        }}/>
-                                                        <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
-                                                            Definizione
-                                                        </Typography>
-                                                    </MenuItem>
+                                                    >
+                                                        {
+                                                            graphcontrol1=="one"?
+                                                            <>
+                                                                <MenuItem>
+                                                                    <Typography variant="caption"  gutterBottom>
+                                                                        <b>Riepilogo:</b>
+                                                                    </Typography>
+                                                                </MenuItem>
+                                                                <MenuItem sx={{mb:0, pb:0}}>
+                                                                    <Box sx={{
+                                                                        width:"15px",
+                                                                        height:"15px",
+                                                                        backgroundColor:"#FF4545",
+                                                            
+                                                                    }}/>
+                                                                    <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                        Video 1
+                                                                    </Typography>
+                                                                </MenuItem>
+                                                                <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                                    <Box sx={{
+                                                                        width:"15px",
+                                                                        height:"15px",
+                                                                        backgroundColor:"#3E7FFF"
+                                                                    }}/>
+                                                                    <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                        Video 2
+                                                                    </Typography>
+                                                                </MenuItem>
+                                                                <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                                    <Box sx={{
+                                                                        width:"15px",
+                                                                        height:"15px",
+                                                                        backgroundColor:"#CE3FFF"
+                                                                    }}/>
+                                                                    <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                        Video 3
+                                                                    </Typography>
+                                                                </MenuItem>
+                                                                <MenuItem sx={{pt:0, pb:0}}>
+                                                                    <Box sx={{
+                                                                        width:"15px",
+                                                                        height:"15px",
+                                                                        backgroundColor:"#71D89A"
+                                                                    }}/>
+                                                                    <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                        Video 4
+                                                                    </Typography>
+                                                                </MenuItem>
+                                                                <MenuItem sx={{mb:0, pb:0, mt:1}}>
+                                                                    <Box sx={{
+                                                                        width:"15px",
+                                                                        height:"15px",
+                                                                        backgroundColor:"white",
+                                                                        border: '1px solid gray',
+                                                                    }}/>
+                                                                    <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+                                                                        Video Intero
+                                                                    </Typography>
+                                                                </MenuItem>
+                                                                <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                                    <Box sx={{
+                                                                        width:"15px",
+                                                                        height:"15px",
+                                                                        backgroundColor:"grey",
+                                                                        opacity:"0.8",
+                                                                        background:"repeating-linear-gradient( 135deg, grey, grey 3px, white 2px, white 5px )",
+                                                                        border: '1px solid gray',
+                                                                    }}/>
+                                                                    <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+                                                                        Approfondimento
+                                                                    </Typography>
+                                                                </MenuItem>
+                                                                <MenuItem sx={{pt:0, mt:0}}>
+                                                                    <Box sx={{
+                                                                        width:"15px",
+                                                                        height:"15px",
+                                                                        backgroundColor:"grey",
+                                                                        border: '1px solid gray',
+                                                                    }}/>
+                                                                    <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+                                                                        Definizione
+                                                                    </Typography>
+                                                                </MenuItem>
+                                                            </>
+                                                            :
+                                                            graphcontrol1=="two"?
+                                                                    <>
+                                                                        <MenuItem>
+                                                                        <Typography variant="caption"  gutterBottom>
+                                                                            <b>Definizione:</b>
+                                                                        </Typography>
+                                                                        </MenuItem>
+                                                                        <MenuItem sx={{mb:0, pb:0}}>
+                                                                            <Box sx={{
+                                                                                width:"15px",
+                                                                                height:"15px",
+                                                                                backgroundColor:"#FF4545",
+                                                                    
+                                                                            }}/>
+                                                                            <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                Video 1
+                                                                            </Typography>
+                                                                        </MenuItem>
+                                                                        <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                                            <Box sx={{
+                                                                                width:"15px",
+                                                                                height:"15px",
+                                                                                backgroundColor:"#3E7FFF"
+                                                                            }}/>
+                                                                            <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                Video 2
+                                                                            </Typography>
+                                                                        </MenuItem>
+                                                                        <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                                            <Box sx={{
+                                                                                width:"15px",
+                                                                                height:"15px",
+                                                                                backgroundColor:"#CE3FFF"
+                                                                            }}/>
+                                                                            <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                Video 3
+                                                                            </Typography>
+                                                                        </MenuItem>
+                                                                        <MenuItem sx={{pt:0, pb:0}}>
+                                                                            <Box sx={{
+                                                                                width:"15px",
+                                                                                height:"15px",
+                                                                                backgroundColor:"#71D89A"
+                                                                            }}/>
+                                                                            <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                Video 4
+                                                                            </Typography>
+                                                                        </MenuItem>
+                                                                    </>
+                                                                    :
+                                                                    graphcontrol1=="three"?
+                                                                            <>
+                                                                                <MenuItem>
+                                                                                    <Typography variant="caption"  gutterBottom>
+                                                                                        <b>Approfondimento:</b>
+                                                                                    </Typography>
+                                                                                </MenuItem>
+                                                                                <MenuItem sx={{mb:0, pb:0}}>
+                                                                                    <Box sx={{
+                                                                                        width:"15px",
+                                                                                        height:"15px",
+                                                                                        width:"15px",
+                                                                                        height:"15px",
+                                                                                        backgroundColor:"#e5e5f7","opacity":"0.8",
+                                                                                        background:"repeating-linear-gradient( 135deg, #FF4545, #FF4545 3px, #e5e5f7 2px, #e5e5f7 5px )",
+                                                                                        border:1,
+                                                                                        borderColor:"grey"
+                                                                            
+                                                                                    }}/>
+                                                                                    <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                        Video 1
+                                                                                    </Typography>
+                                                                                </MenuItem>
+                                                                                <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                                                    <Box sx={{
+                                                                                        width:"15px",
+                                                                                        height:"15px",
+                                                                                        backgroundColor:"#e5e5f7","opacity":"0.8",
+                                                                                        background:"repeating-linear-gradient( 135deg, #3E7FFF, #3E7FFF 3px, #e5e5f7 2px, #e5e5f7 5px )",
+                                                                                        border:1,
+                                                                                        borderColor:"grey"
+                                                                                    }}/>
+                                                                                    <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                        Video 2
+                                                                                    </Typography>
+                                                                                </MenuItem>
+                                                                                <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                                                    <Box sx={{
+                                                                                        width:"15px",
+                                                                                        height:"15px",
+                                                                                        backgroundColor:"#e5e5f7","opacity":"0.8",
+                                                                                        background:"repeating-linear-gradient( 135deg, #E3B8F2, #E3B8F2 3px, #e5e5f7 2px, #e5e5f7 5px )",
+                                                                                        border:1,
+                                                                                        borderColor:"grey"
+                                                                                    }}/>
+                                                                                    <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                        Video 3
+                                                                                    </Typography>
+                                                                                </MenuItem>
+                                                                                <MenuItem sx={{pt:0, pb:0}}>
+                                                                                    <Box sx={{
+                                                                                        width:"15px",
+                                                                                        height:"15px",
+                                                                                        backgroundColor:"#e5e5f7","opacity":"0.8",
+                                                                                        background:"repeating-linear-gradient( 135deg, #71D89A, #71D89A 3px, #e5e5f7 2px, #e5e5f7 5px )",
+                                                                                        border:1,
+                                                                                        borderColor:"grey"
+                                                                                    }}/>
+                                                                                    <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                        Video 4
+                                                                                    </Typography>
+                                                                                </MenuItem>
+                                                                            
+                                                                            </>
+                                                                            :
+                                                                            graphcontrol1=="four"?
+                                                                                <>
+                                                                                    <MenuItem>
+                                                                                        <Typography variant="caption"  gutterBottom>
+                                                                                            <b>Video Intero:</b>
+                                                                                        </Typography>
+                                                                                    </MenuItem>
+                                                                                    <MenuItem sx={{mb:0, pb:0}}>
+                                                                                        <Box sx={{
+                                                                                            width:"15px",
+                                                                                            height:"15px",
+                                                                                            backgroundColor:"white",
+                                                                                            border:2,
+                                                                                            borderColor:"#FF4545"
+                                                                                
+                                                                                        }}/>
+                                                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                            Video 1
+                                                                                        </Typography>
+                                                                                    </MenuItem>
+                                                                                    <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                                                        <Box sx={{
+                                                                                            width:"15px",
+                                                                                            height:"15px",
+                                                                                            backgroundColor:"white",
+                                                                                            border:2,
+                                                                                            borderColor:"#3E7FFF"
+                                                                                        }}/>
+                                                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                            Video 2
+                                                                                        </Typography>
+                                                                                    </MenuItem>
+                                                                                    <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
+                                                                                        <Box sx={{
+                                                                                            width:"15px",
+                                                                                            height:"15px",
+                                                                                            backgroundColor:"white",
+                                                                                            border:2,
+                                                                                            borderColor:"#CE3FFF"
+                                                                                        }}/>
+                                                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                            Video 3
+                                                                                        </Typography>
+                                                                                    </MenuItem>
+                                                                                    <MenuItem sx={{pt:0, pb:0}}>
+                                                                                        <Box sx={{
+                                                                                            width:"15px",
+                                                                                            height:"15px",
+                                                                                            backgroundColor:"white",
+                                                                                            border:2,
+                                                                                            borderColor:"#71D89A"
+                                                                                        }}/>
+                                                                                        <Typography variant="caption" gutterBottom sx={{mt:1,pl:1}}>
+                                                                                            Video 4
+                                                                                        </Typography>
+                                                                                    </MenuItem>
+                                                                                </>
+                                                                                :
+                                                                                <>something went wrong..</>
+                                                        }
+                                                    
                                                     
                                                 </Menu>
                                 <Grid item>
@@ -568,9 +750,7 @@ export default function Result(){
                                         aria-label="secondary tabs example"
                                        
                                     >
-                                        <Tab value="one" label={<Typography variant="caption" display="block" gutterBottom>
-                                            Riepilogo
-                                        </Typography>} />
+                                        
                                         <Tab value="two" label={<Typography variant="caption" display="block" gutterBottom>
                                             Definizione
                                         </Typography>} />
@@ -580,6 +760,9 @@ export default function Result(){
                                         <Tab value="four" label={<Typography variant="caption" display="block" gutterBottom>
                                             Video Intero
                                         </Typography>}/>
+                                        <Tab value="one" label={<Typography variant="caption" display="block" gutterBottom>
+                                            Riepilogo
+                                        </Typography>} />
                                     </Tabs>
                                         </Grid>
                                         
@@ -614,26 +797,39 @@ export default function Result(){
                                     location.state.catalog.map((video,idx)=>{
                                         return(
                                             <Grid item key={idx}>
-                                                <Stack direction="row" spacing={0.5}>
-                                       
-                                                    <Box
+                                                <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover" style={{marginLeft:0,paddingLeft:5, color:"#3b3b3b"}}>
+                                                <Box
                                                     sx={{
-                                                        backgroundColor:colorPick[idx],
-                                                        width:"10px",
-                                                        height:"20px",
-                                                        mr:0,
-                                                        pr:0
-                                                    }}/>
-                                             
-                                          
-                                                    <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover" style={{marginLeft:0,paddingLeft:5, color:"#3b3b3b"}}>
-                                                        <Typography variant="caption" gutterBottom>
-                                                            {video.title}
-                                                        </Typography>
-                                                    </Links>   
-                                                    <EastIcon sx={{pt:0.3, width:"15px", height:'15px'}}/> 
+                                                        width:"auto",
+                                                        height:"auto",
+                                                        border:1,
+                                                        borderColor:"grey.300",
+                                                        borderRadius:"16px",
+                                                        backgroundColor:"white"
+                                                    }}>
+                                                    <Stack direction="row" spacing={0.5} sx={{ml:1, mr:1, mt:0.5, mb:0.5}}>
+                                        
+                                                        <Box
+                                                        sx={{
+                                                            backgroundColor:colorPick[idx],
+                                                            width:"8px",
+                                                            height:"15px",
+                                                            mr:0,
+                                                            pr:0,
+                                                            mt:0.4
+                                                        }}/>
+                                                
                                             
-                                                </Stack>
+                                                        
+                                                            <Typography variant="caption" gutterBottom sx={{pt:0.4}}>
+                                                                {video.title}
+                                                            </Typography>
+                                                         
+                                                        <EastIcon sx={{pt:0.4, width:"15px", height:'15px'}}/> 
+                                                
+                                                    </Stack>
+                                                </Box>
+                                                </Links>  
                                                
                                                 
                                             </Grid>
@@ -930,26 +1126,39 @@ export default function Result(){
                                     location.state.catalog.map((video,idx)=>{
                                         return(
                                             <Grid item key={idx}>
-                                                <Stack direction="row" spacing={0.5}>
-                                       
-                                                    <Box
+                                                <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover" style={{marginLeft:0,paddingLeft:5, color:"#3b3b3b"}}>
+                                                <Box
                                                     sx={{
-                                                        backgroundColor:colorPick[idx],
-                                                        width:"10px",
-                                                        height:"20px",
-                                                        mr:0,
-                                                        pr:0
-                                                    }}/>
-                                             
-                                          
-                                                    <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover" style={{marginLeft:0,paddingLeft:5, color:"#3b3b3b"}}>
-                                                        <Typography variant="caption" gutterBottom>
-                                                            {video.title}
-                                                        </Typography>
-                                                    </Links>   
-                                                    <EastIcon sx={{pt:0.3, width:"15px", height:'15px'}}/> 
+                                                        width:"auto",
+                                                        height:"auto",
+                                                        border:1,
+                                                        borderColor:"grey.300",
+                                                        borderRadius:"16px",
+                                                        backgroundColor:"white"
+                                                    }}>
+                                                    <Stack direction="row" spacing={0.5} sx={{ml:1, mr:1, mt:0.5, mb:0.5}}>
+                                        
+                                                        <Box
+                                                        sx={{
+                                                            backgroundColor:colorPick[idx],
+                                                            width:"8px",
+                                                            height:"15px",
+                                                            mr:0,
+                                                            pr:0,
+                                                            mt:0.4
+                                                        }}/>
+                                                
                                             
-                                                </Stack>
+                                                        
+                                                            <Typography variant="caption" gutterBottom sx={{pt:0.4}}>
+                                                                {video.title}
+                                                            </Typography>
+                                                         
+                                                        <EastIcon sx={{pt:0.4, width:"15px", height:'15px'}}/> 
+                                                
+                                                    </Stack>
+                                                </Box>
+                                                </Links>  
                                                
                                                 
                                             </Grid>
@@ -1191,26 +1400,39 @@ export default function Result(){
                                     location.state.catalog.map((video,idx)=>{
                                         return(
                                             <Grid item key={idx}>
-                                                <Stack direction="row" spacing={0.5}>
-                                       
-                                                    <Box
+                                                <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover" style={{marginLeft:0,paddingLeft:5, color:"#3b3b3b"}}>
+                                                <Box
                                                     sx={{
-                                                        backgroundColor:colorPick[idx],
-                                                        width:"10px",
-                                                        height:"20px",
-                                                        mr:0,
-                                                        pr:0
-                                                    }}/>
-                                             
-                                          
-                                                    <Links href={'/app/'+video.video_id+'/'+video.title} underline="hover" style={{marginLeft:0,paddingLeft:5, color:"#3b3b3b"}}>
-                                                        <Typography variant="caption" gutterBottom>
-                                                            {video.title}
-                                                        </Typography>
-                                                    </Links>   
-                                                    <EastIcon sx={{pt:0.3, width:"15px", height:'15px'}}/> 
+                                                        width:"auto",
+                                                        height:"auto",
+                                                        border:1,
+                                                        borderColor:"grey.300",
+                                                        borderRadius:"16px",
+                                                        backgroundColor:"white"
+                                                    }}>
+                                                    <Stack direction="row" spacing={0.5} sx={{ml:1, mr:1, mt:0.5, mb:0.5}}>
+                                        
+                                                        <Box
+                                                        sx={{
+                                                            backgroundColor:colorPick[idx],
+                                                            width:"8px",
+                                                            height:"15px",
+                                                            mr:0,
+                                                            pr:0,
+                                                            mt:0.4
+                                                        }}/>
+                                                
                                             
-                                                </Stack>
+                                                        
+                                                            <Typography variant="caption" gutterBottom sx={{pt:0.4}}>
+                                                                {video.title}
+                                                            </Typography>
+                                                         
+                                                        <EastIcon sx={{pt:0.4, width:"15px", height:'15px'}}/> 
+                                                
+                                                    </Stack>
+                                                </Box>
+                                                </Links>  
                                                
                                                 
                                             </Grid>

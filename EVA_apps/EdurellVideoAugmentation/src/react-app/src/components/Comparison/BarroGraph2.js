@@ -105,6 +105,13 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
                         return " "+context.dataset.label+" "+SecondsToTime(context.parsed.y)
                     }
                 },
+                backgroundColor: "white",
+                borderColor:"#e0e0e0",
+                borderWidth:2,
+                bodyColor:"black",
+                yAlign:"bottom",
+                padding:15,
+                cornerRadius:15
             },
            
           },
