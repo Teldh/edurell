@@ -18,7 +18,7 @@ import EastIcon from '@mui/icons-material/East';
 import { useHistory } from "react-router-dom";
 import { useContext } from 'react';
 import { ContextComparison } from './ContextComparison';
-export default function Querybar({ catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
+export default function Querybar({ querylist, catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
     const listConcepts = useContext(ContextComparison)[3];
     const history = useHistory();
     function GoToComparisonResult(){
@@ -26,7 +26,7 @@ export default function Querybar({ catalog, catalogExtra, ApplyFilters, searchCl
         history.push({
             pathname: '/comparisonResult',
             state: { 
-                concept: location,
+                concept: querylist[0],
                 catalog: catalog.filter(video=>{
                     if(listvideo.filter(lv=>lv.img==video.video_id).length > 0){
                         return video.video_id == listvideo.filter(lv=>lv.img == video.video_id)[0].img

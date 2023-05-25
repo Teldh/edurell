@@ -31,6 +31,7 @@ POSSO CHIAMARE SOLO LE QUERY SENZA AVERE PROBLEMI CON LE 500 CONNESSIONI
 */
 
 export default function Comparison(){
+    console.log("IM BACK AT COMPARISON")
     //list of video selected for comparison
     const [listvideo, setListVideo]= useState([]);
 
@@ -80,7 +81,7 @@ export default function Comparison(){
     //capturing the concept sent from previous page
     useEffect(() => {
       if(location.state != undefined)
-      console.log("data from previous search comparison: ", location.state.data);
+      console.log("data from previous search comparison COMPARISONJS: ", location.state.data);
     }, [location]);
 
 
@@ -633,7 +634,7 @@ export default function Comparison(){
         <ContextComparison.Provider value={[AddVideo,RemoveVideo,setSearchFilterClicked, listConcepts]}>
 
             <>
-            <Querybar catalog = {catalog} catalogExtra = {catalogExtra} ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
+            <Querybar querylist={querylist} catalog = {catalog} catalogExtra = {catalogExtra} ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>
             <Listvideo UpdateCatalogExtra={UpdateCatalogExtra}  catalogExtra={catalogExtra} catalog={catalog} loading={loading} querylist={querylist} catalogoriginal={catalogoriginal}/>
             </>

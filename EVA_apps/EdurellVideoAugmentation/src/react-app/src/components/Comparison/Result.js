@@ -227,6 +227,7 @@ export default function Result(){
         sx={{backgroundColor: "rgb(198,235,220)"}}
         >
             <Grid item>
+                
                 <Autocomplete
                 options={location.state.listConcepts}
                 className="bg-primary"

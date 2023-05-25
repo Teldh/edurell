@@ -16,13 +16,13 @@ import { ContextComparison } from './ContextComparison';
 export default function Queryinput({listconcepts,AddQueryElement, nomatch, location}){
     const options = listconcepts;//['Option 1', 'Option 2', 'Option 3', 'Option 4'];
     const [valac, SetValac] = useState([location]);
-    console.log("queryinput: ",location," ",location[0].trim().length);
+
   
     const setSearchFilterClicked = useContext(ContextComparison)[2];
 
 
     return(<>{
-        location!=null && location[0].trim().length!=0?  
+        location==null || location==undefined || location[0]==undefined || location[0].trim().length===0?  
         <Stack
         direction="row"
         spacing={0}
@@ -30,7 +30,7 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
         <Autocomplete
             
             className="bg-primary"
-            defaultValue={[location]}
+            
             freeSolo
             multiple
             limitTags={1}
@@ -84,7 +84,7 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
                         limitTags={1}
                         id="multiple-limit-tags "
                         options={options}
-                  
+                        defaultValue={[location]}
                         renderInput={(params) => (
                             <TextField error={nomatch}
                                         className="backColor" 

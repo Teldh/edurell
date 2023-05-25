@@ -34,6 +34,7 @@ function SecondsToTime(secondRaw){
 }
 
 export default function Barro({catalog, catalogExtra, graphcontrol}){
+    console.log("BARRO: ",catalog, catalogExtra)
     function createDiagonalPattern(color = 'black') {
         // create a 10x10 px canvas for the pattern's base shape
         let shape = document.createElement('canvas')
