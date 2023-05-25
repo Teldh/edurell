@@ -74,7 +74,12 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
       "#FF4545",
       "#3E7FFF",
       "#CE3FFF",
-      "#71D89A"
+      "#71D89A",
+
+      "#ff7878",
+      "#9dbdfc",
+      "#e08dfc",
+      "#a4f5c4"
   ]
   const nodeColor = (node) => {
     if(idx == 0){
@@ -82,7 +87,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
         case 'input':
           return '#FFFFFF';
         case 'output':
-          return '#B50000';
+          return '#FFFFFF';
         default:
           return '#FF4545';
       }
@@ -91,7 +96,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
         case 'input':
           return '#FFFFFF';
         case 'output':
-          return '#0039AB';
+          return '#FFFFFF';
         default:
           return '#3E7FFF';
       }
@@ -100,7 +105,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
         case 'input':
           return '#FFFFFF';
         case 'output':
-          return '#8000AB';
+          return '#FFFFFF';
         default:
           return '#CE3FFF';
       }
@@ -109,7 +114,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
         case 'input':
           return '#FFFFFF';
         case 'output':
-          return '#00A241';
+          return '#FFFFFF';
         default:
           return '#71D89A';
       }
@@ -131,20 +136,36 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
   const nodeStrokeColor = (node) => {
     if(idx == 0){
 
-
-          return '#FF4545';
+      if(node.type=="output"){
+        return "#ff7878";
+      }else{
+        return '#FF4545';
+      }
+          
     
     }else if(idx == 1){
-     
-          return '#3E7FFF';
+      if(node.type=="output"){
+        return "#9dbdfc";
+      }else{
+        return '#3E7FFF';
+      }
+          
       
     }else if(idx == 2){
-      
-          return '#CE3FFF';
+      if(node.type=="output"){
+        return "#e08dfc";
+      }else{
+        return '#CE3FFF';
+      }
+          
       
     }else if(idx == 3){
-     
-          return '#71D89A';
+      if(node.type=="output"){
+        return "#a4f5c4";
+      }else{
+        return '#71D89A';
+      }
+          
       
     }else{
       switch (node.type) {
@@ -229,7 +250,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
                 type:'input',
                 data:{label:conceptExtra["list_preconcept"][i]},
                 position,
-                style:{backgroundColor:"white", borderColor:graphcontrol=="three"?"grey":colorPick[idx], borderWidth:"2px",fontWeight:"bold"}
+                style:{backgroundColor:"white", borderColor:graphcontrol=="three"?"grey":colorPick[idx], borderWidth:"5px",fontWeight:"bold"}
             }];
             prenodesnote=[...prenodesnote,conceptExtra["list_prenotes"][i]]
         }
@@ -243,7 +264,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
                 type:'output',
                 data:{label:conceptExtra["list_derivatedconcept"][i]},
                 position,
-                style:{backgroundColor:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx],borderStyle:"dashed", borderWidth:"2px",fontWeight:"bold"}
+                style:{backgroundColor:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx+4], borderWidth:"5px",fontWeight:"bold"}
             }];
             postnodesnote=[...postnodesnote,conceptExtra["list_postnotes"][i]]
         }    
@@ -342,9 +363,9 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
         let newnode = nodes.map(node=>{
           console.log("node: ",node)
           if(node.type == "input"){
-            node.style={backgroundColor:"white", borderColor:graphcontrol=="three"?"grey":colorPick[idx], borderWidth:"2px",fontWeight:"bold"}
+            node.style={backgroundColor:"white", borderColor:graphcontrol=="three"?"grey":colorPick[idx], borderWidth:"5px",fontWeight:"bold"}
           }else if(node.type == "output"){
-            node.style={backgroundColor:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx],borderStyle:"dashed", borderWidth:"2px",fontWeight:"bold"}
+            node.style={backgroundColor:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx+4], borderWidth:"5px",fontWeight:"bold"}
           }else{
             node.style={backgroundColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], color:"white", borderColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], fontWeight:"bold"}
           }
@@ -391,7 +412,7 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
       fitView
     >
       <Controls />
-      <MiniMap nodeColor={nodeColor} nodeStrokeColor={nodeStrokeColor} nodeStrokeWidth={5} zoomable pannable />
+      <MiniMap nodeColor={nodeColor} nodeStrokeColor={nodeStrokeColor} nodeStrokeWidth={10} zoomable pannable />
       <Panel position="top-right">
       
         <button onClick={() => {onLayout(nodes,edges,'DOWN')}}>vertical layout</button>
