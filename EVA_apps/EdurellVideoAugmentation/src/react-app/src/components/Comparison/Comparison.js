@@ -31,7 +31,7 @@ POSSO CHIAMARE SOLO LE QUERY SENZA AVERE PROBLEMI CON LE 500 CONNESSIONI
 */
 
 export default function Comparison(){
-    console.log("IM BACK AT COMPARISON")
+    const [listTutorial, setListTutorial] = useState([]);
     //list of video selected for comparison
     const [listvideo, setListVideo]= useState([]);
 
