@@ -28,7 +28,8 @@ import { ContextComparison } from './ContextComparison';
 import ClickAwayListener from '@mui/base/ClickAwayListener';
 import CircleIcon from '@mui/icons-material/Circle';
 import {TokenContext} from '../account-management/TokenContext';
-import FlowChart from './FlowChart.js'
+import FlowChartSmall from './FlowChartSmall.js'
+import ReactFlow, { ReactFlowProvider, useReactFlow } from 'reactflow';
 import {
   Link,
   Redirect,
@@ -705,9 +706,23 @@ export default function VideoFiltered({catalog, querylist,  UpdateCatalogExtra, 
                                                     </Grid>
                                                 </Grid>
                                                 <Grid item>
-                                                <Collapse in={expanded2} timeout="auto" unmountOnExit>
-                                                                            INSERT CONCEPTUAL MAP
-                                                                        
+                                                    <Collapse in={expanded2} timeout="auto" unmountOnExit>
+                                                        <Grid
+                                                        container
+                                                        direction="row"
+                                                        justifyContent="center"
+                                                        alignItems="center"
+                                                        sx={{
+                                                            width:"100%",
+                                                            height:"500px"
+                                                        }}
+                                                        >
+                                                            <Grid item sx={{width:"100%", height:"100%"}}>
+                                                                <ReactFlowProvider>
+                                                                    <FlowChartSmall concept={querylist[0]} conceptExtraRaw={conceptextra}/>
+                                                                </ReactFlowProvider>
+                                                            </Grid>
+                                                        </Grid>
                                                     </Collapse>
                                                 </Grid>
                                             </Grid>
