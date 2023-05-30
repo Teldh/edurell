@@ -1,7 +1,7 @@
 import Header from '../Header/Header';
 import React from 'react';
 import Grid from '@mui/material/Grid';
-import { useContext,useState,useEffect } from 'react';
+import { useContext,useState,useEffect, useRef} from 'react';
 import {TokenContext} from '../account-management/TokenContext';
 import Querybar from './Querybar.js';
 import Listvideo from './Listvideo.js';
@@ -32,7 +32,9 @@ POSSO CHIAMARE SOLO LE QUERY SENZA AVERE PROBLEMI CON LE 500 CONNESSIONI
 */
 
 export default function Comparison(){
-    const [listTutorial, setListTutorial] = useState([]);
+    const anchor1 = useRef(null);
+    const [anchor2,setAnchor2] = useState(null)
+    console.log("COMPARISON ANCHOR2: ",anchor2)
     const [openTutorial, setOpenTutorial] = useState(false);
     function closeTutorial(){
       setOpenTutorial(false);
@@ -43,13 +45,10 @@ export default function Comparison(){
       console.log("ID: ",document.getElementById("TEST"))
     }
 
-    //tutoria;
-    useEffect(()=>{
-      let anchorlist=[]
-      anchorlist=[...anchorlist,document.getElementById("TUTORIALONE")]
-      anchorlist=[...anchorlist,document.getElementById("TUTORIALTWO")]
-      setListTutorial(anchorlist)
-    },[])
+  
+
+
+
     //list of video selected for comparison
     const [listvideo, setListVideo]= useState([]);
 
@@ -111,7 +110,7 @@ export default function Comparison(){
 
     //request from mongodb to the value inside collection videos
     useEffect(() => {
-        console.log("effect")
+       // console.log("effect")
         const fetchData = async () => {
             let response=null
             try{
@@ -126,7 +125,7 @@ export default function Comparison(){
                 .then(res => res.json())
             }
             catch(err){
-              console.log(err)
+           //   console.log(err)
               if(err.message==="401"){
                   
                   context.setToken('')
@@ -138,7 +137,7 @@ export default function Comparison(){
                   return
               }
             }
-            console.log("response",response)
+            //console.log("response",response)
             if(response===undefined){
               alert('Unknown Server Error')
               return
@@ -181,7 +180,7 @@ export default function Comparison(){
       
           })
           x=x+1;
-                  console.log(newlistconcepts);
+                  //console.log(newlistconcepts);
           setListConcepts(newlistconcepts);
           //used to get all type and preconcept of all video. not used anymore. just for reference in the future.
           //QueryVideoTypeAndPre()
@@ -192,10 +191,10 @@ export default function Comparison(){
 
         if(searchFilterClicked){
           SetCatalogExtra(catalogExtra=>[])
-          console.log("queryextra use effect ",catalog)
+          //("queryextra use effect ",catalog)
           let asd = catalogExtra
           catalog.map(video=>{
-          console.log("sto facendo query")
+         // console.log("sto facendo query")
           
             
             QueryConceptExtra(video.video_id, querylist)
@@ -213,10 +212,10 @@ export default function Comparison(){
             if(concept.length==0){
                 //setCatalog(originalList);
             }
-            console.log("addquery ",concept)
+           // console.log("addquery ",concept)
             const newquerylist = [...concept];
             setQueryList(newquerylist);
-            console.log("newquerylist: ",newquerylist)
+        //    console.log("newquerylist: ",newquerylist)
             
             setSearchFilterClicked(true)
             let newcatalog = catalog.filter(video=>checker(video.extracted_keywords,concept));
@@ -234,20 +233,20 @@ export default function Comparison(){
     function AddQueryElement(concept){
       //attiva la lista video selected
       SetSearchClicked(true);
-      console.log("DOPOCLICKBUTTON: ",searchFilterClicked)
+      //console.log("DOPOCLICKBUTTON: ",searchFilterClicked)
       //SetCatalogOriginal(catalog);
       //setCatalog(catalogoriginal);
       //bug resettare la querylist coi elementi aggiornati
-      console.log(catalog," ",catalogoriginal," ",concept)
+     // console.log(catalog," ",catalogoriginal," ",concept)
   
           setCatalog(catalogoriginal);
-          console.log("addquery ",concept)
+          //console.log("addquery ",concept)
           const newquerylist = [...concept];
           setQueryList(newquerylist);
-          console.log("newquerylist: ",newquerylist)
+         // console.log("newquerylist: ",newquerylist)
           if(concept[0]==null || concept[0].trim().length===0){
               //setSearchFilterClicked(false);
-              console.log("concept null")
+              //console.log("concept null")
               setNomatch(false);
               return;
           }
@@ -257,7 +256,7 @@ export default function Comparison(){
           
          
           let newcatalog = catalogoriginal.filter(video=>checker(video.extracted_keywords,concept));
-          console.log("check concept: ",concept.length," ",newcatalog.length," ",querylist.length)
+          //console.log("check concept: ",concept.length," ",newcatalog.length," ",querylist.length)
           if(concept.length>0 && newcatalog.length==0){
               setNomatch(true)
           }else if(concept.length!=querylist.length){
@@ -644,16 +643,16 @@ export default function Comparison(){
       
     return(
         <>
-        <Tutorial anchors={listTutorial} open={openTutorial} closeTutorial={closeTutorial}/>
+        <Tutorial anchor1={anchor1} anchor2={anchor2} open={openTutorial} closeTutorial={closeTutorial}/>
         <ThemeProvider theme={theme}>
         <StyledEngineProvider injectFirst> {/* to override the default style with your custom css */}
         <Header page="dashboard" login={nameSurname}/>
         <ContextComparison.Provider value={[AddVideo,RemoveVideo,setSearchFilterClicked, listConcepts]}>
 
             <>
-            <Querybar openTutorial={openTutorialFunc} querylist={querylist} catalog = {catalog} catalogExtra = {catalogExtra} ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
+            <Querybar ref={anchor1} openTutorial={openTutorialFunc} querylist={querylist} catalog = {catalog} catalogExtra = {catalogExtra} ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>
-            <Listvideo UpdateCatalogExtra={UpdateCatalogExtra}  catalogExtra={catalogExtra} catalog={catalog} loading={loading} querylist={querylist} catalogoriginal={catalogoriginal}/>
+            <Listvideo setAnchor2={setAnchor2} UpdateCatalogExtra={UpdateCatalogExtra}  catalogExtra={catalogExtra} catalog={catalog} loading={loading} querylist={querylist} catalogoriginal={catalogoriginal}/>
             </>
             
         </ContextComparison.Provider>

@@ -11,9 +11,9 @@ import Paper from '@mui/material/Paper';
 import Videoavailable from "./Videoavailable.js"
 import VideoFiltered from "./VideoFiltered.js"
 import {TokenContext} from '../account-management/TokenContext';
-import { useContext } from 'react';
+import { useContext, forwardRef } from 'react';
 
-export default function Listvideo({UpdateCatalogExtra, catalogExtra, catalog,loading, querylist, catalogoriginal}){
+const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, catalog,loading, querylist, catalogoriginal}, ref)=>{
     
     
     const context = useContext(TokenContext);
@@ -42,11 +42,18 @@ export default function Listvideo({UpdateCatalogExtra, catalogExtra, catalog,loa
                 //console.log("LISTVIDEO: ",catalogExtra)
                 let singlecatExtra = catalogExtra.filter(extra =>video.video_id == extra.video_id)
                 //console.log(video.video_id," extra ",singlecatExtra)
-                return(
-                    
-                    <Grid key={video._id.$oid} item xs={12} xl={2} md={3} >
-                        <VideoFiltered idx={idx} catalog={catalog} querylist={querylist} UpdateCatalogExtra={UpdateCatalogExtra} tottime={video.duration} conceptextra={singlecatExtra} titleurl={video.title} imageurl={video.video_id} idxurl={video._id.$oid} concepts={video.extracted_keywords} creator={video.creator}/>
-                    </Grid>
+                return(<>
+                    {
+                        idx==0?
+                        <Grid key={video._id.$oid} item xs={12} xl={2} md={3} >
+                        <VideoFiltered setAnchor2={setAnchor2} idx={idx} catalog={catalog} querylist={querylist} UpdateCatalogExtra={UpdateCatalogExtra} tottime={video.duration} conceptextra={singlecatExtra} titleurl={video.title} imageurl={video.video_id} idxurl={video._id.$oid} concepts={video.extracted_keywords} creator={video.creator}/>
+                        </Grid>
+                        :
+                        <Grid key={video._id.$oid} item xs={12} xl={2} md={3} >
+                        <VideoFiltered setAnchor2={setAnchor2} idx={idx} catalog={catalog} querylist={querylist} UpdateCatalogExtra={UpdateCatalogExtra} tottime={video.duration} conceptextra={singlecatExtra} titleurl={video.title} imageurl={video.video_id} idxurl={video._id.$oid} concepts={video.extracted_keywords} creator={video.creator}/>
+                        </Grid>
+                    }
+                    </>
                 );
                 
                 
@@ -111,6 +118,8 @@ export default function Listvideo({UpdateCatalogExtra, catalogExtra, catalog,loa
     </Container>
     </>
     );
-}
+});
+
+export default Listvideo;
 
 

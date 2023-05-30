@@ -19,7 +19,7 @@ import Box from '@mui/material/Box';
 import Filters from './Filters.js'
 import EastIcon from '@mui/icons-material/East';
 import { useHistory } from "react-router-dom";
-import { useContext ,useState} from 'react';
+import { useContext ,useState, forwardRef} from 'react';
 import { ContextComparison } from './ContextComparison';
 import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
@@ -37,7 +37,7 @@ const ExpandMore = styled((props) => {
 }));
 
 
-export default function Querybar({ openTutorial,querylist, catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}){
+const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}, ref) => {
     const [expanded, setExpanded] = useState(false);
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -106,7 +106,7 @@ export default function Querybar({ openTutorial,querylist, catalog, catalogExtra
                             >
                                 <Grid item>
                                     <Chip 
-                                        id="TUTORIALONE"
+                                        
                                         label={<Typography variant="caption" display="block" gutterBottom>
                                             <b>Aiuto</b>
                                             </Typography>}
@@ -128,9 +128,12 @@ export default function Querybar({ openTutorial,querylist, catalog, catalogExtra
                                 </Grid>
                                 
                                 <Grid item>
+                                    <div >
+                                       
+                                        
                                     <Chip 
                                         sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px'}}
-                                        
+                                        ref={ref}
                                         avatar={<TuneRoundedIcon/>}
                                         label={<Typography variant="caption" display="block" gutterBottom sx={{m:0.5}}>
                                         Filtri
@@ -148,13 +151,15 @@ export default function Querybar({ openTutorial,querylist, catalog, catalogExtra
                                             </ExpandMore>
                                         }
                                     />
+                              
+                                    </div>
                                 </Grid>
                             
                                 
                             </Grid>
                     </Grid>
                     <Grid item>
-                        <Filters ApplyFilters={ApplyFilters} expanded={expanded}/>
+                        <Filters ApplyFilters={ApplyFilters} expanded={expanded} />
                     </Grid>
                 </Grid>
             </Container>
@@ -304,4 +309,6 @@ export default function Querybar({ openTutorial,querylist, catalog, catalogExtra
 
         </>
     );
-}
+});
+
+export default Querybar;

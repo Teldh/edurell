@@ -6,7 +6,7 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import imag from './imgtest/brainicon.PNG'
-import {useState} from 'react';
+import {useState, useRef} from 'react';
 import { useTheme } from '@material-ui/core/styles';
 import CancelIcon from '@mui/icons-material/Cancel';
 import Paper from '@mui/material/Paper';
@@ -23,7 +23,7 @@ import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse';
-import { useContext } from 'react';
+import { useContext, forwardRef,useEffect } from 'react';
 import { ContextComparison } from './ContextComparison';
 import ClickAwayListener from '@mui/base/ClickAwayListener';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -49,7 +49,17 @@ const ExpandMore = styled((props) => {
       duration: theme.transitions.duration.shortest,
     }),
 }));
-export default function VideoFiltered({idx, catalog, querylist,  UpdateCatalogExtra, tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator}){
+const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCatalogExtra, tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator},ref)=>{
+    const myref=useRef(null)
+    console.log("VIDEOFILTERED ", idx," ",myref)
+    useEffect(() => {
+        
+        if(myref.current != null){
+            console.log("VIDEOFILTERED CALLED: ",myref.current)
+            setAnchor2(myref.current)
+        }
+        
+      }, [myref.current]);
     const [expanded2, setExpanded2] = useState(false);
     const handleExpandClick2 = () => {
         setExpanded2(!expanded2);
@@ -144,8 +154,8 @@ export default function VideoFiltered({idx, catalog, querylist,  UpdateCatalogEx
         let seconds = Math.abs(minutes - (remainminutes * 60))
         seconds = seconds*60
        /// console.log("seconds: ",seconds);
-        console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
-        console.log("0"+hours+" "+(minutes<10?("0"+minutes):minutes).toString())
+        //console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
+        //console.log("0"+hours+" "+(minutes<10?("0"+minutes):minutes).toString())
         duration = (hours<10?("0"+hours):hours).toString()+":"+(minutes<10?("0"+minutes):minutes).toString()+":"+(Math.floor(seconds)<10?("0"+Math.floor(seconds)):Math.floor(seconds)).toString()
     }
 
@@ -194,50 +204,7 @@ export default function VideoFiltered({idx, catalog, querylist,  UpdateCatalogEx
     }
 
 
-    /*
-    if(conceptextra[0]!=undefined&& conceptextra[0].concept_starttime.length>0){
-        for(let i=0; i<conceptextra[0].derivatedconcept_starttime.length;i++){
 
-            const time1 = conceptextra[0].derivatedconcept_endtime[i] .split("^^")[0];
-            const time2 = conceptextra[0].derivatedconcept_starttime[i] .split("^^")[0];
-    
-            let [hours1, minutes1, seconds1] = time1.split(":");
-            seconds1=Math.floor(seconds1)
-            seconds1=seconds1+hours1*3600
-            //console.log("hours1: ",hours1*3600," ",seconds1)
-            seconds1=seconds1+minutes1*60
-            //console.log("minutes: ",minutes1*60," ",seconds1)
-    
-            let [hours2, minutes2, seconds2] = time2.split(":");
-            seconds2=Math.floor(seconds2)
-            seconds2=seconds2+hours2*3600
-            //console.log("hours2: ",hours2*3600," ",seconds2)
-            seconds2=seconds2+minutes2*60
-            //console.log("hours2: ",minutes2*60," ",seconds2)
-    
-            let resultseconds = Math.abs(seconds2-seconds1);
-            //console.log("difference: ",resultseconds);
-          
-       
-    
-           
-            approfondimenti = approfondimenti+resultseconds;
-
-        }
-        approfondimentiSeconds = approfondimenti;
-        let hours = Math.floor(approfondimenti /3600)
-        //console.log("hour: ",hours," remain: ",Math.abs(hours - (approfondimenti /3600)))
-        let remainminutes = Math.abs(hours - (approfondimenti /3600))
-        let minutes = Math.floor(remainminutes * 60);
-        //console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
-        let seconds = Math.abs(minutes - (remainminutes * 60))
-        seconds = seconds*60
-       // console.log("seconds: ",seconds);
-       // console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
-        approfondimenti = hours+":"+minutes+":"+Math.floor(seconds)
-        
-    }
-    */
     return(
         <ClickAwayListener onClickAway={handleClickAway}>
         <div>
@@ -274,9 +241,9 @@ export default function VideoFiltered({idx, catalog, querylist,  UpdateCatalogEx
             
             <Chip label={"1 match"} size="small" sx={{backgroundColor:"rgb(255,128,0)", color:"white"}}/>
             {!add?
-            <>
+            <div className='asdolo'>
                 <Box
-                    id="TUTORIALTWO"
+                    
                         sx={{marginLeft: 'auto',
                             backgroundColor:'#B798f8', 
                             color:"white",
@@ -297,13 +264,19 @@ export default function VideoFiltered({idx, catalog, querylist,  UpdateCatalogEx
                         </>
                         :
                         <>
-                        <Typography variant="body2" display="block" sx={{m:0, p:0.5, pl:3, pr:3}} gutterBottom>VS</Typography>
+                        {
+                            idx==0?
+                            <Typography ref={myref} variant="body2" display="block" sx={{m:0, p:0.5, pl:3, pr:3}} gutterBottom>VS</Typography>
+                            :
+                            <Typography variant="body2" display="block" sx={{m:0, p:0.5, pl:3, pr:3}} gutterBottom>VS</Typography>
+                        }
+                        
                         </>
                     }
                     
                     
                     </Box>
-            </>
+            </div>
             :
             <>
                     <Box
@@ -831,4 +804,6 @@ export default function VideoFiltered({idx, catalog, querylist,  UpdateCatalogEx
         
         </ClickAwayListener>
     );
-}
+});
+
+export default VideoFiltered;

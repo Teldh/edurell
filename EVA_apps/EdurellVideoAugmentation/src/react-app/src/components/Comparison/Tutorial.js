@@ -1,36 +1,57 @@
 import React from 'react';
 import Modal from '@mui/material/Modal';
-import {useState} from 'react';
+import {useState, useEffect,useRef} from 'react';
 import EastIcon from '@mui/icons-material/East';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import WestIcon from '@mui/icons-material/West';
-export default function Tutorial({anchors, open, closeTutorial}){
+export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
 
-    const[page,setPage]=useState(1)
-    const [anchorEl, setAnchorEl] = useState(anchors[0]);
+    const[page,setPage]=useState(0)
+    const [anchorEl, setAnchorEl] = useState([null,null,null,null]);
 
+    
+    if(open){
+        console.log("TUTORIAL: ",anchor1," ",anchor2)
+    }
+  
+
+    
+    useEffect(() => {
+        setAnchorEl([anchorEl[0],anchor1.current,anchorEl[2],anchorEl[3]])
+      }, [anchor1.current]);
     const handleClick = (event) => {
       setAnchorEl(event.currentTarget);
     };
     const handleClose = () => {
-      setAnchorEl(null);
+     // setAnchorEl(null);
     };
 
     function NextPage(){
-        if(page==1){
-            setAnchorEl(anchors[1])
+        console.log("nextpage: ",page)
+
+
+        if(page==0 && anchor1.current != null){
+            anchor1.current.style.zIndex=10000;
+        }else{
+            anchor1.current.style.zIndex="auto";
         }
-        if(page<4){
+        if(page<3){
             setPage(page+1)
+            
         }else{
 
         }
     }
 
     function PreviousPage(){
+        if(page==2 && anchor1.current != null){
+            anchor1.current.style.zIndex=10000;
+        }else{
+            anchor1.current.style.zIndex="auto";
+        }
         if(page >0){
             setPage(page-1)
         }else{
@@ -45,7 +66,8 @@ export default function Tutorial({anchors, open, closeTutorial}){
     aria-describedby="modal-modal-description"
     >
     <Menu
-        anchorEl={anchorEl}
+        sx={{mt:1}}
+        anchorEl={anchorEl[page]}
         id="account-menu"
         open="true"
         onClose={handleClose}
@@ -94,7 +116,7 @@ export default function Tutorial({anchors, open, closeTutorial}){
                 >
                     <Grid item>
                         <Typography variant="caption" display="block" gutterBottom>
-                            {page}/4
+                            {page+1}/4
                         </Typography>
                     </Grid>
                     <Grid item>

@@ -2,7 +2,7 @@ import * as React from 'react';
 import Chip from '@mui/material/Chip';
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
 import Typography from '@mui/material/Typography';
-import {useState} from 'react';
+import {useState, forwardRef} from 'react';
 import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -56,12 +56,13 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 },
 }));
   
-export default function Filters({ApplyFilters, expanded}){
+const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
 
    
     const [anchorEl1, setAnchorEl1] = useState(null);
     const handlePopoverOpen1 = (event) => {
         setAnchorEl1(event.currentTarget);
+        console.log("FILTERSANCHOR: ",event.currentTarget)
     };
     const handlePopoverClose1 = () => {
         setAnchorEl1(null);
@@ -610,4 +611,6 @@ export default function Filters({ApplyFilters, expanded}){
     
     
     </>);
-}
+});
+
+export default Filters;
