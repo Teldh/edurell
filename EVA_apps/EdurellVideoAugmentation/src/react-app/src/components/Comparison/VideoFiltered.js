@@ -241,42 +241,79 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
             
             <Chip label={"1 match"} size="small" sx={{backgroundColor:"rgb(255,128,0)", color:"white"}}/>
             {!add?
-            <div className='asdolo'>
-                <Box
+            <>
+                {
+                    idx==0?
+                    <div ref={myref} style={{marginLeft:"auto"}}>
+                        <Box
+                            
+                                sx={{marginLeft: 'auto',
+                                    backgroundColor:'#B798f8', 
+                                    color:"white",
+                                    borderRadius:'20px 0 0 0',
+                                    width:'auto',
+                                    maxWidth:'200px',
+                                    height:"auto"}}
+                                onMouseEnter={()=>setHoverm(true)}
+                                onMouseLeave={()=>setHoverm(false)}
+                                onClick={e => {e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);UpdateCatalogExtra(imageurl, durationSeconds, approfondimentiSeconds);}}
+                        
+                        >
+                            {
+                                hoverm?
+                                <>
+                                <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Aggiungi</Typography>
+                                <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>al confronto</Typography>
+                                </>
+                                :
+                                <>
+                            
+                                <Typography variant="body2" display="block" sx={{m:0, p:0.5, pl:3, pr:3}} gutterBottom>VS</Typography>
+                                
+                                
+                                </>
+                            }
+                            
+                            
+                            </Box>
+                    </div>
+                    :
+                    <div style={{marginLeft:"auto"}}>
+                    <Box
+                        
+                            sx={{marginLeft: 'auto',
+                                backgroundColor:'#B798f8', 
+                                color:"white",
+                                borderRadius:'20px 0 0 0',
+                                width:'auto',
+                                maxWidth:'200px',
+                                height:"auto"}}
+                            onMouseEnter={()=>setHoverm(true)}
+                            onMouseLeave={()=>setHoverm(false)}
+                            onClick={e => {e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);UpdateCatalogExtra(imageurl, durationSeconds, approfondimentiSeconds);}}
                     
-                        sx={{marginLeft: 'auto',
-                            backgroundColor:'#B798f8', 
-                            color:"white",
-                            borderRadius:'20px 0 0 0',
-                            width:'auto',
-                            maxWidth:'200px',
-                            height:"auto"}}
-                        onMouseEnter={()=>setHoverm(true)}
-                        onMouseLeave={()=>setHoverm(false)}
-                        onClick={e => {e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);UpdateCatalogExtra(imageurl, durationSeconds, approfondimentiSeconds);}}
-                
-                >
-                    {
-                        hoverm?
-                        <>
-                        <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Aggiungi</Typography>
-                        <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>al confronto</Typography>
-                        </>
-                        :
-                        <>
+                    >
                         {
-                            idx==0?
-                            <Typography ref={myref} variant="body2" display="block" sx={{m:0, p:0.5, pl:3, pr:3}} gutterBottom>VS</Typography>
+                            hoverm?
+                            <>
+                            <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Aggiungi</Typography>
+                            <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>al confronto</Typography>
+                            </>
                             :
+                            <>
+                         
                             <Typography variant="body2" display="block" sx={{m:0, p:0.5, pl:3, pr:3}} gutterBottom>VS</Typography>
+                            
+                            
+                            </>
                         }
                         
-                        </>
-                    }
-                    
-                    
-                    </Box>
-            </div>
+                        
+                        </Box>
+                </div>
+
+                }
+           </>
             :
             <>
                     <Box
