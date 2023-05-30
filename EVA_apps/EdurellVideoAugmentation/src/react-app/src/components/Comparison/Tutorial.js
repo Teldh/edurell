@@ -22,6 +22,10 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
     useEffect(() => {
         setAnchorEl([anchorEl[0],anchor1.current,anchorEl[2],anchorEl[3]])
       }, [anchor1.current]);
+
+    useEffect(()=>{
+        setAnchorEl([anchorEl[0],anchorEl[1],anchor2,anchorEl[3]])
+    },[anchor2])
     const handleClick = (event) => {
       setAnchorEl(event.currentTarget);
     };
@@ -38,6 +42,12 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
         }else{
             anchor1.current.style.zIndex="auto";
         }
+
+        if(page==1 && anchor1.current != null){
+            anchor2.style.zIndex=10000;
+        }else{
+            anchor2.style.zIndex="auto";
+        }
         if(page<3){
             setPage(page+1)
             
@@ -51,6 +61,11 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
             anchor1.current.style.zIndex=10000;
         }else{
             anchor1.current.style.zIndex="auto";
+        }
+        if(page==2 && anchor1.current != null){
+            anchor2.style.zIndex=10000;
+        }else{
+            anchor2.style.zIndex="auto";
         }
         if(page >0){
             setPage(page-1)
