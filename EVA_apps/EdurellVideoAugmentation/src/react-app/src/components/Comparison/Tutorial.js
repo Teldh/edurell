@@ -101,7 +101,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
             },
             '&:before': {
               content: '""',
-              display: 'block',
+              display: page==0?'none':page==3?'none':'block',
               position: 'absolute',
               top: 0,
               right: 14,
@@ -340,7 +340,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                         page==0?
                         <>
                             <Grid item>
-                                
+
                             </Grid>
                         </>
                         :
