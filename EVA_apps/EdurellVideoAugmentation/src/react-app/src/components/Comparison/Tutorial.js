@@ -136,7 +136,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                     </Grid>
                     <Grid item>
                         <Typography variant="caption" display="block" gutterBottom onClick={closeTutorial}>
-                            chiudi | x
+                            close | x
                         </Typography>
                     </Grid>
                 </Grid>
@@ -147,30 +147,64 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                 direction="column"
                 justifyContent="flex-start"
                 alignItems="center"
-                >   {page==1?
+                >   {page==0?
                     <>
                     <Grid item>
                         <Typography variant="h6" gutterBottom>
-                            Troppi video tra 
-                        </Typography>
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="h6" gutterBottom>
-                            cui cercare?
+                            Too many videos?
                         </Typography>
                     </Grid>
                     </>
                     :
-                        page==2?
+                        page==1?
                             <>
+                                <Grid item>
+                                    <Typography variant="h6" gutterBottom>
+                                        Set your filters for video
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="h6" gutterBottom>
+                                        search
+                                    </Typography>
+                                </Grid>
+                            </>
+                            :
+                            page==2?
+                            <>
+                                <Grid item>
+                                    <Typography variant="h6" gutterBottom>
+                                        Click
+                                    </Typography>
+                                    <Typography variant="h6" gutterBottom>
+                                        to choose and
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="h6" gutterBottom>
+                                        compare up to 4 videos
+                                    </Typography>
+                                </Grid>
                             </>
                             :
                             page==3?
                             <>
+                                <Grid item>
+                                    <Typography variant="h6" gutterBottom>
+                                        Compare video stats and
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="h6" gutterBottom>
+                                        choose the best video for
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="h6" gutterBottom>
+                                        your needs!
+                                    </Typography>
+                                </Grid>
                             </>
-                            :
-                            page==4?
-                            <></>
                             :
                             <></>
                     }
@@ -184,31 +218,111 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                 alignItems="center"
                 >
                     {
-                        page==1?
+                        page==0?
                         
                         <>
                             <Grid item>
                                 <Typography variant="caption" display="block" gutterBottom>
-                                    Nessun problema,
+                                    Don't worry,
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="caption" display="block" gutterBottom>
-                                    ti <b>aiutiamo</b> noi
+                                    we'll <b>help</b> you out!
                                 </Typography>
                             </Grid>
                         </>
                         :
-                        page==2?
+                        page==1?
                             <>
+                                <Grid item>
+                                    <Typography variant="caption" display="block" gutterBottom>
+                                        Here you can select video
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="caption" display="block" gutterBottom>
+                                        duration, expertise level and
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="caption" display="block" gutterBottom>
+                                        other features to get the perfect
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="caption" display="block" gutterBottom>
+                                        video you are looking for!
+                                    </Typography>
+                                </Grid>
+                            </>
+                            :
+                            page==2?
+                            <>
+                                <Grid item>
+                                    <Typography variant="caption" display="block" gutterBottom>
+                                        Are there too many videos <b>and you don't know</b>
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="caption" display="block" gutterBottom>
+                                        <b>which one to watch?</b>
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="caption" display="block" gutterBottom>
+                                        <b>compare them</b> and find what suits you best!
+                                    </Typography>
+                                </Grid>
                             </>
                             :
                             page==3?
                             <>
+                                <Grid item>
+                                    <Typography variant="caption" display="block" gutterBottom>
+                                        After choosing all the videos you want to compare
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="caption" display="block" gutterBottom>
+                                        you will be able to access <b>all the stats</b> regarding:
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <ul>
+                                        <li>
+                                            <Typography variant="caption" display="block" gutterBottom>
+                                                <b>Duration</b> of the whole video and also of the specific parts about the concept
+                                            </Typography>
+                                        </li>
+                                        <li>
+                                            <Typography variant="caption" display="block" gutterBottom>
+                                                <b>What you should already know</b>
+                                            </Typography>
+                                        </li>
+                                        <li>
+                                            <Typography variant="caption" display="block" gutterBottom>
+                                                <b>What you'll learn</b>
+                                            </Typography>
+                                        </li>
+                                        <li>
+                                            <Typography variant="caption" display="block" gutterBottom>
+                                                Whether or not you'll find any <b>slides</b> in the video
+                                            </Typography>
+                                        </li>
+                                    </ul>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="body2" display="block" gutterBottom>
+                                        What are you waiting for?
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="body2" display="block" gutterBottom>
+                                        <b>Try it yourself!</b>
+                                    </Typography>
+                                </Grid>
                             </>
-                            :
-                            page==4?
-                            <></>
                             :
                             <></>
                     }
@@ -222,32 +336,37 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                 justifyContent="space-between"
                 alignItems="center"
                 >
-                    <Grid item xs="auto" sx={{p: 2 ,backgroundColor:'#B798f8', borderRadius:'0 50px 0 50px'}} onClick={PreviousPage}>
-                        <Grid
-                        container
-                        direction="row"
-                        justifyContent="center"
-                        alignItems="center"
-                        >
-                            {
-                                page==1?
-                                <>
-                                    
-                                </>
-                                :
-                                <>  
+                    {
+                        page==0?
+                        <>
+                            <Grid item>
+                                
+                            </Grid>
+                        </>
+                        :
+                        <>
+                            <Grid item xs="auto" sx={{p: 2 ,backgroundColor:'#B798f8', borderRadius:'0 50px 0 50px'}} onClick={PreviousPage}>
+                                <Grid
+                                container
+                                direction="row"
+                                justifyContent="center"
+                                alignItems="center"
+                                >
+                                
                                     <Grid item>
                                         <WestIcon sx={{color:"#FFFFFF"}}/>
                                     </Grid>
                                     <Grid item>
-                                        <p style={{color:'white'}}>Avanti</p>
+                                        <p style={{color:'white'}}>Back</p>
                                     </Grid>
+                                            
                                     
-                                </>
-                            }
-                            
-                        </Grid>
-                    </Grid>
+                                    
+                                </Grid>
+                            </Grid>
+                        </>
+                    }
+                    
                     <Grid item xs="auto" sx={{p: 2 ,backgroundColor:'#B798f8', borderRadius:'50px 0 50px 0'}} onClick={NextPage}>
                         <Grid
                         container
@@ -256,16 +375,16 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                         alignItems="center"
                         >
                             {
-                                page==4?
+                                page==3?
                                 <>
                                     <Grid item>
-                                        <p style={{color:'white'}}>Fine</p>
+                                        <p style={{color:'white'}}>Got it, thanks.</p>
                                     </Grid>
                                 </>
                                 :
                                 <>
                                     <Grid item>
-                                        <p style={{color:'white'}}>Avanti</p>
+                                        <p style={{color:'white'}}>Next</p>
                                     </Grid>
                                     <Grid item>
                                         <EastIcon sx={{color:"#FFFFFF"}}/>
