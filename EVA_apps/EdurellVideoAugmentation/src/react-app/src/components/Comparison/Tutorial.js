@@ -762,6 +762,8 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                 sx={{ display: "flex",
                 alignItems: "center",
                 justifyContent:"center",
+                mt:2,
+                ml:-5
                 }}
                 anchorEl={anchorEl[page]}
 
@@ -787,16 +789,16 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                     position: 'absolute',
                     top: 0,
                     right: 14,
-                    width: 10,
-                    height: 10,
+                    width: 20,
+                    height: 20,
                     bgcolor: 'background.paper',
-                    transform: 'translateY(-50%) rotate(45deg)',
+                    transform: page==1?'translateY(-50%) rotate(45deg)':'translateY(100px) translateX(120%) rotate(45deg)',
                     zIndex: 0,
                     },
                 },
                 }}
-                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                transformOrigin={{ horizontal: 'right', vertical: page==1?'top':'center' }}
+                anchorOrigin={{ horizontal: page==1?'right':'left', vertical: page==1?'bottom':'center' }}
                 anchorReference='anchorEl'
             >
                 <Grid
