@@ -790,7 +790,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                     width: 20,
                     height: 20,
                     bgcolor: 'background.paper',
-                    transform: page==1?'translateY(-50%) rotate(45deg)':'translateY(100px) translateX(120%) rotate(45deg)',
+                    transform: page==1?'translateY(-50%) rotate(45deg)':'translateY(80px) translateX(120%) rotate(45deg)',
                     zIndex: 0,
                     },
                 },
@@ -859,7 +859,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                                     <>
                                         <Grid item>
                                             <Typography variant="h6"  gutterBottom sx={{m:0,p:0}}>
-                                                Click
+                                                <b>Click</b>
                                          
                                             <Box
                                                 sx={{ml:1,mr:1,
@@ -875,12 +875,12 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                                                 <Typography variant="body2" display="inline" sx={{m:0, p:0.5, pl:2, pr:2}} gutterBottom>VS</Typography>
                                             </Box>
                                          
-                                                to choose and
+                                                <b>to choose and</b>
                                             </Typography>
                                         </Grid>
                                         <Grid item>
-                                            <Typography variant="h6" gutterBottom>
-                                                compare up to 4 videos
+                                            <Typography variant="h6" gutterBottom sx={{m:0,p:0}}>
+                                                <b>compare up to 4 videos</b>
                                             </Typography>
                                         </Grid>
                                     </>
@@ -954,17 +954,17 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                                     page==2?
                                     <>
                                         <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
+                                            <Typography variant="caption" display="block" gutterBottom sx={{m:0,p:0}}>
                                                 Are there too many videos <b>and you don't know</b>
                                             </Typography>
                                         </Grid>
                                         <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
+                                            <Typography variant="caption" display="block" gutterBottom sx={{m:0,p:0}}> 
                                                 <b>which one to watch?</b>
                                             </Typography>
                                         </Grid>
                                         <Grid item>
-                                            <Typography variant="caption" display="block" gutterBottom>
+                                            <Typography variant="caption" display="block" gutterBottom sx={{m:0,pt:1}}>
                                                 <b>compare them</b> and find what suits you best!
                                             </Typography>
                                         </Grid>
