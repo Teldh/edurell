@@ -7,6 +7,8 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import WestIcon from '@mui/icons-material/West';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import Popover from '@mui/material/Popover'
 export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
 
     const[page,setPage]=useState(0)
@@ -93,12 +95,14 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
         {
             page==0?
             <>
-                <Menu
+                <Popover
+        
                 sx={{ display: "flex",
                 alignItems: "center",
                 justifyContent:"center",
+                
                 }}
-              
+             
 
                 id="account-menu"
                 open="true"
@@ -144,9 +148,9 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                 direction="column"
                 justifyContent="center"
                 alignItems="stretch"
-            
+                sx={{m:0,p:0}}
                 >
-                    <Grid item>
+                    <Grid item sx={{pl:2,pr:2,pt:2}}>
                         <Grid
                         container
                         direction="row"
@@ -165,7 +169,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item>
+                    <Grid item sx={{pl:2,pr:2}}>
                         <Grid
                         container
                         direction="column"
@@ -175,7 +179,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                             <>
                             <Grid item>
                                 <Typography variant="h6" gutterBottom>
-                                    Too many videos?
+                                    <b>Too many videos?</b>
                                 </Typography>
                             </Grid>
                             </>
@@ -234,24 +238,24 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                             }
                         </Grid>
                     </Grid>
-                    <Grid item>
+                    <Grid item sx={{pl:2,pr:2}}>
                         <Grid
                         container
                         direction="column"
-                        justifyContent="flex-start"
-                        alignItems="center"
+                        justifyContent="center"
+                        alignItems="flex-start"
                         >
                             {
                                 page==0?
                                 
                                 <>
                                     <Grid item>
-                                        <Typography variant="caption" display="block" gutterBottom>
+                                        <Typography variant="caption" display="block" gutterBottom sx={{m:0,p:0}}>
                                             Don't worry,
                                         </Typography>
                                     </Grid>
                                     <Grid item>
-                                        <Typography variant="caption" display="block" gutterBottom>
+                                        <Typography variant="caption" display="block" gutterBottom sx={{m:0,p:0}}>
                                             we'll <b>help</b> you out!
                                         </Typography>
                                     </Grid>
@@ -353,7 +357,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                             
                         </Grid>
                     </Grid>
-                    <Grid item>
+                    <Grid item sx={{pt:2}}>
                         <Grid
                         container
                         direction="row"
@@ -391,37 +395,31 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                                 </>
                             }
                             
-                            <Grid item xs="auto" sx={{p: 2 ,backgroundColor:'#B798f8', borderRadius:'50px 0 50px 0'}} onClick={NextPage}>
+                            <Grid item xs="auto" sx={{m:0 ,pl:2,pt:1,pr:1,pb:0.5 ,backgroundColor:'#B798f8', borderRadius:'25px 0 3px 0'}} onClick={NextPage}>
                                 <Grid
                                 container
                                 direction="row"
                                 justifyContent="center"
                                 alignItems="center"
+                                sx={{m:0,p:0}}
                                 >
-                                    {
-                                        page==3?
-                                        <>
-                                            <Grid item>
-                                                <p style={{color:'white'}}>Got it, thanks.</p>
-                                            </Grid>
-                                        </>
-                                        :
-                                        <>
-                                            <Grid item>
-                                                <p style={{color:'white'}}>Next</p>
-                                            </Grid>
-                                            <Grid item>
-                                                <EastIcon sx={{color:"#FFFFFF"}}/>
-                                            </Grid>
-                                        </>
-                                    }
+                                    
+                                    <Grid item sx={{m:0,p:0}}>
+                                        <Typography variant="body2" gutterBottom sx={{color:"white", p:0,m:0}}>
+                                            <b>Next</b>
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item sx={{m:0,p:0,pl:0.5}}>
+                                        <EastIcon sx={{color:"#FFFFFF", width:"15px", height:"15px"}}/>
+                                    </Grid>
+                                        
                                     
                                 </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
-            </Menu>
+            </Popover>
             </>
             :
             page==3?
@@ -860,10 +858,23 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                                     page==2?
                                     <>
                                         <Grid item>
-                                            <Typography variant="h6" gutterBottom>
+                                            <Typography variant="h6"  gutterBottom sx={{m:0,p:0}}>
                                                 Click
-                                            </Typography>
-                                            <Typography variant="h6" gutterBottom>
+                                         
+                                            <Box
+                                                sx={{ml:1,mr:1,
+                                                    display:'inline',
+                                                    backgroundColor:'#B798f8', 
+                                                    color:"white",
+                                                    borderRadius:'20px 0 0 0',
+                                                    width:'auto',
+                                                    maxWidth:'30px',
+                                                    height:"auto"}}
+                                               
+                                            >
+                                                <Typography variant="body2" display="inline" sx={{m:0, p:0.5, pl:2, pr:2}} gutterBottom>VS</Typography>
+                                            </Box>
+                                         
                                                 to choose and
                                             </Typography>
                                         </Grid>
