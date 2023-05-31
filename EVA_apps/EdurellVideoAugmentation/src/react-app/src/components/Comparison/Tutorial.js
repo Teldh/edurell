@@ -8,8 +8,10 @@ import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import WestIcon from '@mui/icons-material/West';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import Popover from '@mui/material/Popover'
+import Popover from '@mui/material/Popover';
+import tutorialPic from './tutorialpic.PNG';
 export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
+
 
     const[page,setPage]=useState(0)
     const [anchorEl, setAnchorEl] = useState([null,null,null,null]);
@@ -395,7 +397,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                                 </>
                             }
                             
-                            <Grid item xs="auto" sx={{m:0 ,pl:2,pt:1,pr:1,pb:0.5 ,backgroundColor:'#B798f8', borderRadius:'25px 0 3px 0'}} onClick={NextPage}>
+                            <Grid item xs="auto" sx={{m:0 ,pl:2,pt:1,pr:1,pb:0.5 ,backgroundColor:'#917FC7', borderRadius:'25px 0 3px 0'}} onClick={NextPage}>
                                 <Grid
                                 container
                                 direction="row"
@@ -559,10 +561,23 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                                                 <b>your needs!</b>
                                             </Typography>
                                         </Grid>
+                                        
                                     </>
                                     :
                                     <></>
                             }
+                        </Grid>
+                    </Grid>
+                    <Grid item>
+                        <Grid 
+                            container
+                            direction="column"
+                            justifyContent="center"
+                            alignItems="center"
+                        >
+                            <Grid item sx={{width:"50%"}}>
+                                <img src={tutorialPic}  width="100%" height="auto"/>
+                            </Grid>
                         </Grid>
                     </Grid>
                     <Grid item sx={{pl:2,pr:2}}>
@@ -727,7 +742,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                                     </Grid>
                                 </>
                             }
-                            <Grid item xs="auto" sx={{m:0 ,pl:2,pt:1,pr:1,pb:0.5 ,backgroundColor:'#B798f8', borderRadius:'25px 0 3px 0'}} onClick={NextPage}>
+                            <Grid item xs="auto" sx={{m:0 ,pl:2,pt:1,pr:1,pb:0.5 ,backgroundColor:'#917FC7', borderRadius:'25px 0 3px 0'}} onClick={NextPage}>
                                 <Grid
                                 container
                                 direction="row"
@@ -1060,7 +1075,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                                 </>
                             }
                             
-                            <Grid item xs="auto" sx={{m:0 ,pl:2,pt:1,pr:1,pb:0.5 ,backgroundColor:'#B798f8', borderRadius:'25px 0 3px 0'}} onClick={NextPage}>
+                            <Grid item xs="auto" sx={{m:0 ,pl:2,pt:1,pr:1,pb:0.5 ,backgroundColor:'#917FC7', borderRadius:'25px 0 3px 0'}} onClick={NextPage}>
                                 <Grid
                                 container
                                 direction="row"
