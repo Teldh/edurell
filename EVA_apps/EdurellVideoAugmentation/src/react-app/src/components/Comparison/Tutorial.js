@@ -33,6 +33,11 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
      // setAnchorEl(null);
     };
 
+    const onCloseTutorial=()=>{
+        setPage(0)
+        closeTutorial()
+    }
+
     function NextPage(){
         console.log("nextpage: ",page)
 
@@ -54,6 +59,9 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
         }else{
 
         }
+        if(page==3){
+            onCloseTutorial()
+        }
     }
 
     function PreviousPage(){
@@ -62,7 +70,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
         }else{
             anchor1.current.style.zIndex="auto";
         }
-        if(page==2 && anchor1.current != null){
+        if(page==3 && anchor1.current != null){
             anchor2.style.zIndex=10000;
         }else{
             anchor2.style.zIndex="auto";
@@ -135,7 +143,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
                         </Typography>
                     </Grid>
                     <Grid item>
-                        <Typography variant="caption" display="block" gutterBottom onClick={closeTutorial}>
+                        <Typography variant="caption" display="block" gutterBottom onClick={onCloseTutorial}>
                             close | x
                         </Typography>
                     </Grid>
