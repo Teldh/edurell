@@ -109,10 +109,10 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                     <Grid item sx={{mr:1}}>
                                     <Chip 
                                         
-                                        label={<Typography variant="caption" display="block" gutterBottom sx={{color:"white",mt:0.5}}>
+                                        label={<Typography variant="caption" display="block" gutterBottom sx={{color:"white",mt:1}}>
                                             <b>Help</b>
                                             </Typography>}
-                                        deleteIcon={<HelpIcon sx={{color:grey[50]}}/>}
+                                        deleteIcon={<HelpIcon style={{fill:"white"}}/>}
                                         onClick={openTutorial}
                                         onDelete={openTutorial}
                                         sx={{

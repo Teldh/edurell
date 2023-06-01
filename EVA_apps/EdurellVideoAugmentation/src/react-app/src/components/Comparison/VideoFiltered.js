@@ -160,8 +160,10 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
     }
 
     if(conceptextra[0]!=undefined&& conceptextra[0].concept_starttime.length>0){
+      //  console.log("computeCE_on_videofiltered: ",conceptextra[0].concept_starttime," ",conceptextra[0].concept_endtime," ",conceptextra[0].explain," ",conceptextra[0].video_id)
         for(let i=0; i<conceptextra[0].concept_starttime.length;i++){
             if(conceptextra[0].explain[i] == "conceptExpansion"){
+               // console.log("computeCE_on_videofiltered_dentro: ",conceptextra[0].concept_starttime[i]," ",conceptextra[0].concept_endtime[i]," ",conceptextra[0].explain[i])
                 const time1 = conceptextra[0].concept_endtime[i] .split("^^")[0];
                 const time2 = conceptextra[0].concept_starttime[i] .split("^^")[0];
         
@@ -355,7 +357,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
         
       
         
-        <Collapse in={expanded} timeout="auto" unmountOnExit style={{position:'fixed',bottom: 0, left:0, right:0, backgroundColor:"white"}}>
+        <Collapse in={expanded} timeout="auto" unmountOnExit style={{position:'fixed',bottom: 0, left:0, right:0, backgroundColor:"white", zIndex:1}}>
             <Grid
             container
             direction="row"
@@ -568,7 +570,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                                 
                                                                         {(conceptextra[0]!=undefined&& conceptextra[0].derivatedconcept_starttime.length>0)?
                                                                             
-                                                                            <Typography variant="subtitle2" gutterBottom>{approfondimenti}</Typography>
+                                                                            <Typography variant="subtitle2" gutterBottom>{approfondimenti+" "+approfondimentiSeconds}</Typography>
                                                                             :
                                                                             <Typography variant="subtitle2" gutterBottom>null</Typography>
 

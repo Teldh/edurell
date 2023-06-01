@@ -34,7 +34,7 @@ POSSO CHIAMARE SOLO LE QUERY SENZA AVERE PROBLEMI CON LE 500 CONNESSIONI
 export default function Comparison(){
     const anchor1 = useRef(null);
     const [anchor2,setAnchor2] = useState(null)
-    console.log("COMPARISON ANCHOR2: ",anchor2," anchor1: ",anchor1)
+    //console.log("COMPARISON ANCHOR2: ",anchor2," anchor1: ",anchor1)
     const [openTutorial, setOpenTutorial] = useState(false);
     function closeTutorial(){
       setOpenTutorial(false);
@@ -42,7 +42,7 @@ export default function Comparison(){
 
     function openTutorialFunc(){
       setOpenTutorial(true);
-      console.log("ID: ",document.getElementById("TEST"))
+      //console.log("ID: ",document.getElementById("TEST"))
     }
 
   
@@ -271,24 +271,82 @@ export default function Comparison(){
       
     }
 
+   
     function ComputeDuration(start,end){
       let duration=0
       for(let i=0; i<start.length;i++){
-        const time1 = end[i] .split("^^")[0];
-        const time2 = start[i] .split("^^")[0];
 
-        let [hours1, minutes1, seconds1] = time1.split(":");
-        seconds1=Math.floor(seconds1)
-        seconds1=seconds1+hours1*3600
-        seconds1=seconds1+minutes1*60
+          const time1 = end[i] .split("^^")[0];
+          const time2 = start[i] .split("^^")[0];
 
-        let [hours2, minutes2, seconds2] = time2.split(":");
-        seconds2=Math.floor(seconds2)
-        seconds2=seconds2+hours2*3600
-        seconds2=seconds2+minutes2*60
+          let [hours1, minutes1, seconds1] = time1.split(":");
+          seconds1=Math.floor(seconds1)
+          seconds1=seconds1+hours1*3600
+          seconds1=seconds1+minutes1*60
 
-        let resultseconds = Math.abs(seconds2-seconds1);
-        duration = duration+resultseconds;
+          let [hours2, minutes2, seconds2] = time2.split(":");
+          seconds2=Math.floor(seconds2)
+          seconds2=seconds2+hours2*3600
+          seconds2=seconds2+minutes2*60
+
+          let resultseconds = Math.abs(seconds2-seconds1);
+          duration = duration+resultseconds;
+        
+        
+      }
+
+        return duration
+    }
+
+    function ComputeDurationCD(start,end,type){
+      let duration=0
+      for(let i=0; i<start.length;i++){
+        if(type[i]=="conceptDefinition"){
+          const time1 = end[i] .split("^^")[0];
+          const time2 = start[i] .split("^^")[0];
+
+          let [hours1, minutes1, seconds1] = time1.split(":");
+          seconds1=Math.floor(seconds1)
+          seconds1=seconds1+hours1*3600
+          seconds1=seconds1+minutes1*60
+
+          let [hours2, minutes2, seconds2] = time2.split(":");
+          seconds2=Math.floor(seconds2)
+          seconds2=seconds2+hours2*3600
+          seconds2=seconds2+minutes2*60
+
+          let resultseconds = Math.abs(seconds2-seconds1);
+          duration = duration+resultseconds;
+        }
+        
+      }
+
+        return duration
+    }
+
+    function ComputeDurationCE(start,end,type){
+      let duration=0
+      for(let i=0; i<start.length;i++){
+     //   console.log("computeCE: ",start," ",end," ",type)
+        if(type[i]=="conceptExpansion"){
+          //console.log("computeCEfiltered: ",start[i]," ",end[i]," ",type[i])
+          const time1 = end[i] .split("^^")[0];
+          const time2 = start[i] .split("^^")[0];
+
+          let [hours1, minutes1, seconds1] = time1.split(":");
+          seconds1=Math.floor(seconds1)
+          seconds1=seconds1+hours1*3600
+          seconds1=seconds1+minutes1*60
+
+          let [hours2, minutes2, seconds2] = time2.split(":");
+          seconds2=Math.floor(seconds2)
+          seconds2=seconds2+hours2*3600
+          seconds2=seconds2+minutes2*60
+
+          let resultseconds = Math.abs(seconds2-seconds1);
+          duration = duration+resultseconds;
+        }
+        
       }
 
         return duration
@@ -305,24 +363,24 @@ export default function Comparison(){
       // const [catalogFilter, SetCatalogFilter]=useState([])
       
        //applicare filtri
-       console.log("querylist filter: ",querylist)
+       //console.log("querylist filter: ",querylist)
        let catalogfiltered=[...catalogoriginal];
         catalogfiltered = catalogfiltered.filter(video=>checker(video.extracted_keywords,querylist));
-        console.log("inizio filtri: ",listfilters)
-        console.log("catalogextra: ",catalogExtra)
-        console.log("catalogfiltered: ",catalogfiltered)
+        //console.log("inizio filtri: ",listfilters)
+       // console.log("catalogextra: ",catalogExtra)
+        //console.log("catalogfiltered: ",catalogfiltered)
 
        if(listfilters[0] == "novice"){
          //filtro, tutti i preconcetti concenuti nei concetti
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("NOVICE ",video.extracted_keywords," ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"]);
+          // console.log("NOVICE ",video.extracted_keywords," ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"]);
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"].length == 0){
             return true;
            }
            return checker(video.extracted_keywords, catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"])});
        }else if(listfilters[0] == "expert"){
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("EXPERT ",video.extracted_keywords," ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id));
+         //  console.log("EXPERT ",video.extracted_keywords," ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id));
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"].length == 0){
             return false;
            }
@@ -335,7 +393,7 @@ export default function Comparison(){
        //spiegazione
        if(listfilters[1] == "essential"){
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("essential ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]);
+           //console.log("essential ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]);
            //if conceptexpansion array is empty, return always true
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"].length == 0){
             return true;
@@ -346,7 +404,7 @@ export default function Comparison(){
 
        }else if(listfilters[1]=="detailed"){
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("detailed ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]);
+          // console.log("detailed ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]);
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"].length == 0){
             return true;
            }
@@ -359,13 +417,13 @@ export default function Comparison(){
        //tipo di lezione
        if(listfilters[2] == "withslide"){
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("wihslide ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"]);
+           //console.log("wihslide ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"]);
            return catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"] > 0.1? true:false;
          })
  
        }else if(listfilters[2] == "withoutslide"){
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("withoutslide ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"]);
+           //console.log("withoutslide ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"]);
            return catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"] <= 0.1? true:false;
          })
     
@@ -378,24 +436,27 @@ export default function Comparison(){
           catalogfiltered = catalogfiltered.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) < 240
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+           // console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDurationCD(endtime, starttime,type), "type: ",type)
+            return ComputeDurationCD(endtime, starttime,type) < 240
           });
     
        }else if(listfilters[3]=="4to20"){
           catalogfiltered = catalogfiltered.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) >= 240 && ComputeDuration(endtime, starttime) <= 1200
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+            //console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDurationCD(endtime, starttime,type), "type: ",type)
+            return ComputeDurationCD(endtime, starttime,type) >= 240 && ComputeDurationCD(endtime, starttime,type) <= 1200
           });
       
        }else if(listfilters[3]=="greater20"){
           catalogfiltered = catalogfiltered.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) > 1200
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+            //console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDurationCD(endtime, starttime,type), "type: ",type)
+            return ComputeDurationCD(endtime, starttime,type) > 1200
           });
     
        }
@@ -405,49 +466,52 @@ export default function Comparison(){
        //approfondimento
        if(listfilters[4]=="less4"){
           catalogfiltered = catalogfiltered.filter(video=>{
-            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_starttime"]
-            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) < 240
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+           // console.log("less4 starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDurationCE(endtime, starttime,type), "type: ",type," ", video.title)
+            return ComputeDurationCE(endtime, starttime,type) < 240
           });
 
        }else if(listfilters[4]=="4to20"){
           catalogfiltered = catalogfiltered.filter(video=>{
-            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_starttime"]
-            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) >= 240 && ComputeDuration(endtime, starttime) <= 1200
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+            //console.log("4to20 starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDurationCE(endtime, starttime,type), "type: ",type," ",video.title," ",video.video_id)
+            return ComputeDurationCE(endtime, starttime,type) >= 240 && ComputeDurationCE(endtime, starttime,type) <= 1200
           });
 
        }else if(listfilters[4]=="greater20"){
           catalogfiltered = catalogfiltered.filter(video=>{
-            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_starttime"]
-            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) > 1200
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+            //console.log("greater20 starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDurationCE(endtime, starttime,type), "type: ",type," ",video.title)
+            return ComputeDurationCE(endtime, starttime,type) > 1200
           });
 
        }
 
 
-        console.log("video intero")
+       // console.log("video intero")
        //video intero
        if(listfilters[5]=="less4"){
           catalogfiltered = catalogfiltered.filter(video=>video.duration < 240)
 
-          console.log("after filter: ",catalogfiltered)
+          //console.log("after filter: ",catalogfiltered)
        }else if(listfilters[5]=="4to20"){
-          console.log("videointero 4to20: ",catalogfiltered.filter(video=>video.duration >= 240 && video.duration < 1200))
+          //console.log("videointero 4to20: ",catalogfiltered.filter(video=>video.duration >= 240 && video.duration < 1200))
           catalogfiltered = catalogfiltered.filter(video=>video.duration >= 240 && video.duration < 1200)
 
-          console.log("after filter: ",catalogfiltered)
+         //console.log("after filter: ",catalogfiltered)
        }else if(listfilters[5]=="greater20"){
 
           catalogfiltered = catalogfiltered.filter(video=>{
 
-            console.log("video intero: ",video.video_id," ",video.duration," ",video.duration > 1200)
+           // console.log("video intero: ",video.video_id," ",video.duration," ",video.duration > 1200)
             return video.duration > 1200;})
-          console.log("after filter: ",catalogfiltered)
+          //console.log("after filter: ",catalogfiltered)
  
        }
 
@@ -496,11 +560,11 @@ export default function Comparison(){
           function(a,b){
             let start1=catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)[0]["concept_starttime"];
             let end1=catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)[0]["concept_endtime"];
-            console.log("deflengtha: ",catalogExtra," ",a, " ",catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)," ",end1)
+          //  console.log("deflengtha: ",catalogExtra," ",a, " ",catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)," ",end1)
            
             let duration1 = ComputeDuration(end1,start1)
-            console.log("deflengthb: ",catalogExtra," ",b)
-            console.log(catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id))
+         //   console.log("deflengthb: ",catalogExtra," ",b)
+         //   console.log(catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id))
             let start2=catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id)[0]["concept_starttime"];
             let end2=catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id)[0]["concept_endtime"];
             

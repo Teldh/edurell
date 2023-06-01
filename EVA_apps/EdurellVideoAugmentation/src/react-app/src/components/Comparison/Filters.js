@@ -559,9 +559,9 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                         label={<Typography variant="subtitle2" display="inline" gutterBottom>Latest </Typography>}/>
                                     <FormControlLabel value="videolength" control={<Radio color="default"/>} 
                                         label={<Typography variant="subtitle2" display="inline" gutterBottom>Video duration</Typography> }/>
-                                    <FormControlLabel value="deflength" control={<Radio color="default"/>} 
-                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Definition duration</Typography>} />
                                     <FormControlLabel value="detailedlength" control={<Radio color="default"/>} 
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Definition duration</Typography>} />
+                                    <FormControlLabel value="deflength" control={<Radio color="default"/>} 
                                         label={<Typography variant="subtitle2" display="inline" gutterBottom>In depth duration</Typography>}/>
                                 </RadioGroup>
                             </FormControl>
