@@ -8,8 +8,13 @@ const SecondaryColor = styled(withTheme(Button))({
       
   
       background: "#FA824C",
+      height:"50px",
+      borderRadius:'0 15px 15px 0',
       '&:hover': {
       backgroundColor: "#FB9B6F",
+      height:"50px",
+      borderRadius:'0 15px 15px 0',
+      
     },
   });
 

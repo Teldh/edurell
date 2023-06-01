@@ -32,6 +32,8 @@ POSSO CHIAMARE SOLO LE QUERY SENZA AVERE PROBLEMI CON LE 500 CONNESSIONI
 */
 
 export default function Comparison(){
+
+
     const anchor1 = useRef(null);
     const [anchor2,setAnchor2] = useState(null)
     //console.log("COMPARISON ANCHOR2: ",anchor2," anchor1: ",anchor1)

@@ -30,7 +30,7 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
         <Autocomplete
             
             className="bg-primary"
-            
+            size="small"
             freeSolo
             multiple
             limitTags={1}
@@ -78,7 +78,7 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
               spacing={0}
           >
               <Autocomplete
-                        size="large"
+                        size="small"
                         freeSolo
                         multiple
                         limitTags={1}
