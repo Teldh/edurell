@@ -6,6 +6,8 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import imag from './imgtest/brainicon.PNG'
+import Skeleton from '@mui/material/Skeleton';
+
 import {useState, useRef} from 'react';
 import { useTheme } from '@material-ui/core/styles';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -51,6 +53,7 @@ const ExpandMore = styled((props) => {
 }));
 const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCatalogExtra, tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator},ref)=>{
     const myref=useRef(null)
+    console.log("VIDEOFILTERED: ",conceptextra)
    // console.log("VIDEOFILTERED ", idx," ",myref)
     useEffect(() => {
         
@@ -210,8 +213,9 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
     return(
         <ClickAwayListener onClickAway={handleClickAway}>
         <div>
-         
-        <Card elevation={shadow}
+         {
+            conceptextra.length > 0?
+            <Card elevation={shadow}
             color="primary" 
             sx={{ maxWidth: 250 , border: add?"2px solid #C6EBDC": '0px'}}
             onMouseEnter={()=>setshadow(5)}
@@ -347,6 +351,16 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
         </CardActions>
      
       </Card>
+      :
+      <Stack spacing={0}>
+                                
+                                <Skeleton variant="rounded" width={200} height={110} />
+                                <Skeleton variant="text" sx={{ fontSize: '1rem' ,marginTop: 1}} />
+                                <Skeleton variant="text" sx={{ fontSize: '1rem' ,width: "69%"/* xd */}} />
+                                
+                                </Stack>
+         }
+        
         
         
         
