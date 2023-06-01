@@ -169,7 +169,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                             >
                                 <Grid item sx={{mb:3}}>
                                     <Typography variant="button" gutterBottom >
-                                        CARATTERISTICHE:
+                                        FEATURES:
                                     </Typography>
                                 </Grid>
                             </Grid>
@@ -197,7 +197,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                     </Grid>
                                     <Grid item>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
-                                        · Adatto a:
+                                        · Suitable for:
                                     </Typography>
                                     </Grid>
                                 </Grid>
@@ -221,7 +221,10 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                                 >
                                                 <Box sx={{ width: '100%', maxWidth: 200 }}>
                                                     <Typography variant="body2" gutterBottom>
-                                                    Nei video per principianti troverai spiegato sia il concetto che cerchi che i suoi prerequisiti. Se sei gia piu esperto troverai piu video in cui la conoscenza dei prerequisiti e' data per scontata
+                                                    In videos for <b>beginners</b> you are more likely to find a definition for the concept you looked up and its prerequsiites.
+                                                    </Typography>
+                                                    <Typography variant="body2" gutterBottom sx={{mt:1}}>
+                                                    If you click on <b>expert</b>, you are going to find videos where the knowledge of prerequsiites is taken for granted
                                                     </Typography>
                                                 </Box>
                                                 </Popover>
@@ -235,10 +238,10 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                     aria-label="Platform"
                                     >
                                     <ToggleButton value="expert" style={{textTransform: 'none'}}>
-                                        <Typography variant="body2" display="block" gutterBottom>Esperti</Typography>
+                                        <Typography variant="body2" display="block" gutterBottom>Experts</Typography>
                                     </ToggleButton>
                                     <ToggleButton value="novice" style={{textTransform: 'none'}}>
-                                        <Typography variant="body2" display="block" gutterBottom>Principianti</Typography>
+                                        <Typography variant="body2" display="block" gutterBottom>Beginners</Typography>
                                     </ToggleButton>
                                     </StyledToggleButtonGroup>
                                 </Grid>
@@ -267,7 +270,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                     </Grid>
                                     <Grid item>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
-                                        · Spiegazione:
+                                        · Explanation:
                                     </Typography>
                                     </Grid>
                                     
@@ -290,7 +293,10 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                                 >
                                                 <Box sx={{ width: '100%', maxWidth: 200 }}>
                                                     <Typography variant="body2" gutterBottom>
-                                                    Una spiegazione essenziale andra dritta al punto senza distrazioni. Una spiegazione approfondita e' lideale se vuoi esplorare ogni sfumatura di ogni concetto
+                                                    <b>A basic</b> explanation would go straight to the point.
+                                                    </Typography>
+                                                    <Typography variant="body2" gutterBottom sx={{mt:1}}>
+                                                    A <b>detailed</b> explanation is broader and includes related concepts
                                                     </Typography>
                                                 </Box>
                                                 </Popover>
@@ -305,10 +311,10 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                     aria-label="Platform"
                                     >
                                     <ToggleButton value="essential" style={{textTransform: 'none'}}>
-                                        <Typography variant="body2" display="block" gutterBottom>Essenziale</Typography>
+                                        <Typography variant="body2" display="block" gutterBottom>Basic</Typography>
                                     </ToggleButton>
                                     <ToggleButton value="detailed" style={{textTransform: 'none'}}>
-                                        <Typography variant="body2" display="block" gutterBottom>Approfondita</Typography>
+                                        <Typography variant="body2" display="block" gutterBottom>Detailed</Typography>
                                     </ToggleButton>
                                     </StyledToggleButtonGroup>
                                 </Grid>
@@ -338,7 +344,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                     </Grid>
                                     <Grid item>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
-                                        · Tipo di lezione:
+                                        · Kind of lesson:
                                     </Typography>
                                     </Grid>
                                     
@@ -361,7 +367,10 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                                 >
                                                 <Box sx={{ width: '100%', maxWidth: 200 }}>
                                                     <Typography variant="body2" gutterBottom>
-                                                        Scegli video con slide se preferisci seguire una presentazione. Scegli senza slide se preferisci altre modalita'
+                                                    Choose videos <b>with slides</b> if you like video lectures showing slides of what is explained
+                                                    </Typography>
+                                                    <Typography variant="body2" gutterBottom sx={{mt:1}}>
+                                                    Choose <b>no slides</b> if you prefer other teaching modes.
                                                     </Typography>
                                                 </Box>
                                                 </Popover>
@@ -376,10 +385,10 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                     aria-label="Platform"
                                     >
                                     <ToggleButton value="withslide" style={{textTransform: 'none'}}>
-                                        <Typography variant="body2" display="block" gutterBottom>Con slide</Typography>
+                                        <Typography variant="body2" display="block" gutterBottom>With slides</Typography>
                                     </ToggleButton>
                                     <ToggleButton value="withoutslide" style={{textTransform: 'none'}}>
-                                        <Typography variant="body2" display="block" gutterBottom>Senza slide</Typography>
+                                        <Typography variant="body2" display="block" gutterBottom>No slides</Typography>
                                     </ToggleButton>
                                     </StyledToggleButtonGroup>
                                 </Grid>
@@ -411,7 +420,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                             >
                                 <Grid item sx={{mb:3}}>
                                     <Typography variant="button" gutterBottom>
-                                        DURATE:
+                                        DURATION:
                                     </Typography>
                                 </Grid>
                             </Grid>
@@ -428,7 +437,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                             >
                                 <Grid item>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
-                                        · Definizione:
+                                        · Definition of the concept:
                                     </Typography>
                                 </Grid>
                                 <Grid item>
@@ -453,7 +462,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                 </Grid>
                                 <Grid item>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
-                                        · Approfondimento:
+                                        · In depth explanation:
                                     </Typography>
                                 </Grid>
                                 <Grid item>
@@ -478,7 +487,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                 </Grid>
                                 <Grid item>
                                     <Typography variant="subtitle2" display="inline" gutterBottom>
-                                        · Video intero:
+                                        · Whole video:
                                     </Typography>
                                 </Grid>
                                 <Grid item>
@@ -531,7 +540,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                     id="ORDINA PER"
                     >
                         <Grid item sx={{mb:2}}>
-                            <Typography variant="button" gutterBottom>ORDINA PER</Typography>
+                            <Typography variant="button" gutterBottom>SORT BY:</Typography>
                         </Grid>
                         <Grid item>
                             <FormControl>
@@ -545,13 +554,13 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                     onChange={(event,value)=>Setradiog(value)}
                                 >
                                     <FormControlLabel value="recent" control={<Radio color="default"/>} 
-                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Piu recente </Typography>}/>
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Latest </Typography>}/>
                                     <FormControlLabel value="videolength" control={<Radio color="default"/>} 
-                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>durata del video</Typography> }/>
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Video duration</Typography> }/>
                                     <FormControlLabel value="deflength" control={<Radio color="default"/>} 
-                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Durata della definizione</Typography>} />
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Definition duration</Typography>} />
                                     <FormControlLabel value="detailedlength" control={<Radio color="default"/>} 
-                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>durata dell'approfondimento"</Typography>}/>
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>In depth duration</Typography>}/>
                                 </RadioGroup>
                             </FormControl>
                         </Grid>
@@ -591,7 +600,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                     >
                         <Grid item>
 
-                            <p style={{color:'white'}}>Imposta Filtri</p>
+                            <p style={{color:'white'}}>Set filters</p>
                         </Grid>
                         <Grid item>
                             <EastIcon sx={{color:"#FFFFFF"}}/>

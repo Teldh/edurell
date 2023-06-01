@@ -668,7 +668,7 @@ export default function Comparison(){
         >
             <Grid item>
                 <Typography variant="overline" display="block" gutterBottom sx={{color:"white"}}>
-                   Congratulation, you've made it to the footer :&#41;
+                   <b>Edurell Platform for enhanced Video-based Learning</b>
                 </Typography>
             </Grid>
         </Grid>

@@ -61,7 +61,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
         labels: catalog.map(video=>video.title),
         datasets:[
             {
-                label:'video intero',
+                label:'Whole video',
                 data:catalog.map(video=>video.duration),
                 backgroundColor:"white",
                 borderColor: graphcontrol=="two"||graphcontrol=="three"?"grey":[
@@ -76,7 +76,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
                 
             },
             {
-                label:'definizione',
+                label:'Definition',
                 data:catalogExtra.map(video=>video.conceptLength),
                 backgroundColor:graphcontrol=="three" || graphcontrol=="four"?"grey":[
                     "#FF4545",
@@ -89,7 +89,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
 
             },
             {
-                label:'approfondimento',
+                label:'In depth',
                 data: catalogExtra.map(video=>video.derivatedLength),
                 backgroundColor:
                     graphcontrol=="two"||graphcontrol =="four"?createDiagonalPattern('grey'):

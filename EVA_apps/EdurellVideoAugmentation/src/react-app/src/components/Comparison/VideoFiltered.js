@@ -296,8 +296,8 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                         {
                             hoverm?
                             <>
-                            <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Aggiungi</Typography>
-                            <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>al confronto</Typography>
+                            <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Add video</Typography>
+                            <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>for comparison</Typography>
                             </>
                             :
                             <>
@@ -331,8 +331,8 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                     >
                     
                         <>
-                        <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Hai gia aggiunto</Typography>
-                        <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>questo video</Typography>
+                        <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>You already</Typography>
+                        <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>added this video</Typography>
                         </>
                         
                 
@@ -424,7 +424,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                 <Grid item>
                                                     <Chip label={<>
                                                         <Typography variant="caption" gutterBottom>
-                                                             X | chiudi anteprima
+                                                             X | close
                                                         </Typography></>}
                                                         onClick={()=>handleExpandClick()} />
                                                 </Grid>
@@ -450,7 +450,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                     >
                                                         <Grid item>
                                                             <Typography variant="caption" display="block" gutterBottom>
-                                                                Cosa devi sapere prima di vedere questo video
+                                                                Things you must already know to understand this video:
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item sx={{mb:2}}>
@@ -478,7 +478,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                         </Grid>
                                                         <Grid item>
                                                             <Typography variant="caption" display="block" gutterBottom>
-                                                                Cosa imparerai in questo video
+                                                                What you are going to learn in this video:
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item>
@@ -515,7 +515,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                     > 
                                                         <Grid item>
                                                             <Typography variant="caption" display="block" gutterBottom>
-                                                                Durate:
+                                                                Duration:
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item>
@@ -531,7 +531,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                                 </Grid>
                                                                 <Grid item>
                                                                     <Typography variant="caption" gutterBottom>
-                                                                        Definizione:
+                                                                        Definition:
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item>
@@ -561,7 +561,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                                 </Grid>
                                                                 <Grid item>
                                                                     <Typography variant="caption" gutterBottom>
-                                                                        Approfondimenti:
+                                                                        In depth:
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item>
@@ -593,7 +593,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                                 </Grid>
                                                                 <Grid item>
                                                                     <Typography variant="caption" gutterBottom>
-                                                                        Video intero:
+                                                                        Whole video:
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item>
@@ -620,7 +620,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                             >
                                                                 <Grid item>
                                                                     <Typography variant="caption" gutterBottom>
-                                                                        Presenza di slide:
+                                                                        Slide presence:
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item>
@@ -670,7 +670,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                             >
                                                                 <Grid item>
                                                                     <Typography variant="caption" display="block" gutterBottom>
-                                                                        Guarda la mappa concettuale
+                                                                        Check the concept map
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item>
@@ -698,7 +698,15 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                                             >
                                                                             <Box sx={{ width: '100%', maxWidth: 200 }}>
                                                                                 <Typography variant="body2" gutterBottom>
-                                                                                    Questa sezione mostra la mappa concettuale per mostrare come il concetto che hai cercato si lega agli altri concetti del video
+                                                                                This concept map is a visual representation of how concepts in the video relate to others.
+
+                                                                                </Typography>
+                                                                                <Typography variant="body2" gutterBottom>
+                                                                                    <ul>
+                                                                                    <li>on the <b>left</b> there are the prerequisites of the concept you looked for</li>
+                                                                                    <li>on the <b>right</b> there are further concepts entailed in the explanation of the concept you looked for</li>
+                                                                                   
+                                                                                    </ul>
                                                                                 </Typography>
                                                                             </Box>
                                                                             </Popover>
@@ -778,8 +786,8 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                 {
                                                     hoverm?
                                                     <>
-                                                    <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Aggiungi</Typography>
-                                                    <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>al confronto</Typography>
+                                                    <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Add video</Typography>
+                                                    <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>for comparison</Typography>
                                                     </>
                                                     :
                                                     <>
@@ -807,8 +815,8 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                 >
                                                 
                                                     <>
-                                                    <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>Hai gia aggiunto</Typography>
-                                                    <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>questo video</Typography>
+                                                    <Typography variant="body2" display="block" sx={{m:0, pb:0, pt:1, pr:1, pl:1}} gutterBottom>You already</Typography>
+                                                    <Typography variant="body2" display="block" sx={{m:0, pt:0, pb:1, pr:1, pl:1}} gutterBottom>added this video</Typography>
                                                     </>
                                                     
                                             

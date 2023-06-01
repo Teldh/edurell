@@ -37,7 +37,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
         labels: catalogExtra.map(video=>(video.video_slidishness*100).toString()+"%"),
         datasets:[
             {
-                label:'video intero',
+                label:'Whole video',
                 data:catalog.map(video=>video.duration),
                 backgroundColor:"white",
                 borderColor: graphcontrol=="two"?"grey":[
@@ -51,7 +51,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
                 order:10,
             },
             {
-                label:'slide',
+                label:'Slide',
                 data:catalogExtra.map(video=>video.video_slidishness*catalog.filter(cat=>cat.video_id == video.video_id)[0].duration),
                 backgroundColor:graphcontrol=="three"?"grey":[
                     "#FF4545",
