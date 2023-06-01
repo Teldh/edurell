@@ -11,16 +11,50 @@ import Paper from '@mui/material/Paper';
 import Videoavailable from "./Videoavailable.js"
 import VideoFiltered from "./VideoFiltered.js"
 import {TokenContext} from '../account-management/TokenContext';
-import { useContext, forwardRef } from 'react';
+import { useContext, forwardRef, useState,useEffect } from 'react';
+import Modal from '@mui/material/Modal';
+import Popover from '@mui/material/Popover';
+
 
 const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, catalog,loading, querylist, catalogoriginal}, ref)=>{
     
     
     const context = useContext(TokenContext);
     //console.log("listvideo querylist ",querylist)
+    const [open,setOpen] = useState(false)
+    function openhelper(){
+        setOpen(true)
+    }
+    
+    function closehelper(){
+        setOpen(false)
+    }
+    const[listconcept,setListConcept]=useState([])
+    useEffect(() => {
+        if (querylist.length > 0 && querylist[0]!=null) { // It's used here...
+          
+            let newlistconcepts=[]
+            catalog.map(video=>{
+                
+                video.extracted_keywords.map(concept=>{
+                    
+                    if(!newlistconcepts.includes(concept)){
+                        newlistconcepts = [...newlistconcepts, concept];
+                    }
+  
+                  
+                })
+  
+                
+        
+            })
+          
+                    
+            setListConcept(newlistconcepts);
+        }
+      }, [querylist]);
 
 
-      
     return (
     <>
     <Container maxWidth = "xl" >
@@ -109,6 +143,10 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
         </Grid>
         <Grid item>
             {/*INSERT HERE MORE CONCEPTS */}
+            {listconcept.map(concept=>
+                
+                <Chip label={concept} size="small" sx={{m:0.5, color:"grey"}} onClick={openhelper}/>
+                )}
         </Grid>
         </>
         :
@@ -116,7 +154,165 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
         }
         </Grid>
     </Container>
+
+    <Modal
+    open={open}
+    aria-labelledby="modal-modal-title"
+    aria-describedby="modal-modal-description"
+    id="modale"
+    >
+
+       
+            <>
+                <Popover
+        
+                sx={{ display: "flex",
+                alignItems: "center",
+                justifyContent:"center",
+                
+                }}
+             
+
+                id="account-menu"
+                open="true"
+       
+                PaperProps={{
+                elevation: 0,
+              
+                }}
+              
+                anchorReference="anchorPosition"
+                anchorPosition={{ top:window.innerHeight/2, left: window.innerWidth/2}}
+                transformOrigin={{
+                    vertical: 'center',
+                    horizontal: 'center',
+                  }}
+            >
+                <Grid
+                id="primoGrid"
+                container
+                direction="column"
+                justifyContent="center"
+                alignItems="stretch"
+                sx={{m:0,p:0}}
+                >
+                 
+                    <Grid item sx={{pl:2,pr:2,pt:3, pb:1}}>
+                        <Grid
+                        container
+                        direction="column"
+                        justifyContent="center"
+                        alignItems="flex-start"
+                        >   
+                            <Grid item>
+                                <Typography variant="h6" gutterBottom sx={{m:0,p:0}}>
+                                    <b>Oops, we didn't</b>
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="h6" gutterBottom sx={{m:0,p:0}}>
+                                    <b>expect this :&#40;</b>
+                                </Typography>
+                            </Grid>
+                         
+                        </Grid>
+                    </Grid>
+                    <Grid item sx={{pl:2,pr:2}}>
+                        <Grid
+                        container
+                        direction="column"
+                        justifyContent="center"
+                        alignItems="flex-start"
+                        >
+                           
+                            <Grid item>
+                                <Typography variant="caption" display="block" gutterBottom sx={{m:0,p:0}}>
+                                    I know you'd like to click here, but <b>i'm just a</b>
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="caption" display="block" gutterBottom sx={{m:0,p:0}}>
+                                    <b>limited prototype.</b>
+                                </Typography>
+                            </Grid>
+
+                            <Grid item>
+                                <Typography variant="caption" display="block" gutterBottom sx={{m:0,p:0,mt:1}}>
+                                    if you want me to <b>work</b> and <b>compare the</b>
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="caption" display="block" gutterBottom sx={{m:0,p:0}}>
+                                    <b>videos</b>, please:
+                                </Typography>
+                            </Grid>
+
+                            <Grid item>
+                                <Typography variant="caption" display="block" gutterBottom sx={{m:0,p:0,mt:1, pl:2}}>
+                                    <ul style={{padding:0}}>
+                                        <li>
+                                            Choose <b>all the videos you want to compare</b>
+                                        </li>
+                                        <li>
+                                            Choose them <b>from left to right</b>.
+                                        </li>
+                                    </ul>
+                                </Typography>
+                            </Grid>
+                             
+                            <Grid item>
+                                <Typography variant="body2" display="block" gutterBottom sx={{m:0,p:0}}>
+                                    <b>Please be kind</b>,
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="caption" display="block" gutterBottom sx={{m:0,p:0}}>
+                                    I'm still learning &#x1F62D;
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid item sx={{pt:2}}>
+                        <Grid
+                        container
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        >
+                           <Grid item>
+
+                                </Grid>
+                            
+                            <Grid item xs="auto" sx={{m:0 ,pl:2,pt:1,pr:1,pb:0.5 ,backgroundColor:'#917FC7', borderRadius:'25px 0 3px 0'}} onClick={closehelper}>
+                                <Grid
+                                container
+                                direction="row"
+                                justifyContent="center"
+                                alignItems="center"
+                                sx={{m:0,p:0}}
+                                >
+                                    
+                                    <Grid item sx={{m:0,p:0}}>
+                                        <Typography variant="body2" gutterBottom sx={{color:"white", p:0,m:0}}>
+                                            Got it, <b>I'll forgive you.</b>
+                                        </Typography>
+                                    </Grid>
+                                   
+                                        
+                                    
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Popover>
+            </>
+        
+        
+    
+    </Modal>
     </>
+    
     );
 });
 
