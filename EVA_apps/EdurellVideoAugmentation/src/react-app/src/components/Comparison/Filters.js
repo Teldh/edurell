@@ -137,8 +137,8 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
         style={{position:"relative"}}
         >
             <Box
-            style={{position:"absolute", top:-34,right:10.55}}
-            sx={{width:"103px",height:"300px",backgroundColor:"white"}}/>
+            style={{position:"absolute", top:-30,right:41}}
+            sx={{width:"110px",height:"300px",backgroundColor:"white"}}/>
         <Grid item sx={{ p:5, borderRadius: '50px 50px 0 0', backgroundColor:"white"}}>
             <Grid 
             container
@@ -151,6 +151,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
             >
                 <Grid item sx={{
                         borderRight: '1px solid #CCCCCC',
+                        m:3,pr:3
                     }}>
                     <Grid
                     container
@@ -402,6 +403,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
 
                 <Grid item sx={{
                         borderRight: '1px solid #CCCCCC',
+                        m:3,pr:3,ml:1
                     }}>
                     <Grid
                     container
@@ -531,7 +533,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
 
 
 
-                <Grid item >
+                <Grid item sx={{m:3,ml:0}}>
                     <Grid
                     container
                     direction="column"
