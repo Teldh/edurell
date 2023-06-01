@@ -19,6 +19,8 @@ import {TokenContext} from './components/account-management/TokenContext'
 import { GrNotes  } from 'react-icons/gr'
 import Tooltip from '@material-ui/core/Tooltip';
 import { TouchableOpacity } from 'react-native-web';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 {/* 
   This class renders the interface to follow a lesson and most of the features of the project
   Its props are : the url, title, and ID of the video
@@ -290,6 +292,28 @@ export default class App extends React.Component {
                   <HiOutlineHome size={30} color="white"/>
                 </Link>
               </Tooltip>
+              <Tooltip title ="Compare videos">
+                    
+                      <Link to={`/comparisonSearch`} style={{ textDecoration: 'none' }}>
+                      <Box
+                                        sx={{
+                                            bbackgroundColor: 'transparent',
+                                            width:"20px",
+                                            height:"20px",
+                                            borderRadius:"50%",
+                                            border:2,
+                                            borderColor:"white",
+                                            justifyContent:"center",
+                                            alignItems:"center",
+                                            p:0.3,
+                                            m:0.5
+                                        }}>
+                      <Typography variant="button" display="block" gutterBottom sx={{color:"white"}}>
+                        <b>VS</b>
+                        </Typography>
+                        </Box>
+                      </Link>
+                    </Tooltip>
               <Tooltip title ="Edit Profile">
                 <Link to={`/editProfile/${nameSurname}/`}>
                   <RiUserSettingsLine size={30} color="white"/>

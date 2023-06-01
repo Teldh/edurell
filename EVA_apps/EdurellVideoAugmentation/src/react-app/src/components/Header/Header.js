@@ -9,6 +9,8 @@ import { HiOutlineHome } from 'react-icons/hi'
 import LoginButton from './LoginButton'
 import LogoutButton from '../account-management/logout/LogoutButton'
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 
 {/*
   The header allows the user to go back to the dasboard, edit his profile, login and logout
@@ -34,11 +36,35 @@ export default class Header extends React.Component {
                   <text className="link" style={{fontSize: 20}}>{login}</text>
                   <FaGripLinesVertical size={30} color="white"/>
                   <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-around'}}>
-                    <Tooltip title ="Home Page">
+                  <Tooltip title ="Home Page">
                       <Link to={`/dashboard`}>
                         <HiOutlineHome size={30} color="white"/>
                       </Link>
                     </Tooltip>
+                    
+                    <Tooltip title ="Compare videos">
+                    
+                      <Link to={`/comparisonSearch`} style={{ textDecoration: 'none' }}>
+                      <Box
+                                        sx={{
+                                            bbackgroundColor: 'transparent',
+                                            width:"20px",
+                                            height:"20px",
+                                            borderRadius:"50%",
+                                            border:2,
+                                            borderColor:"white",
+                                            justifyContent:"center",
+                                            alignItems:"center",
+                                            p:0.3,
+                                            m:0.5
+                                        }}>
+                      <Typography variant="button" display="block" gutterBottom sx={{color:"white"}}>
+                        <b>VS</b>
+                        </Typography>
+                        </Box>
+                      </Link>
+                    </Tooltip>
+                   
                     <Tooltip title ="Edit Profile">
                       <Link to={`/editProfile/${login}/`}>
                         <RiUserSettingsLine size={30} color="white"/>
