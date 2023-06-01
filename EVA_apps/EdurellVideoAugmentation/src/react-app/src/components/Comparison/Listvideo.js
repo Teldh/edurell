@@ -37,7 +37,7 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
         {loading
               ? null
               :
-            querylist.length > 0?
+            querylist.length > 0 && querylist[0]!=null?
             catalog.map((video,idx)=>{
                 //console.log("LISTVIDEO: ",catalogExtra)
                 let singlecatExtra = catalogExtra.filter(extra =>video.video_id == extra.video_id)

@@ -105,7 +105,7 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                             alignItems="center"
                             >
                                 {
-                                    searchClicked?
+                                    querylist.length > 0 && querylist[0]!=null?
                                     <Grid item>
                                     <Chip 
                                         
@@ -134,7 +134,7 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                 </Grid>
                                 
                                 {
-                                    searchClicked?
+                                    querylist.length > 0 && querylist[0]!=null?
                                     <Grid item>
                                     <div style={{zIndex:1, position:"relative"}}>
                                        
