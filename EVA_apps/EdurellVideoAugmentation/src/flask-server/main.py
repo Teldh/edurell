@@ -1043,6 +1043,7 @@ def ConceptVideoData(video_id, concept_searched):
     ## --------------------------------------------------------------------------------------------------------------------------------------
     ## ---------------------------------------------------------QUERYPRECONCEPTS-------------------------------------------------------------
     ## --------------------------------------------------------------------------------------------------------------------------------------
+    ## preconcepts that aren't explained: no conceptDefinition nor conceptExpansion
     qr = """
                 PREFIX oa: <http://www.w3.org/ns/oa#>
                 PREFIX edu: <https://teldh.github.io/edurell#>
@@ -1063,6 +1064,7 @@ def ConceptVideoData(video_id, concept_searched):
 
 
     """
+
     qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
     #print("preconcept")
     #print("qres: ",len(qres))

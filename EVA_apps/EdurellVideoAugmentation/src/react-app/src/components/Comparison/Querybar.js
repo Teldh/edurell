@@ -144,7 +144,7 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                         sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px', backgroundColor:"#c6ebdc"}}
                                         
                                         avatar={<TuneRoundedIcon/>}
-                                        label={<Typography variant="caption" display="block" gutterBottom sx={{m:0.5}}>
+                                        label={<Typography variant="body1" display="block" gutterBottom sx={{m:0.5}}>
                                         Filters
                                     </Typography>} 
                                         onClick={handleExpandClick}

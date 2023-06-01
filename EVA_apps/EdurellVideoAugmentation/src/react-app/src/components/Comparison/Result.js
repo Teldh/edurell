@@ -893,7 +893,7 @@ export default function Result(){
                             >
                                 <Grid item>
                                 <Typography variant="h4" gutterBottom sx={{mb:0,pb:0, pt:10}}>
-                                    <b>What you must already know, what you are going to learn and concept maps</b>
+                                    <b>What you must already know, what you are going to learn</b>
                                 </Typography>
                                 <Box
                                 sx={{

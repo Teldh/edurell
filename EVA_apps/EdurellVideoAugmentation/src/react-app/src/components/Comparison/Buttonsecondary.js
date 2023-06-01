@@ -7,11 +7,11 @@ import './buttonsecondary.css';
 const SecondaryColor = styled(withTheme(Button))({
       
   
-      background: "#FA824C",
+      background: "rgb(255,168,37)",
       height:"50px",
       borderRadius:'0 15px 15px 0',
       '&:hover': {
-      backgroundColor: "#FB9B6F",
+      backgroundColor: "#fcb851",
       height:"50px",
       borderRadius:'0 15px 15px 0',
       

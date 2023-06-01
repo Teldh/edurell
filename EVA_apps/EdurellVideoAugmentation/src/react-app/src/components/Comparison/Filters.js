@@ -238,12 +238,13 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                     onChange={handleChange1}
                                     aria-label="Platform"
                                     >
+                                         <ToggleButton value="novice" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>Beginners</Typography>
+                                    </ToggleButton>
                                     <ToggleButton value="expert" style={{textTransform: 'none'}}>
                                         <Typography variant="body2" display="block" gutterBottom>Experts</Typography>
                                     </ToggleButton>
-                                    <ToggleButton value="novice" style={{textTransform: 'none'}}>
-                                        <Typography variant="body2" display="block" gutterBottom>Beginners</Typography>
-                                    </ToggleButton>
+                                   
                                     </StyledToggleButtonGroup>
                                 </Grid>
                             </Grid>

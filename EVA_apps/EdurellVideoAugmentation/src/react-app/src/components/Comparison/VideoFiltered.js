@@ -245,7 +245,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
         <CardActions disableSpacing >
             
             
-            <Chip label={"1 match"} size="small" sx={{backgroundColor:"rgb(255,128,0)", color:"white"}}/>
+            <Chip label={"1 match"} size="small" sx={{backgroundColor:"#424242", color:"white"}}/>
             {!add?
             <>
                 {
@@ -371,7 +371,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
         
       
         
-        <Collapse in={expanded} timeout="auto" unmountOnExit style={{position:'fixed',bottom: 0, left:0, right:0, backgroundColor:"white", zIndex:1}}>
+        <Collapse in={expanded} timeout="auto" unmountOnExit style={{position:'fixed',bottom: 0, left:0, right:0, zIndex:1}}>
             <Grid
             container
             direction="row"
@@ -380,8 +380,8 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
             id="1 COLONNA CENTRALE DATI"
             sx={{p:5}}
             >
-                <Grid item xs={2}></Grid>
-                <Grid item>
+                <Grid item xs={1}></Grid>
+                <Grid item sx={{backgroundColor:"white", boxShadow:10, p:3}}>
                     <Grid
                     container
                     direction="column"
@@ -427,11 +427,11 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                     >
                                                         <Grid item>
                                                             <Typography variant="subtitle2" gutterBottom>
-                                                                {titleurl}    
+                                                                <b>{titleurl}</b>   
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item>
-                                                            <Typography variant="caption" gutterBottom>
+                                                            <Typography variant="caption" gutterBottom sx={{color:"grey"}}>
                                                                 {creator}
                                                             </Typography>
                                                         </Grid>
@@ -446,7 +446,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                 </Grid>
                                             </Grid>
                                         </Grid>
-                                        <Grid item>
+                                        <Grid item sx={{border:2, borderColor:"rgb(223,223,223)", p:3}}>
                                             <Grid
                                             container
                                             direction="row"
@@ -465,7 +465,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                     sx={{maxWidth: 500}}
                                                     >
                                                         <Grid item>
-                                                            <Typography variant="caption" display="block" gutterBottom>
+                                                            <Typography variant="body2" display="block" gutterBottom>
                                                                 Things you must already know to understand this video:
                                                             </Typography>
                                                         </Grid>
@@ -493,7 +493,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                             </Grid>
                                                         </Grid>
                                                         <Grid item>
-                                                            <Typography variant="caption" display="block" gutterBottom>
+                                                            <Typography variant="body2" display="block" gutterBottom>
                                                                 What you are going to learn in this video:
                                                             </Typography>
                                                         </Grid>
@@ -505,11 +505,33 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                             alignItems="flex-start"
                                                             id="lista di concetti"
                                                             >
+
+                                                                    <Grid item xs="auto" sx={{m:0.2,mb:2}}>
+                                                                        <Chip label={querylist[0]} size="small" sx={{backgroundColor:"#424242", color:"white"}}/>
+                                                                    </Grid>
+                                                               
+                                                          
+                                                            </Grid>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <Typography variant="body2" display="block" gutterBottom>
+                                                                You will learn also the following related concepts:
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <Grid
+                                                            container
+                                                            direction="row"
+                                                            justifyContent="flex-start"
+                                                            alignItems="flex-start"
+                                                            id="lista di concetti"
+                                                            >
+
                                                                
                                                                 {(conceptextra[0]!=undefined&& conceptextra[0].list_derivatedconcept.length>0)?
                                                                 conceptextra[0].list_derivatedconcept.map(keyword=>
                                                                     <Grid item xs="auto" key={keyword} sx={{m:0.2}}>
-                                                                        <Chip label={keyword} size="small" color="primary"/>
+                                                                        <Chip label={keyword} size="small"  sx={{ backgroundColor:"#a7d0bf"}}/>
                                                                     </Grid>
                                                                 ):
                                                                 <Grid item xs="auto" sx={{m:0.2}}>
@@ -528,9 +550,10 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                     justifyContent="center"
                                                     alignItems="flex-start"
                                                     id="DX"
+                                                    sx={{ml:5}}
                                                     > 
                                                         <Grid item>
-                                                            <Typography variant="caption" display="block" gutterBottom>
+                                                            <Typography variant="body2" display="block" gutterBottom>
                                                                 Duration:
                                                             </Typography>
                                                         </Grid>
@@ -543,20 +566,20 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                             id="definizione"
                                                             >
                                                                 <Grid item>
-                                                                    <CircleIcon sx={{color:"rgb(255,168,37)"}}/>
+                                                                    <CircleIcon sx={{color:"#424242", border:1, borderColor:"#1c1c1c", mr:0.5,borderRadius: '50%'}}/>
                                                                 </Grid>
                                                                 <Grid item>
                                                                     <Typography variant="caption" gutterBottom>
-                                                                        Definition:
+                                                                        Definition of the concept:
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item>
                                                                 
                                                                         {(conceptextra[0]!=undefined&& conceptextra[0].concept_starttime.length>0)?
                                                                             
-                                                                            <Typography variant="subtitle2" gutterBottom>{duration}</Typography>
+                                                                            <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>{duration}</Typography>
                                                                             :
-                                                                            <Typography variant="subtitle2" gutterBottom>null</Typography>
+                                                                            <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>null</Typography>
 
                                                                         }
                                                              
@@ -573,20 +596,20 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                             id="approfondimenti"
                                                             >
                                                                 <Grid item>
-                                                                    <CircleIcon sx={{color:"rgb(255,255,181)"}}/>
+                                                                    <CircleIcon sx={{color:"#8c8c8c" ,border:1, borderColor:"#8c8c8c", mr:0.5,borderRadius: '50%'}}/>
                                                                 </Grid>
                                                                 <Grid item>
                                                                     <Typography variant="caption" gutterBottom>
-                                                                        In depth:
+                                                                        In depth explaination:
                                                                     </Typography>
                                                                 </Grid>
                                                                 <Grid item>
                                                                 
                                                                         {(conceptextra[0]!=undefined&& conceptextra[0].derivatedconcept_starttime.length>0)?
                                                                             
-                                                                            <Typography variant="subtitle2" gutterBottom>{approfondimenti+" "+approfondimentiSeconds}</Typography>
+                                                                            <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>{approfondimenti}</Typography>
                                                                             :
-                                                                            <Typography variant="subtitle2" gutterBottom>null</Typography>
+                                                                            <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>null</Typography>
 
                                                                         }
                                                               
@@ -602,7 +625,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                             id="durata totale"
                                                             >
                                                                 <Grid item>
-                                                                    <CircleIcon sx={{color:"rgb(255,255,255)", p:0, m:0}}style={{
+                                                                    <CircleIcon sx={{color:"rgb(255,255,255)", p:0, mr:0.5}}style={{
                                                                         border: '1px solid grey', // Specifica lo stile del bordo desiderato
                                                                         borderRadius: '50%', // Assicura che il bordo sia arrotondato per creare una forma circolare
                                                                     }}/>
@@ -616,9 +639,9 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                              
                                                                         {(conceptextra[0]!=undefined&& conceptextra[0].derivatedconcept_starttime.length>0)?
                                                                             
-                                                                            <Typography variant="subtitle2" gutterBottom>{duratatot}</Typography>
+                                                                            <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>{duratatot}</Typography>
                                                                             :
-                                                                            <Typography variant="subtitle2" gutterBottom>null</Typography>
+                                                                            <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>null</Typography>
 
                                                                         }
                                                                
@@ -646,9 +669,9 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                              
                                                                         {(conceptextra[0]!=undefined)?
                                                                             
-                                                                            <Typography variant="subtitle2" gutterBottom>{slidishness}</Typography>
+                                                                            <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>{slidishness}</Typography>
                                                                             :
-                                                                            <Typography variant="subtitle2" gutterBottom>null</Typography>
+                                                                            <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>null</Typography>
 
                                                                         }
                                                                
@@ -748,7 +771,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                         justifyContent="center"
                                                         alignItems="center"
                                                         sx={{
-                                                            width:"100%",
+                                                            width:"1000px",
                                                             height:"500px"
                                                         }}
                                                         >
@@ -847,7 +870,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={2}></Grid>
+                <Grid item xs={1}></Grid>
             </Grid>
 
         </Collapse>
