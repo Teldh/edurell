@@ -1,8 +1,9 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import Edurell from './Edurell';
+import ReactDOM from 'react-dom';
 
 ReactDOM.render(
   <React.StrictMode>

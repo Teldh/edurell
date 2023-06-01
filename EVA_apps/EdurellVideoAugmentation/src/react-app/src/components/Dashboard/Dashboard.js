@@ -12,6 +12,7 @@ import { GoSearch  } from 'react-icons/go'
 import { TextInput } from 'react-native-web'
 import { TouchableOpacity, Image } from 'react-native-web'
 import { Tooltip } from '@material-ui/core';
+import ButtonComp from '../Comparison/ButtonComp.js'
 
 {/*
     This component is the first interface that the user sees when he's logged in
@@ -49,6 +50,7 @@ const HistoryVideo = props => {
   )
 }
 export default class Dashboard extends React.Component {
+  
     state = {
       // the videos already watched by the user
       userHistory: {
@@ -64,7 +66,7 @@ export default class Dashboard extends React.Component {
       // result of the research in the catalog
       searchResult: []
     }
-
+    
     static contextType = TokenContext
 
     // returns the videos already wtached by the user
@@ -84,6 +86,7 @@ export default class Dashboard extends React.Component {
         }
         catch(err){
           console.log(err)
+          
           if(err.message==="401"){
               
               //alert('Your session have expired, please re-login')
@@ -140,6 +143,7 @@ export default class Dashboard extends React.Component {
         }
         else{
           this.setState({catalog: response.catalog})
+          console.log("HERE: "+JSON.stringify(response.catalog[0]))
       }
     }
 
@@ -206,6 +210,8 @@ export default class Dashboard extends React.Component {
                   </div>
               }
             </div>
+            
+            <ButtonComp/>
         </div>
 
         {loading

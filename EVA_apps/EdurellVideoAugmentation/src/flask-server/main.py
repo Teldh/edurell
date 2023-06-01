@@ -5,10 +5,14 @@ import time
 import random
 import string
 import math
+import json
+from rdflib import Graph, RDF, URIRef, Literal
+from rdflib.namespace import SKOS
 
 from datetime import datetime
 from flask_httpauth import HTTPBasicAuth
 import jwt
+import pymongo
 import bcrypt
 from flask_mongoengine import MongoEngine
 from flask_mail import Mail, Message
@@ -16,6 +20,7 @@ from smtplib import SMTPException, SMTPRecipientsRefused
 import urllib.request
 import json
 import urllib
+import urllib.parse
 
 import data
 import handle_data
@@ -36,6 +41,8 @@ app.config['MONGODB_SETTINGS'] = {
     'host': "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority"
 }
 
+
+
 #mail server config (gmail account date of birth : 01/01/1900)
 #old: <project.edurell@gmail.com> <work$package>
 app.config['MAIL_SERVER']='smtp.gmail.com'
@@ -55,6 +62,7 @@ auth = HTTPBasicAuth(scheme='Custom')
 db = MongoEngine()
 db.init_app(app)
 mail = Mail(app)
+
 
 # generate a random string of lenght N composed of lowercase letters and numbers
 def generate_code(N=6):
@@ -84,12 +92,28 @@ def speech_from_youtube():
 def get_integer_part(number):
     split_number = math.modf(number)
     return split_number[1]
+    
+class VTStitles(db.EmbeddedDocument):
+    start_end_seconds = db.ListField(db.DecimalField())
+    text = db.StringField()
+    xywh_normalized = db.ListField(db.DecimalField())
+    
+class VideoTextSegmentation(db.Document):
+    video_id = db.StringField()
+    video_slidishness = db.DecimalField()
+    slide_titles = db.EmbeddedDocumentListField(VTStitles)
+    slide_startends = db.ListField(db.ListField(db.DecimalField()))
+    slidish_frames_startend = db.ListField(db.ListField(db.IntField()))
+
+
+
 
 #image of the mongodb collection of the database, used by mongoengine
 class Videos(db.Document):
     video_id = db.StringField()
     title = db.StringField()
     creator = db.StringField()
+    duration = db.StringField()
     segment_starts = db.ListField(db.StringField())
     segment_ends = db.ListField(db.StringField())
     extracted_keywords = db.ListField(db.StringField())
@@ -536,23 +560,48 @@ def add_history():
 def get_history():
     student= g.student
     video_title_list = []
-    for i in student.video_history_list:
-        video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
-    return (jsonify({'email': student.email, 'videoHistory' : student.video_history_list, 'videoHistoryTitles': video_title_list}), 201)
+    
+    # Removing videos that have been removed from videos collection
+    for video_in_history in reversed(student.video_history_list):
+        if not Videos.objects(video_id = video_in_history.video_url.split("watch?v=")[1]):
+            student.video_history_list.remove(video_in_history)
 
+    print("GET HISTORY")
+    for video in student.video_history_list:
+        video_title_list.append(get_video_title_from_url(video.video_url.split("watch?v=")[1]))
+        #print(video," ",get_video_title_from_url(video.video_url.split("watch?v=")[1]))
+    
+    return (jsonify({'email': student.email, 'videoHistory' : student.video_history_list, 'videoHistoryTitles': video_title_list}), 201)
+"""
+  video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
+        print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
+
+
+        try:
+            video_title_list.append(get_video_title_from_url(i.video_url.split("watch?v=")[1]))
+            print(i," ",get_video_title_from_url(i.video_url.split("watch?v=")[1]))
+        except Exception:
+            pass
+"""
 
 # used in the function above to get youtube video title based on their id
 def get_video_title_from_url(video_id):
+    #print("GET VIDEO: ",video_id)
     params = {"format": "json", "url": "https://www.youtube.com/watch?v=%s" % video_id}
     url = "https://www.youtube.com/oembed"
     query_string = urllib.parse.urlencode(params)
     url = url + "?" + query_string
+    #print("url ",url)
+
+    #print("dopo")
 
     with urllib.request.urlopen(url) as response:
         response_text = response.read()
         data = json.loads(response_text.decode())
-
     return data['title']
+
+    
+
 
 # return the fragment of a video and their progress, can be taken from the Video mongodb collection or from the user's history if he already watched it
 @app.route('/api/get_fragments/<string:video_id>')
@@ -579,7 +628,6 @@ def get_fragments(video_id):
         abort(409, "Unexisting graph for this video id")    # the video doesn't exist in the graphs collection
 
     keywords = handle_data.get_definitions_fragments(graph_object.email, video_id, video_fragment_progress)
-    #print(keywords)
 
     if(video_fragment_progress is None or not len(video_fragment_progress)):
         
@@ -624,6 +672,7 @@ def get_catalog():
 
 
     return (jsonify({'catalog': catalog}), 201)
+
 
 #image of the mongodb collection of the database, used by mongoengine
 class Graphs(db.Document):
@@ -687,21 +736,25 @@ def get_image(video_id=None, fragment_index=None ):
 @app.route('/api/graph_id/<video_id>')
 @auth.login_required
 def graph_id(video_id):
+    print("***** EDURELL - Video Augmentation: main.py::graph_id(): Inizio ******")
     student= g.student
     graph_list = handle_data.check_graphs(video_id,student.email)
 
     # if user first time on this video, select all available graph ids
     if not len(graph_list):
         graph_list = handle_data.get_graphs(video_id)
+    print(graph_list)
+    print("***** EDURELL - Video Augmentation: main.py::graph_id(): Fine ******")
 
     return {"graphs_id_list": graph_list }
+
 
 #return the graph of a given video
 @app.route('/api/graph/<annotator_id>/<video_id>')
 @auth.login_required
 def graph(annotator_id, video_id):
     concept_graph = data.build_array(annotator_id, video_id)
-    
+
     # old: return {"conceptsList": concept_graph }
     
     conceptVocabulary = data.get_concept_vocabulary(annotator_id, video_id)
@@ -711,11 +764,668 @@ def graph(annotator_id, video_id):
         conceptVocabulary = {}
         concept_list = data.get_concept_list(annotator_id, video_id)
         for c in concept_list:
-            conceptVocabulary[c["name"][4:].replace("_", " ")] = []
+            conceptVocabulary[c["name"][4:].replace("_", " ")] = []    
 
     return {"conceptsList": concept_graph, "conceptVocabulary": conceptVocabulary}
 
+@app.route('/api/GetVideoTypeAndPrerequisite')
+@auth.login_required
+def GetVideoTypeAndPrerequisite():
+    user = "luca"
+    password = "vSmAZ6c1ZOg2IEVw"
+    client = pymongo.MongoClient(
+        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+
+    # retrieve from mongodb collection=graphs the all elements with the value of video_id
+    db = client.edurell
+    collection = db.graphs
+
+    videos = Videos.objects()
+    result={}
+    for v in videos:
+        cursor = collection.find({"video_id":v.video_id})
+
+
+        
+        for document in cursor:
+            #print("per ogni document in cursor: ",document["_id"]," ",document["conceptVocabulary"])
+            #print("\n asd \n")
+            if document["conceptVocabulary"] == "":
+                print("NONE")
+                continue
+
+            gr=Graph()
+            print("Generato grafo: ")
+            # Query the concept timeline and duration
+            gr.parse(data=json.dumps(document["graph"]), format='json-ld')
+
+            # initialize conceptVocabulary for the query
+            gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+           
+        
+        qr="""
+                PREFIX oa: <http://www.w3.org/ns/oa#>
+                PREFIX edu: <https://teldh.github.io/edurell#>
+                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                PREFIX dcterms: <http://purl.org/dc/terms/>
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+                SELECT DISTINCT ?video_id ?prerequisite ?typedef
+                WHERE{
+                    ?id_descr oa:motivatedBy oa:describing.
+                    ?id_descr oa:hasTarget ?target_descr.
+                    ?target_descr oa:hasSource ?video_id.
+                    ?id_descr skos:note  ?typedef.
+
+                    ?id_pre oa:motivatedBy edu:linkingPrerequisite.
+                    ?id_pre oa:hasTarget ?target_link.
+                    ?target_link oa:hasSource ?video_id.
+                    ?id_pre oa:hasBody ?prerequisiteIRI.
+                    ?prerequisiteIRI skos:prefLabel ?prerequisite.
+                    
+
+                }
+        
+        """
+        print("applico la query")
+        qres = gr.query(qr)
+        print("qres: ",len(qres)," ",qr)
+        for row in qres:
+            #print("_________________________________________")
+            #print(row['video_id']," ",row['prerequisite']," ",row['typedef'])
+            if v.video_id in result:
+                if "prerequisite" in result[v.video_id]:
+                    result[v.video_id]["prerequisite"].append(row['prerequisite'])
+                else:
+                    result[v.video_id]["prerequisite"] = []
+                    result[v.video_id]["prerequisite"].append(row['prerequisite'])
+                
+                if "typedef" in result[v.video_id]:
+                    result[v.video_id]["typedef"].append(row['typedef'])
+                else:
+                    result[v.video_id]["typedef"] = []
+                    result[v.video_id]["typedef"].append(row['typedef'])
+            else:
+                result[v.video_id] = {}
+                if "prerequisite" in result[v.video_id]:
+                    result[v.video_id]["prerequisite"].append(row['prerequisite'])
+                else:
+                    result[v.video_id]["prerequisite"] = []
+                    result[v.video_id]["prerequisite"].append(row['prerequisite'])
+                
+                if "typedef" in result[v.video_id]:
+                    result[v.video_id]["typedef"].append(row['typedef'])
+                else:
+                    result[v.video_id]["typedef"] = []
+                    result[v.video_id]["typedef"].append(row['typedef'])
+    
+        VTS=VideoTextSegmentation.objects(video_id = v.video_id)
+        for VTSdoc in VTS:
+            print(VTSdoc.video_id)
+            print(VTSdoc.video_slidishness)
+            if v.video_id in result:
+                result[v.video_id]['video_slidishness'] = VTSdoc.video_slidishness
+            else:
+                result[v.video_id] = {}
+                result[v.video_id]['video_slidishness'] = VTSdoc.video_slidishness
+    return result
+
+@app.route('/api/ConceptVideoData/<video_id>/<concept_searched>')
+@auth.login_required
+def ConceptVideoData(video_id, concept_searched):
+    user = "luca"
+    password = "vSmAZ6c1ZOg2IEVw"
+    #pymongo db config for query sparql
+    client = pymongo.MongoClient(
+            "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+    dbsparql = client.edurell
+    # retrieve from mongodb collection=graphs the all elements with the value of video_id
+    collection = dbsparql.graphs
+    
+    # initialize the dicitonary where we save our results
+    result = {
+        'video_id':video_id,
+        'concept_starttime':[],
+        'concept_endtime':[],
+        'explain':[],
+        'list_preconcept': [],
+        'list_prenotes':[],
+        'list_postnotes':[],
+        'list_derivatedconcept':[],
+        'derivatedconcept_starttime':[],
+        'derivatedconcept_endtime':[]
+        
+    }
+    print("?????????????????????????????START??????????????????????????????????")
+    print("start query: ",video_id," ",concept_searched)
+    print("result: ",result)
+    # two options:
+    ## 1. search newest annotation
+    ### 2. combine every annotation of a video into a unique graph and make the query of that
+    cursor = collection.find({"video_id":video_id})
+    optiongraph = 2
+    gr=Graph()
+
+
+    if optiongraph == 1:
+        ## 1. search newest annotation
+        ## search for the newest in term of timestamp and get the idx of the newest document
+        ## maybe it's pointless if the lastest is always the newest
+        ## but in case the order changes in the future, this piece of code will make the ode work right regardless
+        lastest = "1970-01-01T00:00:00.000000Z"
+        lastest_idx = 0
+        for idx,document in enumerate(cursor):
+            if document is None:
+                continue
+            gr=Graph().parse(data=json.dumps(document["graph"]), format='json-ld')
+            qr = """
+                    PREFIX oa: <http://www.w3.org/ns/oa#>
+                    PREFIX edu: <https://teldh.github.io/edurell#>
+                    PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                    PREFIX dcterms: <http://purl.org/dc/terms/>
+                    
+                    SELECT DISTINCT ?timestamp
+                    WHERE {
+                            ?who dcterms:created ?timestamp
+                        }
+
+                """
+            qres = gr.query(qr)
+            print("query result: ",qres)
+            for row in qres:
+                print("current_timestamp: ",lastest," / selected_timestamp: ",row['timestamp'])
+                if row['timestamp'] > lastest:
+                    lastest = row['timestamp']
+                    lastest_idx = idx
+        print("lastest_timestamp: ",lastest," lastest_idx: ",lastest_idx)
+        print("TESTTTTTTTTT       ",cursor)
+
+        # select the newest document
+        document = collection.find({"video_id":video_id})[lastest_idx]
+        
+
+        # Query the concept timeline and duration
+        gr.parse(data=json.dumps(document["graph"]), format='json-ld')
+
+        # initialize conceptVocabulary for the query
+        gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+
+    else:
+        ### 2. combine all annotation of a video together
+        ### in mongodb we collect all annotation of a single video
+        ### made by different people or the same
+        ### this mode combine from the oldest to the newest into a single graph
+        print("start cursor for: ",video_id)
+        for idx,document in enumerate(cursor):
+            print("document ",video_id," idx: ",idx," \n\nGRAPH: ",document["graph"]," \n\nCONCEPT:  ",document["conceptVocabulary"]," \n\n")
+            print("\n")
+            # Query the concept timeline and duration
+            if document["graph"]=="":
+                print("\nIGNORE GRAPH: ")
+                continue
+            if document["conceptVocabulary"] == "":
+                print("\nIGNORE CONCEPT: ")
+                continue
+            gr.parse(data=json.dumps(document["graph"]), format='json-ld')
+
+            # initialize conceptVocabulary for the query
+            
+            gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------QUERYCREATED-----------------------------------------------------------------
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    qr = """
+                PREFIX oa: <http://www.w3.org/ns/oa#>
+                PREFIX edu: <https://teldh.github.io/edurell#>
+                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                PREFIX dcterms: <http://purl.org/dc/terms/>
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+                SELECT DISTINCT ?created
+                WHERE{
+                        ?who oa:motivatedBy oa:describing.
+                        ?who dcterms:created ?created.
+                        ?who a oa:Annotation.
+                        ?who oa:hasBody ?c_id.
+                        ?c_id skos:prefLabel ?c_selected.
+                }
+    """
+    qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
+    print("query created")
+    print("qres: ",len(qres))
+    for row in qres:
+        print("_________________________________________")
+        print(row['created'])
+        result['created']=row['created']
+
+    print(result)
+
+
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------QUERYCONCEPTTIMELINE&SKOSNOTE------------------------------------------------------
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    qr = """
+                PREFIX oa: <http://www.w3.org/ns/oa#>
+                PREFIX edu: <https://teldh.github.io/edurell#>
+                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                PREFIX dcterms: <http://purl.org/dc/terms/>
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                SELECT ?concept_starttime ?concept_endtime ?explain
+                WHERE {
+                        
+                        ?who oa:hasBody ?c_id.
+                        ?c_id skos:prefLabel ?c_selected.
+                        ?who oa:motivatedBy oa:describing.
+                        ?who oa:hasTarget ?target.
+                        ?target oa:hasSelector ?selector.
+                        ?selector oa:hasStartSelector ?startselector.
+                        ?startselector rdf:value ?concept_starttime.
+                        ?selector oa:hasEndSelector ?endselector.
+                        ?endselector rdf:value ?concept_endtime.
+                        ?who skos:note ?explain               
+                    }
+
+
+            """
+ 
+    qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
+    print("qres: ",len(qres))
+    for row in qres:
+        #print("result: ",row['concept_starttime']," ",row['concept_endtime'])
+        print("_________________________________________")
+        print(row['concept_starttime'],"\n",row['concept_endtime'])
+        result['concept_starttime'].append(row['concept_starttime'])
+        result['concept_endtime'].append(row['concept_endtime'])
+        result['explain'].append(row['explain'])
+    
+
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------QUERYPRECONCEPTS-------------------------------------------------------------
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    qr = """
+                PREFIX oa: <http://www.w3.org/ns/oa#>
+                PREFIX edu: <https://teldh.github.io/edurell#>
+                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                PREFIX dcterms: <http://purl.org/dc/terms/>
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+                SELECT DISTINCT ?preconcept ?prenote
+                WHERE{
+                        ?who oa:hasBody ?preconceptIRI.
+                        ?c_id skos:prefLabel ?c_selected.
+                        ?who oa:motivatedBy edu:linkingPrerequisite.
+                        ?who oa:hasTarget ?target.
+                        ?target dcterms:subject ?c_id.
+                        ?preconceptIRI skos:prefLabel ?preconcept.
+                        ?who skos:note ?prenote.
+                }
+
+
+    """
+    qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
+    print("preconcept")
+    print("qres: ",len(qres))
+    for row in qres:
+        print("a_________________________________________")
+        print(row['preconcept'])
+        result['list_preconcept'].append(row['preconcept'])
+        result['list_prenotes'].append(row['prenote'])
+
+    print(result)
+    
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------QUERYCONCEPTDERIVATED--------------------------------------------------------
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    qr = """
+                PREFIX oa: <http://www.w3.org/ns/oa#>
+                PREFIX edu: <https://teldh.github.io/edurell#>
+                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                PREFIX dcterms: <http://purl.org/dc/terms/>
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+                SELECT DISTINCT ?c_derivated ?postnote
+                WHERE{
+                        ?who oa:hasBody ?c_id.
+                        ?c_id skos:prefLabel ?c_selected.
+                        ?who oa:motivatedBy edu:linkingPrerequisite.
+                        ?who oa:hasTarget ?target.
+                        ?target dcterms:subject ?c_derivatedIRI.
+                        ?c_derivatedIRI skos:prefLabel ?c_derivated.
+                        ?who skos:note ?postnote
+                }
+
+
+    """
+    """
+        'list_derivatedconcept':[],
+        'derivatedconcept_starttime':[],
+        'derivatedconcept_endtime':[]
+    """
+    qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
+    print("c_derivated")
+    print("qres: ",len(qres))
+    for row in qres:
+        print("b_________________________________________")
+        print(row['c_derivated'])
+        result['list_derivatedconcept'].append(row['c_derivated'])
+        result['list_postnotes'].append(row['postnote'])
+
+    
+
+
+
+
+    for dc in result['list_derivatedconcept']:
+        qr = """
+                PREFIX oa: <http://www.w3.org/ns/oa#>
+                PREFIX edu: <https://teldh.github.io/edurell#>
+                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                PREFIX dcterms: <http://purl.org/dc/terms/>
+                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                SELECT ?dc_starttime ?dc_endtime
+                WHERE {
+                        
+                        ?who oa:hasBody ?c_id.
+                        ?c_id skos:prefLabel ?c_selected.
+                        ?who oa:motivatedBy oa:describing.
+                        ?who oa:hasTarget ?target.
+                        ?target oa:hasSelector ?selector.
+                        ?selector oa:hasStartSelector ?startselector.
+                        ?startselector rdf:value ?dc_starttime.
+                        ?selector oa:hasEndSelector ?endselector.
+                        ?endselector rdf:value ?dc_endtime.               
+                    }
+
+
+            """
+ 
+        qres = gr.query(qr, initBindings = {"c_selected":Literal(dc, lang="en")})
+        print("qres: ",len(qres))
+        for row in qres:
+            #print("result: ",row['concept_starttime']," ",row['concept_endtime'])
+            print("_________________________________________")
+            print(row['dc_starttime'],"\n",row['dc_endtime'])
+            result['derivatedconcept_starttime'].append(row['dc_starttime'])
+            result['derivatedconcept_endtime'].append(row['dc_endtime'])
+
+    
+
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    ## ---------------------------------------------------------SLIDISHNESS------------------------------------------------------------------
+    ## --------------------------------------------------------------------------------------------------------------------------------------
+    VTS=VideoTextSegmentation.objects(video_id = video_id)
+    for VTSdoc in VTS:
+        print(VTSdoc.video_id)
+        print(VTSdoc.video_slidishness)
+        result['video_slidishness'] = str(VTSdoc.video_slidishness)
+
+    print(result)
+    return result
+
+@app.route('/api/testm/<video_id>')
+@auth.login_required
+def testm(video_id):
+    user = "luca"
+    password = "vSmAZ6c1ZOg2IEVw"
+
+    client = pymongo.MongoClient(
+        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+
+    db = client.edurell
+    collection = db.graphs
+
+    cursor = collection.find({"video_id": video_id})
+    gr = Graph()
+    retval={}
+    for document in cursor:
+        print("asd")
+        if document is not None:
+            
+            gr.parse(data=json.dumps(document["graph"]), format='json-ld')
+
+
+            qr = """
+                PREFIX oa: <http://www.w3.org/ns/oa#>
+                PREFIX edu: <https://teldh.github.io/edurell#>
+                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                PREFIX dcterms: <http://purl.org/dc/terms/>
+                
+                SELECT ?sub ?pre ?obj
+                WHERE {
+                        ?sub ?pre ?obj
+                    
+                    }
+
+            """
+
+            qr2="""
+                PREFIX oa: <http://www.w3.org/ns/oa#>
+                PREFIX edu: <https://teldh.github.io/edurell#>
+                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                PREFIX dcterms: <http://purl.org/dc/terms/>
+                
+                SELECT ?sub  ?obj
+                WHERE {
+                        ?sub dcterms:created ?obj
+                    
+                    }
+
+            """
+            qres = gr.query(qr)
+            qres2=gr.query(qr2)
+            resulto={}
+            resulto2={}
+            print("STARTOOOOOO ",qres)
+            for idx,row in enumerate(qres):
+                resulto[idx]={"subject":row['sub'],"predicate":row['pre'],"object":row['obj']}
+            print("ENDOOOOOOOO")
+            for idx,row in enumerate(qres2):
+                resulto2[idx]={"subject":row['sub'],"object":row['obj']}
+            retval["res"]=resulto
+    return retval
+
+@app.route('/api/sparql_query_concepts/<video_id>')
+@auth.login_required
+def sparql_query_concepts(video_id, annotator_id):
+    user = "luca"
+    password = "vSmAZ6c1ZOg2IEVw"
+
+    client = pymongo.MongoClient(
+        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+
+    db = client.edurell
+    collection = db.graphs
+
+    query = {
+        "annotator_id": annotator_id,
+        "video_id": video_id
+    }
+
+    general_query = {
+        "video_id": video_id
+    }
+
+    #se trova un grafo qualunque con quel video_id, salva il risultato della query
+    if collection.find_one(general_query) is not None:
+        risultato = collection.find_one(general_query)["conceptVocabulary"]
+    #ma se trova il grafo con quel video_id e proprio con quell'annotator_id, sovrascrive risultato
+    if collection.find_one(query) is not None:
+        risultato = collection.find_one(query)["conceptVocabulary"]    
+
+    #se almeno una delle due query è andata a buon fine
+    if risultato is not None:
+        gr = Graph()\
+        .parse(data=json.dumps(risultato), format='json-ld')
+
+        tic = time.time()
+
+        # Seleziona tutti i nodi concetto ed eventuali sinonimi
+        query3 = """
+            PREFIX oa: <http://www.w3.org/ns/oa#>
+            PREFIX edu: <https://teldh.github.io/edurell#>
+            PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+            
+            SELECT ?concept ?synonym
+            WHERE {
+                    ?concetto skos:prefLabel ?concept.
+                    OPTIONAL {
+                        ?concetto skos:altLabel ?synonym
+                    }
+                    FILTER (!BOUND(?altLabel))
+                }"""
+
+        qres = gr.query(query3)
+
+        toc = time.time()
+
+        #print per i concetti
+        print("Results: - obtained in %.4f seconds" % (toc - tic))
+        for row in qres: 
+            print(f"Concept: {row.concept} || Synonym: {row.synonym}")
+
+
+def sparql_query_prerequisite(video_id, annotator_id):
+    user = "luca"
+    password = "vSmAZ6c1ZOg2IEVw"
+
+    client = pymongo.MongoClient(
+        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+
+    db = client.edurell
+    collection = db.graphs
+
+    query = {
+        "annotator_id": annotator_id,
+        "video_id": video_id
+    }
+
+    general_query = {
+        "video_id": video_id
+    }
+
+    #se trova un grafo qualunque con quel video_id, salva il risultato della query
+    if collection.find_one(general_query) is not None:
+        risultato = collection.find_one(general_query)["graph"]
+    #ma se trova il grafo con quel video_id e proprio con quell'annotator_id, sovrascrive risultato
+    if collection.find_one(query) is not None:
+        risultato = collection.find_one(query)["graph"]    
+
+    #se almeno una delle due query è andata a buon fine
+    if risultato is not None:
+        gr = Graph()\
+        .parse(data=json.dumps(risultato), format='json-ld')
+
+        tic = time.time()
+
+        #query per i prerequisiti
+        query2 = """
+            PREFIX oa: <http://www.w3.org/ns/oa#>
+            PREFIX edu: <https://teldh.github.io/edurell#>
+
+            SELECT ?prerequisite_concept ?created ?creator ?prerequisite_type ?target_concept
+            WHERE {
+                    ?concept_prerequisite oa:motivatedBy edu:linkingPrerequisite.
+                    ?concept_prerequisite dcterms:created ?created.
+                    ?concept_prerequisite dcterms:creator ?creator.
+                    ?concept_prerequisite oa:hasBody ?prerequisite_concept.
+                    ?concept_prerequisite skos:note ?prerequisite_type.
+                    ?concept_prerequisite oa:hasTarget ?target.
+                    ?target dcterms:subject ?target_concept.
+                }"""
+
+
+        qres = gr.query(query2)
+
+        toc = time.time()
+
+        #print per i prerequisiti
+        print("Results: - obtained in %.4f seconds" % (toc - tic))
+        for row in qres: 
+            print(f"Prerequisite concept: {row.prerequisite_concept}")
+            print(f"Created: {row.created}")
+            print(f"Creator: {row.creator}")
+            print(f"Prerequisite Type: {row.prerequisite_type}")
+            print(f"Target concept: {row.target_concept}")
+
+
+def sparql_query_definitions(video_id, annotator_id):
+    user = "luca"
+    password = "vSmAZ6c1ZOg2IEVw"
+
+    client = pymongo.MongoClient(
+        "mongodb+srv://"+user+":"+password+"@clusteredurell.z8aeh.mongodb.net/edurell?retryWrites=true&w=majority")
+
+    db = client.edurell
+    collection = db.graphs
+
+    query = {
+        "annotator_id": annotator_id,
+        "video_id": video_id
+    }
+
+    general_query = {
+        "video_id": video_id
+    }
+
+    #se trova un grafo qualunque con quel video_id, salva il risultato della query
+    if collection.find_one(general_query) is not None:
+        risultato = collection.find_one(general_query)["graph"]
+    #ma se trova il grafo con quel video_id e proprio con quell'annotator_id, sovrascrive risultato
+    if collection.find_one(query) is not None:
+        risultato = collection.find_one(query)["graph"]    
+
+    #se almeno una delle due query è andata a buon fine
+    if risultato is not None:
+        gr = Graph()\
+        .parse(data=json.dumps(risultato), format='json-ld')
+
+        tic = time.time()
+
+        # Seleziona i concetti che sono spiegati nel video
+        query1 = """
+            PREFIX oa: <http://www.w3.org/ns/oa#>
+            PREFIX edu: <https://teldh.github.io/edurell#>
+            PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+            SELECT ?explained_concept ?created ?creator ?description_type
+            WHERE {
+                    ?concept_definition oa:motivatedBy oa:describing.
+                    ?concept_definition dcterms:created ?created.
+                    ?concept_definition dcterms:creator ?creator.
+                    ?concept_definition oa:hasBody ?explained_concept.
+                    ?concept_definition skos:note ?description_type.
+                    ?concept_definition oa:hasTarget ?target.
+                    ?target oa:hasSelector ?selector.
+                    ?selector oa:hasStartSelector ?startSelector
+
+                }"""
+
+
+        qres = gr.query(query1)
+
+        toc = time.time()
+        
+        #print per le definizioni
+        print("Results: - obtained in %.4f seconds" % (toc - tic))
+        for row in qres:
+            print(f"Explained concept: {row.explained_concept}")
+            print(f"Created: {row.created}")
+            print(f"Creator: {row.creator}")
+            print(f"Description Type: {row.description_type}")
+
+
+
+
 if __name__ == '__main__':
+
+    print("***** EDURELL - Video Augmentation: main.py::__main__: Inizio ******")
+
+    
+
+    print("***** EDURELL - Video Augmentation: main.py::__main__: Fine ******")
+
     app.run(debug=True)
 
 

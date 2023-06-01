@@ -7,15 +7,15 @@ import './Popup.css'
  */
 export default class Popup extends React.Component{
 
-    channel = new BroadcastChannel('react-connect'); //create a boradcast channel
+    channel = new BroadcastChannel('react-connect'); //create a broadcast channel
+
 
     render(){
-        let temp = [];
         return(this.props.visible &&
             <div className="popup" style={{left: `${this.props.x}px`, top: `${this.props.y}px`, display: 'inline-block'}}>
                 { this.props.popupMap && Object.keys(this.props.popupMap).sort().map((word, id) =>
                 <ul className="ul-popup">
-                    <li className="popup-li">
+                    <li className="popup-li">                       
                         Concept: <span className="text-concept-popup">{word}</span> 
                     </li>
                     { this.props.popupMap[word]["Definition"].sort().map((time, id) =>
