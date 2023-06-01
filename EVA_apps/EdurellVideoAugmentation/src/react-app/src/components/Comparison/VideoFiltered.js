@@ -51,11 +51,11 @@ const ExpandMore = styled((props) => {
 }));
 const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCatalogExtra, tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator},ref)=>{
     const myref=useRef(null)
-    console.log("VIDEOFILTERED ", idx," ",myref)
+   // console.log("VIDEOFILTERED ", idx," ",myref)
     useEffect(() => {
         
         if(myref.current != null){
-            console.log("VIDEOFILTERED CALLED: ",myref.current)
+            //console.log("VIDEOFILTERED CALLED: ",myref.current)
             setAnchor2(myref.current)
         }
         

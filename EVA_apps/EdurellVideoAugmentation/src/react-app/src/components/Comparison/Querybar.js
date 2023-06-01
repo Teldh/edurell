@@ -132,17 +132,17 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                 <Grid item>
                                     <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
                                 </Grid>
-                                
+                                <Grid item>
+                                    <div style={{zIndex:1, position:"relative"}} ref={ref}>
                                 {
                                     querylist.length > 0 && querylist[0]!=null?
-                                    <Grid item>
-                                    <div style={{zIndex:1, position:"relative"}}>
+                                  
                                        
                                         
                                     <Chip 
                                         clickable={false}
                                         sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px', backgroundColor:"#c6ebdc"}}
-                                        ref={ref}
+                                        
                                         avatar={<TuneRoundedIcon/>}
                                         label={<Typography variant="caption" display="block" gutterBottom sx={{m:0.5}}>
                                         Filters
@@ -161,13 +161,13 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                         }
                                     />
                               
-                                    </div>
-                                </Grid>
+                                   
                                 :
                                 <></>
                                 }
                                
-                            
+                                </div>
+                                </Grid>
                                 
                             </Grid>
                     </Grid>
