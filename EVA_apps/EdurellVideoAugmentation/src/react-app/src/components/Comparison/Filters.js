@@ -137,7 +137,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
         style={{position:"relative"}}
         >
             <Box
-            style={{position:"absolute", top:-30,right:41}}
+            style={{position:"absolute", top:-30,right:38}}
             sx={{width:"110px",height:"300px",backgroundColor:"white"}}/>
         <Grid item sx={{ p:5, borderRadius: '50px 50px 0 0', backgroundColor:"white"}}>
             <Grid 
