@@ -171,7 +171,7 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                 
                             </Grid>
                     </Grid>
-                    <Grid item>
+                    <Grid item sx={{mt:1}}>
                         <Filters ApplyFilters={ApplyFilters} expanded={expanded} />
                     </Grid>
                 </Grid>
@@ -287,12 +287,14 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                     </Grid>
                                     <Grid item>
                                         <Chip
-                                        label={<Typography variant="h6" gutterBottom>
+                                     
+                                        label={<Typography variant="body2" gutterBottom sx={{pt:1}}>
                                        Compare these videos
                                       </Typography>}
                                         onClick={GoToComparisonResult}
                                         onDelete={GoToComparisonResult}
                                         deleteIcon={<EastIcon />}
+                                        sx={{backgroundColor:"white"}}
                                         />
                                     </Grid>
 
