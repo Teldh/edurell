@@ -115,7 +115,7 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
   direction="column"
   justifyContent="center"
   alignItems="center"
-  spacing={2}
+  spacing={0}
 >
         {
             querylist.length>0?<>
@@ -131,17 +131,17 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
                 />
         </Grid>
         <Grid item>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom sx={{mb:0,pb:0,mt:5}}>
             <b>It looks like there are no more videos about this concept :&#40;</b> 
             </Typography>
             
         </Grid>
         <Grid item>
-            <Typography variant="overline" display="block" gutterBottom sx={{color:"black"}}>
+            <Typography variant="caption" display="block" gutterBottom sx={{color:"black",mt:0, pt:0,mb:3}} >
                 Do you need anything else? Take a look at these other concepts from the videos we found!
             </Typography>
         </Grid>
-        <Grid item>
+        <Grid item sx={{mb:5}}>
             {/*INSERT HERE MORE CONCEPTS */}
             {listconcept.map(concept=>
                 
