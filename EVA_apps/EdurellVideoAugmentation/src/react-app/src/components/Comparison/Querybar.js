@@ -110,7 +110,7 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                     <Chip 
                                         
                                         label={<Typography variant="caption" display="block" gutterBottom>
-                                            <b>Aiuto</b>
+                                            <b>Help</b>
                                             </Typography>}
                                         deleteIcon={<HelpIcon sx={{color:grey[50]}}/>}
                                         onClick={openTutorial}
@@ -145,7 +145,7 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                         ref={ref}
                                         avatar={<TuneRoundedIcon/>}
                                         label={<Typography variant="caption" display="block" gutterBottom sx={{m:0.5}}>
-                                        Filtri
+                                        Filters
                                     </Typography>} 
                                         onClick={handleExpandClick}
                                         onDelete={handleExpandClick}
@@ -224,19 +224,19 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                             videos.length >1?
                                             <>
                                                 <Typography variant="body2" display="block" gutterBottom>
-                                                    Hai selezionato tutti i
+                                                    Did you pick all of the
                                                 </Typography>
                                                 <Typography variant="body2" display="block" gutterBottom>
-                                                    video che ti interessano?
+                                                    videos you are interested in?
                                                 </Typography>
                                             </>
                                             :
                                             <>
                                                 <Typography variant="body2" display="block" gutterBottom sx={{pb:0, mb:0}}>
-                                                    Seleziona almeno un altro 
+                                                    <b>Choose</b> at least <b>one more</b>
                                                 </Typography>
                                                 <Typography variant="body2" display="block" gutterBottom sx={{pt:0, mt:0}}>
-                                                    video per confrontarli
+                                                    <b>video</b> to compare them
                                                 </Typography>
                                             </>
                                         }
@@ -246,7 +246,7 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                         <Chip
                                         disabled={videos.length>1?false:true}
                                         label={<Typography variant="body2" gutterBottom sx={{pt:1}}>
-                                       Vai al confronto
+                                       Compare these videos
                                       </Typography>}
                                         onClick={GoToComparisonResult}
                                         onDelete={GoToComparisonResult}
@@ -279,16 +279,16 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                     </Grid>
                                     <Grid item>
                                         <Typography variant="body2" display="block" gutterBottom>
-                                            Hai raggiunto il <b>numero</b> 
+                                            You reached the <b>max</b> 
                                         </Typography>
                                         <Typography variant="body2" display="block" gutterBottom>
-                                            <b>massimo</b> di video selezionabili
+                                            <b>number</b> of comparable videos
                                         </Typography>
                                     </Grid>
                                     <Grid item>
                                         <Chip
                                         label={<Typography variant="h6" gutterBottom>
-                                       Vai al confronto
+                                       Compare these videos
                                       </Typography>}
                                         onClick={GoToComparisonResult}
                                         onDelete={GoToComparisonResult}
