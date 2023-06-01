@@ -104,7 +104,9 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                             justifyContent="center"
                             alignItems="center"
                             >
-                                <Grid item>
+                                {
+                                    searchClicked?
+                                    <Grid item>
                                     <Chip 
                                         
                                         label={<Typography variant="caption" display="block" gutterBottom>
@@ -121,18 +123,25 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                         
                               
                                 </Grid>
+                                :
+                                <></>
+                                }
+                                
                             
                                
                                 <Grid item>
                                     <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
                                 </Grid>
                                 
-                                <Grid item>
-                                    <div >
+                                {
+                                    searchClicked?
+                                    <Grid item>
+                                    <div style={{zIndex:1, position:"relative"}}>
                                        
                                         
                                     <Chip 
-                                        sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px'}}
+                                        clickable={false}
+                                        sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px', backgroundColor:"#c6ebdc"}}
                                         ref={ref}
                                         avatar={<TuneRoundedIcon/>}
                                         label={<Typography variant="caption" display="block" gutterBottom sx={{m:0.5}}>
@@ -154,6 +163,10 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                               
                                     </div>
                                 </Grid>
+                                :
+                                <></>
+                                }
+                               
                             
                                 
                             </Grid>

@@ -127,14 +127,18 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
         
        
 
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <Collapse in={expanded} timeout={0} unmountOnExit>
         <Grid
         container
         direction="column"
         justifyContent="center"
         alignItems="center"
         id="TWO COLUMN ONE IS FILTERS LOWER IS BUTTON"
+        style={{position:"relative"}}
         >
+            <Box
+            style={{position:"absolute", top:-34,right:10.55}}
+            sx={{width:"103px",height:"300px",backgroundColor:"white"}}/>
         <Grid item sx={{ p:5, borderRadius: '50px 50px 0 0', backgroundColor:"white"}}>
             <Grid 
             container
