@@ -881,7 +881,11 @@ def ConceptVideoData(video_id, concept_searched):
     dbsparql = client.edurell
     # retrieve from mongodb collection=graphs the all elements with the value of video_id
     collection = dbsparql.graphs
-    
+
+    f = open("out.txt", "a")
+    f.write("chjeck: "+str(client)+" "+str(dbsparql))
+    f.close()
+
     # initialize the dicitonary where we save our results
     result = {
         'video_id':video_id,
@@ -905,7 +909,7 @@ def ConceptVideoData(video_id, concept_searched):
     cursor = collection.find({"video_id":video_id})
     optiongraph = 2
     gr=Graph()
-
+    
 
     if optiongraph == 1:
         ## 1. search newest annotation
@@ -971,6 +975,7 @@ def ConceptVideoData(video_id, concept_searched):
             # initialize conceptVocabulary for the query
             
             gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+        
 
     ## --------------------------------------------------------------------------------------------------------------------------------------
     ## ---------------------------------------------------------QUERYCREATED-----------------------------------------------------------------
@@ -991,6 +996,7 @@ def ConceptVideoData(video_id, concept_searched):
                         ?c_id skos:prefLabel ?c_selected.
                 }
     """
+
     qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
     #print("query created")
     #print("qres: ",len(qres))
@@ -1060,6 +1066,7 @@ def ConceptVideoData(video_id, concept_searched):
                         ?target dcterms:subject ?c_id.
                         ?preconceptIRI skos:prefLabel ?preconcept.
                         ?who skos:note ?prenote.
+                        
                 }
 
 

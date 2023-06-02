@@ -379,11 +379,33 @@ export default function Comparison(){
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"].length == 0){
             return true;
            }
+           let list_pre = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"]
+           let maxnum=list_pre.length;
+           let countnum=0;
+           for(let i=0;i<maxnum; i++){
+              if (checker(video.extracted_keywords,list_pre[i])){
+                countnum++;
+              }
+           }
+           if(countnum/maxnum >= 0.8){
+            return true;
+           }
            return checker(video.extracted_keywords, catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"])});
        }else if(listfilters[0] == "expert"){
          catalogfiltered = catalogfiltered.filter(video=>{
          //  console.log("EXPERT ",video.extracted_keywords," ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id));
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"].length == 0){
+            return false;
+           }
+           let list_pre = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"]
+           let maxnum=list_pre.length;
+           let countnum=0;
+           for(let i=0;i<maxnum; i++){
+              if (checker(video.extracted_keywords,list_pre[i])){
+                countnum++;
+              }
+           }
+           if(countnum/maxnum >= 0.8){
             return false;
            }
            return !checker(video.extracted_keywords, catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"]);
