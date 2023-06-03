@@ -206,6 +206,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                                 <Popover 
                                                 sx={{
                                                     pointerEvents: 'none',
+                                                
                                                 }}
                                                 open={open1}
                                                 anchorEl={anchorEl1}
@@ -220,7 +221,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                                 onClose={handlePopoverClose1}
                                                 disableRestoreFocus
                                                 >
-                                                <Box sx={{ width: '100%', maxWidth: 200 }}>
+                                                <Box sx={{ width: '100%', maxWidth: 200, p:2, border:2,borderColor:"#ffa825" }}>
                                                     <Typography variant="body2" gutterBottom>
                                                     In videos for <b>beginners</b> you are more likely to find a definition for the concept you looked up and its prerequsiites.
                                                     </Typography>
@@ -293,7 +294,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                                 onClose={handlePopoverClose2}
                                                 disableRestoreFocus
                                                 >
-                                                <Box sx={{ width: '100%', maxWidth: 200 }}>
+                                                <Box sx={{ width: '100%', maxWidth: 200,p:2, border:2,borderColor:"#ffa825"  }}>
                                                     <Typography variant="body2" gutterBottom>
                                                     <b>A basic</b> explanation would go straight to the point.
                                                     </Typography>
@@ -367,7 +368,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                                                 onClose={handlePopoverClose3}
                                                 disableRestoreFocus
                                                 >
-                                                <Box sx={{ width: '100%', maxWidth: 200 }}>
+                                                <Box sx={{ width: '100%', maxWidth: 200 ,p:2, border:2,borderColor:"#ffa825" }}>
                                                     <Typography variant="body2" gutterBottom>
                                                     Choose videos <b>with slides</b> if you like video lectures showing slides of what is explained
                                                     </Typography>

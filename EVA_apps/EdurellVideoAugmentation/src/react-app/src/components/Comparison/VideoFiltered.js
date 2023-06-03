@@ -743,7 +743,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                                             onClose={handlePopoverClose}
                                                                             disableRestoreFocus
                                                                             >
-                                                                            <Box sx={{ width: '100%', maxWidth: 200 }}>
+                                                                            <Box sx={{ width: '100%', maxWidth: 200,p:2, border:2,borderColor:"#ffa825"  }}>
                                                                                 <Typography variant="body2" gutterBottom>
                                                                                 This concept map is a visual representation of how concepts in the video relate to others.
 
