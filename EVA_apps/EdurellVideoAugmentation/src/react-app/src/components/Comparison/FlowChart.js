@@ -64,7 +64,13 @@ const getLayoutedElements = (nodes, edges, direction = 'TB') => {
 
 */
 
-const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
+const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
+   //a function used to check if small is included into big
+   let checker = (big, small) => {
+    //console.log("checker: ",big," ",small)
+    return small.every(v => big.includes(v));
+  };
+
   const reactFlowInstance = useReactFlow();
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
@@ -242,7 +248,22 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
     let flowidx=0
 
     if(conceptExtra["list_preconcept"].length > 0){
-        for(let i=0; i<conceptExtra["list_preconcept"].length; i++){
+
+        //compute the percentage of prerequisite if explained or not
+        let list_pre = conceptExtra["list_preconcept"]
+        let maxnum=list_pre.length;
+        let countnum=0;
+        for(let i=0;i<maxnum; i++){
+          if (checker(catalog[0].extracted_keywords,[list_pre[i]])){
+            countnum++;
+          }
+        }
+
+        //left: if for 80% prerequisite explained in the video. right: if the prerequisite isnt in the extracted concepts = oa:description = not explained
+        if((countnum/maxnum >= 0.8) || !checker(catalog[0].extracted_keywords, conceptExtra["list_preconcept"])){
+
+        }else{
+          for(let i=0; i<conceptExtra["list_preconcept"].length; i++){
             prenodes=[...prenodes,{
                 id:(flowidx++).toString(),
                 //id:conceptExtra["list_preconcept"][i],
@@ -252,7 +273,9 @@ const LayoutFlow = ({concept, conceptExtra, idx, graphcontrol}) => {
                 style:{backgroundColor:"white", borderColor:graphcontrol=="three"?"grey":colorPick[idx], borderWidth:"5px",fontWeight:"bold"}
             }];
             prenodesnote=[...prenodesnote,conceptExtra["list_prenotes"][i]]
+          }
         }
+        
     }
 
     if(conceptExtra["list_derivatedconcept"].length>0){
