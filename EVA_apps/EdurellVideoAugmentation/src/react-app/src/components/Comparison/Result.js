@@ -460,7 +460,7 @@ export default function Result(){
                                                 <ExpandMoreIcon />
                                             </ExpandMore1>}
                                         label={<Typography variant="caption" display="block" gutterBottom sx={{mt:1}}>
-                                        Key
+                                        Legend
                                     </Typography>} 
                                         onClick={handleClick1}
                                        
@@ -932,7 +932,7 @@ export default function Result(){
                                                 <ExpandMoreIcon />
                                             </ExpandMore2>}
                                         label={<Typography variant="caption" display="block" gutterBottom sx={{mt:1}}>
-                                        Key
+                                        Legend
                                     </Typography>} 
                                         onClick={handleClick2}
                                        
@@ -1414,7 +1414,7 @@ export default function Result(){
                                                 <ExpandMoreIcon />
                                             </ExpandMore3>}
                                         label={<Typography variant="caption" display="block" gutterBottom sx={{mt:1}}>
-                                        Key
+                                        Legend
                                     </Typography>} 
                                         onClick={handleClick3}
                                        
