@@ -777,7 +777,13 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                         >
                                                             <Grid item sx={{width:"100%", height:"100%"}}>
                                                                 <ReactFlowProvider>
-                                                                    <FlowChartSmall concept={querylist[0]} conceptExtraRaw={conceptextra}/>
+                                                                    {
+                                                                        conceptextra[0]!=undefined?
+                                                                        <FlowChartSmall catalog={catalog.filter(video=>video.video_id == conceptextra[0].video_id)} concept={querylist[0]} conceptExtraRaw={conceptextra}/>
+                                                                        :
+                                                                        <></>
+                                                                    }
+                                                                    
                                                                 </ReactFlowProvider>
                                                             </Grid>
                                                         </Grid>

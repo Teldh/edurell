@@ -873,6 +873,10 @@ def GetVideoTypeAndPrerequisite():
 @app.route('/api/ConceptVideoData/<video_id>/<concept_searched>')
 @auth.login_required
 def ConceptVideoData(video_id, concept_searched):
+
+
+
+
     user = "luca"
     password = "vSmAZ6c1ZOg2IEVw"
     #pymongo db config for query sparql
@@ -882,8 +886,6 @@ def ConceptVideoData(video_id, concept_searched):
     # retrieve from mongodb collection=graphs the all elements with the value of video_id
     collection = dbsparql.graphs
 
-    f = open("out.txt", "a")
-    f.write("\n\nSTART\n\n"+str(client)+" "+str(dbsparql)+"\n\n")
     
 
     # initialize the dicitonary where we save our results
@@ -975,7 +977,7 @@ def ConceptVideoData(video_id, concept_searched):
             # initialize conceptVocabulary for the query
             
             gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
-        f.write("\n\n"+str(gr.serialize(format="ntriples"))+"\n\n")
+        #f.write("\n\n"+str(gr.serialize(format="json-ld"))+"\n\n")
         
 
     ## --------------------------------------------------------------------------------------------------------------------------------------
@@ -997,8 +999,8 @@ def ConceptVideoData(video_id, concept_searched):
                         ?c_id skos:prefLabel ?c_selected.
                 }
     """
-    f.write("\n\n"+str(qr)+" "+str(gr)+" \n\n")
-    f.close()
+   # f.write("\n\n"+str(qr)+" "+str(gr)+" \n\n")
+   # f.close()
     qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
     #print("query created")
     #print("qres: ",len(qres))
