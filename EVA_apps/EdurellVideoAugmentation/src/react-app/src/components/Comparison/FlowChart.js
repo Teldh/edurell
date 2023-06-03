@@ -291,12 +291,12 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
             postnodesnote=[...postnodesnote,conceptExtra["list_postnotes"][i]]
         }    
     }
-
+    console.log("graphcontrol: ",graphcontrol)
     initialNodes=[...initialNodes, {
         id:"conceptSelected",
         data:{label:concept},
         position,
-        style:{backgroundColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], color:"white", borderColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], fontWeight:"bold"}
+        style:{backgroundColor:graphcontrol=="two"?"grey":colorPick[idx], color:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx], fontWeight:"bold"}
     }]
 
     for(let i=0; i<prenodes.length; i++){
@@ -389,7 +389,7 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
           }else if(node.type == "output"){
             node.style={backgroundColor:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx+4], borderWidth:"5px",fontWeight:"bold"}
           }else{
-            node.style={backgroundColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], color:"white", borderColor:graphcontrol=="two"||graphcontrol=="three"?"grey":colorPick[idx], fontWeight:"bold"}
+            node.style={backgroundColor:graphcontrol=="two"?"grey":colorPick[idx], color:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx], fontWeight:"bold"}
           }
           return node
         })
