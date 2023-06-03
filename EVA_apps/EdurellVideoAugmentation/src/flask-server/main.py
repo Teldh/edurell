@@ -883,8 +883,8 @@ def ConceptVideoData(video_id, concept_searched):
     collection = dbsparql.graphs
 
     f = open("out.txt", "a")
-    f.write("chjeck: "+str(client)+" "+str(dbsparql))
-    f.close()
+    f.write("\n\nSTART\n\n"+str(client)+" "+str(dbsparql)+"\n\n")
+    
 
     # initialize the dicitonary where we save our results
     result = {
@@ -975,6 +975,7 @@ def ConceptVideoData(video_id, concept_searched):
             # initialize conceptVocabulary for the query
             
             gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+        f.write("\n\n"+str(gr.serialize(format="ntriples"))+"\n\n")
         
 
     ## --------------------------------------------------------------------------------------------------------------------------------------
@@ -996,7 +997,8 @@ def ConceptVideoData(video_id, concept_searched):
                         ?c_id skos:prefLabel ?c_selected.
                 }
     """
-
+    f.write("\n\n"+str(qr)+" "+str(gr)+" \n\n")
+    f.close()
     qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
     #print("query created")
     #print("qres: ",len(qres))
