@@ -97,6 +97,10 @@ export default function Comparison(){
     //list fo filters value. used to filter the videos
     const [comparisonfilter, SetComparisonFilter] = useState([null,null,null,null,null,null,"recent"])
     
+    const handleScroll = (event)=>{
+      console.log(event.target)
+      //document.body.style="overflow-y:auto"
+    }
     //capturing the concept sent from previous page
     useEffect(() => {
       if(location.state != undefined)
@@ -730,7 +734,7 @@ export default function Comparison(){
       }
       
     return(
-        <>
+        <div onWheel={handleScroll}>
         <Tutorial anchor1={anchor1} anchor2={anchor2} open={openTutorial} closeTutorial={closeTutorial}/>
         <ThemeProvider theme={theme}>
         <StyledEngineProvider injectFirst> {/* to override the default style with your custom css */}
@@ -760,7 +764,7 @@ export default function Comparison(){
                 </Typography>
             </Grid>
         </Grid>
-        </>
+        </div>
     );
 }
 

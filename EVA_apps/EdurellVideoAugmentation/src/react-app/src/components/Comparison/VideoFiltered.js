@@ -92,6 +92,13 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
     const handleClickAway=()=>{
         setExpanded(false)
     }
+    const [bottomval,setBottomVal]=useState(0)
+    const handleScroll = (event)=> {
+        console.log("scroll: ", event.deltaY)
+       
+       // setBottomVal(bottomval=>bottomval+event.deltaY*0.1)
+       // document.body.style="overflow-y:hidden"
+    }
     //console.log("videofitlered ",conceptextra, " ", conceptextra[0])
     let duration=0
     let durationSeconds =0;
@@ -379,9 +386,10 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
             alignItems="center"
             id="1 COLONNA CENTRALE DATI"
             sx={{p:5}}
+            
             >
                 <Grid item xs={1}></Grid>
-                <Grid item sx={{backgroundColor:"white", boxShadow:10, p:3}}>
+                <Grid id="FIXED ELEMENT COLLAPSE AO" item sx={{backgroundColor:"white", boxShadow:10, p:3, width:"auto",height:"500px",overflow:"auto"}} onWheel={handleScroll}>
                     <Grid
                     container
                     direction="column"
@@ -394,10 +402,10 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                             container
                             direction="row"
                             justifyContent="center"
-                            alignItems="center"
+                            alignItems="flex-start"
                             id="3 SX VIDEO, DX DATI"
                             >
-                                <Grid item sx={{m:0.5}}>
+                                <Grid item sx={{m:0.5,mt:12}}>
                                     <img src={"http://img.youtube.com/vi/"+imageurl+"/mqdefault.jpg"} alt={titleurl} width="100%" height="auto"/>
                                 </Grid>
                                 <Grid item sx={{m:0.5}}>
@@ -771,7 +779,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                         justifyContent="center"
                                                         alignItems="center"
                                                         sx={{
-                                                            width:"1000px",
+                                                            width:"100%",
                                                             height:"500px"
                                                         }}
                                                         >
