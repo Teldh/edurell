@@ -14,10 +14,19 @@ import {TokenContext} from '../account-management/TokenContext';
 import { useContext, forwardRef, useState,useEffect } from 'react';
 import Modal from '@mui/material/Modal';
 import Popover from '@mui/material/Popover';
-
+import { useHistory } from "react-router-dom";
+import { FaWindows } from 'react-icons/fa';
 
 const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, catalog,loading, querylist, catalogoriginal}, ref)=>{
-    
+    const history = useHistory();
+    function SendData(value){
+        console.log("historypush: ",value);
+        history.push({
+            pathname: '/comparisonSearch',
+            state: { data: value },
+        });
+        window.location.reload()
+    }
     
     const context = useContext(TokenContext);
     //console.log("listvideo querylist ",querylist)
@@ -131,8 +140,8 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
                 />
         </Grid>
         <Grid item>
-            <Typography variant="h6" gutterBottom sx={{mb:0,pb:0,mt:5}}>
-            <b>It looks like there are no more videos about this concept :&#40;</b> 
+            <Typography variant="body2" gutterBottom sx={{mb:0,pb:0,mt:5}}>
+            It looks like there are no more videos about this concept :&#40;
             </Typography>
             
         </Grid>
@@ -145,7 +154,7 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
             {/*INSERT HERE MORE CONCEPTS */}
             {listconcept.map(concept=>
                 
-                <Chip label={concept} size="small" sx={{m:0.5, color:"grey"}} onClick={openhelper}/>
+                <Chip label={concept} size="small" sx={{m:0.5, color:"grey"}} onClick={()=>SendData(concept)}/>
                 )}
         </Grid>
         </>

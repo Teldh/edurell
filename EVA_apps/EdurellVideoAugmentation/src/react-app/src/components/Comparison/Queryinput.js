@@ -16,7 +16,7 @@ import { ContextComparison } from './ContextComparison';
 export default function Queryinput({listconcepts,AddQueryElement, nomatch, location}){
     const options = listconcepts;//['Option 1', 'Option 2', 'Option 3', 'Option 4'];
     const [valac, SetValac] = useState([location]);
-
+    console.log("queryiunpout: ",location)
   
     const setSearchFilterClicked = useContext(ContextComparison)[2];
 

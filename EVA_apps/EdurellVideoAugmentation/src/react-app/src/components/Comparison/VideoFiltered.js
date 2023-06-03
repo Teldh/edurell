@@ -355,8 +355,8 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
       <Stack spacing={0}>
                                 
                                 <Skeleton variant="rounded" width={200} height={110} />
-                                <Skeleton variant="text" sx={{ fontSize: '1rem' ,marginTop: 1}} />
-                                <Skeleton variant="text" sx={{ fontSize: '1rem' ,width: "69%"/* xd */}} />
+                                <Skeleton variant="text" sx={{ fontSize: '1rem' ,marginTop: 1, width:"200px"}} />
+                                <Skeleton variant="text" sx={{ fontSize: '1rem' ,width: "150px"/* xd */}} />
                                 
                                 </Stack>
          }
