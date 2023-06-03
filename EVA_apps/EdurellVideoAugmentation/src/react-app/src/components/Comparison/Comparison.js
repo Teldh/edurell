@@ -383,7 +383,7 @@ export default function Comparison(){
            let maxnum=list_pre.length;
            let countnum=0;
            for(let i=0;i<maxnum; i++){
-              if (checker(video.extracted_keywords,[list_pre[i])]){
+              if (checker(video.extracted_keywords,[list_pre[i]])){
                 countnum++;
               }
            }
@@ -401,7 +401,7 @@ export default function Comparison(){
            let maxnum=list_pre.length;
            let countnum=0;
            for(let i=0;i<maxnum; i++){
-              if (checker(video.extracted_keywords,[list_pre[i])]){
+              if (checker(video.extracted_keywords,[list_pre[i]])){
                 countnum++;
               }
            }
