@@ -20,6 +20,7 @@ ChartJS.register(
     Legend
 )
 
+//secondRaw is in seconds, and transform it in a string of format hh:mm:ss
 function SecondsToTime(secondRaw){
     let duration = secondRaw
     let durationSeconds = duration;
@@ -32,7 +33,7 @@ function SecondsToTime(secondRaw){
 }
 
 export default function Barro({catalog, catalogExtra, graphcontrol}){
-    
+    //dataset to display 
     const data = {
         labels: catalogExtra.map(video=>(video.video_slidishness*100).toString()+"%"),
         datasets:[
@@ -65,6 +66,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
         ]
     }
 
+    //options to setup and customize the graph
     const options ={
        scales:{
         x:{

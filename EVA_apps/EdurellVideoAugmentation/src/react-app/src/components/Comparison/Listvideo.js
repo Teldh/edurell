@@ -17,10 +17,14 @@ import Popover from '@mui/material/Popover';
 import { useHistory } from "react-router-dom";
 import { FaWindows } from 'react-icons/fa';
 
+//this component is used for the layout of all video available or filtered.
+//it uses VideoAvailable component when you dont use the search bar
+//it uses videoFiltered when you search for a concept
 const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, catalog,loading, querylist, catalogoriginal}, ref)=>{
+    
+    //At below of the page you will notice the list of concepts clickable. This will update the Searchbar
     const history = useHistory();
     function SendData(value){
-        console.log("historypush: ",value);
         history.push({
             pathname: '/comparisonSearch',
             state: { data: value },
@@ -29,18 +33,20 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
     }
     
     const context = useContext(TokenContext);
-    //console.log("listvideo querylist ",querylist)
+
+    //used for popup tutorial. not anymore
     const [open,setOpen] = useState(false)
     function openhelper(){
         setOpen(true)
     }
-    
     function closehelper(){
         setOpen(false)
     }
+
+    //used to display more concepts as buttons at bottom of page
     const[listconcept,setListConcept]=useState([])
     useEffect(() => {
-        if (querylist.length > 0 && querylist[0]!=null) { // It's used here...
+        if (querylist.length > 0 && querylist[0]!=null) { 
           
             let newlistconcepts=[]
             catalog.map(video=>{
@@ -50,15 +56,8 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
                     if(!newlistconcepts.includes(concept)){
                         newlistconcepts = [...newlistconcepts, concept];
                     }
-  
-                  
                 })
-  
-                
-        
             })
-          
-                    
             setListConcept(newlistconcepts);
         }
       }, [querylist]);
@@ -82,9 +81,7 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
               :
             querylist.length > 0 && querylist[0]!=null?
             catalog.map((video,idx)=>{
-                //console.log("LISTVIDEO: ",catalogExtra)
                 let singlecatExtra = catalogExtra.filter(extra =>video.video_id == extra.video_id)
-                //console.log(video.video_id," extra ",singlecatExtra)
                 return(<>
                     {
                         idx==0?

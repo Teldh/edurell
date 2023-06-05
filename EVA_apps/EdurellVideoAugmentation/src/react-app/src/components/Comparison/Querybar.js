@@ -36,7 +36,7 @@ const ExpandMore = styled((props) => {
     }),
 }));
 
-
+//this is the whole component before the listvideo component. It holds the searchbar with the filters and tutorial and the video selected for comparison
 const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}, ref) => {
     const [expanded, setExpanded] = useState(false);
     const handleExpandClick = () => {
@@ -45,6 +45,9 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
     
     const listConcepts = useContext(ContextComparison)[3];
     const history = useHistory();
+
+    //this function is used to go to the next page for comparisonresult
+    //because we are moving to another route, page, we need to send the information to the other page
     function GoToComparisonResult(){
         
         history.push({
@@ -70,6 +73,7 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
         });
     }
 
+    
     let videos = listvideo.map((video,index) =>
     
         <>

@@ -26,7 +26,6 @@ import 'reactflow/dist/style.css';
 
 const LayoutFlow = ({catalog, concept, conceptExtraRaw}) => {
   let checker = (big, small) => {
-    //console.log("checker: ",big," ",small)
     return small.every(v => big.includes(v));
   };
     const conceptExtra = conceptExtraRaw[0]

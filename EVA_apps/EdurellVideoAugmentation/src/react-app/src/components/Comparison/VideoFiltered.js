@@ -51,18 +51,24 @@ const ExpandMore = styled((props) => {
       duration: theme.transitions.duration.shortest,
     }),
 }));
+
+
+//After you select a concept inside the searchbar this will substitute the videoavailable
+//this component has more information about the video and you can add or remove for comparison
+//and if you click on it, it will show another window with further information and a mini flowchart
 const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCatalogExtra, tottime, conceptextra, titleurl,imageurl,idxurl,concepts,creator},ref)=>{
+    
+    //used to retrieve anchor for Tutorial component
     const myref=useRef(null)
-    console.log("VIDEOFILTERED: ",conceptextra)
-   // console.log("VIDEOFILTERED ", idx," ",myref)
     useEffect(() => {
         
         if(myref.current != null){
-            //console.log("VIDEOFILTERED CALLED: ",myref.current)
             setAnchor2(myref.current)
         }
         
       }, [myref.current]);
+
+
     const [expanded2, setExpanded2] = useState(false);
     const handleExpandClick2 = () => {
         setExpanded2(!expanded2);
@@ -84,7 +90,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
     };
     const opens = Boolean(anchorEl);
 
-    //const title="Kurzesgast - The power of loveKurzesgast ";
+
     const handleExpandClick = () => {
       setExpanded(!expanded);
     };
@@ -96,10 +102,11 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
     const handleScroll = (event)=> {
         console.log("scroll: ", event.deltaY)
        
-       // setBottomVal(bottomval=>bottomval+event.deltaY*0.1)
-       // document.body.style="overflow-y:hidden"
+
     }
-    //console.log("videofitlered ",conceptextra, " ", conceptextra[0])
+
+
+    //to display the raw data information from DB into seconds or hh:mm:ss format
     let duration=0
     let durationSeconds =0;
     let approfondimenti=0
@@ -108,19 +115,14 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
     let slidishness=0
 
     if(conceptextra[0]!=undefined){
-
         slidishness = (conceptextra[0].video_slidishness*100)+"%"
     }
     if(tottime != undefined){
         let hours = Math.floor(tottime /3600)
-        //console.log("hour: ",hours," remain: ",Math.abs(hours - (tottime /3600)))
         let remainminutes = Math.abs(hours - (tottime /3600))
         let minutes = Math.floor(remainminutes * 60);
-        //console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
         let seconds = Math.abs(minutes - (remainminutes * 60))
         seconds = seconds*60
-        //console.log("seconds: ",seconds);
-        //console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
         duratatot = (hours<10?("0"+hours):hours).toString()+":"+(minutes<10?("0"+minutes):minutes).toString()+":"+(Math.floor(seconds)<10?("0"+Math.floor(seconds)):Math.floor(seconds)).toString()
     }
 
@@ -133,23 +135,15 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                 let [hours1, minutes1, seconds1] = time1.split(":");
                 seconds1=Math.floor(seconds1)
                 seconds1=seconds1+hours1*3600
-                //console.log("hours1: ",hours1*3600," ",seconds1)
                 seconds1=seconds1+minutes1*60
-                //console.log("minutes: ",minutes1*60," ",seconds1)
         
                 let [hours2, minutes2, seconds2] = time2.split(":");
                 seconds2=Math.floor(seconds2)
                 seconds2=seconds2+hours2*3600
-                //console.log("hours2: ",hours2*3600," ",seconds2)
                 seconds2=seconds2+minutes2*60
-                //console.log("hours2: ",minutes2*60," ",seconds2)
         
                 let resultseconds = Math.abs(seconds2-seconds1);
-                //console.log("difference: ",resultseconds);
-            
-        
-        
-            
+    
                 duration = duration+resultseconds;
             }
             
@@ -157,45 +151,30 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
 
         durationSeconds = duration;
         let hours = Math.floor(duration /3600)
-        //console.log("hour: ",hours," remain: ",Math.abs(hours - (duration /3600)))
         let remainminutes = Math.abs(hours - (duration /3600))
         let minutes = Math.floor(remainminutes * 60);
-        //console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
         let seconds = Math.abs(minutes - (remainminutes * 60))
         seconds = seconds*60
-       /// console.log("seconds: ",seconds);
-        //console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
-        //console.log("0"+hours+" "+(minutes<10?("0"+minutes):minutes).toString())
         duration = (hours<10?("0"+hours):hours).toString()+":"+(minutes<10?("0"+minutes):minutes).toString()+":"+(Math.floor(seconds)<10?("0"+Math.floor(seconds)):Math.floor(seconds)).toString()
     }
 
     if(conceptextra[0]!=undefined&& conceptextra[0].concept_starttime.length>0){
-      //  console.log("computeCE_on_videofiltered: ",conceptextra[0].concept_starttime," ",conceptextra[0].concept_endtime," ",conceptextra[0].explain," ",conceptextra[0].video_id)
         for(let i=0; i<conceptextra[0].concept_starttime.length;i++){
             if(conceptextra[0].explain[i] == "conceptExpansion"){
-               // console.log("computeCE_on_videofiltered_dentro: ",conceptextra[0].concept_starttime[i]," ",conceptextra[0].concept_endtime[i]," ",conceptextra[0].explain[i])
                 const time1 = conceptextra[0].concept_endtime[i] .split("^^")[0];
                 const time2 = conceptextra[0].concept_starttime[i] .split("^^")[0];
         
                 let [hours1, minutes1, seconds1] = time1.split(":");
                 seconds1=Math.floor(seconds1)
                 seconds1=seconds1+hours1*3600
-                //console.log("hours1: ",hours1*3600," ",seconds1)
                 seconds1=seconds1+minutes1*60
-                //console.log("minutes: ",minutes1*60," ",seconds1)
         
                 let [hours2, minutes2, seconds2] = time2.split(":");
                 seconds2=Math.floor(seconds2)
                 seconds2=seconds2+hours2*3600
-                //console.log("hours2: ",hours2*3600," ",seconds2)
                 seconds2=seconds2+minutes2*60
-                //console.log("hours2: ",minutes2*60," ",seconds2)
         
                 let resultseconds = Math.abs(seconds2-seconds1);
-                //console.log("difference: ",resultseconds);
-            
-        
-        
             
                 approfondimenti = approfondimenti+resultseconds;
             }
@@ -204,14 +183,10 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
 
         approfondimentiSeconds = approfondimenti;
         let hours = Math.floor(approfondimenti /3600)
-        //console.log("hour: ",hours," remain: ",Math.abs(hours - (approfondimenti /3600)))
         let remainminutes = Math.abs(hours - (approfondimenti /3600))
         let minutes = Math.floor(remainminutes * 60);
-        //console.log("minutes: ",minutes," remain: ",Math.abs(minutes - (remainminutes * 60)))
         let seconds = Math.abs(minutes - (remainminutes * 60))
         seconds = seconds*60
-       // console.log("seconds: ",seconds);
-       // console.log("Differenza di tempo in minuti:", hours,":",minutes,":",seconds);
         approfondimenti = (hours<10?("0"+hours):hours).toString()+":"+(minutes<10?("0"+minutes):minutes).toString()+":"+(Math.floor(seconds)<10?("0"+Math.floor(seconds)):Math.floor(seconds)).toString()
     }
 

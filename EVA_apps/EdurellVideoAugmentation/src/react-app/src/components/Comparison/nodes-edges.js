@@ -1,7 +1,7 @@
 import ReactFlow, { Background, MarkerType } from 'reactflow';
 const position = { x: 0, y: 0 };
 const edgeType = 'step';
-
+//NOT USED ANYMORE
 export const initialNodes = [
   {
     id: '1',

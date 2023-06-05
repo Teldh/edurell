@@ -87,13 +87,15 @@ function DP(color = 'black') {
   
 
   
-
+//the page after you select the video to compare and press the button.
+//this is the page for the comparison result
+//it has 3 graphs and uses BarroGraph.js, BarroGraph2.js and FlowChart.js
 export default function Result(){
-  
+    
+    //at the top there is another search bar. Click X to go back.
     const history = useHistory();
     let location = useLocation();
     function SendData(value){
-        console.log("historypush: ",value);
         history.push({
             pathname: '/comparisonSearch',
             state: { data: value },

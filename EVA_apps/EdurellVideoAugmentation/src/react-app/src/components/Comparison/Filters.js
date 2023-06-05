@@ -55,14 +55,14 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
     },
 },
 }));
-  
+ 
+//its the filter window that appears after you press the filter button
 const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
 
    
     const [anchorEl1, setAnchorEl1] = useState(null);
     const handlePopoverOpen1 = (event) => {
         setAnchorEl1(event.currentTarget);
-        console.log("FILTERSANCHOR: ",event.currentTarget)
     };
     const handlePopoverClose1 = () => {
         setAnchorEl1(null);
@@ -591,9 +591,6 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                 <Grid item xs >
                 </Grid>
                 <Grid item xs="auto" sx={{p: 2 ,backgroundColor:'#B798f8', borderRadius:'50px 0 50px 0'}} onClick={()=>{
-                    
-                    console.log("filtri: ",[alignment1,alignment2,alignment3,alignment4,alignment5,alignment6,radiog]);
-                    console.log("send those baddies to daddy")
                     ApplyFilters([alignment1,alignment2,alignment3,alignment4,alignment5,alignment6,radiog])
                 }}>
                     <Grid

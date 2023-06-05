@@ -6,6 +6,7 @@ import { useContext,useState,useEffect, useRef } from 'react';
 import Draggable, {DraggableCore} from "react-draggable";
 export const background = "#272b4d"
 
+//NOT USED ANYMORE
 export default function Example({ width, height, concept, conceptExtra, idx, graphcontrol}) {
 
     const colorPick=[
