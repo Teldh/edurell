@@ -45,10 +45,7 @@ export default function Comparison(){
       setOpenTutorial(true);
     }
 
-  
-
-
-
+ 
     //list of video selected for comparison
     const [listvideo, setListVideo]= useState([]);
 
@@ -91,6 +88,13 @@ export default function Comparison(){
     const [searchFilterClicked,setSearchFilterClicked] = useState(false);
 
    
+    useEffect(()=>{
+      if(document.cookie == "" && searchFilterClicked){
+        openTutorialFunc()
+        document.cookie = "tutorial=done; expires=Thu, 18 Dec 2100 12:00:00 UTC";
+      }
+    },)
+    
     //capturing the concept sent from previous page
     useEffect(() => {
       if(location.state != undefined)

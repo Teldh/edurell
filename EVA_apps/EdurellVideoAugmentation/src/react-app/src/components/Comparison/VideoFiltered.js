@@ -665,7 +665,13 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                 </Grid>
                                             </Grid>
                                         </Grid>
-                                        <Grid item>
+                                       
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+
+                        <Grid item>
                                             <Box sx={{borderTop: 1,borderBottom: 1, borderColor:"rgb(255,168,37)", m:2}}>
                                             <Grid
                                             container
@@ -684,6 +690,9 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                     id="SX NOME DX FRECCIA PER GIU"
                                                     >
                                                         <Grid item>
+
+                                                        </Grid>
+                                                        <Grid item>
                                                             <Grid
                                                             container
                                                             direction="row"
@@ -691,7 +700,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                             alignItems="center"
                                                             >
                                                                 <Grid item>
-                                                                    <Typography variant="caption" display="block" gutterBottom>
+                                                                    <Typography variant="caption" display="block" gutterBottom sx={{m:0.3}}>
                                                                         Check the concept map
                                                                     </Typography>
                                                                 </Grid>
@@ -775,13 +784,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                             </Grid>
                                             </Box>
                                         </Grid>
-                                    </Grid>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-
-
-
+                                                                    
 
 
 
