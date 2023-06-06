@@ -15,6 +15,7 @@ import ReactFlow, {
   ControlButton,
 
 } from 'reactflow';
+
 import ELK from "elkjs";
 import 'reactflow/dist/style.css';
 
@@ -25,6 +26,7 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
    let checker = (big, small) => {
     return small.every(v => big.includes(v));
   };
+
 
   const reactFlowInstance = useReactFlow();
   const [nodes, setNodes] = useState([]);
@@ -141,7 +143,9 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
   
   };
 
+
   //used to create the tree graph 
+
   const elk = new ELK();
     const elkLayout = (nodes,edges,dir) => {
  
@@ -188,7 +192,9 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
      return elk.layout(graph);
     };
 
+
   //setup the graph first time  
+
   useEffect(()=>{
 
     const position = { x: 0, y: 0 };
@@ -205,6 +211,7 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
     let flowidx=0
 
     if(conceptExtra["list_preconcept"].length > 0){
+
 
         //compute the percentage of prerequisite if explained or not
         let list_pre = conceptExtra["list_preconcept"]
@@ -230,21 +237,25 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
           for(let i=0; i<conceptExtra["list_preconcept"].length; i++){
             prenodes=[...prenodes,{
                 id:(flowidx++).toString(),
+
                 type:'input',
                 data:{label:conceptExtra["list_preconcept"][i]},
                 position,
                 style:{backgroundColor:"white", borderColor:graphcontrol=="three"?"grey":colorPick[idx], borderWidth:"5px",fontWeight:"bold"}
             }];
             prenodesnote=[...prenodesnote,conceptExtra["list_prenotes"][i]]
+
           }
         }
         
+
     }
 
     if(conceptExtra["list_derivatedconcept"].length>0){
         for(let i=0; i<conceptExtra["list_derivatedconcept"].length; i++){
             postnodes=[...postnodes,{
                 id:(flowidx++).toString(),
+
                 type:'output',
                 data:{label:conceptExtra["list_derivatedconcept"][i]},
                 position,
@@ -253,16 +264,20 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
             postnodesnote=[...postnodesnote,conceptExtra["list_postnotes"][i]]
         }    
     }
+
     initialNodes=[...initialNodes, {
         id:"conceptSelected",
         data:{label:concept},
         position,
+
         style:{backgroundColor:graphcontrol=="two"?"grey":colorPick[idx], color:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx], fontWeight:"bold"}
+
     }]
 
     for(let i=0; i<prenodes.length; i++){
         initialEdges=[...initialEdges,{
             id:(flowidx++).toString(),
+
             source:prenodes[i].id,
             target:"conceptSelected",
             type: 'smoothstep',
@@ -279,6 +294,7 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
     for(let i=0; i<postnodes.length; i++){
         initialEdges=[...initialEdges,{
             id:(flowidx++).toString(),
+
             source:"conceptSelected",
             target:postnodes[i].id,
             type: 'smoothstep',
@@ -293,6 +309,7 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
     }
 
     initialNodes=[...prenodes,...initialNodes,...postnodes]
+
     elkLayout(initialNodes,initialEdges,direction).then((graph) => {
    
       setNodes(nodesForFlow(graph,initialNodes));
@@ -302,7 +319,9 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
   },[]);
 
 
+
     //used to retrieve list of nodes
+
     const nodesForFlow = (graph, initialNodes) => {
       return [
         ...graph.children.map((node) => {
@@ -315,18 +334,23 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
       ];
     };
 
+
     //used to retrieve list of edges
+
     const edgesForFlow = (graph) => {
       return graph.edges;
     };
 
-   
+
     //called each rendering to center the graph
+
     useEffect(()=>{
       reactFlowInstance.fitView();
     })
     
+
     //if we change direciton of the graph this will be called and update the rendering
+
     useEffect(()=>{
   
       if(nodes!=undefined){
@@ -338,7 +362,9 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
           }else if(node.type == "output"){
             node.style={backgroundColor:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx+4], borderWidth:"5px",fontWeight:"bold"}
           }else{
+
             node.style={backgroundColor:graphcontrol=="two"?"grey":colorPick[idx], color:"white", borderColor:graphcontrol=="two"?"grey":colorPick[idx], fontWeight:"bold"}
+
           }
           return node
         })
@@ -348,7 +374,9 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
      
     },[graphcontrol])
 
+
     //update the direction of graph
+
     const onLayout = 
       (nodes,edges,direction) => {
         elkLayout(nodes,edges,direction).then((graph) => {
@@ -358,7 +386,7 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
         });
       }
     
-  
+
 
   return (
 <>    <ReactFlow

@@ -87,6 +87,7 @@ function DP(color = 'black') {
   
 
   
+
 //the page after you select the video to compare and press the button.
 //this is the page for the comparison result
 //it has 3 graphs and uses BarroGraph.js, BarroGraph2.js and FlowChart.js
@@ -96,6 +97,7 @@ export default function Result(){
     const history = useHistory();
     let location = useLocation();
     function SendData(value){
+
         history.push({
             pathname: '/comparisonSearch',
             state: { data: value },
@@ -393,7 +395,9 @@ export default function Result(){
             <Grid item>
              <Container maxWidth="xl" sx={{mt:20}}>  
                 <Typography variant="h3" gutterBottom sx={{mb:0, pb:0}}>
+
                     Comparison results
+
                 </Typography>
                 <Box
                 sx={{
@@ -424,7 +428,9 @@ export default function Result(){
                             >
                                 <Grid item>
                                 <Typography variant="h4" gutterBottom sx={{mb:0,pb:0,pt:10}}>
+
                                     <b>Duration</b>
+
                                 </Typography>
                                 <Box
                                 sx={{
@@ -462,7 +468,9 @@ export default function Result(){
                                                 <ExpandMoreIcon />
                                             </ExpandMore1>}
                                         label={<Typography variant="caption" display="block" gutterBottom sx={{mt:1}}>
+
                                         Legend
+
                                     </Typography>} 
                                         onClick={handleClick1}
                                        
@@ -509,7 +517,9 @@ export default function Result(){
                                                             <>
                                                                 <MenuItem>
                                                                     <Typography variant="caption"  gutterBottom>
+
                                                                         <b>Overview:</b>
+
                                                                     </Typography>
                                                                 </MenuItem>
                                                                 <MenuItem sx={{mb:0, pb:0}}>
@@ -561,7 +571,9 @@ export default function Result(){
                                                                         border: '1px solid gray',
                                                                     }}/>
                                                                     <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                         Whole video
+
                                                                     </Typography>
                                                                 </MenuItem>
                                                                 <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
@@ -574,7 +586,9 @@ export default function Result(){
                                                                         border: '1px solid gray',
                                                                     }}/>
                                                                     <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                         In depth
+
                                                                     </Typography>
                                                                 </MenuItem>
                                                                 <MenuItem sx={{pt:0, mt:0}}>
@@ -585,7 +599,9 @@ export default function Result(){
                                                                         border: '1px solid gray',
                                                                     }}/>
                                                                     <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                         Definition
+
                                                                     </Typography>
                                                                 </MenuItem>
                                                             </>
@@ -594,7 +610,9 @@ export default function Result(){
                                                                     <>
                                                                         <MenuItem>
                                                                         <Typography variant="caption"  gutterBottom>
+
                                                                             <b>Definition:</b>
+
                                                                         </Typography>
                                                                         </MenuItem>
                                                                         <MenuItem sx={{mb:0, pb:0}}>
@@ -644,7 +662,9 @@ export default function Result(){
                                                                             <>
                                                                                 <MenuItem>
                                                                                     <Typography variant="caption"  gutterBottom>
+
                                                                                         <b>In depth:</b>
+
                                                                                     </Typography>
                                                                                 </MenuItem>
                                                                                 <MenuItem sx={{mb:0, pb:0}}>
@@ -709,7 +729,9 @@ export default function Result(){
                                                                                 <>
                                                                                     <MenuItem>
                                                                                         <Typography variant="caption"  gutterBottom>
+
                                                                                             <b>Whole video:</b>
+
                                                                                         </Typography>
                                                                                     </MenuItem>
                                                                                     <MenuItem sx={{mb:0, pb:0}}>
@@ -787,6 +809,7 @@ export default function Result(){
                                     >
                                         
                                         <Tab value="two" label={<Typography variant="caption" display="block" gutterBottom>
+
                                             Definition
                                         </Typography>} />
                                         <Tab value="three" label={<Typography variant="caption" display="block" gutterBottom>
@@ -797,6 +820,7 @@ export default function Result(){
                                         </Typography>}/>
                                         <Tab value="one" label={<Typography variant="caption" display="block" gutterBottom>
                                             Overview
+
                                         </Typography>} />
                                     </Tabs>
                                         </Grid>
@@ -895,7 +919,9 @@ export default function Result(){
                             >
                                 <Grid item>
                                 <Typography variant="h4" gutterBottom sx={{mb:0,pb:0, pt:10}}>
+
                                     <b>What you must already know, what you are going to learn</b>
+
                                 </Typography>
                                 <Box
                                 sx={{
@@ -934,7 +960,9 @@ export default function Result(){
                                                 <ExpandMoreIcon />
                                             </ExpandMore2>}
                                         label={<Typography variant="caption" display="block" gutterBottom sx={{mt:1}}>
+
                                         Legend
+
                                     </Typography>} 
                                         onClick={handleClick2}
                                        
@@ -981,7 +1009,9 @@ export default function Result(){
                                                         <>
                                                             <MenuItem>
                                                                 <Typography variant="caption"  gutterBottom>
+
                                                                     <b>Overview:</b>
+
                                                                 </Typography>
                                                             </MenuItem>
                                                             <MenuItem sx={{mb:0, pb:0}}>
@@ -1034,7 +1064,9 @@ export default function Result(){
                                                                     borderColor:"black"
                                                                 }}/>
                                                                 <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                     What should you already know?
+
                                                                 </Typography>
                                                             </MenuItem>
                                                             <MenuItem sx={{mt:0, mb:0, pt:0, pb:0}}>
@@ -1048,7 +1080,9 @@ export default function Result(){
                                                                     borderColor:"grey"
                                                                 }}/>
                                                                 <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                     What will you learn?
+
                                                                 </Typography>
                                                             </MenuItem>
                                                             <MenuItem sx={{pt:0, mt:0}}>
@@ -1059,19 +1093,25 @@ export default function Result(){
                                                                     border: '2px solid gray',
                                                                 }}/>
                                                                 <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                     Concept
+
                                                                 </Typography>
                                                             </MenuItem>
                                                             <MenuItem sx={{pb:0,mb:0}}>
                                                                 <EastIcon sx={{stroke: "black", strokeWidth: 2}}/>
                                                                 <Typography variant="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                     <b>Strong link</b>
+
                                                                 </Typography>
                                                             </MenuItem>
                                                             <MenuItem sx={{pt:0,mt:0}}>
                                                                 <EastIcon/>
                                                                 <Typography variant="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                     Weak link
+
                                                                 </Typography>
                                                             </MenuItem>
                                                         </>
@@ -1080,7 +1120,9 @@ export default function Result(){
                                                                 <>
                                                                     <MenuItem>
                                                                         <Typography variant="caption"  gutterBottom>
+
                                                                             <b>What should you already know?</b>
+
                                                                         </Typography>
                                                                     </MenuItem>
                                                                     <MenuItem sx={{mb:0, pb:0}}>
@@ -1135,13 +1177,17 @@ export default function Result(){
                                                                     <MenuItem sx={{pb:0,mb:0}}>
                                                                         <EastIcon sx={{stroke: "black", strokeWidth: 2}}/>
                                                                         <Typography variant="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                             <b>Strong link</b>
+
                                                                         </Typography>
                                                                     </MenuItem>
                                                                     <MenuItem sx={{pt:0,mt:0}}>
                                                                         <EastIcon/>
                                                                         <Typography variant="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                             Weak link
+
                                                                         </Typography>
                                                                     </MenuItem>
                                                                 </>
@@ -1150,7 +1196,9 @@ export default function Result(){
                                                                         <>
                                                                             <MenuItem>
                                                                                 <Typography variant="caption"  gutterBottom>
+
                                                                                     <b>What will you learn?</b>
+
                                                                                 </Typography>
                                                                             </MenuItem>
                                                                             <MenuItem sx={{mb:0, pb:0}}>
@@ -1209,13 +1257,17 @@ export default function Result(){
                                                                             <MenuItem sx={{pb:0,mb:0}}>
                                                                                 <EastIcon sx={{stroke: "black", strokeWidth: 2}}/>
                                                                                 <Typography variant="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                                     <b>Strong link</b>
+
                                                                                 </Typography>
                                                                             </MenuItem>
                                                                             <MenuItem sx={{pt:0,mt:0}}>
                                                                                 <EastIcon/>
                                                                                 <Typography variant="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                                     Weak link
+
                                                                                 </Typography>
                                                                             </MenuItem>
                                                                         
@@ -1245,6 +1297,7 @@ export default function Result(){
                                     >
                                        
                                         <Tab value="two" label={<Typography variant="caption" display="block" gutterBottom>
+
                                             What should you already know?
                                         </Typography>} />
                                         <Tab value="three" label={<Typography variant="caption" display="block" gutterBottom>
@@ -1252,6 +1305,7 @@ export default function Result(){
                                         </Typography>}/>
                                         <Tab value="one" label={<Typography variant="caption" display="block" gutterBottom>
                                             Overview
+
                                         </Typography>} />
                                     </Tabs>
                                         </Grid>
@@ -1290,7 +1344,9 @@ export default function Result(){
                                             return(<>
                                                 <Grid item xs>
                                                 <ReactFlowProvider>
+
                                                     <FlowChart catalog={location.state.catalog.filter(video=>video.video_id == catExtra.video_id)} concept={location.state.concept} conceptExtra={catExtra} idx={idx} graphcontrol={graphcontrol2}/>
+
                                                 </ReactFlowProvider>
                                                 </Grid>
                                                 <Divider orientation="vertical" variant="middle" flexItem  />
@@ -1378,7 +1434,9 @@ export default function Result(){
                             >
                                 <Grid item>
                                 <Typography variant="h4" gutterBottom sx={{mb:0,pb:0, pt:10}}>
+
                                     <b>Slide presence</b>
+
                                 </Typography>
                                 <Box
                                 sx={{
@@ -1416,7 +1474,9 @@ export default function Result(){
                                                 <ExpandMoreIcon />
                                             </ExpandMore3>}
                                         label={<Typography variant="caption" display="block" gutterBottom sx={{mt:1}}>
+
                                         Legend
+
                                     </Typography>} 
                                         onClick={handleClick3}
                                        
@@ -1463,7 +1523,9 @@ export default function Result(){
                                                         <>
                                                             <MenuItem>
                                                                 <Typography variant="caption"  gutterBottom>
+
                                                                     <b>Overview:</b>
+
                                                                 </Typography>
                                                             </MenuItem>
                                                             <MenuItem sx={{mb:0, pb:0}}>
@@ -1515,7 +1577,9 @@ export default function Result(){
                                                                     border: '1px solid gray',
                                                                 }}/>
                                                                 <Typography variant ="caption" gutterBottom sx={{mt:1, pl:1}}>
+
                                                                     Whole video
+
                                                                 </Typography>
                                                             </MenuItem>
                                                         
@@ -1590,7 +1654,9 @@ export default function Result(){
                                                                         <>
                                                                             <MenuItem>
                                                                                 <Typography variant="caption"  gutterBottom>
+
                                                                                     <b>Whole video:</b>
+
                                                                                 </Typography>
                                                                             </MenuItem>
                                                                             <MenuItem sx={{mb:0, pb:0}}>
@@ -1673,10 +1739,12 @@ export default function Result(){
                                             Slide
                                         </Typography>} />
                                         <Tab value="three" label={<Typography variant="caption" display="block" gutterBottom>
+
                                             Whole video
                                         </Typography>}/>
                                         <Tab value="one" label={<Typography variant="caption" display="block" gutterBottom>
                                             Overview
+
                                         </Typography>} />
                                 
                                     </Tabs>
@@ -1769,7 +1837,9 @@ export default function Result(){
         >
             <Grid item>
                 <Typography variant="overline" display="block" gutterBottom sx={{color:"white"}}>
+
                 <b>Edurell Platform for enhanced Video-based Learning</b>
+
                 </Typography>
             </Grid>
         </Grid>

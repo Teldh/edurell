@@ -24,7 +24,6 @@ import { useHistory } from "react-router-dom";
 import Box from '@mui/material/Box';
 import FlowChart from './FlowChart.js'
 
-
 //used as a MainPage for Comparison. Not used anymore.
 export default function C_Start({Endcstart}){
     const context = useContext(TokenContext);

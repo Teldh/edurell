@@ -33,6 +33,7 @@ POSSO CHIAMARE SOLO LE QUERY SENZA AVERE PROBLEMI CON LE 500 CONNESSIONI
 
 export default function Comparison(){
 
+
     //this block used for tutorial to setup anchor to jump and open and close the window
     const anchor1 = useRef(null);
     const [anchor2,setAnchor2] = useState(null)
@@ -43,9 +44,11 @@ export default function Comparison(){
 
     function openTutorialFunc(){
       setOpenTutorial(true);
+
     }
 
  
+
     //list of video selected for comparison
     const [listvideo, setListVideo]= useState([]);
 
@@ -69,6 +72,7 @@ export default function Comparison(){
     //used for textfield list, where we read all the concept user has selected.
     const [querylist, setQueryList]=useState([]);
 
+
     //used to retrieve the context, used to save the logged user
     const context = useContext(TokenContext);
     const nameSurname  = context.nameSurname;
@@ -87,6 +91,7 @@ export default function Comparison(){
     //check if concept selected to filter video to match
     const [searchFilterClicked,setSearchFilterClicked] = useState(false);
 
+
    
     useEffect(()=>{
       if(document.cookie == "" && searchFilterClicked){
@@ -94,6 +99,7 @@ export default function Comparison(){
         document.cookie = "tutorial=done; expires=Thu, 18 Dec 2100 12:00:00 UTC";
       }
     },)
+
     
     //capturing the concept sent from previous page
     useEffect(() => {
@@ -104,11 +110,13 @@ export default function Comparison(){
 
     //a function used to check if small is included into big
     let checker = (big, small) => {
+
       return small.every(v => big.includes(v));
     };
 
     //request from mongodb to the value inside collection videos
     useEffect(() => {
+
         const fetchData = async () => {
             let response=null
             try{
@@ -123,6 +131,7 @@ export default function Comparison(){
                 .then(res => res.json())
             }
             catch(err){
+
               if(err.message==="401"){
                   
                   context.setToken('')
@@ -134,11 +143,13 @@ export default function Comparison(){
                   return
               }
             }
+
             if(response===undefined){
               alert('Unknown Server Error')
               return
             }
             else{
+
               //if answered correctly update data
               setCatalog(response.catalog)
               SetCatalogOriginal(response.catalog)
@@ -146,14 +157,17 @@ export default function Comparison(){
           }
         };
         fetchData();
+
       }, []);
 
       //if query to videos collection is successful or not, depending on variable loading
       useEffect(() => {
+
         if (loading) {
           // if loading do nothing
         } else {
           // create unique list of concepts to use for queryinputs 
+
            
           let x=0;
           let newlistconcepts=[]
@@ -172,16 +186,19 @@ export default function Comparison(){
       
           })
           x=x+1;
+
           setListConcepts(newlistconcepts);
           //used to get all type and preconcept of all video. not used anymore. just for reference in the future.
         }
       }, [loading]);
 
       //used to query n times more information from Graphs collection in mongodb using SPARQL query
+
       useEffect(()=>{
 
         if(searchFilterClicked){
           SetCatalogExtra(catalogExtra=>[])
+
           catalog.map(video=>{
             QueryConceptExtra(video.video_id, querylist)
           })
@@ -264,10 +281,12 @@ export default function Comparison(){
           duration = duration+resultseconds;
         }
         
+
       }
 
         return duration
     }
+
 
     //same as before but for conceptExpansion
     function ComputeDurationCE(start,end,type){
@@ -342,22 +361,27 @@ export default function Comparison(){
            if(countnum/maxnum >= 0.8){
             return false;
            }
+
            return !checker(video.extracted_keywords, catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"]);
          })
        }
 
        
 
+
         //check if concept selected is conceptDefinition or ConceptExpansion
         if(listfilters[1] == "essential"){
          catalogfiltered = catalogfiltered.filter(video=>{
+
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"].length == 0){
             return true;
            }
            return !checker(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"],["conceptExpansion"]);
          })
+
        }else if(listfilters[1]=="detailed"){
          catalogfiltered = catalogfiltered.filter(video=>{
+
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"].length == 0){
             return true;
            }
@@ -367,47 +391,59 @@ export default function Comparison(){
        }
      
 
+
        //check if slide is present in the video
        if(listfilters[2] == "withslide"){
          catalogfiltered = catalogfiltered.filter(video=>{
+
            return catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"] > 0.1? true:false;
          })
  
        }else if(listfilters[2] == "withoutslide"){
          catalogfiltered = catalogfiltered.filter(video=>{
+
            return catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"] <= 0.1? true:false;
          })
     
        }
        
 
+
        //conceptDefinition duration filter
+
        if(listfilters[3]=="less4"){
           catalogfiltered = catalogfiltered.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
+
             let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
             return ComputeDurationCD(endtime, starttime,type) < 240
+
           });
     
        }else if(listfilters[3]=="4to20"){
           catalogfiltered = catalogfiltered.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
+
             let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
             return ComputeDurationCD(endtime, starttime,type) >= 240 && ComputeDurationCD(endtime, starttime,type) <= 1200
+
           });
       
        }else if(listfilters[3]=="greater20"){
           catalogfiltered = catalogfiltered.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
+
             let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
             return ComputeDurationCD(endtime, starttime,type) > 1200
+
           });
     
        }
    
+
 
        //conceptExpansion duration filter
        if(listfilters[4]=="less4"){
@@ -416,25 +452,31 @@ export default function Comparison(){
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
             let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
             return ComputeDurationCE(endtime, starttime,type) < 240
+
           });
 
        }else if(listfilters[4]=="4to20"){
           catalogfiltered = catalogfiltered.filter(video=>{
+
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
             let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
             return ComputeDurationCE(endtime, starttime,type) >= 240 && ComputeDurationCE(endtime, starttime,type) <= 1200
+
           });
 
        }else if(listfilters[4]=="greater20"){
           catalogfiltered = catalogfiltered.filter(video=>{
+
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
             let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
             return ComputeDurationCE(endtime, starttime,type) > 1200
+
           });
 
        }
+
 
 
        //whole video duration filter
@@ -456,6 +498,7 @@ export default function Comparison(){
        if(listfilters[6]=="recent"){
           catalogfiltered = catalogfiltered.sort(
             function(a,b){
+
               console.log("recent ",catalogExtra.filter(videoExtra=>{
                 console.log("dentro: ",videoExtra.video_id," ",a.video_id," ",b.video_id)
                 return videoExtra.video_id == a.video_id
@@ -494,7 +537,9 @@ export default function Comparison(){
           function(a,b){
             let start1=catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)[0]["concept_starttime"];
             let end1=catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)[0]["concept_endtime"];
+
             let duration1 = ComputeDuration(end1,start1)
+
             let start2=catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id)[0]["concept_starttime"];
             let end2=catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id)[0]["concept_endtime"];
             
@@ -537,7 +582,9 @@ export default function Comparison(){
     }
 
   
+
     //used to add the video for comparison in querybar component
+
     function AddVideo(img, title,setAdd,idxurl){
         const newListVideo = [...listvideo,{img:img,title:title,idx:idxurl, setAdd:setAdd}];
         setListVideo(newListVideo);
@@ -545,17 +592,21 @@ export default function Comparison(){
      
     }
 
+
     //used to remove the video for comparison in querybar component
+
     function RemoveVideo(idx){
         const newListVideo = listvideo.filter(video => video.idx != idx);
         setListVideo(newListVideo);
         
     }
 
+
     
     //query to the extra data for a specific concept inside Graphs collection in mongodb using SPARQL query
     //videoid and concept is needed
     async function QueryConceptExtra(videoid, concept) {
+
       let risposta=null
       try{
 
@@ -574,14 +625,18 @@ export default function Comparison(){
         alert("problem  qeury")
         return
       }else{
+
         var data = await risposta.json();
         SetCatalogExtra(catalogExtra=>[...catalogExtra,data]);
+
       }
       
 
     }
 
+
     //theme of MUI
+
     const theme = createTheme({
         palette: {
           primary: {
@@ -604,8 +659,10 @@ export default function Comparison(){
         },
       });
     
+
       //used in videofiltered to update the value inside catalogExtra
       function UpdateCatalogExtra(video_id, conceptLength, derivatedLength){
+
         let newcatalogExtra = catalogExtra.map(video=>{
           if(video.video_id == video_id){
             video["conceptLength"] = conceptLength;
@@ -647,7 +704,9 @@ export default function Comparison(){
         >
             <Grid item>
                 <Typography variant="overline" display="block" gutterBottom sx={{color:"white"}}>
+
                    <b>Edurell Platform for enhanced Video-based Learning</b>
+
                 </Typography>
             </Grid>
         </Grid>

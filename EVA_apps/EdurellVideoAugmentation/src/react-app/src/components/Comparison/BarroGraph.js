@@ -58,7 +58,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
         // create the pattern from the shape
         return c.createPattern(shape, 'repeat')
       }
-    
+
     // consists of the dataset represented into the graph
     const data = {
         labels: catalog.map(video=>video.title),
@@ -92,6 +92,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
 
             },
             {
+
                 label:'In depth',
                 data: catalogExtra.map(video=>video.derivatedLength),
                 backgroundColor:

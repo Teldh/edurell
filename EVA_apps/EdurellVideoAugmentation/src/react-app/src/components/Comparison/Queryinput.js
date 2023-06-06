@@ -14,12 +14,14 @@ import Stack from '@mui/material/Stack';
 import { useContext } from 'react';
 import { ContextComparison } from './ContextComparison';
 
+
 //its the searchbar. 
 // the whole system should be made for 1 concept, but this is made to handle multiple.
 // why? for future implementation.
 export default function Queryinput({listconcepts,AddQueryElement, nomatch, location}){
     const options = listconcepts;//['Option 1', 'Option 2', 'Option 3', 'Option 4'];
     const [valac, SetValac] = useState([location]);
+
   
     const setSearchFilterClicked = useContext(ContextComparison)[2];
 
@@ -33,7 +35,9 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
         <Autocomplete
             
             className="bg-primary"
+
             size="small"
+
             freeSolo
             multiple
             limitTags={1}
@@ -65,7 +69,7 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
             sx={{ width: '500px' }}
             onChange={(event,value)=>{
                 SetValac(value)
-            
+
                 setSearchFilterClicked(false)
             }}
          
@@ -81,7 +85,9 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
               spacing={0}
           >
               <Autocomplete
+
                         size="small"
+
                         freeSolo
                         multiple
                         limitTags={1}
@@ -113,7 +119,7 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
                         sx={{ width: '500px' }}
                         onChange={(event,value)=>{
                             SetValac(value)
-                            
+
                             setSearchFilterClicked(false)
                         }}
                     

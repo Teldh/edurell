@@ -566,7 +566,7 @@ def get_history():
         if not Videos.objects(video_id = video_in_history.video_url.split("watch?v=")[1]):
             student.video_history_list.remove(video_in_history)
 
-    #print("GET HISTORY")
+
     for video in student.video_history_list:
         video_title_list.append(get_video_title_from_url(video.video_url.split("watch?v=")[1]))
         #print(video," ",get_video_title_from_url(video.video_url.split("watch?v=")[1]))
@@ -874,9 +874,6 @@ def GetVideoTypeAndPrerequisite():
 @auth.login_required
 def ConceptVideoData(video_id, concept_searched):
 
-
-
-
     user = "luca"
     password = "vSmAZ6c1ZOg2IEVw"
     #pymongo db config for query sparql
@@ -885,8 +882,6 @@ def ConceptVideoData(video_id, concept_searched):
     dbsparql = client.edurell
     # retrieve from mongodb collection=graphs the all elements with the value of video_id
     collection = dbsparql.graphs
-
-    
 
     # initialize the dicitonary where we save our results
     result = {
@@ -902,16 +897,18 @@ def ConceptVideoData(video_id, concept_searched):
         'derivatedconcept_endtime':[]
         
     }
+
     #print("?????????????????????????????START??????????????????????????????????")
     #print("start query: ",video_id," ",concept_searched)
     #print("result: ",result)
+
     # two options:
     ## 1. search newest annotation
     ### 2. combine every annotation of a video into a unique graph and make the query of that
     cursor = collection.find({"video_id":video_id})
     optiongraph = 2
     gr=Graph()
-    
+
 
     if optiongraph == 1:
         ## 1. search newest annotation
@@ -946,6 +943,7 @@ def ConceptVideoData(video_id, concept_searched):
         #print("lastest_timestamp: ",lastest," lastest_idx: ",lastest_idx)
         #print("TESTTTTTTTTT       ",cursor)
 
+
         # select the newest document
         document = collection.find({"video_id":video_id})[lastest_idx]
         
@@ -961,6 +959,7 @@ def ConceptVideoData(video_id, concept_searched):
         ### in mongodb we collect all annotation of a single video
         ### made by different people or the same
         ### this mode combine from the oldest to the newest into a single graph
+
         #print("start cursor for: ",video_id)
         for idx,document in enumerate(cursor):
          #   print("document ",video_id," idx: ",idx," \n\nGRAPH: ",document["graph"]," \n\nCONCEPT:  ",document["conceptVocabulary"]," \n\n")
@@ -971,14 +970,16 @@ def ConceptVideoData(video_id, concept_searched):
                 continue
             if document["conceptVocabulary"] == "":
             #    print("\nIGNORE CONCEPT: ")
+
                 continue
             gr.parse(data=json.dumps(document["graph"]), format='json-ld')
 
             # initialize conceptVocabulary for the query
             
             gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
-        #f.write("\n\n"+str(gr.serialize(format="json-ld"))+"\n\n")
+
         
+
 
     ## --------------------------------------------------------------------------------------------------------------------------------------
     ## ---------------------------------------------------------QUERYCREATED-----------------------------------------------------------------
@@ -999,6 +1000,7 @@ def ConceptVideoData(video_id, concept_searched):
                         ?c_id skos:prefLabel ?c_selected.
                 }
     """
+
    # f.write("\n\n"+str(qr)+" "+str(gr)+" \n\n")
    # f.close()
     qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
@@ -1010,6 +1012,7 @@ def ConceptVideoData(video_id, concept_searched):
         result['created']=row['created']
 
     #print(result)
+
 
 
     ## --------------------------------------------------------------------------------------------------------------------------------------
@@ -1040,11 +1043,13 @@ def ConceptVideoData(video_id, concept_searched):
             """
  
     qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
+
     #print("qres: ",len(qres))
     for row in qres:
         #print("result: ",row['concept_starttime']," ",row['concept_endtime'])
      #   print("_________________________________________")
       #  print(row['concept_starttime'],"\n",row['concept_endtime'])
+
         result['concept_starttime'].append(row['concept_starttime'])
         result['concept_endtime'].append(row['concept_endtime'])
         result['explain'].append(row['explain'])
@@ -1054,6 +1059,7 @@ def ConceptVideoData(video_id, concept_searched):
     ## ---------------------------------------------------------QUERYPRECONCEPTS-------------------------------------------------------------
     ## --------------------------------------------------------------------------------------------------------------------------------------
     ## preconcepts that aren't explained: no conceptDefinition nor conceptExpansion
+
     qr = """
                 PREFIX oa: <http://www.w3.org/ns/oa#>
                 PREFIX edu: <https://teldh.github.io/edurell#>
@@ -1070,11 +1076,12 @@ def ConceptVideoData(video_id, concept_searched):
                         ?target dcterms:subject ?c_id.
                         ?preconceptIRI skos:prefLabel ?preconcept.
                         ?who skos:note ?prenote.
-                        
+
                 }
 
 
     """
+
 
     qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
     #print("preconcept")
@@ -1086,6 +1093,7 @@ def ConceptVideoData(video_id, concept_searched):
         result['list_prenotes'].append(row['prenote'])
 
     #print(result)
+
     
     ## --------------------------------------------------------------------------------------------------------------------------------------
     ## ---------------------------------------------------------QUERYCONCEPTDERIVATED--------------------------------------------------------
@@ -1121,6 +1129,7 @@ def ConceptVideoData(video_id, concept_searched):
     for row in qres:
      #   print("b_________________________________________")
       #  print(row['c_derivated'])
+
         result['list_derivatedconcept'].append(row['c_derivated'])
         result['list_postnotes'].append(row['postnote'])
 

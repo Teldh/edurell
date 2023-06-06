@@ -20,6 +20,7 @@ ChartJS.register(
     Legend
 )
 
+
 //secondRaw is in seconds, and transform it in a string of format hh:mm:ss
 function SecondsToTime(secondRaw){
     let duration = secondRaw
@@ -33,11 +34,13 @@ function SecondsToTime(secondRaw){
 }
 
 export default function Barro({catalog, catalogExtra, graphcontrol}){
+
     //dataset to display 
     const data = {
         labels: catalogExtra.map(video=>(video.video_slidishness*100).toString()+"%"),
         datasets:[
             {
+
                 label:'Whole video',
                 data:catalog.map(video=>video.duration),
                 backgroundColor:"white",
@@ -52,6 +55,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
                 order:10,
             },
             {
+
                 label:'Slide',
                 data:catalogExtra.map(video=>video.video_slidishness*catalog.filter(cat=>cat.video_id == video.video_id)[0].duration),
                 backgroundColor:graphcontrol=="three"?"grey":[
@@ -65,6 +69,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
        
         ]
     }
+
 
     //options to setup and customize the graph
     const options ={

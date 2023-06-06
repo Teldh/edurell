@@ -30,6 +30,7 @@ const LayoutFlow = ({catalog, concept, conceptExtraRaw}) => {
   };
     const conceptExtra = conceptExtraRaw[0]
 
+
   const reactFlowInstance = useReactFlow();
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
@@ -103,6 +104,7 @@ const LayoutFlow = ({catalog, concept, conceptExtraRaw}) => {
     let flowidx=0
 
     if(conceptExtra["list_preconcept"].length > 0){
+
       //compute the percentage of prerequisite if explained or not
       let list_pre = conceptExtra["list_preconcept"]
       let maxnum=list_pre.length;
@@ -117,6 +119,7 @@ const LayoutFlow = ({catalog, concept, conceptExtraRaw}) => {
       if((countnum/maxnum >= 0.8) || !checker(catalog[0].extracted_keywords, conceptExtra["list_preconcept"])){
 
       }else{
+
         for(let i=0; i<conceptExtra["list_preconcept"].length; i++){
             prenodes=[...prenodes,{
                 id:(flowidx++).toString(),
@@ -127,7 +130,9 @@ const LayoutFlow = ({catalog, concept, conceptExtraRaw}) => {
             }];
             prenodesnote=[...prenodesnote,conceptExtra["list_prenotes"][i]]
         }
+
       }
+
     }
 
     if(conceptExtra["list_derivatedconcept"].length>0){

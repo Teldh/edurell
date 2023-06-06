@@ -63,6 +63,7 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
       }, [querylist]);
 
 
+
     return (
     <>
     <Container maxWidth = "xl" >
@@ -79,9 +80,11 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
         {loading
               ? null
               :
+
             querylist.length > 0 && querylist[0]!=null?
             catalog.map((video,idx)=>{
                 let singlecatExtra = catalogExtra.filter(extra =>video.video_id == extra.video_id)
+
                 return(<>
                     {
                         idx==0?
@@ -121,7 +124,9 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
   direction="column"
   justifyContent="center"
   alignItems="center"
+
   spacing={0}
+
 >
         {
             querylist.length>0?<>
@@ -137,12 +142,15 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
                 />
         </Grid>
         <Grid item>
+
             <Typography variant="body2" gutterBottom sx={{mb:0,pb:0,mt:5}}>
             It looks like there are no more videos about this concept :&#40;
+
             </Typography>
             
         </Grid>
         <Grid item>
+
             <Typography variant="caption" display="block" gutterBottom sx={{color:"black",mt:0, pt:0,mb:3}} >
                 Do you need anything else? Take a look at these other concepts from the videos we found!
             </Typography>
@@ -153,6 +161,7 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
                 
                 <Chip label={concept} size="small" sx={{m:0.5, color:"grey"}} onClick={()=>SendData(concept)}/>
                 )}
+
         </Grid>
         </>
         :
@@ -160,6 +169,7 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
         }
         </Grid>
     </Container>
+
 
     <Modal
     open={open}
@@ -319,6 +329,7 @@ const Listvideo = forwardRef(({setAnchor2, UpdateCatalogExtra, catalogExtra, cat
     </Modal>
     </>
     
+
     );
 });
 
