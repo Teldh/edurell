@@ -376,7 +376,7 @@ class ImageClassifier:
         if self._image is not None:
             if self._color_scheme == COLOR_BGR:
                 image = self._image.copy()
-                cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+                image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
             else:
                 image = self._image
             if axis is not None:

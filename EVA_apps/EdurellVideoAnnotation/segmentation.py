@@ -617,7 +617,7 @@ class VideoAnalyzer:
             return start_times, end_times, punctuated_transcription
         
 
-    def can_be_analyzed(self,video:LocalVideo=None,max_seconds=6000):
+    def can_be_analyzed(self,video:LocalVideo=None,max_seconds=18000):
         if video is None:
             video = VideoSpeedManager(self._video_id).get_video()
         return video.get_count_frames() / video.get_fps() <= max_seconds
@@ -754,7 +754,7 @@ class VideoAnalyzer:
         txt_classif.set_comparison_methods([COMPARISON_METHOD_TXT_SIM_RATIO,
                                             COMPARISON_METHOD_TXT_MISS_RATIO])
         
-        def remove_classification_errors(lst: List[TimedAndFramedText],vsm: VideoSpeedManager,img_classif:ImageClassifier,txt_classif: TextSimilarityClassifier,min_seconds_duration=3):
+        def remove_classification_errors(lst: List[TimedAndFramedText],vsm: VideoSpeedManager,img_classif:ImageClassifier,txt_classif: TextSimilarityClassifier,min_seconds_duration=2):
             '''
             for every element of the input list of TimedAndFramedText checks if at every start frame the text recognized is approximatly the same\n
             checks also that the text has a minimum len and the segment's duration is long enough\n
@@ -1441,75 +1441,39 @@ def _main_in_segmentation():
     
     #video = VideoAnalyzer('sXLhYStO0m8') #sexing skeleton 1
     #video = VideoAnalyzer('rFRO8IwB8aY') # Lesson Med 33 minutes low score and very slow
-    segmentation_data = db_mongo.get_video_segmentation('PPLop4L2eGk',raise_error=False)
-    video._video_slidishness = segmentation_data['video_slidishness']
-    video._frames_to_analyze = segmentation_data['slidish_frames_startend']
-    video.set(titles=segmentation_data['slide_titles'])
-    concepts = [{'concept': 'machine', 'start_sent_id': 0, 
-                 'end_sent_id': 7, 
-                 'start': '0:00:00.060000', 
-                 'end': '0:00:31.319000', 
-                 'description_type': 'In Depth', 
-                 'creator': 'Burst Analysis'}, 
-                {'concept': 'machine', 
-                 'start_sent_id': 64, 
-                 'end_sent_id': 74, 
-                 'start': '0:05:37.310000', 
-                 'end': '0:07:06.509000', 
-                 'description_type': 'Definition', 
-                 'creator': 'Burst Analysis'}, 
-                {'concept': 'machine learning', 
-                 'start_sent_id': 0, 
-                 'end_sent_id': 7, 
-                 'start': '0:00:00.060000', 
-                 'end': '0:00:31.319000', 
-                 'description_type': 'In Depth', 
-                 'creator': 'Burst Analysis'}, 
-                {'concept': 'machine learning', 
-                 'start_sent_id': 64, 
-                 'end_sent_id': 74, 
-                 'start': '0:05:37.310000', 
-                 'end': '0:07:06.509000', 
-                 'description_type': 'Definition', 
-                 'creator': 'Burst Analysis'}, 
-                {'concept': 'learning', 'start_sent_id': 0, 'end_sent_id': 3, 'start': '0:00:00.060000', 'end': '0:00:14.879000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, 
-                {'concept': 'learning', 'start_sent_id': 38, 'end_sent_id': 42, 'start': '0:03:29.250000', 'end': '0:04:25.850000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, 
-                {'concept': 'learning', 'start_sent_id': 45, 'end_sent_id': 50, 'start': '0:04:19.350000', 'end': '0:04:59.690000', 'description_type': 'In Depth', 'creator': 'Burst Analysis'}, 
-                {'concept': 'learning', 'start_sent_id': 64, 'end_sent_id': 74, 'start': '0:05:37.310000', 'end': '0:07:06.509000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}, 
-                {'concept': 'checker', 'start_sent_id': 8, 'end_sent_id': 13, 'start': '0:00:24.609000', 'end': '0:01:13.349000', 'description_type': 'Definition', 'creator': 'Burst Analysis'}]
-    concepts = video.adjust_or_insert_definitions_and_indepth_times(concepts)
-    print(concepts)
-    #results = video.extract_titles(quant=0.85)
-    #results_dict = [{'start_end_frames':start_end_frames,'title':title,'xywh_normalized':bb} for (title,start_end_frames,bb) in results]
-    #pprint(results_dict)
-    return
+    vid_id = "6leS5eEO2N8"
+    video = VideoAnalyzer(vid_id)
+    #video.analyze_video(_show_info=True)
+    segmentation_data = db_mongo.get_video_segmentation(vid_id)
+    video.set(video_slidishness=segmentation_data["video_slidishness"],slide_startends=segmentation_data["slide_startends"])
+    video.reconstruct_slides_from_times_set()
+    results = video.extract_titles()
 
     # print results
     image = ImageClassifier(image_and_scheme=[None, COLOR_BGR])
-    video_ref = LocalVideo('PPLop4L2eGk')
+    video_ref = LocalVideo(vid_id)
     from matplotlib import pyplot as plt
-    fig, ax = plt.subplots(nrows=1,ncols=5, figsize=(16,9))
-    j=0
-    for (title,start_end_frames,bb) in results:
-        for start_end in start_end_frames:
-            axis = ax[j]
-            video_ref.set_num_frame(start_end[0])
-            title = title.rstrip('\n')
-            axis.set_title(f"'Title: {title}'\n\nstart frame: {start_end[0]}\ntime: {video_ref.get_time_from_num_frame(start_end[0])}")
-            image.set_img(draw_bounding_boxes_on_image(video_ref.extract_next_frame(),[bb]))
-            image._debug_show_image(axis)
-            j+=1
+    fig, ax = plt.subplots(nrows=ceil(len(results)/3),ncols=3, figsize=(16,9))
+    j = 0
+    for (title,start_end_seconds,bb) in results:
+        axis = ax[floor(j/3),j%3]
+        video_ref.set_num_frame(video_ref.get_num_frame_from_time(start_end_seconds[0]))
+        title = title.rstrip('\n')
+        axis.set_title(f"'Title: {title}'\nstart frame: {video_ref.get_num_frame_from_time(start_end_seconds[0])}   time: {start_end_seconds[0]}")
+        image.set_img(draw_bounding_boxes_on_image(video_ref.extract_next_frame(),[bb]))
+        image._debug_show_image(axis)
+        j+=1
 
     plt.show()
 
 if __name__ == '__main__':
     _main_in_segmentation()
-    vid_id = "JDmNvQj0I5A"
-    segmentation_data = db_mongo.get_video_segmentation(vid_id)
-    video = VideoAnalyzer(vid_id)
-    video.set(segmentation_data['video_slidishness'],segmentation_data['slidish_frames_startend'])
-    video.set(slide_startends = segmentation_data['slide_startends'])
-    video.reconstruct_slides_from_times_set()
-    video.set(titles=segmentation_data["slide_titles"])
-    video.adjust_or_insert_definitions_and_indepth_times(None)
+    #vid_id = "JDmNvQj0I5A"
+    #segmentation_data = db_mongo.get_video_segmentation(vid_id)
+    #video = VideoAnalyzer(vid_id)
+    #video.set(segmentation_data['video_slidishness'],segmentation_data['slidish_frames_startend'])
+    #video.set(slide_startends = segmentation_data['slide_startends'])
+    #video.reconstruct_slides_from_times_set()
+    #video.set(titles=segmentation_data["slide_titles"])
+    #video.adjust_or_insert_definitions_and_indepth_times(None)
     #_test_and_save_segment_video(vid_id)

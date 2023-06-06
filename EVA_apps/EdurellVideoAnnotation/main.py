@@ -609,11 +609,10 @@ def burst_launch():
     data_summary = compute_data_summary(video_id,concept_map,definitions)
     
     # checks whether video has been segmented and if so if it is classifies ad slide video or not in order to enable refinement
-    segmentation_data = db_mongo.get_video_segmentation(video_id,returned_fields={"video_slidishness"},raise_error=False)
+    segmentation_data = db_mongo.get_video_segmentation(video_id,raise_error=False)
     can_be_refined = segmentation_data is not None \
-                    and VideoAnalyzer(video_id).set(segmentation_data['video_slidishness']).is_slide_video() \
-                    and len(segmentation_data["slide_titles"]) > 0
-
+                    and VideoAnalyzer(video_id).set(segmentation_data['video_slidishness']).is_slide_video()
+    
     json = {
         "concepts": concepts,
         "concept_map": concept_map,
@@ -702,7 +701,7 @@ def open_application_in_browser(address):
 if __name__ == '__main__':
     print("***** EDURELL - Video Annotation: main.py::__main__ ******")
 
-    address = '127.0.0.0'
+    address = '127.0.0.1'
     #open_application_in_browser(address)
     workers_queue_scheduler(video_segmentations_queue)    
     app.run(host=address, threaded=True, debug=DEBUG) #, port=5050\
