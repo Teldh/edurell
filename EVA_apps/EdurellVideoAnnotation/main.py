@@ -613,6 +613,8 @@ def burst_launch():
     can_be_refined = segmentation_data is not None \
                     and VideoAnalyzer(video_id).set(segmentation_data['video_slidishness']).is_slide_video()
     
+    can_be_refined = can_be_refined and "slide_titles" in segmentation_data.keys()
+    
     json = {
         "concepts": concepts,
         "concept_map": concept_map,
