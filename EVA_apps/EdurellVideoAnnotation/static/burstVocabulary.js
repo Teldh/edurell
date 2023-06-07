@@ -4,8 +4,11 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
+
+
 function sortVocabulary(dictionary) {
-  
+
   var orderedDict = {}
   var keys = Object.keys(dictionary);
   var i, len = keys.length;
@@ -346,39 +349,92 @@ async function getConceptVocabulary(){
   })
 }
 
-function launchBurstAnalysis(burstType){
+async function launchBurstAnalysis(burstType){
 
-    loading()
+  console.log("launchBurstAnalysis in burstVocabulary.js")
 
-    // Activate to use advanced synonym burst
-    const SYN_BURST = $burstSynonym; 
- 
-    let data = {
-        "id": $video_id,
-        "concepts":$concepts,
-        "conceptVocabulary":$conceptVocabulary,
-        "syn_burst":SYN_BURST,
-        "burst_type": burstType
-    }
+  // Activate to use advanced synonym burst
+  const SYN_BURST = $burstSynonym; 
 
-    //console.log(data);
+  let data = {
+      "id": $video_id,
+      "concepts":$concepts,
+      "conceptVocabulary":$conceptVocabulary,
+      "syn_burst":SYN_BURST,
+      "burst_type": burstType
+  }
 
-    var js_data = JSON.stringify(data);
-
-    $.ajax({
-        url: '/annotator/burst_launch',
-        type : 'post',
-        contentType: 'application/json',
-        dataType : 'json',
-        data : js_data
-    }).done(function(result) {
-        console.log(result)
-        showResults(result)
-    })
+  console.log(data);
+  var js_data = JSON.stringify(data);
+  
+  result = await $.ajax({
+      url: '/annotator/burst_launch',
+      type : 'post',
+      contentType: 'application/json',
+      dataType : 'json',
+      data : js_data
+  }).done(function(result) {
+    showResults(result)
+    $downloadableGraph = result.downloadable_jsonld_graph;
+    $hasBeenRefined = false;
+    $conceptMap = result.concept_map;
+  })
+  
+  return result
 }
 
+function refineBurstWithVideoAnalysis() {
+  console.log("***** EDURELL - Video Annotation: burstVocabulary.js::refineBurstWithVideoAnalysis() ******");
+  var data = {
+    "id": $video_id,
+    "concepts": $concepts,
+    "concept_map":$conceptMap,
+    "conceptVocabulary":$conceptVocabulary,
+    "definitions":$definitions
+  } 
+
+  function showRefinementLoading(){
+    document.getElementById("results").style.display = "none";
+    var loading_text_elem = document.getElementById("loadingText")
+    loading_text_elem.textContent = "Refining results..."
+    document.getElementById("loadingAutomatic").style.display = "block";
+  }
+
+  function hideRefinementLoading(prev_text) {
+    document.getElementById("loadingText").textContent = prev_text;
+    document.getElementById("loadingAutomatic").style.display = "none";
+    document.getElementById("results").style.display = "block";
+  }
+
+  var js_data = JSON.stringify(data);
+  
+  var prev_text = document.getElementById("loadingText").textContent;
+  showRefinementLoading();
+
+  $.ajax({
+    url: '/annotator/refinement',
+    type : 'post',
+    contentType: 'application/json',
+    dataType : 'json',
+    data: js_data
+  }).done(function(result) {
+      console.log(result);
+      hideRefinementLoading(prev_text);
+      printDefinitions(result.definitions,true);
+      $hasBeenRefined = true;
+      document.getElementById("refinement-button").style.display = "none";
+      $downloadableGraph = result.downloadable_jsonld_graph
+      $definitions = result.definitions;
+  })
+}
+
+
+
+
+
 function showResults(result){
-    document.getElementById("loading").style.display = "none"
+    console.log("***** EDURELL - Video Annotation: burstVocabulary.js::showResults() ******")
+    document.getElementById("loadingAutomatic").style.display = "none"
     document.getElementById("results").style.display = "block"
     //document.getElementById("results").innerText += result
 
@@ -386,8 +442,10 @@ function showResults(result){
     let relationsWithSynonyms = [];
 
     for(let word in $conceptVocabulary) {
+        console.log(word)
         let node = [word];
         for(let synonym of $conceptVocabulary[word]) {
+            console.log(synonym)
             node.push(synonym);
         }
         node.sort();
@@ -400,14 +458,14 @@ function showResults(result){
                 nodeName += " = " + node[i];
             }   
         }
-        //console.log(node)
+        console.log(node)
 
         conceptsWithSynonyms.push(nodeName);
-        //console.log(conceptsWithSynonyms)
+        console.log(conceptsWithSynonyms)
     }
 
     let graphNodes = [...new Set(conceptsWithSynonyms)];
-    //console.log(graphNodes)
+    console.log(graphNodes)
 
     let checkDuplicateArray = []
 
@@ -431,7 +489,7 @@ function showResults(result){
     }
 
     network = showNetwork(graphNodes, relationsWithSynonyms, "network")
-
+    
     let data_summary = result.data_summary
 
     let resultsToVisualize = " <div class=\"container\">\n" +
@@ -462,7 +520,7 @@ function showResults(result){
         "                    <th class=\"col\">"+ data_summary.num_rels +"</th>\n" +
         "                  </tr>\n" +
         "                  <tr class=\"d-flex\">\n" +
-        "                    <td class=\"col-3\">Unique relations</td>\n" +
+        "                    <td class=\"col-3\">Number of unique relations</td>\n" +
         "                    <th class=\"col\">"+ data_summary.num_unique +"</th>\n" +
         "                  </tr>\n" +
         "\n" +
@@ -473,11 +531,10 @@ function showResults(result){
         "              </table>\n" +
         "            </div>\n" +
         "        </div>"
-
-
+            
             if(result.agreement != null) {
-
-                resultsToVisualize += "<h5 class='titleLower'> Comparison with " + result.agreement["name"] + "</h5>"+
+                
+                resultsToVisualize += "<h5 class='titleLower' style='padding-left:15px;'> Comparison with " + result.agreement["name"] + "</h5>"+
                 "    <div class=\"container\">\n" +
                 "            <div class=\"table\">\n" +
                 "              <table class=\"table table-responsive\">\n" +
@@ -514,24 +571,21 @@ function showResults(result){
 
 
     document.getElementById("data_summary").innerHTML = resultsToVisualize
-    printDefinitions(result.definitions)
-    fitNetwork()
+    printDefinitions(result.definitions,false)
 }
 
 
-function fitNetwork(){
-    //network.fit();
-}
-
-
-function printDefinitions(definitions){
-
+function printDefinitions(definitions, update){
+  console.log("***** EDURELL - Video Annotation: burstVocabulary.js::printDefinitions() ******");
+    if(update) {
+      document.getElementById("defsTable").innerHTML = ""
+    }
     let definitionTable = document.getElementById("defsTable")
 
     definitionTable.innerHTML = ""
 
     for(let i in definitions){
-
+        console.log(definitions[i])
         let c = definitions[i].concept
         let s = definitions[i].start.split(".")[0]
         let e = definitions[i].end.split(".")[0]
@@ -546,6 +600,50 @@ function printDefinitions(definitions){
 
     }
 
+}
+
+//function downloadObjectAsJson(exportObj, exportName){
+//  var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj,null,2));
+//  var downloadAnchorNode = document.createElement('a');
+//  downloadAnchorNode.setAttribute("href",     dataStr);
+//  downloadAnchorNode.setAttribute("download", exportName + ".json");
+//  document.body.appendChild(downloadAnchorNode); // required for firefox
+//  downloadAnchorNode.click();
+//  downloadAnchorNode.remove();
+//}
+
+function DownloadBurstResultAsJson(exportObj) {
+  if($hasBeenRefined){
+      namefile = "refined_graph"
+  } else {
+      namefile = "graph"
+  }
+  downloadObjectAsJson(exportObj,namefile)
+}
+
+function saveBurstGraph(){
+  console.log("***** EDURELL - Video Annotation: burstVocabulary.js::saveBurstGraph() ******");
+  var data = {
+    "id": $video_id,
+    "concepts": $concepts,
+    "conceptVocabulary":$conceptVocabulary
+  } 
+
+  console.log(data)
+
+  var js_data = JSON.stringify(data);  
+
+  console.log(js_data)
+
+  $.ajax({
+    url: '/annotator/save_burst_json',
+    type : 'post',
+    contentType: 'application/json',
+    dataType : 'json',
+    data: js_data
+}).done(function(result) {
+    console.log(result);
+})     
 }
 
 function hmsToSeconds(time){
@@ -563,7 +661,6 @@ function playDefinition(start){
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     var target = $(e.target).attr("href")
     console.log(target)
-    fitNetwork();
 });
 
 

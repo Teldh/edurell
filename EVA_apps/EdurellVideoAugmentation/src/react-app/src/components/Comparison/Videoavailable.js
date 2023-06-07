@@ -42,6 +42,11 @@ const ExpandMore = styled((props) => {
   }));
 
 
+
+//List of video from the server. Each video use this component to be displayed inside ListVideo Component
+//when you click a videoavailable it will jump to another page to watch the video
+//this is shown if the searchbar is empty
+
 export default function Videoavailable({titleurl,imageurl,idxurl,concepts,creator}) {
 
 

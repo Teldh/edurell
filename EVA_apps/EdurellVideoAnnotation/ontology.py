@@ -11,24 +11,31 @@ import db_mongo
 
 
 oa = Namespace("http://www.w3.org/ns/oa#")
+dc = Namespace("http://purl.org/dc/elements/1.1/")
 dctypes = Namespace("http://purl.org/dc/dcmitype/")
 dcterms = Namespace("http://purl.org/dc/terms/")
-edu = Namespace("http://edurell.com/")
+edu = Namespace("https://teldh.github.io/edurell#")
 
-edurell = "http://edurell.com/"
-#context = "http://www.w3.org/ns/anno.jsonld"
+edurell = "https://teldh.github.io/edurell#"
 context = ["http://www.w3.org/ns/anno.jsonld", {"edu": edurell}]
 
 
-def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
+def annotations_to_jsonLD(annotations, isAutomatic:bool):
 
-    concepts_anno = annotations["definitions"]
-    prereq_anno = annotations["relations"]
+    print("***** EDURELL - Video Annotation: ontology.py::to_jsonLD(): Inizio ******")
+
+    concepts_anno = []
+    prereq_anno = []
+
+    if "definitions" in annotations:
+        concepts_anno = annotations["definitions"]
+    if "relations" in annotations:    
+        prereq_anno = annotations["relations"]
     video_id = annotations["id"]
 
-    if not isGoldCreation and not isBurst:
+    if not isAutomatic:
         creator = annotations["annotator"]
-        creator = Literal(creator)
+        creator = URIRef(creator)
 
     g = Graph()
 
@@ -39,52 +46,69 @@ def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
     g.bind("dcterms", dcterms)
 
 
-    video = URIRef(edurell + "video_" + str(video_id))
-    g.add((video, RDF.type, dctypes.movingImage))
+    # aggiunge un nodo
+    video = URIRef("video_" + str(video_id))
+    #video = URIRef(edurell + "video_" + str(video_id))
+    g.add((video, RDF.type, dctypes.MovingImage))
 
-    conll = URIRef(edurell + "conll_" + str(video_id))
-    g.add((conll, RDF.type, dctypes.text))
+    conll = URIRef("conll_" + str(video_id))
+    #conll = URIRef(edurell + "conll_" + str(video_id))
+    g.add((conll, RDF.type, dctypes.Text))
 
 
     # collegamento video conll
-    ann_linking_conll = URIRef(edurell + "ann0")
-    g.add((ann_linking_conll, RDF.type, oa.annotation))
+    ann_linking_conll = URIRef("ann0")
+    #ann_linking_conll = URIRef(edurell + "ann0")
+    g.add((ann_linking_conll, RDF.type, oa.Annotation))
     g.add((ann_linking_conll, oa.motivatedBy, edu.linkingConll))
     g.add((ann_linking_conll, oa.hasBody, conll))
     g.add((ann_linking_conll, oa.hasTarget, video))
 
     date = Literal(datetime.now())
 
+    #creo il nuovo nodo dei concetti
+    #localVocabulary = URIRef("localVocabulary")
+    #g.add((localVocabulary, RDF.type, SKOS.Collection))
+
 
     # per ogni annotazione di concetto spiegato aggiungo le triple
     for i, annotation in enumerate(concepts_anno):
-        ann = URIRef(edurell + "ann" + str(i + 1))
+        ann = URIRef("ann" + str(i + 1))
 
-        g.add((ann, RDF.type, oa.annotation))
+        g.add((ann, RDF.type, oa.Annotation))
 
-        if isGoldCreation or isBurst:
-            g.add((ann, dcterms.creator, Literal(annotation["creator"])))
+        if isAutomatic:
+            g.add((ann, dcterms.creator, URIRef(annotation["creator"])))
         else:
             g.add((ann, dcterms.creator, creator))
 
         g.add((ann, dcterms.created, date))
         g.add((ann, oa.motivatedBy, oa.describing))
-        g.add((ann, SKOS.note, Literal(annotation["description_type"])))
+        g.add((ann, SKOS.note, Literal("concept"+annotation["description_type"])))
 
 
-        concept = URIRef(edurell + annotation["concept"].replace(" ", "_"))
+        concept = URIRef("concept_" + annotation["concept"].replace(" ", "_"))
 
-        g.add((concept, RDF.type, SKOS.Concept))
+        #crea un nodo concetto
+        
+        #g.add((localVocabulary, SKOS.member, concept))
+        #g.add((concept, RDF.type, SKOS.Concept))
+
+
         g.add((ann, oa.hasBody, concept))
 
         blank_target = BNode()
+
+        
         blank_selector = BNode()
 
         g.add((ann, oa.hasTarget, blank_target))
-        g.add((blank_target, RDF.type, oa.specificResource))
+        g.add((blank_target, RDF.type, oa.SpecificResource))
 
         g.add((blank_target, oa.hasSelector, blank_selector))
-        g.add((blank_selector, RDF.type, oa.rangeSelector))
+        g.add((blank_selector, RDF.type, oa.RangeSelector))
+
+        g.add((blank_target, oa.hasSource, video))
 
         blank_startSelector = BNode()
         blank_endSelector = BNode()
@@ -101,26 +125,24 @@ def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
 
         g.add((blank_endSelector, RDF.value, Literal(annotation["end"] + "^^xsd:dateTime")))
         g.add((blank_endSelector, edu.conllSentId, Literal(annotation["end_sent_id"])))
-
-
-        g.add((blank_target, oa.hasSource, video))
+        
 
     num_definitions = len(concepts_anno) + 1
 
     # per ogni annotazione di prerequisito aggiungo le triple
     for i, annotation in enumerate(prereq_anno):
-        ann = URIRef(edurell + "ann" + str(num_definitions + i))
+        ann = URIRef("ann" + str(num_definitions + i))
 
-        target_concept = URIRef(edurell + annotation["target"].replace(" ", "_"))
-        prereq_concept = URIRef(edurell + annotation["prerequisite"].replace(" ", "_"))
+        target_concept = URIRef("concept_" +  annotation["target"].replace(" ", "_"))
+        prereq_concept = URIRef("concept_" +  annotation["prerequisite"].replace(" ", "_"))
 
-        g.add((target_concept, RDF.type, SKOS.Concept))
-        g.add((prereq_concept, RDF.type, SKOS.Concept))
+        #g.add((target_concept, RDF.type, SKOS.Concept))
+        #g.add((prereq_concept, RDF.type, SKOS.Concept))
 
-        g.add((ann, RDF.type, oa.annotation))
+        g.add((ann, RDF.type, oa.Annotation))
 
-        if isGoldCreation or isBurst:
-            g.add((ann, dcterms.creator, Literal(annotation["creator"])))
+        if isAutomatic:
+            g.add((ann, dcterms.creator, URIRef(annotation["creator"])))
         else:
             g.add((ann, dcterms.creator, creator))
 
@@ -133,7 +155,7 @@ def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
         blank_target = BNode()
 
         g.add((ann, oa.hasTarget, blank_target))
-        g.add((blank_target, RDF.type, oa.specificResource))
+        g.add((blank_target, RDF.type, oa.SpecificResource))
         g.add((blank_target, dcterms.subject, target_concept))
 
         g.add((blank_target, oa.hasSource, video))
@@ -203,13 +225,13 @@ def create_graph_jsonld(annotations, isGoldCreation=False, isBurst=False):
                                         del jsonld["@graph"][k]
                                         break
 
-
-    #pprint(jsonld)
+    #print(jsonld)
     data = {
         "graph":jsonld
     }
 
     #print(data)
+    print("***** EDURELL - Video Annotation: ontology.py::to_jsonLD(): Fine ******")
 
     return g, data
 
@@ -223,10 +245,16 @@ def graph_to_rdf(jsonld):
 
 if __name__ == '__main__':
 
-    json_graph = db_mongo.get_graph("616726e4d1a3488902b4b55d", "sXLhYStO0m8")
+    #print("***** EDURELL - Video Annotation: ontology.py::__main__: Inizio ******")
 
-    print(json_graph)
+    #json_graph = db_mongo.get_graph("616726e4d1a3488902b4b55d", "sXLhYStO0m8")
+    json_graph = db_mongo.get_graph("Burst Analysis", "PPLop4L2eGk")
+
+    from pprint import pprint
+    #pprint(json_graph)
+
     json_expanded = pyld.jsonld.expand(json_graph)
+    pprint(json_expanded[0])
 
     gr = Graph()\
         .parse(data=json.dumps(json_graph), format='json-ld')
@@ -236,19 +264,35 @@ if __name__ == '__main__':
     # Seleziona i concetti che sono spiegati nel video
     query1 = """
         PREFIX oa: <http://www.w3.org/ns/oa#>
-        PREFIX edu: <http://edurell.com/>
+        PREFIX edu: <'https://teldh.github.io/edurell#>
         SELECT ?explained_concept
            WHERE {
                 ?concept_annotation oa:motivatedBy oa:describing.
                 ?concept_annotation oa:hasBody ?explained_concept.
             }"""
 
-    qres = gr.query(query1)
+    query2 = """
+        PREFIX oa: <http://www.w3.org/ns/oa#>
+        PREFIX edu: <'https://teldh.github.io/edurell#>
+        PREFIX rdf: <'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+        SELECT ?explained_concept ?start
+           WHERE {
+                ?concept_annotation oa:motivatedBy oa:describing.
+                ?concept_annotation oa:hasBody ?explained_concept.
+                ?concept_annotation oa:hasTarget ?targ.
+                ?targ oa:hasSelector ?selector.
+                ?selector oa:hasStartSelector ?start_selector.
+                ?start_selector rdf:value ?start_sent_id.
+                
+            }"""
 
+    qres = gr.query(query2)
+    
     toc = time.time()
 
     print("Results: - obtained in %.4f seconds" % (toc - tic))
     for row in qres:
-        print("%s" % row)
+        print(row)
+        print("%s, %d" % row)
 
-    print()
+    #print("***** EDURELL - Video Annotation: ontology.py::__main__: Fine ******")    

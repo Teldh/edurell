@@ -27,56 +27,63 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
-
-    <div class="container" id="mainContainer" style="margin-top: 10px">
-
-      <div class="row">
-        <div class="col">
-            <p class="title"> Video Annotation Selection  </p>
-        </div>
-        <div class="col">
-          <button type="button" class="btn btn-lg btn-dodgerblue btn-primary float-right" data-toggle="modal" data-target="#addVideoModal">
-            + Add Video
-          </button>
-        </div>
-      </div>
-
-      <div class="row" style="">
-        <div class="col">
-            <p class="titleLower"> Select a video</p>
-        </div>
-
-        <div class="input-group rounded searchbar col">
-          <input type="search" class="form-control rounded" autocomplete="off" placeholder="Search" aria-label="Search"
-            aria-describedby="search-addon" id="searchbar" onkeyup="search_video()"/>
-          <span class="input-group-text border-0" id="search-addon" style="color: dodgerblue;">
-            <i class="fas fa-search"></i>
-          </span>
-        </div>
-      </div>
-
-    <div id="videos" class="center_selection" style="margin-top: 2%;">
-
-        {% for vid in videos%}
-            <label class="video_radio" video="{{ vid.video_id }}"  >
-              <input type="radio" name="video" value={{ vid.video_id }} id={{ vid.video_id }}>
-              <img src="https://img.youtube.com/vi/{{ vid.video_id }}/hqdefault.jpg">
-              <p class="video_title">{{ vid.title }}</p>
-            </label>
-        {% endfor %}
-
-    </div>
-
-    <div class="container" id="loading" style="display: none; margin-top: 2%">
+          
+    <div>
+      <div class="container" id="backgroundLoading" style="display:none;margin-top: 2%">
         <div class="text-center" style="margin-top: 4%">
-            <p class="titleLower"> The video is being downloaded.. </p>
+            <p class="titleLower"> The annotator is loading.. </p>
           <div class="spinner-border text-primary" role="status">
             <span class="sr-only">Loading...</span>
           </div>
         </div>
-    </div>
+      </div>
 
+      <div class="container" id="videoSelectionTextContainer" style="margin-top: 10px">
+        <div class="row">
+          <div class="col">
+              <p class="title"> Video Annotation Selection  </p>
+          </div>
+          <div class="col">
+            <button type="button" class="btn btn-lg btn-dodgerblue btn-primary float-right" data-toggle="modal" data-target="#addVideoModal">
+              + Add Video
+            </button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+              <p class="titleLower"> Select a video</p>
+          </div>
+          <!-- <div class="col" title="before starting the manual annotator wait for the video segmentation to finish: this could result in keyframes based on slides show up">
+            <label class="titleLower" style="font-size: 1.2rem;"> wait for segmentation
+              <input type="checkbox" id="waitSegmentationCheckbox"></input>
+            </label>
+          </div> -->
+          <div class="input-group rounded searchbar col">
+            <input type="search" class="form-control rounded" autocomplete="off" placeholder="Search" aria-label="Search"
+              aria-describedby="search-addon" id="searchbar" onkeyup="search_video()"/>
+            <span class="input-group-text border-0" id="search-addon" style="color: dodgerblue;">
+              <i class="fas fa-search"></i>
+            </span>
+          </div>
+        </div>
+
+        <div id="videos" class="center_selection" style="margin-top: 2%;">
+
+            {% for vid in videos%}
+                <label class="video_radio" video="{{ vid.video_id }}"  >
+                  <input type="radio" name="video" value={{ vid.video_id }} id={{ vid.video_id }}>
+                  <img src="https://img.youtube.com/vi/{{ vid.video_id }}/hqdefault.jpg">
+                  <p class="video_title">{{ vid.title }}</p>
+                </label>
+            {% endfor %}
+
+        </div>
+      </div>
     </div>
+    
+
+    
 
 
 
@@ -94,34 +101,32 @@
 
 
       <div class="modal-body" style="height:300px;">
-        <h5 class="title" id="conceptsModalLabel" style="margin-top: 2%">Add Youtube Url</h5>
-            <br>
-            <form method="POST" id="urlForm">
-              {{ form.csrf_token }}
-               <div class="form-group">
-                 {{ form.url(class_='form-control', autocomplete="off", id="youtube_url")}}
-               </div>
-            <button type="submit" class="btn btn-dodgerblue float-right">
-                Add Video & Start Annotate
-            </button>
-            </form>
-
-            <div class="container" id="loading2" style="display: none; margin-top: 2%">
-                <div class="text-center" style="margin-top: 4%">
-                   <p class="titleLower"> The video is being downloaded.. </p>
-                  <div class="spinner-border text-primary" role="status">
-                    <span class="sr-only">Loading...</span>
-                  </div>
-                </div>
+        <div id="frontPopupWindowTextContainer">
+          <h5 class="title" id="conceptsModalLabel" style="margin-top: 2%">Add YouTube Url</h5>
+              <br>
+              <form method="POST" id="urlForm">
+                {{ form.csrf_token }}
+                 <div class="form-group">
+                   {{ form.url(class_='form-control', autocomplete="off", id="youtube_url")}}
+                 </div>
+              <button type="submit" class="btn btn-dodgerblue float-right">
+                  Add Video & Start Annotation
+              </button>
+              </form>
+        </div>
+        <div class="container" id="loadingInForwardWindow" style="display:none; margin-top: 12%">
+            <div class="text-center" style="margin-top: 4%">
+               <p class="titleLower"> The video is being downloaded and analyzed... </p>
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
             </div>
-
-
-
+        </div>
       </div>
-
-      <div class="modal-footer">
+      <!--<div class="modal-footer" id="stopAndCloseButtonsFooter">
+        <button type="button" id="breakButton" class="btn btn-secondary" title="send stop signal to segmentation algorithm" style="display: none;">Stop Segmentation</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
+      </div>-->
     </div>
   </div>
 </div>
@@ -134,20 +139,54 @@
 
 <script>
 
-    function loading(){
+    function addVideoLoading(){
         document.getElementById("videos").style.display = "none"
-        document.getElementById("loading").style.display = "block"
-        document.getElementById("urlForm").style.display = "none"
-        document.getElementById("loading2").style.display = "block"
+        // background loading can be shown but it's not pretty with the front loading scene
+        //document.getElementById("backgroundLoading").style.display = "none"
+        document.getElementById("addVideoModal").style.display = "block"
+        document.getElementById("videoSelectionTextContainer").style.display = "none"
+        
+        document.getElementById("frontPopupWindowTextContainer").style.display = "none"
+        document.getElementById("loadingInForwardWindow").style.display = "block"
+        document.getElementById("stopAndCloseButtonsFooter").style.justifyContent = "space-between"
+        document.getElementById("breakButton").style.display = "block"
+        
     }
 
+    //$("#breakButton").click(function(){
+    //  console.log("Breaking analysis....")
+    //  $.ajax({
+    //    url: '/annotator/stop_segmentation',
+    //    type : 'get',
+    //    success: function(result) {
+    //      console.log("Stopped Execution")
+    //    }
+    //  })
+    //});
+
+    //const checkbox = document.getElementById("waitSegmentationCheckbox");
+
+    //checkbox.addEventListener('change', function() {
+    //  if (this.checked) {
+    //    console.log('Checkbox is checked');
+    //  } else {
+    //    console.log('Checkbox is not checked');
+    //  }
+    //});
+
     $("#urlForm").submit(function() {
-      loading()
+      addVideoLoading()
     });
 
+    async function selectVideoLoading(){
+      document.getElementById("videoSelectionTextContainer").style.display = "none"
+      document.getElementById("backgroundLoading").style.display = "block"
+    }
+
     $(".video_radio").click(function(e) {
+        console.log("here")
+        selectVideoLoading()
         e.preventDefault();
-        loading()
         document.getElementById("youtube_url").value = "https://www.youtube.com/watch?v=" + this.getAttribute("video")
         document.getElementById("urlForm").submit();
     });

@@ -1,12 +1,12 @@
 from synonyms import create_skos_dictionary
 import db_mongo
-from ontology import create_graph_jsonld
+from ontology import annotations_to_jsonLD
 from pprint import pprint
 
 # Function to merge dictionaries
 def mergeDictionary(d1, d2):
    d3 = {**d1, **d2}
-   for key, value in d3.items():
+   for key in d3.keys():
        if key in d1 and key in d2:
             d3[key] = list(set(d3[key]+d1[key]))
    return d3
@@ -28,16 +28,16 @@ def create_gold(video, annotators, combination_criteria, name):
         # If the concept vocabulary is new (empty) then initialize it to empty synonyms
         if(conceptVocabulary == {}) :
             for i in db_mongo.get_concepts(annotators[0], video):
-                conceptVocabulary[i] = [];
+                conceptVocabulary[i] = []
 
         annotations = {"relations":relations, "definitions":definitions, "id":video}
-        g, jsonld = create_graph_jsonld(annotations, isGoldCreation=True)
+        _, jsonld = annotations_to_jsonLD(annotations, isAutomatic=True)
 
         data = jsonld.copy()
         data["video_id"] = video
         data["graph_type"] = "gold standard"
         data["gold_name"] = name
-        data["conceptVocabulary"] = create_skos_dictionary(conceptVocabulary)
+        data["conceptVocabulary"] = create_skos_dictionary(conceptVocabulary, video,"auto")
 
         db_mongo.insert_gold(data)
 

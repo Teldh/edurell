@@ -113,7 +113,7 @@ class BurstExtractor:
         self._bursts = pd.DataFrame(columns=['keyword', 'level', 'start', 'end'],
                                     dtype='int64')
 
-    def find_offsets(self, words, occ_index_file: str=None) -> dict or defaultdict:
+    def find_offsets(self, words=None, occ_index_file: str=None) -> dict or defaultdict:
         """
         Determine the offsets (i.e. occurrences) in the text for all the words belonging to
         the wordlist. This can be done either by relying on precomputed offsets stored in a
@@ -172,6 +172,7 @@ class BurstExtractor:
                     if word.upper() in sent.upper():
                         # add the index of the sentence in the list of offsets of that word
                         self._offsets[word].append(index)
+        #print(f"offsets: {self._offsets}")
         return self._offsets
 
     def generate_bursts(self, s=2, gamma=1) -> pd.DataFrame or None:

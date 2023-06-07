@@ -48,16 +48,18 @@ def get_synonyms_from_list(concepts):
 Create skos dictionary from a dict with synonyms (word: [list of synonyms]).
 Returns the graph with the skos dictionary structure.
 '''
-def create_skos_dictionary(synonyms):
+def create_skos_dictionary(synonyms, video_id, mode):
+
+    print("***** EDURELL - Video Annotation: synonyms.py::create_skos_dictionary(): Inizio ******")
     
     graph = Graph()
     skos = Namespace('http://www.w3.org/2004/02/skos/core#')
     graph.bind('skos', skos)
-    uri_edurell = 'http://edurell.com/'
+    uri_edurell = 'https://teldh.github.io/edurell#'
 
     for concept in synonyms.keys():
         
-        uri_concept = URIRef(uri_edurell + concept.replace(" ", "_"))
+        uri_concept = URIRef("concept_" + concept.replace(" ", "_"))
         graph.add((uri_concept, RDF['type'], skos['Concept']))
         graph.add((uri_concept, skos['prefLabel'], Literal(concept, lang='en')))
         for synonym in synonyms[concept]:
@@ -67,11 +69,17 @@ def create_skos_dictionary(synonyms):
     #graph.serialize(destination='output.txt', format='json-ld')
     #print graph.serialize(format='json-ld').decode('utf-8')
 
-    context = ["http://www.w3.org/ns/anno.jsonld", {"edu": uri_edurell}]
+    context = ["http://www.w3.org/ns/anno.jsonld", 
+        {"edu": uri_edurell, 
+        "@base": "https://edurell.dibris.unige.it/annotator/"+mode+"/"+video_id+"/", "@version": 1.1}]        
 
     jsonld = json.loads(graph.serialize(format='json-ld'))
     jsonld = pyld.jsonld.compact(jsonld, context)
-    #print(jsonld)
+
+    if '@graph' not in jsonld:
+        jsonld["@graph"] = []
+
+    print("***** EDURELL - Video Annotation: synonyms.py::create_skos_dictionary(): Fine ******")
 
     return jsonld
 

@@ -24,9 +24,13 @@ import 'reactflow/dist/style.css';
 
 
 
-const LayoutFlow = ({concept, conceptExtraRaw}) => {
+const LayoutFlow = ({catalog, concept, conceptExtraRaw}) => {
+  let checker = (big, small) => {
+    return small.every(v => big.includes(v));
+  };
     const conceptExtra = conceptExtraRaw[0]
-    console.log("FLOWMSLAL: ",concept," ",conceptExtra," ",conceptExtraRaw)
+
+
   const reactFlowInstance = useReactFlow();
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
@@ -100,6 +104,22 @@ const LayoutFlow = ({concept, conceptExtraRaw}) => {
     let flowidx=0
 
     if(conceptExtra["list_preconcept"].length > 0){
+
+      //compute the percentage of prerequisite if explained or not
+      let list_pre = conceptExtra["list_preconcept"]
+      let maxnum=list_pre.length;
+      let countnum=0;
+      for(let i=0;i<maxnum; i++){
+        if (checker(catalog[0].extracted_keywords,[list_pre[i]])){
+          countnum++;
+        }
+      }
+
+      //left: if for 80% prerequisite explained in the video. right: if the prerequisite isnt in the extracted concepts = oa:description = not explained
+      if((countnum/maxnum >= 0.8) || !checker(catalog[0].extracted_keywords, conceptExtra["list_preconcept"])){
+
+      }else{
+
         for(let i=0; i<conceptExtra["list_preconcept"].length; i++){
             prenodes=[...prenodes,{
                 id:(flowidx++).toString(),
@@ -110,6 +130,9 @@ const LayoutFlow = ({concept, conceptExtraRaw}) => {
             }];
             prenodesnote=[...prenodesnote,conceptExtra["list_prenotes"][i]]
         }
+
+      }
+
     }
 
     if(conceptExtra["list_derivatedconcept"].length>0){

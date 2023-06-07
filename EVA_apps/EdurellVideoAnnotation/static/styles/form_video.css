@@ -68,6 +68,9 @@ MULTI STEP FORM
 
 */
 
+.button {
+  margin-right: 200px;
+}
 
 .center_selection{
   display: flex;

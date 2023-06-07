@@ -32,7 +32,7 @@
 
     <div class="container" id="mainContainer" style="margin-top: 10px">
 
-      <p class="title"> Burst </p>
+      <p class="title"> Auto-annotation of Prerequisite Relations </p>
 
 
     <div id="tab_analysis_type">
@@ -41,22 +41,27 @@
 
         <div class="wrapperRadio">
          <input type="radio" class="analysis_type" name="analysis_type" id="semi" value="Semi automatic extraction">
-         <input type="radio" class="analysis_type" name="analysis_type" id="auto" value="automatic extraction">
+         <input type="radio" class="analysis_type" name="analysis_type" id="auto" value="Automatic extraction">
+         <!--<input type="radio" class="analysis_type" name="analysis_type" id="video" value="Automatic&Video extraction">-->
 
-           <label for="semi" class="option option-1">
+           <label for="semi" class="option option-1" title="this mode allows extracted concepts to be edited before starting automatic prerequisite extraction">
              <div class="dot"></div>
-              <span>Semi automatic extraction</span>
+              <span>Semi automatic</span>
               </label>
-           <label for="auto" class="option option-2">
+           <label for="auto" class="option option-2" title="this mode does not allow manual editing: concepts and prerequisite relations are both extracted automatically">
              <div class="dot"></div>
-              <span>Automatic extraction</span>
+              <span>Automatic</span>
            </label>
+           <!--<label for="video" class="option option-3">
+            <div class="dot"></div>
+             <span>Automatic + Video segmentation</span>
+          </label> -->
 
         </div>
     </div>
 
     <div id="videos" style="display: none">
-    <div class="row" style="">
+    <div class="row">
         <div class="col">
             <p class="titleLower"> Select a video</p>
         </div>
@@ -87,7 +92,7 @@
 
     <div class="container" id="loading" style="display: none; margin-top: 2%">
         <div class="text-center" style="margin-top: 4%">
-           <p class="titleLower"> Extracting keywords.. </p>
+           <p class="titleLower"> Finding keywords.. </p>
           <div class="spinner-border text-primary" role="status">
             <span class="sr-only">Loading...</span>
           </div>
@@ -121,7 +126,7 @@
 
 
 
-    function loading(){
+    function loadingVideosInBurst(){
         document.getElementById("videos").style.display = "none"
         document.getElementById("loading").style.display = "block"
         document.getElementById("urlForm").style.display = "none"
@@ -132,22 +137,19 @@
     $(".video_radio").click(function(e) {
         e.preventDefault();
 
-        loading()
+        loadingVideosInBurst()
         document.getElementById("youtube_url").value = this.getAttribute("video")
         document.getElementById("urlForm").submit();
     });
 
     $('.analysis_type').click(function(e) {
 
-      document.getElementById("tab_analysis_type").style.display = "none"
-      document.getElementById("videos").style.display = "block"
-
-      if($(this).attr('id') == "auto")
-        document.getElementById("type-1").checked = true;
-      else
-        document.getElementById("type-0").checked = true;
-
-
+      document.getElementById("tab_analysis_type").style.display = "none";
+      document.getElementById("videos").style.display = "block";
+      var attrs = {"semi": "0",
+                   "auto": "1"}//,
+                   //"video": "2"}
+      document.getElementById("type-"+attrs[$(this).attr('id')]).checked = true;
     })
 
 

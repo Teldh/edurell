@@ -32,9 +32,11 @@ POSSO CHIAMARE SOLO LE QUERY SENZA AVERE PROBLEMI CON LE 500 CONNESSIONI
 */
 
 export default function Comparison(){
+
+
+    //this block used for tutorial to setup anchor to jump and open and close the window
     const anchor1 = useRef(null);
     const [anchor2,setAnchor2] = useState(null)
-    console.log("COMPARISON ANCHOR2: ",anchor2)
     const [openTutorial, setOpenTutorial] = useState(false);
     function closeTutorial(){
       setOpenTutorial(false);
@@ -42,12 +44,10 @@ export default function Comparison(){
 
     function openTutorialFunc(){
       setOpenTutorial(true);
-      console.log("ID: ",document.getElementById("TEST"))
+
     }
 
-  
-
-
+ 
 
     //list of video selected for comparison
     const [listvideo, setListVideo]= useState([]);
@@ -63,9 +63,6 @@ export default function Comparison(){
     //each video in catalog has multiple concepts and each concepts has extra data required for the website
     const [catalogExtra, SetCatalogExtra]=useState([]);
 
-    //more data for catalog for filters before selecting any concept
-    const [catalogFilter, SetCatalogFilter]=useState([])
-
     //its the catalog but with fewer elements due to filters
     const [catalogoriginal, SetCatalogOriginal] = useState(null);
 
@@ -75,6 +72,8 @@ export default function Comparison(){
     //used for textfield list, where we read all the concept user has selected.
     const [querylist, setQueryList]=useState([]);
 
+
+    //used to retrieve the context, used to save the logged user
     const context = useContext(TokenContext);
     const nameSurname  = context.nameSurname;
 
@@ -92,8 +91,15 @@ export default function Comparison(){
     //check if concept selected to filter video to match
     const [searchFilterClicked,setSearchFilterClicked] = useState(false);
 
-    //list fo filters value. used to filter the videos
-    const [comparisonfilter, SetComparisonFilter] = useState([null,null,null,null,null,null,"recent"])
+
+   
+    useEffect(()=>{
+      if(document.cookie == "" && searchFilterClicked){
+        openTutorialFunc()
+        document.cookie = "tutorial=done; expires=Thu, 18 Dec 2100 12:00:00 UTC";
+      }
+    },)
+
     
     //capturing the concept sent from previous page
     useEffect(() => {
@@ -104,13 +110,13 @@ export default function Comparison(){
 
     //a function used to check if small is included into big
     let checker = (big, small) => {
-      //console.log("checker: ",big," ",small)
+
       return small.every(v => big.includes(v));
     };
 
     //request from mongodb to the value inside collection videos
     useEffect(() => {
-       // console.log("effect")
+
         const fetchData = async () => {
             let response=null
             try{
@@ -125,7 +131,7 @@ export default function Comparison(){
                 .then(res => res.json())
             }
             catch(err){
-           //   console.log(err)
+
               if(err.message==="401"){
                   
                   context.setToken('')
@@ -137,31 +143,31 @@ export default function Comparison(){
                   return
               }
             }
-            //console.log("response",response)
+
             if(response===undefined){
               alert('Unknown Server Error')
               return
             }
             else{
+
+              //if answered correctly update data
               setCatalog(response.catalog)
               SetCatalogOriginal(response.catalog)
               setLoading(false)
-                //originallist = response.catalog
-            
           }
         };
-    
         fetchData();
-        
 
       }, []);
 
       //if query to videos collection is successful or not, depending on variable loading
       useEffect(() => {
-        if (loading) { // It's used here...
-          // ...
+
+        if (loading) {
+          // if loading do nothing
         } else {
-          // ...// create unique list of concepts to use for queryinputs 
+          // create unique list of concepts to use for queryinputs 
+
            
           let x=0;
           let newlistconcepts=[]
@@ -180,173 +186,202 @@ export default function Comparison(){
       
           })
           x=x+1;
-                  //console.log(newlistconcepts);
+
           setListConcepts(newlistconcepts);
           //used to get all type and preconcept of all video. not used anymore. just for reference in the future.
-          //QueryVideoTypeAndPre()
         }
       }, [loading]);
+
+      //used to query n times more information from Graphs collection in mongodb using SPARQL query
 
       useEffect(()=>{
 
         if(searchFilterClicked){
           SetCatalogExtra(catalogExtra=>[])
-          //("queryextra use effect ",catalog)
-          let asd = catalogExtra
+
           catalog.map(video=>{
-         // console.log("sto facendo query")
-          
-            
             QueryConceptExtra(video.video_id, querylist)
           })
-        
-          
         }
       },[searchFilterClicked])
 
-    //OLD, sort the video based on concept on query
-    function AddQueryElementOLD(concept){
-        SetSearchClicked(true);
-        //bug resettare la querylist coi elementi aggiornati
-        if(catalog.length > 0 ){
-            if(concept.length==0){
-                //setCatalog(originalList);
-            }
-           // console.log("addquery ",concept)
-            const newquerylist = [...concept];
-            setQueryList(newquerylist);
-        //    console.log("newquerylist: ",newquerylist)
-            
-            setSearchFilterClicked(true)
-            let newcatalog = catalog.filter(video=>checker(video.extracted_keywords,concept));
-            if(concept.length>0 && newcatalog.length==0){
-                setNomatch(true)
-            }else if(concept.length!=querylist.length){
-                setNomatch(false);
-            }
-            newcatalog = [...newcatalog, ...catalog.filter(video=>!checker(video.extracted_keywords,concept))]
-            setCatalog(newcatalog)
-            
 
-        }
-    }
+    //used to update the concept selected from queryinput component
+    //depending on the concept, if present, or null, change the videos listed in listvideo component
     function AddQueryElement(concept){
-      //attiva la lista video selected
+      
       SetSearchClicked(true);
-      //console.log("DOPOCLICKBUTTON: ",searchFilterClicked)
-      //SetCatalogOriginal(catalog);
-      //setCatalog(catalogoriginal);
-      //bug resettare la querylist coi elementi aggiornati
-     // console.log(catalog," ",catalogoriginal," ",concept)
   
-          setCatalog(catalogoriginal);
-          //console.log("addquery ",concept)
-          const newquerylist = [...concept];
-          setQueryList(newquerylist);
-         // console.log("newquerylist: ",newquerylist)
-          if(concept[0]==null || concept[0].trim().length===0){
-              //setSearchFilterClicked(false);
-              //console.log("concept null")
-              setNomatch(false);
-              return;
-          }
-          setSearchFilterClicked(true);
-          
-          
-          
-         
-          let newcatalog = catalogoriginal.filter(video=>checker(video.extracted_keywords,concept));
-          //console.log("check concept: ",concept.length," ",newcatalog.length," ",querylist.length)
-          if(concept.length>0 && newcatalog.length==0){
-              setNomatch(true)
-          }else if(concept.length!=querylist.length){
-              setNomatch(false);
-          }
-
-  
+      setCatalog(catalogoriginal);
+      const newquerylist = [...concept];
+      setQueryList(newquerylist);
+      if(concept[0]==null || concept[0].trim().length===0){
+          setNomatch(false);
+          return;
+      }
+      setSearchFilterClicked(true);
       
-          setCatalog(newcatalog)
+      let newcatalog = catalogoriginal.filter(video=>checker(video.extracted_keywords,concept));
+      if(concept.length>0 && newcatalog.length==0){
+          setNomatch(true)
+      }else if(concept.length!=querylist.length){
+          setNomatch(false);
+      }  
+      setCatalog(newcatalog)
           
-
-      
     }
 
+   
+    //given two array start and end, with the format 0:01:01.820000^^xsd:dateTime" it will compute the duration in seconds
     function ComputeDuration(start,end){
       let duration=0
       for(let i=0; i<start.length;i++){
-        const time1 = end[i] .split("^^")[0];
-        const time2 = start[i] .split("^^")[0];
 
-        let [hours1, minutes1, seconds1] = time1.split(":");
-        seconds1=Math.floor(seconds1)
-        seconds1=seconds1+hours1*3600
-        seconds1=seconds1+minutes1*60
+          const time1 = end[i] .split("^^")[0];
+          const time2 = start[i] .split("^^")[0];
 
-        let [hours2, minutes2, seconds2] = time2.split(":");
-        seconds2=Math.floor(seconds2)
-        seconds2=seconds2+hours2*3600
-        seconds2=seconds2+minutes2*60
+          let [hours1, minutes1, seconds1] = time1.split(":");
+          seconds1=Math.floor(seconds1)
+          seconds1=seconds1+hours1*3600
+          seconds1=seconds1+minutes1*60
 
-        let resultseconds = Math.abs(seconds2-seconds1);
-        duration = duration+resultseconds;
+          let [hours2, minutes2, seconds2] = time2.split(":");
+          seconds2=Math.floor(seconds2)
+          seconds2=seconds2+hours2*3600
+          seconds2=seconds2+minutes2*60
+
+          let resultseconds = Math.abs(seconds2-seconds1);
+          duration = duration+resultseconds;
+        
+        
       }
 
         return duration
     }
 
+    //as the function before, it will compute only if the type is similar to conceptDefinition
+    function ComputeDurationCD(start,end,type){
+      let duration=0
+      for(let i=0; i<start.length;i++){
+        if(type[i]=="conceptDefinition"){
+          const time1 = end[i] .split("^^")[0];
+          const time2 = start[i] .split("^^")[0];
+
+          let [hours1, minutes1, seconds1] = time1.split(":");
+          seconds1=Math.floor(seconds1)
+          seconds1=seconds1+hours1*3600
+          seconds1=seconds1+minutes1*60
+
+          let [hours2, minutes2, seconds2] = time2.split(":");
+          seconds2=Math.floor(seconds2)
+          seconds2=seconds2+hours2*3600
+          seconds2=seconds2+minutes2*60
+
+          let resultseconds = Math.abs(seconds2-seconds1);
+          duration = duration+resultseconds;
+        }
+        
+
+      }
+
+        return duration
+    }
+
+
+    //same as before but for conceptExpansion
+    function ComputeDurationCE(start,end,type){
+      let duration=0
+      for(let i=0; i<start.length;i++){
+        if(type[i]=="conceptExpansion"){
+          const time1 = end[i] .split("^^")[0];
+          const time2 = start[i] .split("^^")[0];
+
+          let [hours1, minutes1, seconds1] = time1.split(":");
+          seconds1=Math.floor(seconds1)
+          seconds1=seconds1+hours1*3600
+          seconds1=seconds1+minutes1*60
+
+          let [hours2, minutes2, seconds2] = time2.split(":");
+          seconds2=Math.floor(seconds2)
+          seconds2=seconds2+hours2*3600
+          seconds2=seconds2+minutes2*60
+
+          let resultseconds = Math.abs(seconds2-seconds1);
+          duration = duration+resultseconds;
+        }
+        
+      }
+
+        return duration
+    }
+
+    // when in the website you press apply filters, this function will run and filter the video available
     function ApplyFilters(listfilters){
-      //SetComparisonFilter(listfilters)
-
-      //Look at filter UI.
-      //lista nuovi video
-      //  const [catalogoriginal, SetCatalogOriginal] = useState(null);
-
-      //concettiextraperfiltri
-      // const [catalogFilter, SetCatalogFilter]=useState([])
-      
-       //applicare filtri
-       console.log("querylist filter: ",querylist)
+     
        let catalogfiltered=[...catalogoriginal];
         catalogfiltered = catalogfiltered.filter(video=>checker(video.extracted_keywords,querylist));
-        console.log("inizio filtri: ",listfilters)
-        console.log("catalogextra: ",catalogExtra)
-        console.log("catalogfiltered: ",catalogfiltered)
 
-       if(listfilters[0] == "novice"){
-         //filtro, tutti i preconcetti concenuti nei concetti
+
+        // Select if novice or expert
+
+        // if no prerequsiite
+        // if all prerequisite explained in the video
+        // if 80% of prerequisite explained in the video
+        if(listfilters[0] == "novice"){
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("NOVICE ",video.extracted_keywords," ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"]);
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"].length == 0){
             return true;
            }
+           let list_pre = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"]
+           let maxnum=list_pre.length;
+           let countnum=0;
+           for(let i=0;i<maxnum; i++){
+              if (checker(video.extracted_keywords,[list_pre[i]])){
+                countnum++;
+              }
+           }
+           if(countnum/maxnum >= 0.8){
+            return true;
+           }
            return checker(video.extracted_keywords, catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"])});
-       }else if(listfilters[0] == "expert"){
+        //the other case from novice
+        }else if(listfilters[0] == "expert"){
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("EXPERT ",video.extracted_keywords," ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id));
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"].length == 0){
             return false;
            }
+           let list_pre = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"]
+           let maxnum=list_pre.length;
+           let countnum=0;
+           for(let i=0;i<maxnum; i++){
+              if (checker(video.extracted_keywords,[list_pre[i]])){
+                countnum++;
+              }
+           }
+           if(countnum/maxnum >= 0.8){
+            return false;
+           }
+
            return !checker(video.extracted_keywords, catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["list_preconcept"]);
          })
        }
 
        
 
-       //spiegazione
-       if(listfilters[1] == "essential"){
+
+        //check if concept selected is conceptDefinition or ConceptExpansion
+        if(listfilters[1] == "essential"){
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("essential ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]);
-           //if conceptexpansion array is empty, return always true
+
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"].length == 0){
             return true;
            }
            return !checker(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"],["conceptExpansion"]);
          })
-  
 
        }else if(listfilters[1]=="detailed"){
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("detailed ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]);
+
            if(catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"].length == 0){
             return true;
            }
@@ -356,108 +391,114 @@ export default function Comparison(){
        }
      
 
-       //tipo di lezione
+
+       //check if slide is present in the video
        if(listfilters[2] == "withslide"){
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("wihslide ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"]);
+
            return catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"] > 0.1? true:false;
          })
  
        }else if(listfilters[2] == "withoutslide"){
          catalogfiltered = catalogfiltered.filter(video=>{
-           console.log("withoutslide ",catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"]);
+
            return catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["video_slidishness"] <= 0.1? true:false;
          })
     
        }
        
 
-        console.log("definizione")
-       //definizione
+
+       //conceptDefinition duration filter
+
        if(listfilters[3]=="less4"){
           catalogfiltered = catalogfiltered.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) < 240
+
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+            return ComputeDurationCD(endtime, starttime,type) < 240
+
           });
     
        }else if(listfilters[3]=="4to20"){
           catalogfiltered = catalogfiltered.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) >= 240 && ComputeDuration(endtime, starttime) <= 1200
+
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+            return ComputeDurationCD(endtime, starttime,type) >= 240 && ComputeDurationCD(endtime, starttime,type) <= 1200
+
           });
       
        }else if(listfilters[3]=="greater20"){
           catalogfiltered = catalogfiltered.filter(video=>{
             let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
             let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) > 1200
+
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+            return ComputeDurationCD(endtime, starttime,type) > 1200
+
           });
     
        }
    
 
-        console.log("approfondimento")
-       //approfondimento
+
+       //conceptExpansion duration filter
        if(listfilters[4]=="less4"){
           catalogfiltered = catalogfiltered.filter(video=>{
-            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_starttime"]
-            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) < 240
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+            return ComputeDurationCE(endtime, starttime,type) < 240
+
           });
 
        }else if(listfilters[4]=="4to20"){
           catalogfiltered = catalogfiltered.filter(video=>{
-            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_starttime"]
-            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) >= 240 && ComputeDuration(endtime, starttime) <= 1200
+
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+            return ComputeDurationCE(endtime, starttime,type) >= 240 && ComputeDurationCE(endtime, starttime,type) <= 1200
+
           });
 
        }else if(listfilters[4]=="greater20"){
           catalogfiltered = catalogfiltered.filter(video=>{
-            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_starttime"]
-            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["derivatedconcept_endtime"]
-            console.log("starttime: ",starttime, " endtime: ",endtime," duration: ",ComputeDuration(endtime, starttime))
-            return ComputeDuration(endtime, starttime) > 1200
+
+            let starttime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_starttime"]
+            let endtime = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["concept_endtime"]
+            let type = catalogExtra.filter(videoExtra=>videoExtra.video_id == video.video_id)[0]["explain"]
+            return ComputeDurationCE(endtime, starttime,type) > 1200
+
           });
 
        }
 
 
-        console.log("video intero")
-       //video intero
+
+       //whole video duration filter
        if(listfilters[5]=="less4"){
           catalogfiltered = catalogfiltered.filter(video=>video.duration < 240)
-
-          console.log("after filter: ",catalogfiltered)
        }else if(listfilters[5]=="4to20"){
-          console.log("videointero 4to20: ",catalogfiltered.filter(video=>video.duration >= 240 && video.duration < 1200))
           catalogfiltered = catalogfiltered.filter(video=>video.duration >= 240 && video.duration < 1200)
-
-          console.log("after filter: ",catalogfiltered)
        }else if(listfilters[5]=="greater20"){
-
           catalogfiltered = catalogfiltered.filter(video=>{
-
-            console.log("video intero: ",video.video_id," ",video.duration," ",video.duration > 1200)
-            return video.duration > 1200;})
-          console.log("after filter: ",catalogfiltered)
- 
+            return video.duration > 1200;}) 
        }
 
 
-       console.log("sort")
+       //Sort the video based on 
+       //recent: data creation of the annotation
+       //videolength: length of the video
+       //deflength: conceptDefinition of concept length
+       //detailedlength: conceptExpansion length
        if(listfilters[6]=="recent"){
-          console.log("sort: ",catalogfiltered)
           catalogfiltered = catalogfiltered.sort(
             function(a,b){
-              console.log("a: ",a," b: ",b)
+
               console.log("recent ",catalogExtra.filter(videoExtra=>{
                 console.log("dentro: ",videoExtra.video_id," ",a.video_id," ",b.video_id)
                 return videoExtra.video_id == a.video_id
@@ -496,11 +537,9 @@ export default function Comparison(){
           function(a,b){
             let start1=catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)[0]["concept_starttime"];
             let end1=catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)[0]["concept_endtime"];
-            console.log("deflengtha: ",catalogExtra," ",a, " ",catalogExtra.filter(videoExtra=>videoExtra.video_id == a.video_id)," ",end1)
-           
+
             let duration1 = ComputeDuration(end1,start1)
-            console.log("deflengthb: ",catalogExtra," ",b)
-            console.log(catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id))
+
             let start2=catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id)[0]["concept_starttime"];
             let end2=catalogExtra.filter(videoExtra=>videoExtra.video_id == b.video_id)[0]["concept_endtime"];
             
@@ -544,6 +583,8 @@ export default function Comparison(){
 
   
 
+    //used to add the video for comparison in querybar component
+
     function AddVideo(img, title,setAdd,idxurl){
         const newListVideo = [...listvideo,{img:img,title:title,idx:idxurl, setAdd:setAdd}];
         setListVideo(newListVideo);
@@ -551,30 +592,21 @@ export default function Comparison(){
      
     }
 
+
+    //used to remove the video for comparison in querybar component
+
     function RemoveVideo(idx){
         const newListVideo = listvideo.filter(video => video.idx != idx);
         setListVideo(newListVideo);
         
     }
 
-    async function QueryVideoTypeAndPre(){
-      console.log("startquerytypeandpre");
-      const risposta = await fetch('/api/GetVideoTypeAndPrerequisite',{
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Basic ' + btoa(context.token+':unused')
-        },
-      })
 
-      var data = await risposta.json();
-      console.log('queryvideotyperep: ',data);
-      SetCatalogFilter(data);
-    }
     
-    //query to the extra data for a specific concept
+    //query to the extra data for a specific concept inside Graphs collection in mongodb using SPARQL query
+    //videoid and concept is needed
     async function QueryConceptExtra(videoid, concept) {
-      console.log("START queryconceptextra");
+
       let risposta=null
       try{
 
@@ -593,15 +625,17 @@ export default function Comparison(){
         alert("problem  qeury")
         return
       }else{
-        console.log("risposta: ",risposta)
+
         var data = await risposta.json();
-        console.log("data catalogextra: ",data);
         SetCatalogExtra(catalogExtra=>[...catalogExtra,data]);
-        console.log("catalogextra: ",catalogExtra)
+
       }
       
 
     }
+
+
+    //theme of MUI
 
     const theme = createTheme({
         palette: {
@@ -625,8 +659,10 @@ export default function Comparison(){
         },
       });
     
+
+      //used in videofiltered to update the value inside catalogExtra
       function UpdateCatalogExtra(video_id, conceptLength, derivatedLength){
-        console.log("UPDATECATALOGEXTRA")
+
         let newcatalogExtra = catalogExtra.map(video=>{
           if(video.video_id == video_id){
             video["conceptLength"] = conceptLength;
@@ -668,7 +704,9 @@ export default function Comparison(){
         >
             <Grid item>
                 <Typography variant="overline" display="block" gutterBottom sx={{color:"white"}}>
-                   Congratulation, you've made it to the footer :&#41;
+
+                   <b>Edurell Platform for enhanced Video-based Learning</b>
+
                 </Typography>
             </Grid>
         </Grid>
@@ -676,10 +714,4 @@ export default function Comparison(){
     );
 }
 
-/*
-1) Per ogni lista in una state, va a generare un oggetto <Videoselected/> in <Querybar/>
-2) Quando aggiungo un video, <Videoavailable> usa una funzione di this per aggiungere alla lista
-3) Quando clicco x, tolgo l'elemento dalla lista
-4) quando clicco sul video, mi apre il modal corrispondente?
 
-*/

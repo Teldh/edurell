@@ -31,7 +31,7 @@ $(document).on('click','.clickableConcept',function(){
 function addRelation(){
 
   let prereq = document.getElementById("prerequisite").value.toLowerCase();
-  let weight = document.getElementById("weight").value;
+  let weight = document.getElementById("weight").value.toLowerCase();
   let target = document.getElementById("target").value.toLowerCase();
 
   if ((prereq === "") || (target === "")) {
@@ -209,7 +209,11 @@ function deleteDescription(button, concept, start, end){
 
   }
 
-function downloadJson(){
+
+
+function downloadManuGraphAsJson(){
+
+    console.log("***** EDURELL - Video Annotation: create_graph.js::downloadManuGraphAsJson(): Inizio *****")
 
     let annotations = {
         "id": $video_id,
@@ -219,13 +223,10 @@ function downloadJson(){
         "conceptVocabulary": $conceptVocabulary,
     }
 
-    console.log("annotations")
-    console.log(annotations)
-
     var js_data = JSON.stringify(annotations);
 
     $.ajax({
-        url: '/annotator/json_ld',
+        url: '/annotator/download_graph',
         type : 'post',
         contentType: 'application/json',
         dataType : 'json',
@@ -233,25 +234,47 @@ function downloadJson(){
     }).done(function(result) {
         console.log(result)
         downloadObjectAsJson(result, "graph");
-    })
-
-    /*fetch('/json_ld/' + relations).then(function (response) {
-            downloadObjectAsJson(response.json(), "graph")
-        })*/
-
-
+    })    
 }
+  
+function uploadManuGraphOnDB(){
 
-function downloadObjectAsJson(exportObj, exportName){
-    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj,null,2));
-    var downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href",     dataStr);
-    downloadAnchorNode.setAttribute("download", exportName + ".json");
-    document.body.appendChild(downloadAnchorNode); // required for firefox
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-  }
+    let annotations = {
+        "id": $video_id,
+        "relations":relations,
+        "definitions": definitions,
+        "annotator": $annotator,
+        "conceptVocabulary": $conceptVocabulary,
+    }
+    savedText = document.getElementById("saveGraphText")
+    savedText.style.display = "block"
+    console.log("uploadGraphOnDB")
 
+    var js_data = JSON.stringify(annotations);
+
+    $.ajax({
+        url: '/annotator/upload_graph',
+        type : 'post',
+        contentType: 'application/json',
+        dataType : 'json',
+        data : js_data
+    }).done(function(result) {
+        console.log(result)
+        if(result.done == true) {
+            savedText.textContent = "Saved graph successfully!"
+            savedText.style.color = "green";
+            savedText.style.display = "block";
+            setTimeout(function() { 
+                savedText.textContent = "Saving graph...";
+                savedText.style.color = "black";
+                savedText.style.display = "none";
+
+            } ,2000)
+        }
+    })
+}
+  
+  
 /* Creation of the table containing the relations*/
 function printRelations(){
 

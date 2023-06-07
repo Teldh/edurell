@@ -6,6 +6,7 @@ Includes utility functions that are used to process burst results and obtain dat
 
 
 def find_average_len(burst_results) -> dict:
+    print("***** EDURELL - Video Annotation: burst_results_processor.py::find_average_len(): ******")
     """
     Finds the average length of bursts of a concept.
 
@@ -28,6 +29,8 @@ def find_average_len(burst_results) -> dict:
 
 
 def find_first_longest(burst_results, avg) -> dict:
+    print("***** EDURELL - Video Annotation: burst_results_processor.py::find_first_longest(): ******")
+
     """
     Finds the first burst having a length that is higher than the average length of all bursts of that concept.
 
@@ -58,6 +61,9 @@ def find_first_longest(burst_results, avg) -> dict:
 
 
 def get_json_with_bursts(burst_results, sents_idx):
+
+    print("***** EDURELL - Video Annotation: burst_results_processor.py::get_json_with_bursts(): Inizio ******")
+
     """Gets a list of bursts with first/last/ongoing/unique tags that can be uses for the gantt interface.
 
     :param bursts_results: pandas df with these columns [keyword,level,start,end]
@@ -94,7 +100,12 @@ def get_json_with_bursts(burst_results, sents_idx):
         else:
             curr_dict["status"] = "ONGOING"
 
+
+
         bursts_json.append(curr_dict)
+
+    print("***** EDURELL - Video Annotation: burst_results_processor.py::get_json_with_bursts(): Fine ******")
+
 
     return bursts_json
 
@@ -103,6 +114,8 @@ def give_direction_using_first_burst(undirected_matrix: pd.DataFrame,
                                      bursts_results: pd.DataFrame,
                                      indexes,
                                      level=1, preserve_relations=False) -> pd.DataFrame:
+    print("***** EDURELL - Video Annotation: burst_results_processor.py::give_direction_using_first_burst(): ******")
+
     """
 
     # If the matrix has not been processed averaging the weights, this procedure potentially kills too many relations!!!
@@ -182,6 +195,7 @@ def give_direction_using_first_burst(undirected_matrix: pd.DataFrame,
 
 
 def to_edgelist(df):
+    print("***** EDURELL - Video Annotation: burst_results_processor.py::to_edgelist(): ******")
     edges = []
     for i in df.index.tolist():
         for c in df.columns.tolist():

@@ -10,19 +10,19 @@ import WestIcon from '@mui/icons-material/West';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Popover from '@mui/material/Popover';
 import tutorialPic from './tutorialpic.PNG';
+
+
+//its the tutorial window that popup and jump to anchors to present the tutorial to the user
+
 export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
 
 
     const[page,setPage]=useState(0)
     const [anchorEl, setAnchorEl] = useState([null,null,null,null]);
 
-    
-    if(open){
-        console.log("TUTORIAL: ",anchor1," ",anchor2)
-    }
-  
 
-    
+    //this useEffect used to update the anchors when the value of anchor1 and anchor2 will update from null to a accepted value
+
     useEffect(() => {
         setAnchorEl([anchorEl[0],anchor1.current,anchorEl[2],anchorEl[3]])
       }, [anchor1.current]);
@@ -43,19 +43,22 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
     }
 
     function NextPage(){
-        console.log("nextpage: ",page)
 
 
         if(page==0 && anchor1.current != null){
             anchor1.current.style.zIndex=10000;
         }else{
-            anchor1.current.style.zIndex=1;
+
+            anchor1.current.style.zIndex="auto";
+
         }
 
         if(page==1 && anchor1.current != null){
             anchor2.style.zIndex=10000;
         }else{
-            anchor2.style.zIndex=1;
+
+            anchor2.style.zIndex="auto";
+
         }
         if(page<3){
             setPage(page+1)

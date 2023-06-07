@@ -168,6 +168,8 @@ def LO_PN(graphs, terminology):
 
 def calculate_metrics(automatic_map, manual_map, terminology):
 
+    print("***** EDURELL - Video Annotation: metrics.py::calculate_metrics() ******")
+
     automatic_graph = create_graph(automatic_map)
     annotator_graph = create_graph(manual_map)
 

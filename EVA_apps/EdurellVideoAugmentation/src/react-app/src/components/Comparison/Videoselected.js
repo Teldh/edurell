@@ -14,9 +14,11 @@ import IconButton from '@mui/material/IconButton';
 import { useContext } from 'react';
 import { ContextComparison } from './ContextComparison';
 
+
+//the video selected for the comparison. inside the querybar component
 export default function Videoselected({imageurl,title,idx,setAdd}) {
     const removevideo = useContext(ContextComparison)[1];
-    console.log("select: "+imageurl+" "+title+" "+idx)
+
     return (
         
         <Badge badgeContent={

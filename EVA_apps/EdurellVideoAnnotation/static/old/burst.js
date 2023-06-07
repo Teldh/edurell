@@ -312,7 +312,7 @@ function showResults(result){
 
             if(result.agreement != null) {
 
-                resultsToVisualize += "<h5 class='titleLower'> Comparison with " + result.agreement["name"] + "</h5>"+
+                resultsToVisualize += "<h5 class='titleLower' style="+'"padding-left:5px"'+"> Comparison with " + result.agreement["name"] + "</h5>"+
                 "    <div class=\"container\">\n" +
                 "            <div class=\"table\">\n" +
                 "              <table class=\"table table-responsive\">\n" +

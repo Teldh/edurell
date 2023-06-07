@@ -37,6 +37,8 @@ const ExpandMore = styled((props) => {
 }));
 
 
+//this is the whole component before the listvideo component. It holds the searchbar with the filters and tutorial and the video selected for comparison
+
 const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}, ref) => {
     const [expanded, setExpanded] = useState(false);
     const handleExpandClick = () => {
@@ -45,6 +47,10 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
     
     const listConcepts = useContext(ContextComparison)[3];
     const history = useHistory();
+
+    //this function is used to go to the next page for comparisonresult
+    //because we are moving to another route, page, we need to send the information to the other page
+
     function GoToComparisonResult(){
         
         history.push({
@@ -69,6 +75,7 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
             },
         });
     }
+
 
     let videos = listvideo.map((video,index) =>
     
@@ -105,14 +112,16 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                             alignItems="center"
                             >
                                 {
-                                    searchClicked?
-                                    <Grid item>
+
+                                    querylist.length > 0 && querylist[0]!=null?
+                                    <Grid item sx={{mr:1}}>
                                     <Chip 
                                         
-                                        label={<Typography variant="caption" display="block" gutterBottom>
-                                            <b>Aiuto</b>
+                                        label={<Typography variant="caption" display="block" gutterBottom sx={{color:"white",mt:1}}>
+                                            <b>Help</b>
                                             </Typography>}
-                                        deleteIcon={<HelpIcon sx={{color:grey[50]}}/>}
+                                        deleteIcon={<HelpIcon style={{fill:"white"}}/>}
+
                                         onClick={openTutorial}
                                         onDelete={openTutorial}
                                         sx={{
@@ -132,20 +141,24 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                 <Grid item>
                                     <Queryinput listconcepts={listconcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location}/>
                                 </Grid>
-                                
+
+                                <Grid item>
+                                    <div style={{zIndex:1, position:"relative"}} ref={ref}>
                                 {
-                                    searchClicked?
-                                    <Grid item>
-                                    <div style={{zIndex:1, position:"relative"}}>
+                                    querylist.length > 0 && querylist[0]!=null?
+                                  
+
                                        
                                         
                                     <Chip 
                                         clickable={false}
                                         sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px', backgroundColor:"#c6ebdc"}}
-                                        ref={ref}
+
+                                        
                                         avatar={<TuneRoundedIcon/>}
-                                        label={<Typography variant="caption" display="block" gutterBottom sx={{m:0.5}}>
-                                        Filtri
+                                        label={<Typography variant="body1" display="block" gutterBottom sx={{m:0.5}}>
+                                        Filters
+
                                     </Typography>} 
                                         onClick={handleExpandClick}
                                         onDelete={handleExpandClick}
@@ -161,17 +174,19 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                         }
                                     />
                               
-                                    </div>
-                                </Grid>
+
                                 :
                                 <></>
                                 }
                                
-                            
+
+                                </div>
+                                </Grid>
                                 
                             </Grid>
                     </Grid>
-                    <Grid item>
+                    <Grid item sx={{mt:1}}>
+
                         <Filters ApplyFilters={ApplyFilters} expanded={expanded} />
                     </Grid>
                 </Grid>
@@ -224,19 +239,23 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                             videos.length >1?
                                             <>
                                                 <Typography variant="body2" display="block" gutterBottom>
-                                                    Hai selezionato tutti i
+
+                                                    Did you pick all of the
                                                 </Typography>
                                                 <Typography variant="body2" display="block" gutterBottom>
-                                                    video che ti interessano?
+                                                    videos you are interested in?
+
                                                 </Typography>
                                             </>
                                             :
                                             <>
                                                 <Typography variant="body2" display="block" gutterBottom sx={{pb:0, mb:0}}>
-                                                    Seleziona almeno un altro 
+
+                                                    <b>Choose</b> at least <b>one more</b>
                                                 </Typography>
                                                 <Typography variant="body2" display="block" gutterBottom sx={{pt:0, mt:0}}>
-                                                    video per confrontarli
+                                                    <b>video</b> to compare them
+
                                                 </Typography>
                                             </>
                                         }
@@ -246,7 +265,9 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                         <Chip
                                         disabled={videos.length>1?false:true}
                                         label={<Typography variant="body2" gutterBottom sx={{pt:1}}>
-                                       Vai al confronto
+
+                                       Compare these videos
+
                                       </Typography>}
                                         onClick={GoToComparisonResult}
                                         onDelete={GoToComparisonResult}
@@ -279,20 +300,28 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                     </Grid>
                                     <Grid item>
                                         <Typography variant="body2" display="block" gutterBottom>
-                                            Hai raggiunto il <b>numero</b> 
+
+                                            You reached the <b>max</b> 
                                         </Typography>
                                         <Typography variant="body2" display="block" gutterBottom>
-                                            <b>massimo</b> di video selezionabili
+                                            <b>number</b> of comparable videos
+
                                         </Typography>
                                     </Grid>
                                     <Grid item>
                                         <Chip
-                                        label={<Typography variant="h6" gutterBottom>
-                                       Vai al confronto
+
+                                     
+                                        label={<Typography variant="body2" gutterBottom sx={{pt:1}}>
+                                       Compare these videos
+
                                       </Typography>}
                                         onClick={GoToComparisonResult}
                                         onDelete={GoToComparisonResult}
                                         deleteIcon={<EastIcon />}
+
+                                        sx={{backgroundColor:"white"}}
+
                                         />
                                     </Grid>
 

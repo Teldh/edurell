@@ -34,7 +34,8 @@ function SecondsToTime(secondRaw){
 }
 
 export default function Barro({catalog, catalogExtra, graphcontrol}){
-    console.log("BARRO: ",catalog, catalogExtra)
+
+    //function to create a pattern in svg
     function createDiagonalPattern(color = 'black') {
         // create a 10x10 px canvas for the pattern's base shape
         let shape = document.createElement('canvas')
@@ -57,11 +58,13 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
         // create the pattern from the shape
         return c.createPattern(shape, 'repeat')
       }
+
+    // consists of the dataset represented into the graph
     const data = {
         labels: catalog.map(video=>video.title),
         datasets:[
             {
-                label:'video intero',
+                label:'Whole video',
                 data:catalog.map(video=>video.duration),
                 backgroundColor:"white",
                 borderColor: graphcontrol=="two"||graphcontrol=="three"?"grey":[
@@ -76,7 +79,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
                 
             },
             {
-                label:'definizione',
+                label:'Definition',
                 data:catalogExtra.map(video=>video.conceptLength),
                 backgroundColor:graphcontrol=="three" || graphcontrol=="four"?"grey":[
                     "#FF4545",
@@ -89,7 +92,8 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
 
             },
             {
-                label:'approfondimento',
+
+                label:'In depth',
                 data: catalogExtra.map(video=>video.derivatedLength),
                 backgroundColor:
                     graphcontrol=="two"||graphcontrol =="four"?createDiagonalPattern('grey'):
@@ -111,6 +115,8 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
         ]
     }
 
+
+    //const used by chart.js to setup and customize the graph
     const options ={
         scales:{
             x:{
