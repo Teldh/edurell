@@ -98,7 +98,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
                 label:'In depth',
                 data: catalogExtra.map(video=>video.derivatedLength),
                 backgroundColor:
-                    graphcontrol=="two"||graphcontrol =="four"?createDiagonalPattern('grey'):
+                    graphcontrol=="two"||graphcontrol =="four"?pattern.draw('diagonal-right-left','#cccccc'):
                     [pattern.draw('diagonal-right-left', '#F2BABA'),
                     pattern.draw('diagonal-right-left', '#B8CBF2'),
                     pattern.draw('diagonal-right-left', '#E3B8F2'),
