@@ -223,6 +223,8 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
           }
         }
 
+        
+
         //left: if for 80% prerequisite explained in the video. right: if the prerequisite isnt in the extracted concepts = oa:description = not explained
         if((countnum/maxnum >= 0.8) || !checker(catalog[0].extracted_keywords, conceptExtra["list_preconcept"])){
           prenodes=[{
@@ -249,6 +251,14 @@ const LayoutFlow = ({catalog, concept, conceptExtra, idx, graphcontrol}) => {
         }
         
 
+    }else{
+      prenodes=[{
+        id:(flowidx++).toString(),
+        type:'input',
+        data:{label:"you can watch this video: no prerequisites are required"},
+        position,
+        style:{backgroundColor:"white", borderColor:graphcontrol=="three"?"grey":colorPick[idx], borderWidth:"5px",fontWeight:"bold"}
+      }]
     }
 
     if(conceptExtra["list_derivatedconcept"].length>0){

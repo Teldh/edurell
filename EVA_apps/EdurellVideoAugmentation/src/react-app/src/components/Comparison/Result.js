@@ -477,44 +477,44 @@ export default function Result(){
                                     />
                                     
                                 </Grid>
-                                                    <Menu
-                                                    anchorEl={anchorEl1}
-                                                    id="account-menu"
-                                                    open={open1}
-                                                    onClose={handleClose1}
-                                                    onClick={handleClose1}
-                                                    PaperProps={{
-                                                    elevation: 0,
-                                                    sx: {
-                                                        overflow: 'visible',
-                                                        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                                                        mt: 1.5,
-                                                        '& .MuiAvatar-root': {
-                                                        width: 32,
-                                                        height: 32,
-                                                        ml: -0.5,
-                                                        mr: 1,
-                                                        },
-                                                        '&:before': {
-                                                        content: '""',
-                                                        display: 'block',
-                                                        position: 'absolute',
-                                                        top: 0,
-                                                        right: 14,
-                                                        width: 10,
-                                                        height: 10,
-                                                        bgcolor: 'background.paper',
-                                                        transform: 'translateY(-50%) rotate(45deg)',
-                                                        zIndex: 0,
-                                                        },
-                                                    },
-                                                    }}
-                                                    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                                                    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                                                    >
+                                                   
                                                         {
                                                             graphcontrol1=="one"?
-                                                            <>
+                                                            <Menu
+                                                            anchorEl={anchorEl1}
+                                                            id="account-menu"
+                                                            open={open1}
+                                                            onClose={handleClose1}
+                                                            onClick={handleClose1}
+                                                            PaperProps={{
+                                                            elevation: 0,
+                                                            sx: {
+                                                                overflow: 'visible',
+                                                                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                                                mt: 1.5,
+                                                                '& .MuiAvatar-root': {
+                                                                width: 32,
+                                                                height: 32,
+                                                                ml: -0.5,
+                                                                mr: 1,
+                                                                },
+                                                                '&:before': {
+                                                                content: '""',
+                                                                display: 'block',
+                                                                position: 'absolute',
+                                                                top: 0,
+                                                                right: 14,
+                                                                width: 10,
+                                                                height: 10,
+                                                                bgcolor: 'background.paper',
+                                                                transform: 'translateY(-50%) rotate(45deg)',
+                                                                zIndex: 0,
+                                                                },
+                                                            },
+                                                            }}
+                                                            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                                            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                                            >
                                                                 <MenuItem>
                                                                     <Typography variant="caption"  gutterBottom>
 
@@ -604,10 +604,44 @@ export default function Result(){
 
                                                                     </Typography>
                                                                 </MenuItem>
-                                                            </>
+                                                            </Menu>
                                                             :
                                                             graphcontrol1=="two"?
-                                                                    <>
+                                                            <Menu
+                                                            anchorEl={anchorEl1}
+                                                            id="account-menu"
+                                                            open={open1}
+                                                            onClose={handleClose1}
+                                                            onClick={handleClose1}
+                                                            PaperProps={{
+                                                            elevation: 0,
+                                                            sx: {
+                                                                overflow: 'visible',
+                                                                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                                                mt: 1.5,
+                                                                '& .MuiAvatar-root': {
+                                                                width: 32,
+                                                                height: 32,
+                                                                ml: -0.5,
+                                                                mr: 1,
+                                                                },
+                                                                '&:before': {
+                                                                content: '""',
+                                                                display: 'block',
+                                                                position: 'absolute',
+                                                                top: 0,
+                                                                right: 14,
+                                                                width: 10,
+                                                                height: 10,
+                                                                bgcolor: 'background.paper',
+                                                                transform: 'translateY(-50%) rotate(45deg)',
+                                                                zIndex: 0,
+                                                                },
+                                                            },
+                                                            }}
+                                                            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                                            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                                            >
                                                                         <MenuItem>
                                                                         <Typography variant="caption"  gutterBottom>
 
@@ -656,10 +690,44 @@ export default function Result(){
                                                                                 Video 4
                                                                             </Typography>
                                                                         </MenuItem>
-                                                                    </>
+                                                                    </Menu>
                                                                     :
                                                                     graphcontrol1=="three"?
-                                                                            <>
+                                                                    <Menu
+                                                                    anchorEl={anchorEl1}
+                                                                    id="account-menu"
+                                                                    open={open1}
+                                                                    onClose={handleClose1}
+                                                                    onClick={handleClose1}
+                                                                    PaperProps={{
+                                                                    elevation: 0,
+                                                                    sx: {
+                                                                        overflow: 'visible',
+                                                                        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                                                        mt: 1.5,
+                                                                        '& .MuiAvatar-root': {
+                                                                        width: 32,
+                                                                        height: 32,
+                                                                        ml: -0.5,
+                                                                        mr: 1,
+                                                                        },
+                                                                        '&:before': {
+                                                                        content: '""',
+                                                                        display: 'block',
+                                                                        position: 'absolute',
+                                                                        top: 0,
+                                                                        right: 14,
+                                                                        width: 10,
+                                                                        height: 10,
+                                                                        bgcolor: 'background.paper',
+                                                                        transform: 'translateY(-50%) rotate(45deg)',
+                                                                        zIndex: 0,
+                                                                        },
+                                                                    },
+                                                                    }}
+                                                                    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                                                    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                                                    >
                                                                                 <MenuItem>
                                                                                     <Typography variant="caption"  gutterBottom>
 
@@ -723,10 +791,44 @@ export default function Result(){
                                                                                     </Typography>
                                                                                 </MenuItem>
                                                                             
-                                                                            </>
+                                                                            </Menu>
                                                                             :
                                                                             graphcontrol1=="four"?
-                                                                                <>
+                                                                            <Menu
+                                                                            anchorEl={anchorEl1}
+                                                                            id="account-menu"
+                                                                            open={open1}
+                                                                            onClose={handleClose1}
+                                                                            onClick={handleClose1}
+                                                                            PaperProps={{
+                                                                            elevation: 0,
+                                                                            sx: {
+                                                                                overflow: 'visible',
+                                                                                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                                                                mt: 1.5,
+                                                                                '& .MuiAvatar-root': {
+                                                                                width: 32,
+                                                                                height: 32,
+                                                                                ml: -0.5,
+                                                                                mr: 1,
+                                                                                },
+                                                                                '&:before': {
+                                                                                content: '""',
+                                                                                display: 'block',
+                                                                                position: 'absolute',
+                                                                                top: 0,
+                                                                                right: 14,
+                                                                                width: 10,
+                                                                                height: 10,
+                                                                                bgcolor: 'background.paper',
+                                                                                transform: 'translateY(-50%) rotate(45deg)',
+                                                                                zIndex: 0,
+                                                                                },
+                                                                            },
+                                                                            }}
+                                                                            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                                                            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                                                            >
                                                                                     <MenuItem>
                                                                                         <Typography variant="caption"  gutterBottom>
 
@@ -783,13 +885,13 @@ export default function Result(){
                                                                                             Video 4
                                                                                         </Typography>
                                                                                     </MenuItem>
-                                                                                </>
+                                                                                </Menu>
                                                                                 :
                                                                                 <>something went wrong..</>
                                                         }
                                                     
                                                     
-                                                </Menu>
+                                              
                                 <Grid item>
                                     <Grid
                                     container
@@ -969,44 +1071,44 @@ export default function Result(){
                                     />
                                     
                                 </Grid>
-                                                    <Menu
-                                                    anchorEl={anchorEl2}
-                                                    id="account-menu"
-                                                    open={open2}
-                                                    onClose={handleClose2}
-                                                    onClick={handleClose2}
-                                                    PaperProps={{
-                                                    elevation: 0,
-                                                    sx: {
-                                                        overflow: 'visible',
-                                                        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                                                        mt: 1.5,
-                                                        '& .MuiAvatar-root': {
-                                                        width: 32,
-                                                        height: 32,
-                                                        ml: -0.5,
-                                                        mr: 1,
-                                                        },
-                                                        '&:before': {
-                                                        content: '""',
-                                                        display: 'block',
-                                                        position: 'absolute',
-                                                        top: 0,
-                                                        right: 14,
-                                                        width: 10,
-                                                        height: 10,
-                                                        bgcolor: 'background.paper',
-                                                        transform: 'translateY(-50%) rotate(45deg)',
-                                                        zIndex: 0,
-                                                        },
-                                                    },
-                                                    }}
-                                                    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                                                    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                                                >
+                                                   
                                                     {
                                                         graphcontrol2=="one"?
-                                                        <>
+                                                        <Menu
+                                                        anchorEl={anchorEl2}
+                                                        id="account-menu"
+                                                        open={open2}
+                                                        onClose={handleClose2}
+                                                        onClick={handleClose2}
+                                                        PaperProps={{
+                                                        elevation: 0,
+                                                        sx: {
+                                                            overflow: 'visible',
+                                                            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                                            mt: 1.5,
+                                                            '& .MuiAvatar-root': {
+                                                            width: 32,
+                                                            height: 32,
+                                                            ml: -0.5,
+                                                            mr: 1,
+                                                            },
+                                                            '&:before': {
+                                                            content: '""',
+                                                            display: 'block',
+                                                            position: 'absolute',
+                                                            top: 0,
+                                                            right: 14,
+                                                            width: 10,
+                                                            height: 10,
+                                                            bgcolor: 'background.paper',
+                                                            transform: 'translateY(-50%) rotate(45deg)',
+                                                            zIndex: 0,
+                                                            },
+                                                        },
+                                                        }}
+                                                        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                                        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                                    >
                                                             <MenuItem>
                                                                 <Typography variant="caption"  gutterBottom>
 
@@ -1114,10 +1216,44 @@ export default function Result(){
 
                                                                 </Typography>
                                                             </MenuItem>
-                                                        </>
+                                                        </Menu>
                                                         :
                                                         graphcontrol2=="two"?
-                                                                <>
+                                                        <Menu
+                                                        anchorEl={anchorEl2}
+                                                        id="account-menu"
+                                                        open={open2}
+                                                        onClose={handleClose2}
+                                                        onClick={handleClose2}
+                                                        PaperProps={{
+                                                        elevation: 0,
+                                                        sx: {
+                                                            overflow: 'visible',
+                                                            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                                            mt: 1.5,
+                                                            '& .MuiAvatar-root': {
+                                                            width: 32,
+                                                            height: 32,
+                                                            ml: -0.5,
+                                                            mr: 1,
+                                                            },
+                                                            '&:before': {
+                                                            content: '""',
+                                                            display: 'block',
+                                                            position: 'absolute',
+                                                            top: 0,
+                                                            right: 14,
+                                                            width: 10,
+                                                            height: 10,
+                                                            bgcolor: 'background.paper',
+                                                            transform: 'translateY(-50%) rotate(45deg)',
+                                                            zIndex: 0,
+                                                            },
+                                                        },
+                                                        }}
+                                                        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                                        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                                    >
                                                                     <MenuItem>
                                                                         <Typography variant="caption"  gutterBottom>
 
@@ -1190,10 +1326,44 @@ export default function Result(){
 
                                                                         </Typography>
                                                                     </MenuItem>
-                                                                </>
+                                                                </Menu>
                                                                 :
                                                                 graphcontrol2=="three"?
-                                                                        <>
+                                                                <Menu
+                                                                anchorEl={anchorEl2}
+                                                                id="account-menu"
+                                                                open={open2}
+                                                                onClose={handleClose2}
+                                                                onClick={handleClose2}
+                                                                PaperProps={{
+                                                                elevation: 0,
+                                                                sx: {
+                                                                    overflow: 'visible',
+                                                                    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                                                    mt: 1.5,
+                                                                    '& .MuiAvatar-root': {
+                                                                    width: 32,
+                                                                    height: 32,
+                                                                    ml: -0.5,
+                                                                    mr: 1,
+                                                                    },
+                                                                    '&:before': {
+                                                                    content: '""',
+                                                                    display: 'block',
+                                                                    position: 'absolute',
+                                                                    top: 0,
+                                                                    right: 14,
+                                                                    width: 10,
+                                                                    height: 10,
+                                                                    bgcolor: 'background.paper',
+                                                                    transform: 'translateY(-50%) rotate(45deg)',
+                                                                    zIndex: 0,
+                                                                    },
+                                                                },
+                                                                }}
+                                                                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                                                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                                            >
                                                                             <MenuItem>
                                                                                 <Typography variant="caption"  gutterBottom>
 
@@ -1271,13 +1441,13 @@ export default function Result(){
                                                                                 </Typography>
                                                                             </MenuItem>
                                                                         
-                                                                        </>
+                                                                        </Menu>
                                                                         :
                                                                         <>something went wrong..</>
                                                     }
                                                     
                                                     
-                                                </Menu>
+                                                
                                 <Grid item>
                                     <Grid
                                     container
@@ -1483,44 +1653,44 @@ export default function Result(){
                                     />
                                     
                                 </Grid>
-                                                    <Menu
-                                                    anchorEl={anchorEl3}
-                                                    id="account-menu"
-                                                    open={open3}
-                                                    onClose={handleClose3}
-                                                    onClick={handleClose3}
-                                                    PaperProps={{
-                                                    elevation: 0,
-                                                    sx: {
-                                                        overflow: 'visible',
-                                                        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                                                        mt: 1.5,
-                                                        '& .MuiAvatar-root': {
-                                                        width: 32,
-                                                        height: 32,
-                                                        ml: -0.5,
-                                                        mr: 1,
-                                                        },
-                                                        '&:before': {
-                                                        content: '""',
-                                                        display: 'block',
-                                                        position: 'absolute',
-                                                        top: 0,
-                                                        right: 14,
-                                                        width: 10,
-                                                        height: 10,
-                                                        bgcolor: 'background.paper',
-                                                        transform: 'translateY(-50%) rotate(45deg)',
-                                                        zIndex: 0,
-                                                        },
-                                                    },
-                                                    }}
-                                                    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                                                    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                                                >
+                                                   
                                                     {
                                                         graphcontrol3=="one"?
-                                                        <>
+                                                        <Menu
+                                                        anchorEl={anchorEl3}
+                                                        id="account-menu"
+                                                        open={open3}
+                                                        onClose={handleClose3}
+                                                        onClick={handleClose3}
+                                                        PaperProps={{
+                                                        elevation: 0,
+                                                        sx: {
+                                                            overflow: 'visible',
+                                                            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                                            mt: 1.5,
+                                                            '& .MuiAvatar-root': {
+                                                            width: 32,
+                                                            height: 32,
+                                                            ml: -0.5,
+                                                            mr: 1,
+                                                            },
+                                                            '&:before': {
+                                                            content: '""',
+                                                            display: 'block',
+                                                            position: 'absolute',
+                                                            top: 0,
+                                                            right: 14,
+                                                            width: 10,
+                                                            height: 10,
+                                                            bgcolor: 'background.paper',
+                                                            transform: 'translateY(-50%) rotate(45deg)',
+                                                            zIndex: 0,
+                                                            },
+                                                        },
+                                                        }}
+                                                        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                                        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                                    >
                                                             <MenuItem>
                                                                 <Typography variant="caption"  gutterBottom>
 
@@ -1596,10 +1766,44 @@ export default function Result(){
                                                             </MenuItem>
                                                                 
                                                         
-                                                        </>
+                                                        </Menu>
                                                         :
                                                         graphcontrol3=="two"?
-                                                                <>
+                                                        <Menu
+                                                        anchorEl={anchorEl3}
+                                                        id="account-menu"
+                                                        open={open3}
+                                                        onClose={handleClose3}
+                                                        onClick={handleClose3}
+                                                        PaperProps={{
+                                                        elevation: 0,
+                                                        sx: {
+                                                            overflow: 'visible',
+                                                            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                                            mt: 1.5,
+                                                            '& .MuiAvatar-root': {
+                                                            width: 32,
+                                                            height: 32,
+                                                            ml: -0.5,
+                                                            mr: 1,
+                                                            },
+                                                            '&:before': {
+                                                            content: '""',
+                                                            display: 'block',
+                                                            position: 'absolute',
+                                                            top: 0,
+                                                            right: 14,
+                                                            width: 10,
+                                                            height: 10,
+                                                            bgcolor: 'background.paper',
+                                                            transform: 'translateY(-50%) rotate(45deg)',
+                                                            zIndex: 0,
+                                                            },
+                                                        },
+                                                        }}
+                                                        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                                        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                                    >
                                                                     <MenuItem>
                                                                         <Typography variant="caption"  gutterBottom>
                                                                             <b>Slide:</b>
@@ -1648,10 +1852,44 @@ export default function Result(){
                                                                     </MenuItem>
                                                                 
                                                                 
-                                                                </>
+                                                                </Menu>
                                                                 :
                                                                 graphcontrol3 == "three"?
-                                                                        <>
+                                                                <Menu
+                                                                anchorEl={anchorEl3}
+                                                                id="account-menu"
+                                                                open={open3}
+                                                                onClose={handleClose3}
+                                                                onClick={handleClose3}
+                                                                PaperProps={{
+                                                                elevation: 0,
+                                                                sx: {
+                                                                    overflow: 'visible',
+                                                                    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                                                                    mt: 1.5,
+                                                                    '& .MuiAvatar-root': {
+                                                                    width: 32,
+                                                                    height: 32,
+                                                                    ml: -0.5,
+                                                                    mr: 1,
+                                                                    },
+                                                                    '&:before': {
+                                                                    content: '""',
+                                                                    display: 'block',
+                                                                    position: 'absolute',
+                                                                    top: 0,
+                                                                    right: 14,
+                                                                    width: 10,
+                                                                    height: 10,
+                                                                    bgcolor: 'background.paper',
+                                                                    transform: 'translateY(-50%) rotate(45deg)',
+                                                                    zIndex: 0,
+                                                                    },
+                                                                },
+                                                                }}
+                                                                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                                                                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                                                            >
                                                                             <MenuItem>
                                                                                 <Typography variant="caption"  gutterBottom>
 
@@ -1708,7 +1946,7 @@ export default function Result(){
                                                                                     Video 4
                                                                                 </Typography>
                                                                             </MenuItem>
-                                                                        </>
+                                                                        </Menu>
                                                                         :
                                                                         <>something went wrong..</>
 
@@ -1716,7 +1954,7 @@ export default function Result(){
                                                     
                                                     
                                                     
-                                                </Menu>
+                                               
                                 <Grid item>
                                     <Grid
                                     container

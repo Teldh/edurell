@@ -3,6 +3,7 @@
 
 import React from "react";
 import pattern from 'patternomaly';
+import { useContext,useState,useEffect } from 'react';
 import{
     Chart as ChartJS,
     BarElement,
@@ -35,7 +36,10 @@ function SecondsToTime(secondRaw){
 
 export default function Barro({catalog, catalogExtra, graphcontrol}){
 
-    //function to create a pattern in svg
+    useEffect(() => {
+        console.log("graphcontrol: ",graphcontrol)
+      });
+    //function to create a pattern in svg   
     function createDiagonalPattern(color = 'black') {
         // create a 10x10 px canvas for the pattern's base shape
         let shape = document.createElement('canvas')
@@ -114,7 +118,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
             },
         ]
     }
-
+    console.log("data: ",data)
 
     //const used by chart.js to setup and customize the graph
     const options ={
