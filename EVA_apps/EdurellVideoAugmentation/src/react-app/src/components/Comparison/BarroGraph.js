@@ -3,7 +3,7 @@
 
 import React from "react";
 import pattern from 'patternomaly';
-import { useContext,useState,useEffect } from 'react';
+import { useContext,useState,useEffect,useRef } from 'react';
 import{
     Chart as ChartJS,
     BarElement,
@@ -35,9 +35,9 @@ function SecondsToTime(secondRaw){
 }
 
 export default function Barro({catalog, catalogExtra, graphcontrol}){
-
+    const barchart = useRef(null)
     useEffect(() => {
-        console.log("graphcontrol: ",graphcontrol)
+        console.log("graphcontrol: ",barchart.current)
       });
     //function to create a pattern in svg   
     function createDiagonalPattern(color = 'black') {
@@ -122,6 +122,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
 
     //const used by chart.js to setup and customize the graph
     const options ={
+ 
         scales:{
             x:{
                 display:false
@@ -176,9 +177,10 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
     return(<>
     
         <Bar
-  
+        ref={barchart}
         data={data}
         options={options}
+        redraw
         >
 
 

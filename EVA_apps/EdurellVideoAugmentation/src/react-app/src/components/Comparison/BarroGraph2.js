@@ -130,6 +130,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
   
         data={data}
         options={options}
+        redraw
         >
 
 
