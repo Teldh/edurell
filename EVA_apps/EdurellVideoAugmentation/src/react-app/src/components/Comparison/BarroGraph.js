@@ -35,10 +35,8 @@ function SecondsToTime(secondRaw){
 }
 
 export default function Barro({catalog, catalogExtra, graphcontrol}){
-    const barchart = useRef(null)
-    useEffect(() => {
-        console.log("graphcontrol: ",barchart.current)
-      });
+
+ 
     //function to create a pattern in svg   
     function createDiagonalPattern(color = 'black') {
         // create a 10x10 px canvas for the pattern's base shape
@@ -118,8 +116,7 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
             },
         ]
     }
-    console.log("data: ",data)
-
+ 
     //const used by chart.js to setup and customize the graph
     const options ={
  
@@ -177,7 +174,6 @@ export default function Barro({catalog, catalogExtra, graphcontrol}){
     return(<>
     
         <Bar
-        ref={barchart}
         data={data}
         options={options}
         redraw
