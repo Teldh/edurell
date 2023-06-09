@@ -1358,7 +1358,10 @@ class VideoAnalyzer:
         return self
 
 def _debug_write_on_file(text,mode):
-    filew = open("logging_segmentation.txt",mode)
+    import os
+    # Look for your absolute directory path
+    absolute_path = os.path.dirname(os.path.abspath(__file__))
+    filew = open(absolute_path+"/logging_segmentation.txt",mode)
     filew.write(text)
     filew.close()
 
@@ -1389,7 +1392,7 @@ def _run_jobs(queue):
             else: 
                 # if there's no data in the database check the video slidishness
                 video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True)
-                _debug_write_on_file("video slidishness "+video_slidishness+"\n","a")
+                _debug_write_on_file("video slidishness "+str(video_slidishness)+"\n","a")
                 # prepare data for upload
                 segmentation_data = {'video_id':video_id,'video_slidishness':video_slidishness,'slidish_frames_startend':slide_frames}
                 if vid_analyzer.is_slide_video():
