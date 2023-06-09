@@ -1418,7 +1418,8 @@ def workers_queue_scheduler(queue):
     '''
     Creates a separated process that runs the segmentation of every video in the queue
     '''
-    Process(target=_run_jobs,args=(queue,)).start()    
+    from threading import Thread
+    Thread(target=_run_jobs,args=(queue,)).start()    
 
 
 def _test_and_save_segment_video(vid_id):
