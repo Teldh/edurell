@@ -1373,12 +1373,12 @@ def _run_jobs(queue):
                 segmentation_data = {'video_id':video_id,'video_slidishness':0.0,'slidish_frames_startend':[]}
             else: 
                 # if there's no data in the database check the video slidishness
-                video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True,_show_info=True)
+                video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True)
                 # prepare data for upload
                 segmentation_data = {'video_id':video_id,'video_slidishness':video_slidishness,'slidish_frames_startend':slide_frames}
                 if vid_analyzer.is_slide_video():
                     # if it's classified as a slides video analyze it and insert results in the structure that will be uploaded online
-                    vid_analyzer.analyze_video(_show_info=True)
+                    vid_analyzer.analyze_video()
                     results = vid_analyzer.extract_titles()
 
                     #from pprint import pprint
