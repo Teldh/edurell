@@ -1358,6 +1358,7 @@ class VideoAnalyzer:
         return self
 
 def _debug_write_on_file(text,mode):
+    return
     import os
     # Look for your absolute directory path
     absolute_path = os.path.dirname(os.path.abspath(__file__))
@@ -1390,6 +1391,7 @@ def run_one_segmentation_job(video_id):
                                  **{'slide_titles':[{'start_end_seconds':start_end_seconds,'text':title,'xywh_normalized':bb} for (title,start_end_seconds,bb) in results] if results is not None else [],
                                     'slide_startends': vid_analyzer.get_extracted_text(format='set[times]')}}
     db_mongo.insert_video_text_segmentation(segmentation_data)
+    _debug_write_on_file("Done\n","a")
 
 def _run_jobs(queue):
     '''
