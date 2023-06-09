@@ -1443,11 +1443,13 @@ def _main_in_segmentation():
     #video = VideoAnalyzer('rFRO8IwB8aY') # Lesson Med 33 minutes low score and very slow
     vid_id = "6leS5eEO2N8"
     video = VideoAnalyzer(vid_id)
-    #video.analyze_video(_show_info=True)
-    segmentation_data = db_mongo.get_video_segmentation(vid_id)
-    video.set(video_slidishness=segmentation_data["video_slidishness"],slide_startends=segmentation_data["slide_startends"])
-    video.reconstruct_slides_from_times_set()
+    video.analyze_video(_show_info=True)
+    #segmentation_data = db_mongo.get_video_segmentation(vid_id)
+    #video.set(video_slidishness=segmentation_data["video_slidishness"],slide_startends=segmentation_data["slide_startends"])
+    #video.reconstruct_slides_from_times_set()
     results = video.extract_titles()
+    print(results)
+    return
 
     # print results
     image = ImageClassifier(image_and_scheme=[None, COLOR_BGR])
