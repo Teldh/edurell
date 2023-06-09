@@ -1378,40 +1378,48 @@ def _run_jobs(queue):
             
             _debug_write_on_file("queue has a job\n","a")
             
+            # Ensuring video has to be analyzed (is not already present in mongo) to prevent looping through the same video cliecked by the user
+            # in a short amount of time
             video_id = queue.pop(0)
+            video_has_to_be_analyzed = db_mongo.get_video_segmentation(video_id,raise_error=False) is None
 
-            _debug_write_on_file("segm job on "+video_id+"\n","a")
+            while not video_has_to_be_analyzed and len(queue) > 0:
+                video_id = queue.pop(0)
+                video_has_to_be_analyzed = db_mongo.get_video_segmentation(video_id,raise_error=False) is None
 
-            print("Segmentation job on "+video_id+" starts  working...")
-            vid_analyzer = VideoAnalyzer(video_id)
-            if not vid_analyzer.can_be_analyzed(LocalVideo(video_id)):
-            
-                _debug_write_on_file("cant be analyzed\n","a")
-            
-                segmentation_data = {'video_id':video_id,'video_slidishness':0.0,'slidish_frames_startend':[]}
-            else: 
-                # if there's no data in the database check the video slidishness
-                video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True)
-                _debug_write_on_file("video slidishness "+str(video_slidishness)+"\n","a")
-                # prepare data for upload
-                segmentation_data = {'video_id':video_id,'video_slidishness':video_slidishness,'slidish_frames_startend':slide_frames}
-                if vid_analyzer.is_slide_video():
-                    # if it's classified as a slides video analyze it and insert results in the structure that will be uploaded online
-                    _debug_write_on_file("gonna analyze video\n","a")
-                    vid_analyzer.analyze_video()
-                    _debug_write_on_file("video Analyzed!\n","a")
-                    results = vid_analyzer.extract_titles()
+            if video_has_to_be_analyzed:
+                _debug_write_on_file("segm job on "+video_id+"\n","a")
 
-                    #from pprint import pprint
-                    #pprint(results)
+                print("Segmentation job on "+video_id+" starts  working...")
+                vid_analyzer = VideoAnalyzer(video_id)
+                if not vid_analyzer.can_be_analyzed(LocalVideo(video_id)):
+                
+                    _debug_write_on_file("cant be analyzed\n","a")
 
-                    # insert titles data in the structure that will be loaded on the db
-                    segmentation_data = {**segmentation_data, 
-                                         **{'slide_titles':[{'start_end_seconds':start_end_seconds,'text':title,'xywh_normalized':bb} for (title,start_end_seconds,bb) in results] if results is not None else [],
-                                            'slide_startends': vid_analyzer.get_extracted_text(format='set[times]')}}
-            db_mongo.insert_video_text_segmentation(segmentation_data)
-            _debug_write_on_file("video pushed on db!!\n","a")
-            print(f"Job on {video_id} done!"+" "*20)
+                    segmentation_data = {'video_id':video_id,'video_slidishness':0.0,'slidish_frames_startend':[]}
+                else: 
+                    # if there's no data in the database check the video slidishness
+                    video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True)
+                    _debug_write_on_file("video slidishness "+str(video_slidishness)+"\n","a")
+                    # prepare data for upload
+                    segmentation_data = {'video_id':video_id,'video_slidishness':video_slidishness,'slidish_frames_startend':slide_frames}
+                    if vid_analyzer.is_slide_video():
+                        # if it's classified as a slides video analyze it and insert results in the structure that will be uploaded online
+                        _debug_write_on_file("gonna analyze video\n","a")
+                        vid_analyzer.analyze_video()
+                        _debug_write_on_file("video Analyzed!\n","a")
+                        results = vid_analyzer.extract_titles()
+
+                        #from pprint import pprint
+                        #pprint(results)
+
+                        # insert titles data in the structure that will be loaded on the db
+                        segmentation_data = {**segmentation_data, 
+                                             **{'slide_titles':[{'start_end_seconds':start_end_seconds,'text':title,'xywh_normalized':bb} for (title,start_end_seconds,bb) in results] if results is not None else [],
+                                                'slide_startends': vid_analyzer.get_extracted_text(format='set[times]')}}
+                db_mongo.insert_video_text_segmentation(segmentation_data)
+                _debug_write_on_file("video pushed on db!!\n","a")
+                print(f"Job on {video_id} done!"+" "*20)
         time.sleep(10)
 
 def workers_queue_scheduler(queue):

@@ -700,11 +700,11 @@ def open_application_in_browser(address):
     from webbrowser import open as open_page
     open_page('http://'+address+':5000/', new=2)
 
+workers_queue_scheduler(video_segmentations_queue)
+
 if __name__ == '__main__':
     print("***** EDURELL - Video Annotation: main.py::__main__ ******")
 
     address = '127.0.0.1'
-    #open_application_in_browser(address)
-    workers_queue_scheduler(video_segmentations_queue)    
+    #open_application_in_browser(address)    
     app.run(host=address, threaded=True, debug=DEBUG) #, port=5050\
-    
