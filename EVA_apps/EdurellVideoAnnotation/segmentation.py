@@ -1357,28 +1357,46 @@ class VideoAnalyzer:
             self._slide_titles = titles
         return self
 
+def _debug_write_on_file(text,mode):
+    filew = open("logging_segmentation.txt",mode)
+    filew.write(text)
+    filew.close()
+
 def _run_jobs(queue):
     '''
     Periodically checks if the segmentation queue is empty, if not it starts a segmentation and runs it until the end\n
     if it's empty it goes to sleep to avoid cpu usage 
     '''
+    _debug_write_on_file("started runjobs\n","w")
     #db_mongo.open_socket()
     while True:
         print(" Scheduler says: No jobs",end="\r")
         if len(queue) > 0:
+            
+            _debug_write_on_file("queue has a job\n","a")
+            
             video_id = queue.pop(0)
+
+            _debug_write_on_file("segm job on "+video_id+"\n","a")
+
             print("Segmentation job on "+video_id+" starts  working...")
             vid_analyzer = VideoAnalyzer(video_id)
             if not vid_analyzer.can_be_analyzed(LocalVideo(video_id)):
+            
+                _debug_write_on_file("cant be analyzed\n","a")
+            
                 segmentation_data = {'video_id':video_id,'video_slidishness':0.0,'slidish_frames_startend':[]}
             else: 
                 # if there's no data in the database check the video slidishness
                 video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True)
+                _debug_write_on_file("video slidishness "+video_slidishness+"\n","a")
                 # prepare data for upload
                 segmentation_data = {'video_id':video_id,'video_slidishness':video_slidishness,'slidish_frames_startend':slide_frames}
                 if vid_analyzer.is_slide_video():
                     # if it's classified as a slides video analyze it and insert results in the structure that will be uploaded online
+                    _debug_write_on_file("gonna analyze video\n","a")
                     vid_analyzer.analyze_video()
+                    _debug_write_on_file("video Analyzed!\n","a")
                     results = vid_analyzer.extract_titles()
 
                     #from pprint import pprint
@@ -1389,6 +1407,7 @@ def _run_jobs(queue):
                                          **{'slide_titles':[{'start_end_seconds':start_end_seconds,'text':title,'xywh_normalized':bb} for (title,start_end_seconds,bb) in results] if results is not None else [],
                                             'slide_startends': vid_analyzer.get_extracted_text(format='set[times]')}}
             db_mongo.insert_video_text_segmentation(segmentation_data)
+            _debug_write_on_file("video pushed on db!!\n","a")
             print(f"Job on {video_id} done!"+" "*20)
         time.sleep(10)
 
@@ -1441,7 +1460,8 @@ def _main_in_segmentation():
     
     #video = VideoAnalyzer('sXLhYStO0m8') #sexing skeleton 1
     #video = VideoAnalyzer('rFRO8IwB8aY') # Lesson Med 33 minutes low score and very slow
-    vid_id = "6leS5eEO2N8"
+    #vid_id = "6leS5eEO2N8"
+    vid_id = "GdPVu6vn034"
     video = VideoAnalyzer(vid_id)
     video.analyze_video(_show_info=True)
     #segmentation_data = db_mongo.get_video_segmentation(vid_id)
