@@ -1368,7 +1368,7 @@ def _debug_write_on_file(text,mode):
 
 def run_one_segmentation_job(video_id):
     #_debug_write_on_file("started runjobs\n","w")
-    print(db_mongo.get_video_segmentation(video_id,raise_error=False))
+    #print(db_mongo.get_video_segmentation(video_id,raise_error=False))
     vid_analyzer = VideoAnalyzer(video_id)
     if not vid_analyzer.can_be_analyzed(LocalVideo(video_id)):
         #_debug_write_on_file("cant be analyzed\n","a")
