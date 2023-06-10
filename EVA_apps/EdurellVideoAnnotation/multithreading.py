@@ -9,6 +9,7 @@ def process_video_queue(video_segmentations_queue,video_segmentation_thread,vid_
         if video_segmentation_thread is None:
             video_segmentation_thread = (vid_id,Thread(target=run_one_segmentation_job,args=(vid_id,)))
             video_segmentation_thread[1].start()
+            video_segmentation_thread[1].join()
             return video_segmentation_thread
         elif video_segmentation_thread[0] != vid_id:
             if db_mongo.get_video_segmentation(video_segmentation_thread[0],raise_error=False) is not None:
