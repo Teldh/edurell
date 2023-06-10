@@ -1,4 +1,5 @@
 from threading import Thread
+from multiprocessing import Process
 
 from segmentation import run_one_segmentation_job
 import db_mongo
@@ -7,7 +8,7 @@ def process_video_queue(video_segmentations_queue,video_segmentation_thread,vid_
     if vid_id is not None and \
       vid_id not in video_segmentations_queue:
         if video_segmentation_thread is None:
-            video_segmentation_thread = (vid_id,Thread(target=run_one_segmentation_job,args=(vid_id,)))
+            video_segmentation_thread = (vid_id,Process(target=run_one_segmentation_job,args=(vid_id,)))
             video_segmentation_thread[1].start()
             video_segmentation_thread[1].join()
             raise Exception("testing")
