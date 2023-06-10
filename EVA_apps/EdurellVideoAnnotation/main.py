@@ -30,9 +30,10 @@ from create_gold_standard import create_gold
 from synonyms import create_skos_dictionary, get_synonyms_from_list
 from multithreading import process_video_queue
 
-#video_segmentations_queue = Manager().list()
-video_segmentations_queue = []
-video_segmentation_thread = None
+video_segmentations_queue = Manager().list()
+workers_queue_scheduler(video_segmentations_queue)
+#video_segmentations_queue = []
+#video_segmentation_thread = None
 
 @app.route('/')
 def index():
@@ -238,11 +239,14 @@ def video_selection():
             if segmentation_data is None:
                 if vid_analyzer.can_be_analyzed():
                     print("Video not already segmented: starting segmentation...")
+
                     global video_segmentations_queue
-                    global video_segmentation_thread
-                    result = process_video_queue(video_segmentations_queue,video_segmentation_thread,vid_id)
-                    if result is not None:
-                        video_segmentation_thread = result
+                    #global video_segmentation_thread
+                    #result = process_video_queue(video_segmentations_queue,video_segmentation_thread,vid_id)
+                    #if result is not None:
+                    #    video_segmentation_thread = result
+
+                    video_segmentations_queue.append(vid_id)
                     
                 else: print("The video is too long to be analyzed")
                 # create thumbnails based on the previous segmentation

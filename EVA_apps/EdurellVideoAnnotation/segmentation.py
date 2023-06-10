@@ -1,4 +1,5 @@
 from bisect import insort_left
+from multiprocessing.managers import ListProxy
 from typing_extensions import Literal
 from typing import List,Tuple
 from multiprocessing import Process
@@ -1400,13 +1401,14 @@ def _run_jobs(queue):
     Periodically checks if the segmentation queue is empty, if not it starts a segmentation and runs it until the end\n
     if it's empty it goes to sleep to avoid cpu usage 
     '''
-    _debug_write_on_file("started runjobs\n","w")
+    #_debug_write_on_file("started runjobs\n","w")
     #db_mongo.open_socket()
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
     while True:
-        print(" Scheduler says: No jobs",end="\r")
+        #print(" Scheduler says: No jobs",end="\r")
         if len(queue) > 0:
             
-            _debug_write_on_file("queue has a job\n","a")
+            #_debug_write_on_file("queue has a job\n","a")
             
             # Ensuring video has to be analyzed (is not already present in mongo) to prevent looping through the same video cliecked by the user
             # in a short amount of time
@@ -1418,26 +1420,26 @@ def _run_jobs(queue):
                 video_has_to_be_analyzed = db_mongo.get_video_segmentation(video_id,raise_error=False) is None
 
             if video_has_to_be_analyzed:
-                _debug_write_on_file("segm job on "+video_id+"\n","a")
+                #_debug_write_on_file("segm job on "+video_id+"\n","a")
 
-                print("Segmentation job on "+video_id+" starts  working...")
+                #print("Segmentation job on "+video_id+" starts  working...")
                 vid_analyzer = VideoAnalyzer(video_id)
                 if not vid_analyzer.can_be_analyzed(LocalVideo(video_id)):
                 
-                    _debug_write_on_file("cant be analyzed\n","a")
+                    #_debug_write_on_file("cant be analyzed\n","a")
 
                     segmentation_data = {'video_id':video_id,'video_slidishness':0.0,'slidish_frames_startend':[]}
                 else: 
                     # if there's no data in the database check the video slidishness
                     video_slidishness,slide_frames = vid_analyzer.is_slide_video(return_value=True,return_slide_frames = True)
-                    _debug_write_on_file("video slidishness "+str(video_slidishness)+"\n","a")
+                    #_debug_write_on_file("video slidishness "+str(video_slidishness)+"\n","a")
                     # prepare data for upload
                     segmentation_data = {'video_id':video_id,'video_slidishness':video_slidishness,'slidish_frames_startend':slide_frames}
                     if vid_analyzer.is_slide_video():
                         # if it's classified as a slides video analyze it and insert results in the structure that will be uploaded online
-                        _debug_write_on_file("gonna analyze video\n","a")
+                        #_debug_write_on_file("gonna analyze video\n","a")
                         vid_analyzer.analyze_video()
-                        _debug_write_on_file("video Analyzed!\n","a")
+                        #_debug_write_on_file("video Analyzed!\n","a")
                         results = vid_analyzer.extract_titles()
 
                         #from pprint import pprint
@@ -1448,16 +1450,16 @@ def _run_jobs(queue):
                                              **{'slide_titles':[{'start_end_seconds':start_end_seconds,'text':title,'xywh_normalized':bb} for (title,start_end_seconds,bb) in results] if results is not None else [],
                                                 'slide_startends': vid_analyzer.get_extracted_text(format='set[times]')}}
                 db_mongo.insert_video_text_segmentation(segmentation_data)
-                _debug_write_on_file("video pushed on db!!\n","a")
-                print(f"Job on {video_id} done!"+" "*20)
+                #_debug_write_on_file("video pushed on db!!\n","a")
+                #print(f"Job on {video_id} done!"+" "*20)
         time.sleep(10)
 
-def workers_queue_scheduler(queue):
+def workers_queue_scheduler(queue:'ListProxy[any]'):
     '''
     Creates a separated process that runs the segmentation of every video in the queue
     '''
-    from threading import Thread
-    Thread(target=_run_jobs,args=(queue,)).start()    
+    #from threading import Thread
+    Process(target=_run_jobs,args=(queue,)).start()    
 
 
 def _test_and_save_segment_video(vid_id):
