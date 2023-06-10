@@ -9,15 +9,13 @@ import json
 from conll import get_text
 from burst_class import burst_extraction, burst_extraction_with_synonyms, convert_to_skos_concepts
 from metrics import calculate_metrics
-from multiprocessing import Queue,Manager
-from threading import Thread
-
+from multiprocessing import Manager
 from audio_transcription import speech_from_youtube
 from config import app
 import db_mongo
 from db_mongo import users, unverified_users
 from video import download
-from segmentation import VideoAnalyzer, workers_queue_scheduler, run_one_segmentation_job
+from segmentation import VideoAnalyzer, workers_queue_scheduler
 from ontology import annotations_to_jsonLD
 from burst_class import create_local_vocabulary, create_burst_graph
 from forms import addVideoForm, RegisterForm, LoginForm, GoldStandardForm, ForgotForm, PasswordResetForm, ConfirmCodeForm, BurstForm
@@ -28,12 +26,9 @@ from user import User
 from sendmail import send_mail, generate_confirmation_token, confirm_token, send_confirmation_mail
 from create_gold_standard import create_gold
 from synonyms import create_skos_dictionary, get_synonyms_from_list
-from multithreading import process_video_queue
 
 video_segmentations_queue = Manager().list()
 workers_queue_scheduler(video_segmentations_queue)
-#video_segmentations_queue = []
-#video_segmentation_thread = None
 
 @app.route('/')
 def index():
@@ -239,15 +234,8 @@ def video_selection():
             if segmentation_data is None:
                 if vid_analyzer.can_be_analyzed():
                     print("Video not already segmented: starting segmentation...")
-
                     global video_segmentations_queue
-                    #global video_segmentation_thread
-                    #result = process_video_queue(video_segmentations_queue,video_segmentation_thread,vid_id)
-                    #if result is not None:
-                    #    video_segmentation_thread = result
-
                     video_segmentations_queue.append(vid_id)
-                    
                 else: print("The video is too long to be analyzed")
                 # create thumbnails based on the previous segmentation
                 start_times,end_times,images_path,text = vid_analyzer.transcript_segmentation(subtitles)
