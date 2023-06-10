@@ -1367,6 +1367,7 @@ def _debug_write_on_file(text,mode):
     filew.close()
 
 def run_one_segmentation_job(video_id):
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
     #_debug_write_on_file("started runjobs\n","w")
     #print(db_mongo.get_video_segmentation(video_id,raise_error=False))
     vid_analyzer = VideoAnalyzer(video_id)
