@@ -34,3 +34,32 @@ def process_video_queue(video_segmentations_queue,video_segmentation_thread,vid_
             video_segmentation_thread[1].start()
             return video_segmentation_thread
         return None
+
+if __name__ == "__main__":
+    import subprocess
+    from os import environ
+    tesseract_cmd = "tesseract"
+    try:
+        output = subprocess.check_output(
+            [tesseract_cmd, '--version'],
+            stderr=subprocess.STDOUT,
+            env=environ,
+            stdin=subprocess.DEVNULL,
+        )
+    except OSError:
+        raise Exception("tesseract not found")
+    
+    import string 
+    raw_version = output.decode('utf-8')
+    str_version, *_ = raw_version.lstrip(string.printable[10:]).partition(' ')
+    str_version, *_ = str_version.partition('-')
+
+    from packaging.version import Version, parse,InvalidVersion
+
+    try:
+        version = parse(str_version)
+        assert version >= Version('3.05')
+    except (AssertionError, InvalidVersion):
+        raise SystemExit(f'Invalid tesseract version: "{raw_version}"')
+    
+    print(output)
