@@ -198,10 +198,11 @@ export default function Comparison(){
 
         if(searchFilterClicked){
           SetCatalogExtra(catalogExtra=>[])
-
-          catalog.map(video=>{
-            QueryConceptExtra(video.video_id, querylist)
+          let videoidlist=[]
+          catalog.map((video,idx)=>{
+            videoidlist=[...videoidlist,video.video_id]
           })
+          QueryConceptExtra(videoidlist, querylist)
         }
       },[searchFilterClicked])
 
@@ -605,12 +606,12 @@ export default function Comparison(){
     
     //query to the extra data for a specific concept inside Graphs collection in mongodb using SPARQL query
     //videoid and concept is needed
-    async function QueryConceptExtra(videoid, concept) {
+    async function QueryConceptExtra(videoidlist, concept) {
 
       let risposta=null
       try{
 
-       risposta = await fetch('/api/ConceptVideoData/'+videoid+"/"+concept, {
+       risposta = await fetch('/api/ConceptVideoData/'+videoidlist+"/"+concept, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -627,7 +628,12 @@ export default function Comparison(){
       }else{
 
         var data = await risposta.json();
-        SetCatalogExtra(catalogExtra=>[...catalogExtra,data]);
+   
+
+        for(let i=0;i<data.length;i++){
+          SetCatalogExtra(catalogExtra=>[...catalogExtra,data[i]]);
+        }
+        
 
       }
       

@@ -870,9 +870,9 @@ def GetVideoTypeAndPrerequisite():
                 result[v.video_id]['video_slidishness'] = VTSdoc.video_slidishness
     return result
 
-@app.route('/api/ConceptVideoData/<video_id>/<concept_searched>')
+@app.route('/api/ConceptVideoData/<video_id_list>/<concept_searched>')
 @auth.login_required
-def ConceptVideoData(video_id, concept_searched):
+def ConceptVideoData(video_id_list, concept_searched):
 
     user = "luca"
     password = "vSmAZ6c1ZOg2IEVw"
@@ -883,307 +883,311 @@ def ConceptVideoData(video_id, concept_searched):
     # retrieve from mongodb collection=graphs the all elements with the value of video_id
     collection = dbsparql.graphs
 
-    # initialize the dicitonary where we save our results
-    result = {
-        'video_id':video_id,
-        'concept_starttime':[],
-        'concept_endtime':[],
-        'explain':[],
-        'list_preconcept': [],
-        'list_prenotes':[],
-        'list_postnotes':[],
-        'list_derivatedconcept':[],
-        'derivatedconcept_starttime':[],
-        'derivatedconcept_endtime':[]
-        
-    }
+    videoList = video_id_list.split(',')
+    result_list=[]
+    for i in range(0,len(videoList)):
+        video_id = videoList[i]
+        # initialize the dicitonary where we save our results
+        result = {
+            'video_id':video_id,
+            'concept_starttime':[],
+            'concept_endtime':[],
+            'explain':[],
+            'list_preconcept': [],
+            'list_prenotes':[],
+            'list_postnotes':[],
+            'list_derivatedconcept':[],
+            'derivatedconcept_starttime':[],
+            'derivatedconcept_endtime':[]
+            
+        }
 
-    #print("?????????????????????????????START??????????????????????????????????")
-    #print("start query: ",video_id," ",concept_searched)
-    #print("result: ",result)
+        #print("?????????????????????????????START??????????????????????????????????")
+        #print("start query: ",video_id," ",concept_searched)
+        #print("result: ",result)
 
-    # two options:
-    ## 1. search newest annotation
-    ### 2. combine every annotation of a video into a unique graph and make the query of that
-    cursor = collection.find({"video_id":video_id})
-    optiongraph = 2
-    gr=Graph()
-
-
-    if optiongraph == 1:
+        # two options:
         ## 1. search newest annotation
-        ## search for the newest in term of timestamp and get the idx of the newest document
-        ## maybe it's pointless if the lastest is always the newest
-        ## but in case the order changes in the future, this piece of code will make the ode work right regardless
-        lastest = "1970-01-01T00:00:00.000000Z"
-        lastest_idx = 0
-        for idx,document in enumerate(cursor):
-            if document is None:
-                continue
-            gr=Graph().parse(data=json.dumps(document["graph"]), format='json-ld')
+        ### 2. combine every annotation of a video into a unique graph and make the query of that
+        cursor = collection.find({"video_id":video_id})
+        optiongraph = 2
+        gr=Graph()
+
+
+        if optiongraph == 1:
+            ## 1. search newest annotation
+            ## search for the newest in term of timestamp and get the idx of the newest document
+            ## maybe it's pointless if the lastest is always the newest
+            ## but in case the order changes in the future, this piece of code will make the ode work right regardless
+            lastest = "1970-01-01T00:00:00.000000Z"
+            lastest_idx = 0
+            for idx,document in enumerate(cursor):
+                if document is None:
+                    continue
+                gr=Graph().parse(data=json.dumps(document["graph"]), format='json-ld')
+                qr = """
+                        PREFIX oa: <http://www.w3.org/ns/oa#>
+                        PREFIX edu: <https://teldh.github.io/edurell#>
+                        PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                        PREFIX dcterms: <http://purl.org/dc/terms/>
+                        
+                        SELECT DISTINCT ?timestamp
+                        WHERE {
+                                ?who dcterms:created ?timestamp
+                            }
+
+                    """
+                qres = gr.query(qr)
+                #print("query result: ",qres)
+                for row in qres:
+                #   print("current_timestamp: ",lastest," / selected_timestamp: ",row['timestamp'])
+                    if row['timestamp'] > lastest:
+                        lastest = row['timestamp']
+                        lastest_idx = idx
+            #print("lastest_timestamp: ",lastest," lastest_idx: ",lastest_idx)
+            #print("TESTTTTTTTTT       ",cursor)
+
+
+            # select the newest document
+            document = collection.find({"video_id":video_id})[lastest_idx]
+            
+
+            # Query the concept timeline and duration
+            gr.parse(data=json.dumps(document["graph"]), format='json-ld')
+
+            # initialize conceptVocabulary for the query
+            gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+
+        else:
+            ### 2. combine all annotation of a video together
+            ### in mongodb we collect all annotation of a single video
+            ### made by different people or the same
+            ### this mode combine from the oldest to the newest into a single graph
+
+            #print("start cursor for: ",video_id)
+            for idx,document in enumerate(cursor):
+            #   print("document ",video_id," idx: ",idx," \n\nGRAPH: ",document["graph"]," \n\nCONCEPT:  ",document["conceptVocabulary"]," \n\n")
+            #  print("\n")
+                # Query the concept timeline and duration
+                if document["graph"]=="":
+            #     print("\nIGNORE GRAPH: ")
+                    continue
+                if document["conceptVocabulary"] == "":
+                #    print("\nIGNORE CONCEPT: ")
+
+                    continue
+                gr.parse(data=json.dumps(document["graph"]), format='json-ld')
+
+                # initialize conceptVocabulary for the query
+                
+                gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+
+            
+
+
+        ## --------------------------------------------------------------------------------------------------------------------------------------
+        ## ---------------------------------------------------------QUERYCREATED-----------------------------------------------------------------
+        ## --------------------------------------------------------------------------------------------------------------------------------------
+        qr = """
+                    PREFIX oa: <http://www.w3.org/ns/oa#>
+                    PREFIX edu: <https://teldh.github.io/edurell#>
+                    PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                    PREFIX dcterms: <http://purl.org/dc/terms/>
+                    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+                    SELECT DISTINCT ?created
+                    WHERE{
+                            ?who oa:motivatedBy oa:describing.
+                            ?who dcterms:created ?created.
+                            ?who a oa:Annotation.
+                            ?who oa:hasBody ?c_id.
+                            ?c_id skos:prefLabel ?c_selected.
+                    }
+        """
+
+ 
+        qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
+        #print("query created")
+        #print("qres: ",len(qres))
+        for row in qres:
+        #   print("_________________________________________")
+        #  print(row['created'])
+            result['created']=row['created']
+
+        #print(result)
+
+
+
+        ## --------------------------------------------------------------------------------------------------------------------------------------
+        ## ---------------------------------------------------QUERYCONCEPTTIMELINE&SKOSNOTE------------------------------------------------------
+        ## --------------------------------------------------------------------------------------------------------------------------------------
+        qr = """
+                    PREFIX oa: <http://www.w3.org/ns/oa#>
+                    PREFIX edu: <https://teldh.github.io/edurell#>
+                    PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                    PREFIX dcterms: <http://purl.org/dc/terms/>
+                    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                    SELECT ?concept_starttime ?concept_endtime ?explain
+                    WHERE {
+                            
+                            ?who oa:hasBody ?c_id.
+                            ?c_id skos:prefLabel ?c_selected.
+                            ?who oa:motivatedBy oa:describing.
+                            ?who oa:hasTarget ?target.
+                            ?target oa:hasSelector ?selector.
+                            ?selector oa:hasStartSelector ?startselector.
+                            ?startselector rdf:value ?concept_starttime.
+                            ?selector oa:hasEndSelector ?endselector.
+                            ?endselector rdf:value ?concept_endtime.
+                            ?who skos:note ?explain               
+                        }
+
+
+                """
+    
+        qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
+
+        #print("qres: ",len(qres))
+        for row in qres:
+            #print("result: ",row['concept_starttime']," ",row['concept_endtime'])
+        #   print("_________________________________________")
+        #  print(row['concept_starttime'],"\n",row['concept_endtime'])
+
+            result['concept_starttime'].append(row['concept_starttime'])
+            result['concept_endtime'].append(row['concept_endtime'])
+            result['explain'].append(row['explain'])
+        
+
+        ## --------------------------------------------------------------------------------------------------------------------------------------
+        ## ---------------------------------------------------------QUERYPRECONCEPTS-------------------------------------------------------------
+        ## --------------------------------------------------------------------------------------------------------------------------------------
+        ## preconcepts that aren't explained: no conceptDefinition nor conceptExpansion
+
+        qr = """
+                    PREFIX oa: <http://www.w3.org/ns/oa#>
+                    PREFIX edu: <https://teldh.github.io/edurell#>
+                    PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                    PREFIX dcterms: <http://purl.org/dc/terms/>
+                    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+                    SELECT DISTINCT ?preconcept ?prenote
+                    WHERE{
+                            ?who oa:hasBody ?preconceptIRI.
+                            ?c_id skos:prefLabel ?c_selected.
+                            ?who oa:motivatedBy edu:linkingPrerequisite.
+                            ?who oa:hasTarget ?target.
+                            ?target dcterms:subject ?c_id.
+                            ?preconceptIRI skos:prefLabel ?preconcept.
+                            ?who skos:note ?prenote.
+
+                    }
+
+
+        """
+
+
+        qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
+        #print("preconcept")
+        #print("qres: ",len(qres))
+        for row in qres:
+        #   print("a_________________________________________")
+        #  print(row['preconcept'])
+            result['list_preconcept'].append(row['preconcept'])
+            result['list_prenotes'].append(row['prenote'])
+
+        #print(result)
+
+        
+        ## --------------------------------------------------------------------------------------------------------------------------------------
+        ## ---------------------------------------------------------QUERYCONCEPTDERIVATED--------------------------------------------------------
+        ## --------------------------------------------------------------------------------------------------------------------------------------
+        qr = """
+                    PREFIX oa: <http://www.w3.org/ns/oa#>
+                    PREFIX edu: <https://teldh.github.io/edurell#>
+                    PREFIX dctypes: <http://purl.org/dc/dcmitype/>
+                    PREFIX dcterms: <http://purl.org/dc/terms/>
+                    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+                    SELECT DISTINCT ?c_derivated ?postnote
+                    WHERE{
+                            ?who oa:hasBody ?c_id.
+                            ?c_id skos:prefLabel ?c_selected.
+                            ?who oa:motivatedBy edu:linkingPrerequisite.
+                            ?who oa:hasTarget ?target.
+                            ?target dcterms:subject ?c_derivatedIRI.
+                            ?c_derivatedIRI skos:prefLabel ?c_derivated.
+                            ?who skos:note ?postnote
+                    }
+
+
+        """
+        """
+            'list_derivatedconcept':[],
+            'derivatedconcept_starttime':[],
+            'derivatedconcept_endtime':[]
+        """
+        qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
+        #print("c_derivated")
+        #print("qres: ",len(qres))
+        for row in qres:
+        #   print("b_________________________________________")
+        #  print(row['c_derivated'])
+
+            result['list_derivatedconcept'].append(row['c_derivated'])
+            result['list_postnotes'].append(row['postnote'])
+
+        
+
+
+
+
+        for dc in result['list_derivatedconcept']:
             qr = """
                     PREFIX oa: <http://www.w3.org/ns/oa#>
                     PREFIX edu: <https://teldh.github.io/edurell#>
                     PREFIX dctypes: <http://purl.org/dc/dcmitype/>
                     PREFIX dcterms: <http://purl.org/dc/terms/>
-                    
-                    SELECT DISTINCT ?timestamp
+                    PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+                    SELECT ?dc_starttime ?dc_endtime
                     WHERE {
-                            ?who dcterms:created ?timestamp
+                            
+                            ?who oa:hasBody ?c_id.
+                            ?c_id skos:prefLabel ?c_selected.
+                            ?who oa:motivatedBy oa:describing.
+                            ?who oa:hasTarget ?target.
+                            ?target oa:hasSelector ?selector.
+                            ?selector oa:hasStartSelector ?startselector.
+                            ?startselector rdf:value ?dc_starttime.
+                            ?selector oa:hasEndSelector ?endselector.
+                            ?endselector rdf:value ?dc_endtime.               
                         }
 
+
                 """
-            qres = gr.query(qr)
-            #print("query result: ",qres)
+    
+            qres = gr.query(qr, initBindings = {"c_selected":Literal(dc, lang="en")})
+            #print("qres: ",len(qres))
             for row in qres:
-             #   print("current_timestamp: ",lastest," / selected_timestamp: ",row['timestamp'])
-                if row['timestamp'] > lastest:
-                    lastest = row['timestamp']
-                    lastest_idx = idx
-        #print("lastest_timestamp: ",lastest," lastest_idx: ",lastest_idx)
-        #print("TESTTTTTTTTT       ",cursor)
-
-
-        # select the newest document
-        document = collection.find({"video_id":video_id})[lastest_idx]
-        
-
-        # Query the concept timeline and duration
-        gr.parse(data=json.dumps(document["graph"]), format='json-ld')
-
-        # initialize conceptVocabulary for the query
-        gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
-
-    else:
-        ### 2. combine all annotation of a video together
-        ### in mongodb we collect all annotation of a single video
-        ### made by different people or the same
-        ### this mode combine from the oldest to the newest into a single graph
-
-        #print("start cursor for: ",video_id)
-        for idx,document in enumerate(cursor):
-         #   print("document ",video_id," idx: ",idx," \n\nGRAPH: ",document["graph"]," \n\nCONCEPT:  ",document["conceptVocabulary"]," \n\n")
-          #  print("\n")
-            # Query the concept timeline and duration
-            if document["graph"]=="":
-           #     print("\nIGNORE GRAPH: ")
-                continue
-            if document["conceptVocabulary"] == "":
-            #    print("\nIGNORE CONCEPT: ")
-
-                continue
-            gr.parse(data=json.dumps(document["graph"]), format='json-ld')
-
-            # initialize conceptVocabulary for the query
-            
-            gr.parse(data=json.dumps(document["conceptVocabulary"]), format='json-ld')
+                #print("result: ",row['concept_starttime']," ",row['concept_endtime'])
+            #   print("_________________________________________")
+            #  print(row['dc_starttime'],"\n",row['dc_endtime'])
+                result['derivatedconcept_starttime'].append(row['dc_starttime'])
+                result['derivatedconcept_endtime'].append(row['dc_endtime'])
 
         
 
+        ## --------------------------------------------------------------------------------------------------------------------------------------
+        ## ---------------------------------------------------------SLIDISHNESS------------------------------------------------------------------
+        ## --------------------------------------------------------------------------------------------------------------------------------------
+        VTS=VideoTextSegmentation.objects(video_id = video_id)
+        for VTSdoc in VTS:
+        # print(VTSdoc.video_id)
+        # print(VTSdoc.video_slidishness)
+            result['video_slidishness'] = str(VTSdoc.video_slidishness)
+        result_list.append(result)
 
-    ## --------------------------------------------------------------------------------------------------------------------------------------
-    ## ---------------------------------------------------------QUERYCREATED-----------------------------------------------------------------
-    ## --------------------------------------------------------------------------------------------------------------------------------------
-    qr = """
-                PREFIX oa: <http://www.w3.org/ns/oa#>
-                PREFIX edu: <https://teldh.github.io/edurell#>
-                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
-                PREFIX dcterms: <http://purl.org/dc/terms/>
-                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-
-                SELECT DISTINCT ?created
-                WHERE{
-                        ?who oa:motivatedBy oa:describing.
-                        ?who dcterms:created ?created.
-                        ?who a oa:Annotation.
-                        ?who oa:hasBody ?c_id.
-                        ?c_id skos:prefLabel ?c_selected.
-                }
-    """
-
-   # f.write("\n\n"+str(qr)+" "+str(gr)+" \n\n")
-   # f.close()
-    qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
-    #print("query created")
-    #print("qres: ",len(qres))
-    for row in qres:
-     #   print("_________________________________________")
-      #  print(row['created'])
-        result['created']=row['created']
-
-    #print(result)
-
-
-
-    ## --------------------------------------------------------------------------------------------------------------------------------------
-    ## ---------------------------------------------------QUERYCONCEPTTIMELINE&SKOSNOTE------------------------------------------------------
-    ## --------------------------------------------------------------------------------------------------------------------------------------
-    qr = """
-                PREFIX oa: <http://www.w3.org/ns/oa#>
-                PREFIX edu: <https://teldh.github.io/edurell#>
-                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
-                PREFIX dcterms: <http://purl.org/dc/terms/>
-                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-                SELECT ?concept_starttime ?concept_endtime ?explain
-                WHERE {
-                        
-                        ?who oa:hasBody ?c_id.
-                        ?c_id skos:prefLabel ?c_selected.
-                        ?who oa:motivatedBy oa:describing.
-                        ?who oa:hasTarget ?target.
-                        ?target oa:hasSelector ?selector.
-                        ?selector oa:hasStartSelector ?startselector.
-                        ?startselector rdf:value ?concept_starttime.
-                        ?selector oa:hasEndSelector ?endselector.
-                        ?endselector rdf:value ?concept_endtime.
-                        ?who skos:note ?explain               
-                    }
-
-
-            """
- 
-    qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
-
-    #print("qres: ",len(qres))
-    for row in qres:
-        #print("result: ",row['concept_starttime']," ",row['concept_endtime'])
-     #   print("_________________________________________")
-      #  print(row['concept_starttime'],"\n",row['concept_endtime'])
-
-        result['concept_starttime'].append(row['concept_starttime'])
-        result['concept_endtime'].append(row['concept_endtime'])
-        result['explain'].append(row['explain'])
-    
-
-    ## --------------------------------------------------------------------------------------------------------------------------------------
-    ## ---------------------------------------------------------QUERYPRECONCEPTS-------------------------------------------------------------
-    ## --------------------------------------------------------------------------------------------------------------------------------------
-    ## preconcepts that aren't explained: no conceptDefinition nor conceptExpansion
-
-    qr = """
-                PREFIX oa: <http://www.w3.org/ns/oa#>
-                PREFIX edu: <https://teldh.github.io/edurell#>
-                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
-                PREFIX dcterms: <http://purl.org/dc/terms/>
-                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-
-                SELECT DISTINCT ?preconcept ?prenote
-                WHERE{
-                        ?who oa:hasBody ?preconceptIRI.
-                        ?c_id skos:prefLabel ?c_selected.
-                        ?who oa:motivatedBy edu:linkingPrerequisite.
-                        ?who oa:hasTarget ?target.
-                        ?target dcterms:subject ?c_id.
-                        ?preconceptIRI skos:prefLabel ?preconcept.
-                        ?who skos:note ?prenote.
-
-                }
-
-
-    """
-
-
-    qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
-    #print("preconcept")
-    #print("qres: ",len(qres))
-    for row in qres:
-     #   print("a_________________________________________")
-      #  print(row['preconcept'])
-        result['list_preconcept'].append(row['preconcept'])
-        result['list_prenotes'].append(row['prenote'])
-
-    #print(result)
-
-    
-    ## --------------------------------------------------------------------------------------------------------------------------------------
-    ## ---------------------------------------------------------QUERYCONCEPTDERIVATED--------------------------------------------------------
-    ## --------------------------------------------------------------------------------------------------------------------------------------
-    qr = """
-                PREFIX oa: <http://www.w3.org/ns/oa#>
-                PREFIX edu: <https://teldh.github.io/edurell#>
-                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
-                PREFIX dcterms: <http://purl.org/dc/terms/>
-                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-
-                SELECT DISTINCT ?c_derivated ?postnote
-                WHERE{
-                        ?who oa:hasBody ?c_id.
-                        ?c_id skos:prefLabel ?c_selected.
-                        ?who oa:motivatedBy edu:linkingPrerequisite.
-                        ?who oa:hasTarget ?target.
-                        ?target dcterms:subject ?c_derivatedIRI.
-                        ?c_derivatedIRI skos:prefLabel ?c_derivated.
-                        ?who skos:note ?postnote
-                }
-
-
-    """
-    """
-        'list_derivatedconcept':[],
-        'derivatedconcept_starttime':[],
-        'derivatedconcept_endtime':[]
-    """
-    qres = gr.query(qr, initBindings = {"c_selected":Literal(concept_searched, lang="en")})
-    #print("c_derivated")
-    #print("qres: ",len(qres))
-    for row in qres:
-     #   print("b_________________________________________")
-      #  print(row['c_derivated'])
-
-        result['list_derivatedconcept'].append(row['c_derivated'])
-        result['list_postnotes'].append(row['postnote'])
-
-    
-
-
-
-
-    for dc in result['list_derivatedconcept']:
-        qr = """
-                PREFIX oa: <http://www.w3.org/ns/oa#>
-                PREFIX edu: <https://teldh.github.io/edurell#>
-                PREFIX dctypes: <http://purl.org/dc/dcmitype/>
-                PREFIX dcterms: <http://purl.org/dc/terms/>
-                PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-                SELECT ?dc_starttime ?dc_endtime
-                WHERE {
-                        
-                        ?who oa:hasBody ?c_id.
-                        ?c_id skos:prefLabel ?c_selected.
-                        ?who oa:motivatedBy oa:describing.
-                        ?who oa:hasTarget ?target.
-                        ?target oa:hasSelector ?selector.
-                        ?selector oa:hasStartSelector ?startselector.
-                        ?startselector rdf:value ?dc_starttime.
-                        ?selector oa:hasEndSelector ?endselector.
-                        ?endselector rdf:value ?dc_endtime.               
-                    }
-
-
-            """
- 
-        qres = gr.query(qr, initBindings = {"c_selected":Literal(dc, lang="en")})
-        #print("qres: ",len(qres))
-        for row in qres:
-            #print("result: ",row['concept_starttime']," ",row['concept_endtime'])
-         #   print("_________________________________________")
-          #  print(row['dc_starttime'],"\n",row['dc_endtime'])
-            result['derivatedconcept_starttime'].append(row['dc_starttime'])
-            result['derivatedconcept_endtime'].append(row['dc_endtime'])
-
-    
-
-    ## --------------------------------------------------------------------------------------------------------------------------------------
-    ## ---------------------------------------------------------SLIDISHNESS------------------------------------------------------------------
-    ## --------------------------------------------------------------------------------------------------------------------------------------
-    VTS=VideoTextSegmentation.objects(video_id = video_id)
-    for VTSdoc in VTS:
-       # print(VTSdoc.video_id)
-       # print(VTSdoc.video_slidishness)
-        result['video_slidishness'] = str(VTSdoc.video_slidishness)
-
-    #print(result)
-    return result
+   
+    return result_list
 
 @app.route('/api/testm/<video_id>')
 @auth.login_required
