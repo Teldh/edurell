@@ -35,7 +35,33 @@ const ExpandMore = styled((props) => {
       duration: theme.transitions.duration.shortest,
     }),
 }));
+/*
+old chip button for filter
+  <Chip 
+                                        clickable={false}
+                                        sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px', backgroundColor:"#c6ebdc"}}
 
+                                        
+                                        avatar={<TuneRoundedIcon/>}
+                                        label={<Typography variant="body1" display="block" gutterBottom sx={{m:0.5}}>
+                                        Filters
+
+                                    </Typography>} 
+                                        onClick={handleExpandClick}
+                                        onDelete={handleExpandClick}
+                                        deleteIcon={
+                                            <ExpandMore
+                                            expand={expanded}
+                                    
+                                            aria-expanded={expanded}
+                                            aria-label="show more"
+                                            >
+                                                <ExpandMoreIcon />
+                                            </ExpandMore>
+                                        }
+                                    />
+
+*/
 
 //this is the whole component before the listvideo component. It holds the searchbar with the filters and tutorial and the video selected for comparison
 
@@ -245,9 +271,10 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                 direction="column"
                 justifyContent="center"
                 alignItems="center"
+                sx={{pt:5}}
                 >
                   
-                    <Grid item>
+                    <Grid item id="barra" sx={{m:0,p:0, pb:1}}>
                             <Grid
                             container
                             direction="row"
@@ -286,26 +313,43 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                 </Grid>
 
                                 <Grid item>
-                                    <div style={{zIndex:1, position:"relative"}} ref={ref}>
+                                    <div style={{zIndex:1, position:"relative",width:"120px",
+                                        height:"50px",}} ref={ref}>
                                 {
                                     querylist.length > 0 && querylist[0]!=null?
                                   
 
-                                       
+                                    <Grid
+                                    id="buttonfilter"
+                                    container
+                                    direction="row"
+                                    justifyContent="center"
+                                    alignItems="center"
+                                    onClick={handleExpandClick}
+                                    sx={{
+                                        backgroundColor: expanded?"white":"",
+                                        cursor:"pointer",
+                                        borderRadius:"15px 15px 0 0",
+                                        ml:1,
+                                        width:"100%",
+                                        height:"100%",
+                                        pb:8,
+                                        position:"absolute",
+                                        top:"7px",
+                                        right:"-10px"
+                                   
                                         
-                                    <Chip 
-                                        clickable={false}
-                                        sx={expanded?{width:'auto', margin:'5px',backgroundColor:'white'}:{width:'auto',margin:'5px', backgroundColor:"#c6ebdc"}}
-
-                                        
-                                        avatar={<TuneRoundedIcon/>}
-                                        label={<Typography variant="body1" display="block" gutterBottom sx={{m:0.5}}>
-                                        Filters
-
-                                    </Typography>} 
-                                        onClick={handleExpandClick}
-                                        onDelete={handleExpandClick}
-                                        deleteIcon={
+                                        }}
+                                    >
+                                        <Grid item>
+                                            <TuneRoundedIcon/>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" display="block" gutterBottom sx={{m:0.5}}>
+                                                Filters
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item >
                                             <ExpandMore
                                             expand={expanded}
                                     
@@ -314,8 +358,11 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                             >
                                                 <ExpandMoreIcon />
                                             </ExpandMore>
-                                        }
-                                    />
+                                        </Grid>
+
+                                    </Grid>
+                                        
+                                  
                               
 
                                 :
@@ -328,7 +375,7 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                 
                             </Grid>
                     </Grid>
-                    <Grid item sx={{mt:1}}>
+                    <Grid item sx={{m:0,p:0}} id="filtri">
 
                         <Filters ApplyFilters={ApplyFilters} expanded={expanded} />
                     </Grid>

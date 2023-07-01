@@ -1806,7 +1806,7 @@ export default function Result(){
                                                     >
                                                                     <MenuItem>
                                                                         <Typography variant="caption"  gutterBottom>
-                                                                            <b>Slide:</b>
+                                                                            <b>% of slides on the whole video:</b>
                                                                         </Typography>
                                                                     </MenuItem>
                                                                     <MenuItem sx={{mb:0, pb:0}}>

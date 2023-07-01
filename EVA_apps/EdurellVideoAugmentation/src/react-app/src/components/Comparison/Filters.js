@@ -137,12 +137,9 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
         id="TWO COLUMN ONE IS FILTERS LOWER IS BUTTON"
         style={{position:"relative"}}
         >
-            <Box
+            
 
-            style={{position:"absolute", top:-30,right:38}}
-            sx={{width:"110px",height:"300px",backgroundColor:"white"}}/>
-
-        <Grid item sx={{ p:5, borderRadius: '50px 50px 0 0', backgroundColor:"white"}}>
+        <Grid item sx={{ p:1, borderRadius: '50px 50px 0 0', backgroundColor:"white", pb:0,mb:0,pl:5,pr:5}}>
             <Grid 
             container
             direction="row"
@@ -618,7 +615,7 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
 
         {/* FROM HERE START PART FOR BUTTON */}
 
-        <Grid id="asd"item sx={{  display: 'flex' , width:'100%',pb:5}}>
+        <Grid id="asd"item sx={{  display: 'flex' , width:'100%',pb:0,mb:0,pt:0,mt:0}}>
       
             <Grid
             container
@@ -631,7 +628,13 @@ const Filters=forwardRef(({ApplyFilters, expanded},ref)=>{
                 </Grid>
                 <Grid item xs >
                 </Grid>
-                <Grid item xs="auto" sx={{p: 2 ,backgroundColor:'#B798f8', borderRadius:'50px 0 50px 0'}} onClick={()=>{
+                <Grid item xs="auto" sx={{p: 2 ,backgroundColor:'#B798f8', borderRadius:'50px 0 50px 0', cursor:"pointer",
+                    '&:hover': {
+                    backgroundColor: "#cbb3fc",
+               
+                    
+                    }
+            ,}} onClick={()=>{
 
                     ApplyFilters([alignment1,alignment2,alignment3,alignment4,alignment5,alignment6,radiog])
                 }}>
