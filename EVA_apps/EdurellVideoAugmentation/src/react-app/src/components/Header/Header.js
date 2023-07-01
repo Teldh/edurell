@@ -44,7 +44,7 @@ export default class Header extends React.Component {
                     
                     <Tooltip title ="Compare videos">
                     
-                      <Link to={`/comparisonSearch`} style={{ textDecoration: 'none' }}>
+                      <Link to={`/comparisonSearch`} style={{ textDecoration: 'none' }} onClick={()=>{window.location.reload()}}>
                       <Box
                                         sx={{
                                             bbackgroundColor: 'transparent',

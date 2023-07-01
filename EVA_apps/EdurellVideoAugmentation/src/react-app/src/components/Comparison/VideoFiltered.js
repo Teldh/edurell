@@ -263,7 +263,8 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                     borderRadius:'20px 0 0 0',
                                     width:'auto',
                                     maxWidth:'200px',
-                                    height:"auto"}}
+                                    height:"auto",
+                                    cursor:"pointer"}}
                                 onMouseEnter={()=>setHoverm(true)}
                                 onMouseLeave={()=>setHoverm(false)}
                                 onClick={e => {e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);UpdateCatalogExtra(imageurl, durationSeconds, approfondimentiSeconds);}}
@@ -297,7 +298,8 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                 borderRadius:'20px 0 0 0',
                                 width:'auto',
                                 maxWidth:'200px',
-                                height:"auto"}}
+                                height:"auto",
+                            cursor:"pointer"}}
                             onMouseEnter={()=>setHoverm(true)}
                             onMouseLeave={()=>setHoverm(false)}
                             onClick={e => {e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);UpdateCatalogExtra(imageurl, durationSeconds, approfondimentiSeconds);}}
@@ -740,7 +742,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
 
                         <Grid item>
 
-                                            <Box sx={{borderTop: 1,borderBottom: 1, borderColor:"rgb(255,168,37)", m:2}}>
+                                            <Box sx={{borderTop: 1,borderBottom: 1, borderColor:"rgb(255,168,37)", m:2, cursor:"pointer"}}>
                                             <Grid
                                             container
                                             direction="column"
@@ -886,7 +888,8 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                         borderRadius:'20px 0 0 0',
                                                         width:'auto',
                                                         maxWidth:'200px',
-                                                        height:"auto"}}
+                                                        height:"auto",
+                                                    cursor:"pointer"}}
                                                     onMouseEnter={()=>setHoverm(true)}
                                                     onMouseLeave={()=>setHoverm(false)}
                                                     onClick={e => {e.stopPropagation();addvideo(imageurl,titleurl,setAdd,idxurl);}}
