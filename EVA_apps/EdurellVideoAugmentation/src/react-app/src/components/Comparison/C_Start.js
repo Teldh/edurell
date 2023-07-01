@@ -11,7 +11,11 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import Header from '../Header/Header';
 import { useContext,useState,useEffect } from 'react';
 import {TokenContext} from '../account-management/TokenContext';
+import { styled, withTheme } from "@material-ui/core/styles"
+import Button from '@mui/material/Button';
+import MyButton from './Buttonsecondary.js'
 import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors';
+import { StyledEngineProvider } from '@mui/material/styles';
 import {
   Link,
   Redirect,
@@ -32,6 +36,7 @@ export default function C_Start({Endcstart}){
     const [catalog,setCatalog]=useState(null);
     const [listConcepts, setListConcepts]=useState([]);
     const history = useHistory();
+    const [conSel, setConSel] = useState(null)
 
     useEffect(() => {
         console.log("effect")
@@ -114,32 +119,14 @@ export default function C_Start({Endcstart}){
         });
     }
 
+
     return (
-        <>
-        <Header page="dashboard" login={nameSurname}/>
+      <StyledEngineProvider injectFirst> 
+          <Stack
+          direction="row"
+          spacing={0}
+          >
         
-        
-        <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-      }}
-      className="bgcolordiv"
-    >
-   
-            <Stack spacing={1} sx={{justifyContent:'center', alignItems:'center'}}>
-                <Typography variant="h1" 
-                    gutterBottom  
-                    className="logofirstpage"
-                    style={{
-                        align:'center',
-                        fontWeight: 'bold',
-                        margin: '0'
-                    }}>
-                        Edurell
-                </Typography>
        
                 <Autocomplete
                 
@@ -170,21 +157,15 @@ export default function C_Start({Endcstart}){
                         />
                     }
                     onChange={(event, value) => {
-                        SendData(value);
+                        //SendData(value);
+                        setConSel(value)
                       }}
                 />
+               <MyButton AddQueryElement={SendData} cs={conSel}/>
                 
-            </Stack>
-            
-     
-          
-          
-          
-              
-      </Box>
-
-
-
-        </>
+        
+          </Stack>
+                      </StyledEngineProvider>
+        
     );
 }

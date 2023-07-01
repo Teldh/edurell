@@ -13,7 +13,7 @@ import Videoselected from './Videoselected';
 import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
 import HelpIcon from '@mui/icons-material/Help';
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import Filters from './Filters.js'
@@ -97,13 +97,67 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                     display: 'flex',
                     alignItems: 'center',
                     }}>
-              
+            <Grid
+            container
+            direction="column"
+            justifyContext="center"
+            alignItems="stretch">
+
+           
+            <Grid item>
+                <Grid
+                container
+                direction="column"
+                justifyContent="center"
+                alignItems="flex-start"
+                spacing={0}
+                >
+                    <Grid item>
+                        <Typography variant="h3" gutterBottom display="block" sx={{mb:0, pb:0}}>
+                            VIDEO COMPARISON
+                        </Typography>
+                    </Grid>
+                    <Grid item>
+                        <Typography variant="h6" gutterBottom display="block">
+                            <b>Compare videos on a given concept/topic using advanced tools for video comparison</b>
+                        </Typography>
+                    </Grid>
+                    <Grid item>
+                        <dl>
+                            <dd>
+                                <Typography variant="body1" gutterBottom display="block">
+                                    <b>1. Type in the name of the concept/topic for video search and click</b> 
+                                    <Box justifyContent="center"
+                alignItems="center"sx={{color:"white", backgroundColor:"rgb(255,168,37)", height:"40px", width:"80px"}}>Search</Box>
+                                </Typography>        
+                            </dd>
+                            <dd>
+                                <Typography variant="body1" gutterBottom display="block">
+                                    <b>2. Set the filters with the criteria for video comparison and click</b>
+                                </Typography>
+                            </dd>
+                            <dd>
+                                <Typography variant="body1" gutterBottom display="block">
+                                    <b>3. Select the videos you want to compare by clicking on </b>
+                                </Typography>
+                                </dd>
+                        </dl>
+                    </Grid>
+                    <Grid item>
+                    <Typography variant="body1" gutterBottom display="block">
+                        <b>Use the Help  for tips</b>
+                    </Typography>
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid>
                 <Grid 
                 container
                 direction="column"
                 justifyContent="center"
                 alignItems="center"
                 >
+                  
                     <Grid item>
                             <Grid
                             container
@@ -190,6 +244,8 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                         <Filters ApplyFilters={ApplyFilters} expanded={expanded} />
                     </Grid>
                 </Grid>
+            </Grid>
+            </Grid>
             </Container>
             <br/>
             <br/>

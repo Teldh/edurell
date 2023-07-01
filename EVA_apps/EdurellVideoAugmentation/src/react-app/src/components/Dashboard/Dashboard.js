@@ -13,6 +13,11 @@ import { TextInput } from 'react-native-web'
 import { TouchableOpacity, Image } from 'react-native-web'
 import { Tooltip } from '@material-ui/core';
 import ButtonComp from '../Comparison/ButtonComp.js'
+import checkIcon from '../Comparison/check.png'
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
+import C_Start from '../Comparison/C_Start.js'
 
 {/*
     This component is the first interface that the user sees when he's logged in
@@ -184,34 +189,136 @@ export default class Dashboard extends React.Component {
             <text className="welcomeDashboard">
                 Welcome to your EDURELL dashboard!
             </text>
-            <div className="catalogContainer">
-              <TextInput 
-                type="text"
-                value={searchString}
-                onChange={this.handleChange}
-                placeholder="Search for videos within the catalog"
-                placeholderTextColor="#5B5B5B"
-                style={{color: '#5B5B5B', fontWeight: 'bold', width: '100%'}}
-              />
-              <GoSearch size={20} color='#5B5B5B'/>
-            </div>
-            <div>
-              {
-                !searchString || !searchResult.length
-                ? null
-                : <div style={{height: 2.75*17*searchResult.length}} className="catalog">
-                  <ScrollView style={{height: '100%', width: '100%'}}>
-                      { searchResult.map(h => {
-                        return <Tooltip title="Open Video">
-                                    <Link className="testText" to={`/app/${h.video_id}/${h.title}`} style={{textAlign: 'left'}}>{h.title}</Link>
-                                </Tooltip>}
-                      ) }
-                  </ScrollView>
-                  </div>
-              }
-            </div>
+            <Typography variant="body1" gutterBottom display="block">
+              You can do the following:
+            </Typography>
+            <Grid
+              container
+              direction="column"
+              justifyContent="center"
+              alignItems="flex-start"
+            >
+              <Grid item>
+                <Grid
+                    container
+                    direction="row"
+                    justifyContent="flex-start"
+                    alignItems="center"
+                  >
+                    <Grid item sx={{pb:1.5}}>
+                      <img src={checkIcon} width="30" height="30"/>
+                    </Grid>
+                    <Grid item>
+                      <Typography variant="body1" gutterBottom>
+                        <b>USE THE ENHANCED FEATURES FOR VIDEO WATCHING:</b>
+                      </Typography>
+                    </Grid>
+                  </Grid>
+              </Grid>
+              <Grid item sx={{pl:5}}>
+                  <Grid
+                    container
+                    direction="row"
+                    justifyContent="flex-start"
+                    alignItems="center"
+                  >
+                    <Grid item sx={{pb:1.5}}>
+                      <RadioButtonUncheckedIcon sx={{fontSize:10, pr:1}}/>
+                    </Grid>
+                    <Grid item>
+                      <Typography variant="body1" gutterBottom>
+                        Fragment navigation
+                      </Typography>
+                    </Grid>
+                  </Grid>
+              </Grid>
+              <Grid item sx={{pl:5}}>
+                    <Grid
+                      container
+                      direction="row"
+                      justifyContent="flex-start"
+                      alignItems="center"
+                    >
+                      <Grid item sx={{pb:1.5}}>
+                        <RadioButtonUncheckedIcon sx={{fontSize:10, pr:1}}/>
+                      </Grid>
+                      <Grid item>
+                        <Typography variant="body1" gutterBottom>
+                        Augmented video transcript
+
+                        </Typography>
+                      </Grid>
+                    </Grid>
+              </Grid>
+              <Grid item sx={{pl:5}}>
+                  <Grid
+                    container
+                    direction="row"
+                    justifyContent="flex-start"
+                    alignItems="center"
+                  >
+                    <Grid item sx={{pb:1.5}}>
+                      <RadioButtonUncheckedIcon sx={{fontSize:10, pr:1}}/>
+                    </Grid>
+                    <Grid item>
+                      <Typography variant="body1" gutterBottom>
+                      Interactive map of concepts and prerequisites
+
+                      </Typography>
+                    </Grid>
+                  </Grid>
+              </Grid>
+              <Grid item sx={{height:"100%", width:"100%",pl:5}}>
+                <div className="catalogContainer">
+                  <TextInput 
+                    type="text"
+                    value={searchString}
+                    onChange={this.handleChange}
+                    placeholder="Search for videos within the catalog"
+                    placeholderTextColor="#5B5B5B"
+                    style={{color: '#5B5B5B', fontWeight: 'bold', width: '100%'}}
+                 
+                  />
+                  <GoSearch size={20} color='#5B5B5B'/>
+                </div>
+                <div>
+                  {
+                    !searchString || !searchResult.length
+                    ? null
+                    : <div style={{height: 2.75*17*searchResult.length}} className="catalog">
+                      <ScrollView style={{height: '100%', width: '100%'}}>
+                          { searchResult.map(h => {
+                            return <Tooltip title="Open Video">
+                                        <Link className="testText" to={`/app/${h.video_id}/${h.title}`} style={{textAlign: 'left'}}>{h.title}</Link>
+                                    </Tooltip>}
+                          ) }
+                      </ScrollView>
+                      </div>
+                  }
+                </div>
+              </Grid>
+              <Grid item sx={{pt:5}}>
+                <Grid
+                  container
+                  direction="row"
+                  justifyContent="flex-start"
+                  alignItems="center"
+                >
+                  <Grid item sx={{pb:1.5}}>
+                    <img src={checkIcon} width="30" height="30"/>
+                  </Grid>
+                  <Grid item>
+                    <Typography variant="body1" gutterBottom>
+                      <b>COMPARE VIDEOS on a given concept/topic using advanced tools for video comparison</b>
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item><C_Start/></Grid>
+            </Grid>
             
-            <ButtonComp/>
+            
+            
         </div>
 
         {loading
