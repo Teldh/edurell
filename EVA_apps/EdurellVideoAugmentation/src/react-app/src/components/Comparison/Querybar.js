@@ -139,8 +139,8 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                 spacing={0}
                 >
                     <Grid item>
-                        <Typography variant="h3" gutterBottom display="block" sx={{mb:0, pb:0}}>
-                            VIDEO COMPARISON
+                        <Typography variant="h4" gutterBottom display="block" sx={{mb:0, pb:0}}>
+                            <b>VIDEO COMPARISON</b>
                         </Typography>
                     </Grid>
                     <Grid item>
@@ -327,14 +327,14 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                                     alignItems="center"
                                     onClick={handleExpandClick}
                                     sx={{
-                                        backgroundColor: expanded?"white":"",
+                                        backgroundColor: expanded?"white":"#c6ebdc",
                                         cursor:"pointer",
-                                        borderRadius:"15px 15px 0 0",
+                                        borderRadius: expanded?"15px 15px 0 0":"50px 50px 50px 50px",
                                         ml:1,
                                         width:"100%",
                                         height:"100%",
-                                        pb:8,
-                                        position:"absolute",
+                                        pb:expanded?8:0,
+                                        position:expanded?"absolute":"static",
                                         top:"7px",
                                         right:"-10px"
                                    
