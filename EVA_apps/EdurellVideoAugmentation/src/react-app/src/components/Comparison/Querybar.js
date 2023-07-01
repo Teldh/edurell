@@ -14,10 +14,10 @@ import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
 import HelpIcon from '@mui/icons-material/Help';
 import Typography from '@mui/material/Typography';
+import EastIcon from '@mui/icons-material/East';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import Filters from './Filters.js'
-import EastIcon from '@mui/icons-material/East';
 import { useHistory } from "react-router-dom";
 import { useContext ,useState, forwardRef} from 'react';
 import { ContextComparison } from './ContextComparison';
@@ -125,27 +125,116 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                     <Grid item>
                         <dl>
                             <dd>
-                                <Typography variant="body1" gutterBottom display="block">
+                            <Stack direction="row" spacing={2}>
+                                <Typography variant="body1" gutterBottom sx={{pt:3}}>
                                     <b>1. Type in the name of the concept/topic for video search and click</b> 
-                                    <Box justifyContent="center"
-                alignItems="center"sx={{color:"white", backgroundColor:"rgb(255,168,37)", height:"40px", width:"80px"}}>Search</Box>
-                                </Typography>        
+                                    
+                                </Typography>       
+                                <Box 
+                                
+                                    sx={{color:"white", 
+                                    backgroundColor:"rgb(255,168,37)", 
+                                    height:"40px", 
+                                    width:"80px",
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    display: 'flex',
+                                    borderRadius:'0 15px 15px 0',
+                                    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)'}}>
+                                        <Typography variant="body2" gutterBottom  sx={{pt:1}}>
+                                        <b>SEARCH</b>
+                                        </Typography>
+                                        </Box> 
+                            </Stack>
                             </dd>
                             <dd>
-                                <Typography variant="body1" gutterBottom display="block">
+                                <Stack direction="row" spacing={2}>
+                                <Typography variant="body1" gutterBottom display="block" sx={{pt:3}}>
                                     <b>2. Set the filters with the criteria for video comparison and click</b>
                                 </Typography>
+                                <Box 
+                                
+                                    sx={{color:"white", 
+                                    
+                                    height:"40px", 
+                                    width:"120px",
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    display: 'flex',
+                                    backgroundColor:'#B798f8', borderRadius:'30px 0 30px 0',
+                                    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)'}}>
+                                        <Grid
+                                        container
+                                        direction="row"
+                                        justifyContent="center"
+                                        alignItems="center"
+                                        >
+                                            <Grid item>
+
+
+                                                <p style={{color:'white'}}>Set filters</p>
+
+                                            </Grid>
+                                            <Grid item>
+                                                <EastIcon sx={{color:"#FFFFFF"}}/>
+                                            </Grid>
+                                        </Grid>
+                                        </Box> 
+                                </Stack>
                             </dd>
                             <dd>
-                                <Typography variant="body1" gutterBottom display="block">
+                            <Stack direction="row" spacing={2}>
+                                <Typography variant="body1" gutterBottom display="block" sx={{pt:2}}>
                                     <b>3. Select the videos you want to compare by clicking on </b>
                                 </Typography>
-                                </dd>
+                                <Box 
+                                
+                                    sx={{color:"white", 
+                                    
+                                    height:"30px", 
+                                    width:"80px",
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    display: 'flex',
+                                    backgroundColor:'#B798f8', borderRadius:'20px 0 0 0',
+                                    boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)'}}>
+                                       
+
+
+                                       <Typography variant="body1" gutterBottom display="block" sx={{pt:1.5}}>
+                                        VS
+                                        </Typography>
+                                          
+                                </Box> 
+                            </Stack>
+                            </dd>
                         </dl>
                     </Grid>
                     <Grid item>
                     <Typography variant="body1" gutterBottom display="block">
-                        <b>Use the Help  for tips</b>
+                    <Stack direction="row" spacing={1}>
+                        <b>Use the Help </b>
+                            <Box 
+                                
+                                sx={{color:"white", 
+                                
+                                height:"20px", 
+                                width:"20px",
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                display: 'flex',
+                                backgroundColor:'#FFA825', borderRadius:'50px 50px 50px 50px',
+                                boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.3)'}}>
+                                   
+
+
+                                   <Typography variant="body1" gutterBottom display="block" sx={{pt:1.5}}>
+                                    <b>?</b>
+                                    </Typography>
+                                      
+                            </Box> 
+                            <b>for tips</b>
+                            </Stack>
                     </Typography>
                     </Grid>
                 </Grid>
