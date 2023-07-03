@@ -454,10 +454,13 @@ def download(url,_path:str=None):
         found = False
         for file_name in os.listdir(path_cache_video):
             if file_name.endswith(".mkv") or file_name.endswith(".mp4") or file_name.endswith(".webm"):
+                # renaming video
                 new_video_file_name = os.path.join(path_cache_video,video_id+"."+file_name.split(".")[-1])
                 os.rename(os.path.join(path_cache_video,file_name),new_video_file_name)
+                # converting
                 if not str(new_video_file_name).endswith(".mp4"):
                     print("running ffmpeg")
+                    raise Exception("reached ffmpeg")
                     ffmpeg.run(
                         ffmpeg.output(  ffmpeg.input(new_video_file_name), 
                                         os.path.join(path_cache_video,video_id+".mp4"), 
@@ -465,8 +468,10 @@ def download(url,_path:str=None):
                                         preset="ultrafast", 
                                         crf=23),
                         quiet=True)
+                    # remove old file
                     os.remove(new_video_file_name)
                     new_video_file_name = os.path.join(path_cache_video,video_id+".mp4")
+                # moving new file
                 dest_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"static","videos",video_id)
                 os.makedirs(dest_dir,exist_ok=True)
                 os.rename(new_video_file_name,os.path.join(dest_dir,video_id+".mp4"))
