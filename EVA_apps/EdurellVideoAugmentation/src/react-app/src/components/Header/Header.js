@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    Link,
+    Link,useLocation
   } from "react-router-dom";
 import './Header.css';
 import { RiUserSettingsLine } from 'react-icons/ri'
@@ -16,24 +16,24 @@ import Box from '@mui/material/Box';
   The header allows the user to go back to the dasboard, edit his profile, login and logout
   It hase one props which is the login of the user dsiplayed next to the other links
 */}
-export default class Header extends React.Component {
-    render() {
+export default function Header({page,login,onClick}){
 
-    const { login } = this.props;
+    const location = useLocation();
+    const mylogin  = login;
 
     return (
         <div className="header">
           <text className="link">Edurell</text>
           <div style={{display: 'flex', flexDirection: 'column'}}>
               {/* if the user is on the welcome page we only see the login butto on the header */}
-              {this.props.page === 'welcome'
+              {page === 'welcome'
               ? <Tooltip title="Login"><Link className="link" style={{fontSize: 20}} to="/login"><LoginButton/></Link></Tooltip>
               :
-              this.props.page === 'login'
-              ?  <Tooltip title=""><Link className="link" style={{fontSize: 20}} onClick={this.props.onClick} to="/login"><LoginButton/></Link></Tooltip>
+              page === 'login'
+              ?  <Tooltip title=""><Link className="link" style={{fontSize: 20}} onClick={onClick} to="/login"><LoginButton/></Link></Tooltip>
               // else we have the links to the dashboard, edit profile and logout
               : <div style={{flex: 1, display: 'flex', flexDirection: 'row',  alignItems: 'center'}}>
-                  <text className="link" style={{fontSize: 20}}>{login}</text>
+                  <text className="link" style={{fontSize: 20}}>{mylogin}</text>
                   <FaGripLinesVertical size={30} color="white"/>
                   <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-around'}}>
                   <Tooltip title ="Home Page">
@@ -44,7 +44,13 @@ export default class Header extends React.Component {
                     
                     <Tooltip title ="Compare videos">
                     
-                      <Link to={`/comparisonSearch`} style={{ textDecoration: 'none' }} onClick={()=>{window.location.reload()}}>
+                      <Link to={`/comparisonSearch`} style={{ textDecoration: 'none' }} onClick={()=>{
+                        if(location.pathname === '/comparisonSearch'){
+                          window.location.reload()
+                        }
+                        
+                        
+                        }}>
                       <Box
                                         sx={{
                                             bbackgroundColor: 'transparent',
@@ -75,5 +81,5 @@ export default class Header extends React.Component {
               </div>}
           </div>
         </div>
-  );}
+  );
 }
