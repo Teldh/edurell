@@ -254,7 +254,7 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
             <>
                 {
                     idx==0?
-                    <div ref={myref} style={{marginLeft:"auto"}}>
+                    <div id="anchor2" ref={myref} style={{marginLeft:"auto"}}>
                         <Box
                             
                                 sx={{marginLeft: 'auto',

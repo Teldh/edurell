@@ -314,7 +314,7 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
 
                                 <Grid item>
                                     <div style={{zIndex:1, position:"relative",width:"120px",
-                                        height:"50px",}} ref={ref}>
+                                        height:"50px",}} ref={ref} id="anchor1">
                                 {
                                     querylist.length > 0 && querylist[0]!=null?
                                   

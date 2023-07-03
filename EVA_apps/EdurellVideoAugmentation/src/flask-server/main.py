@@ -1186,8 +1186,8 @@ def ConceptVideoData(video_id_list, concept_searched):
             result['video_slidishness'] = str(VTSdoc.video_slidishness)
         result_list.append(result)
 
-   
-    return result_list
+    
+    return json.dumps(result_list)
 
 @app.route('/api/testm/<video_id>')
 @auth.login_required

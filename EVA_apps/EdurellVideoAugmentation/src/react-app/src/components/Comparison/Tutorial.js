@@ -47,6 +47,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
 
         if(page==0 && anchor1.current != null){
             anchor1.current.style.zIndex=10000;
+            document.getElementById("anchor1").scrollIntoView();
         }else{
 
             anchor1.current.style.zIndex="auto";
@@ -55,6 +56,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
 
         if(page==1 && anchor1.current != null){
             anchor2.style.zIndex=10000;
+            document.getElementById("anchor2").scrollIntoView();
         }else{
 
             anchor2.style.zIndex="auto";
