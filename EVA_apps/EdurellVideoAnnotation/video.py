@@ -432,6 +432,7 @@ def download(url,_path:str=None):
 
     if not downloaded_successfully:
         try:
+            print("using ytdl")
             youtube_dl.YoutubeDL({'format':'bestvideo[height<=480]+bestaudio/best[height<=480]',"quiet":True}).download([url])
             downloaded_successfully = True
         except Exception as e:
@@ -439,20 +440,24 @@ def download(url,_path:str=None):
     
     if not downloaded_successfully:
         try:
+            print("using pafy")
             pafy.new(url).getbest(preftype="mp4", resolution="360p").download()
             downloaded_successfully = True
         except Exception as e:
             print(e)
             raise Exception("There are no libraries to download the video because each one gives an error")
         
+    print("downloaded")
     if not os.path.isfile(os.path.join(path,video_id+'.mp4')): 
         path_cache_video = os.getcwd()
+        print(path_cache_video)
         found = False
         for file_name in os.listdir(path_cache_video):
             if file_name.endswith(".mkv") or file_name.endswith(".mp4") or file_name.endswith(".webm"):
                 new_video_file_name = os.path.join(path_cache_video,video_id+"."+file_name.split(".")[-1])
                 os.rename(os.path.join(path_cache_video,file_name),new_video_file_name)
                 if not str(new_video_file_name).endswith(".mp4"):
+                    print("running ffmpeg")
                     ffmpeg.run(
                         ffmpeg.output(  ffmpeg.input(new_video_file_name), 
                                         os.path.join(path_cache_video,video_id+".mp4"), 
@@ -486,7 +491,7 @@ if __name__ == '__main__':
     #vid_id = 'GdPVu6vn034'
     #download('https://youtu.be/ujutUfgebdo')
     #print(download('https://www.youtube.com/watch?v='+vid_id))
-    print(download("https://www.youtube.com/watch?v=FZ1qPqVeMSQ"))
+    print(download("https://www.youtube.com/watch?v=D4PGqxGWCT0"))
     
     #color_scheme_for_analysis = ColorScheme.BGR
     #   BGR: is the most natural for Opencv video reader, so we avoid some matrix transformations
