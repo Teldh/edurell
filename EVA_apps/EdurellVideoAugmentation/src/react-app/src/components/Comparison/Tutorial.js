@@ -10,7 +10,8 @@ import WestIcon from '@mui/icons-material/West';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Popover from '@mui/material/Popover';
 import tutorialPic from './tutorialpic.PNG';
-
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 
 //its the tutorial window that popup and jump to anchors to present the tutorial to the user
 
@@ -19,7 +20,21 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
 
     const[page,setPage]=useState(0)
     const [anchorEl, setAnchorEl] = useState([null,null,null,null]);
+    const [openLOAD, setOpen] = useState(false);
+    const handleClickLOAD = () => {
+        setOpen(true);
+      };
 
+      const handleCloseLOAD = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        setOpen(false);
+      };
+    const Alert = React.forwardRef(function Alert(props, ref) {
+        return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+      });
 
     //this useEffect used to update the anchors when the value of anchor1 and anchor2 will update from null to a accepted value
 
@@ -44,6 +59,14 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
 
     function NextPage(){
 
+        if(anchor1 == null){
+            handleClickLOAD()
+            return
+        }
+        if(anchor2== null){
+            handleClickLOAD()
+            return
+        }
 
         if(page==0 && anchor1.current != null){
             anchor1.current.style.zIndex=10000;
@@ -54,7 +77,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
 
         }
 
-        if(page==1 && anchor1.current != null){
+        if(page==1 && anchor2!= null){
             anchor2.style.zIndex=10000;
             document.getElementById("anchor2").scrollIntoView();
         }else{
@@ -79,7 +102,7 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
         }else{
             anchor1.current.style.zIndex="auto";
         }
-        if(page==3 && anchor1.current != null){
+        if(page==3 && anchor2.current != null){
             anchor2.style.zIndex=10000;
         }else{
             anchor2.style.zIndex="auto";
@@ -92,6 +115,9 @@ export default function Tutorial({anchor1,anchor2, open, closeTutorial}){
     }
 
     return(<>
+    <Snackbar open={openLOAD} autoHideDuration={6000} onClose={handleCloseLOAD}>
+        <Alert severity="warning"><b>Wait until content is loaded!</b></Alert>
+      </Snackbar>
     <Modal
     open={open}
     aria-labelledby="modal-modal-title"

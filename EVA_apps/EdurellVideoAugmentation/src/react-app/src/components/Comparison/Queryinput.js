@@ -25,6 +25,14 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
   
     const setSearchFilterClicked = useContext(ContextComparison)[2];
 
+ 
+      
+   
+       
+
+    // Execute a function when the user presses a key on the keyboard
+
+    
 
     return(<>{
         location==null || location==undefined || location[0]==undefined || location[0].trim().length===0?  
@@ -33,7 +41,7 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
         spacing={0}
     >
         <Autocomplete
-            
+         
             className="bg-primary"
 
             size="small"
@@ -45,9 +53,11 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
             options={options}
       
             renderInput={(params) => (
-                <TextField error={nomatch}
+                <TextField 
+          
+                error={nomatch}
                            className="backColor " 
-                           id="outlined-basic" 
+                           id="queryinput" 
                      
                             variant='outlined'
                             {...params}
@@ -87,7 +97,7 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
               <Autocomplete
 
                         size="small"
-
+                   
                         freeSolo
                         multiple
                         limitTags={1}
@@ -95,9 +105,11 @@ export default function Queryinput({listconcepts,AddQueryElement, nomatch, locat
                         options={options}
                         defaultValue={[location]}
                         renderInput={(params) => (
-                            <TextField error={nomatch}
+                            <TextField
+                     
+                            error={nomatch}
                                         className="backColor" 
-                                        id="outlined-basic" 
+                                        id="queryinput" 
                                     
                                           {...params}
                                         variant='outlined'
