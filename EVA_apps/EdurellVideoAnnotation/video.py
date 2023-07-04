@@ -467,6 +467,7 @@ def download(url,_path:str=None):
                                         preset="ultrafast", 
                                         crf=23),
                         quiet=True)
+                    print("completed ffmpeg conversion")
                     # remove old file
                     os.remove(new_video_file_name)
                     new_video_file_name = os.path.join(path_cache_video,video_id+".mp4")
