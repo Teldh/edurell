@@ -1,8 +1,9 @@
 from pytube import YouTube
 import pafy
 import yt_dlp as youtube_dl
-#import ffmpeg
-from moviepy.editor import VideoFileClip
+import ffmpeg
+ffmpeg.set_executable("/usr/bin/ffmpeg")
+#from moviepy.editor import VideoFileClip
 import os
 import cv2
 from numpy import clip,reshape,divmod,array,round
@@ -461,6 +462,7 @@ def download(url,_path:str=None):
         for file_name in os.listdir(path_cache_video):
             if file_name.endswith(".mkv") or file_name.endswith(".mp4") or file_name.endswith(".webm"):
                 # renaming video
+                print("renaming file")
                 new_video_file_name = os.path.join(path_cache_video,video_id+"."+file_name.split(".")[-1])
                 os.rename(os.path.join(path_cache_video,file_name),new_video_file_name)
                 # converting NOT NEEDED and also not working on server (problem with ffmpeg)
@@ -483,6 +485,7 @@ def download(url,_path:str=None):
                     #os.remove(new_video_file_name)
                     #new_video_file_name = os.path.join(path_cache_video,video_id+".mp4")
                 # moving new file
+                print("moving file")
                 dest_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"static","videos",video_id)
                 os.makedirs(dest_dir,exist_ok=True)
                 #os.rename(new_video_file_name,os.path.join(dest_dir,video_id+".mp4"))
