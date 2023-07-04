@@ -441,7 +441,10 @@ def download(url,_path:str=None):
     if not downloaded_successfully:
         try:
             print("using ytdl")
+            prev_cwd = os.getcwd()
+            os.chdir(path)
             youtube_dl.YoutubeDL({'format': 'best[height<=480]', 'quiet': True}).download([url])
+            os.chdir(prev_cwd)
             downloaded_successfully = True
         except Exception as e:
             print(e)
@@ -449,14 +452,17 @@ def download(url,_path:str=None):
     if not downloaded_successfully:
         try:
             print("using pafy")
+            prev_cwd = os.getcwd()
+            os.chdir(path)
             pafy.new(url).getbest(preftype="mp4").download()
+            os.chdir(prev_cwd)
             downloaded_successfully = True
         except Exception as e:
             print(e)
             raise Exception("There are no libraries to download the video because each one gives an error, cwd:"+os.getcwd())
         
     print("downloaded")
-    if not os.path.isfile(os.path.join(path,video_id+'.mp4')): 
+    if not os.path.isfile(os.path.join(path,video_id+'.mp4')) or not os.path.isfile(os.path.join(path,video_id+'.mkv')): 
         path_cache_video = os.getcwd()
         found = False
         for file_name in os.listdir(path_cache_video):
