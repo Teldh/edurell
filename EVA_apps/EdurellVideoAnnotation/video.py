@@ -1,7 +1,7 @@
 from pytube import YouTube
 import pafy
 import yt_dlp as youtube_dl
-import ffmpeg
+#import ffmpeg
 from moviepy.editor import VideoFileClip
 import os
 import cv2
@@ -459,20 +459,20 @@ def download(url,_path:str=None):
                 os.rename(os.path.join(path_cache_video,file_name),new_video_file_name)
                 # converting
                 if not str(new_video_file_name).endswith(".mp4"):
-                    try:
-                        ffmpeg.run(
-                            ffmpeg.output(  ffmpeg.input(new_video_file_name), 
-                                            os.path.join(path_cache_video,video_id+".mp4"), 
-                                            vcodec="libx264", 
-                                            preset="ultrafast",
-                                            strict="experimental",
-                                            crf=23),
-                            quiet=True)
-                    except Exception as e:
-                        print("ffmpeg error")
-                        VideoFileClip(new_video_file_name).write_videofile(os.path.join(path_cache_video,video_id+".mp4"), 
-                                                                           codec='libx264', 
-                                                                           audio_codec='aac')
+                    #try:
+                    #    ffmpeg.run(
+                    #        ffmpeg.output(  ffmpeg.input(new_video_file_name), 
+                    #                        os.path.join(path_cache_video,video_id+".mp4"), 
+                    #                        vcodec="libx264", 
+                    #                        preset="ultrafast",
+                    #                        strict="experimental",
+                    #                        crf=23),
+                    #        quiet=True)
+                    #except Exception as e:
+                    #    print("ffmpeg error")
+                    VideoFileClip(new_video_file_name).write_videofile(os.path.join(path_cache_video,video_id+".mp4"), 
+                                                                       codec='libx264', 
+                                                                       audio_codec='aac')
                     # remove old file
                     os.remove(new_video_file_name)
                     new_video_file_name = os.path.join(path_cache_video,video_id+".mp4")
