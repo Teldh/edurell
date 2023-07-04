@@ -42,10 +42,16 @@ class LocalVideo:
         self._frame_size = forced_frame_size
         class_path = os.path.dirname(os.path.abspath(getfile(self.__class__)))
         self._vid_id = video_id
+        video_file = ""
         if _testing_path is None:
-            self._vidcap = cv2.VideoCapture(os.path.join(class_path, "static", "videos", video_id,f"{video_id}.mp4"))
+            video_file_folder = os.path.join(class_path, "static", "videos", video_id)
         else:
-            self._vidcap = cv2.VideoCapture(os.path.join(_testing_path,f"{video_id}.mp4"))
+            video_file_folder = _testing_path
+        for file in os.listdir(video_file_folder):
+            if file.endswith(".mp4") or file.endswith(".mkv"):
+                video_file = file
+                print(video_file)
+        self._vidcap = cv2.VideoCapture(os.path.join(video_file_folder,video_file))
         #self._vidcap = cv2.VideoCapture(os.path.join(class_path, "static", "videos", video_id,f"{video_id}.mkv"))
         if not self._vidcap.isOpened():
             raise Exception(f"Can't find video: {video_id}")
@@ -457,8 +463,8 @@ def download(url,_path:str=None):
                 # renaming video
                 new_video_file_name = os.path.join(path_cache_video,video_id+"."+file_name.split(".")[-1])
                 os.rename(os.path.join(path_cache_video,file_name),new_video_file_name)
-                # converting
-                if not str(new_video_file_name).endswith(".mp4"):
+                # converting NOT NEEDED and also not working on server (problem with ffmpeg)
+                #if not str(new_video_file_name).endswith(".mp4"):
                     #try:
                     #    ffmpeg.run(
                     #        ffmpeg.output(  ffmpeg.input(new_video_file_name), 
@@ -470,17 +476,18 @@ def download(url,_path:str=None):
                     #        quiet=True)
                     #except Exception as e:
                     #    print("ffmpeg error")
-                    VideoFileClip(new_video_file_name).write_videofile(os.path.join(path_cache_video,video_id+".mp4"), 
-                                                                       codec='libx264', 
-                                                                       audio_codec='aac')
+                    #VideoFileClip(new_video_file_name).write_videofile(os.path.join(path_cache_video,video_id+".mp4"), 
+                    #                                                   codec='libx264', 
+                    #                                                   audio_codec='aac')
                     # remove old file
-                    os.remove(new_video_file_name)
-                    new_video_file_name = os.path.join(path_cache_video,video_id+".mp4")
+                    #os.remove(new_video_file_name)
+                    #new_video_file_name = os.path.join(path_cache_video,video_id+".mp4")
                 # moving new file
                 dest_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"static","videos",video_id)
                 os.makedirs(dest_dir,exist_ok=True)
-                os.rename(new_video_file_name,os.path.join(dest_dir,video_id+".mp4"))
-                vidcap = cv2.VideoCapture(os.path.join(dest_dir,video_id+".mp4"))
+                #os.rename(new_video_file_name,os.path.join(dest_dir,video_id+".mp4"))
+                os.rename(new_video_file_name,os.path.join(dest_dir, video_id+"."+file_name.split(".")[-1]))
+                vidcap = cv2.VideoCapture(os.path.join(dest_dir,video_id+"."+file_name.split(".")[-1]))
                 if vidcap.isOpened() and min((vidcap.get(cv2.CAP_PROP_FRAME_WIDTH),vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT))) >= 360:
                     found = True
                     break
@@ -502,6 +509,7 @@ if __name__ == '__main__':
     #download('https://youtu.be/ujutUfgebdo')
     #print(download('https://www.youtube.com/watch?v='+vid_id))
     print(download("https://www.youtube.com/watch?v=D4PGqxGWCT0"))
+    VideoSpeedManager("D4PGqxGWCT0")
     
     #color_scheme_for_analysis = ColorScheme.BGR
     #   BGR: is the most natural for Opencv video reader, so we avoid some matrix transformations
@@ -511,7 +519,4 @@ if __name__ == '__main__':
     #extract_text_from_video(vid_id,color_scheme_for_analysis)
     #video.close()
     # https://www.youtube.com/watch?v=ujutUfgebdo
-
-    
-    
-#download("https://www.youtube.com/watch?v=UuzKYffpxug&list=PLV8Xi2CnRCUm0QOaRfPuMzFNUVxmYlEiV&index=5")
+    #download("https://www.youtube.com/watch?v=UuzKYffpxug&list=PLV8Xi2CnRCUm0QOaRfPuMzFNUVxmYlEiV&index=5")
