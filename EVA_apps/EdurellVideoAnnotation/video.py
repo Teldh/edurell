@@ -464,7 +464,8 @@ def download(url,_path:str=None):
                         ffmpeg.output(  ffmpeg.input(new_video_file_name), 
                                         os.path.join(path_cache_video,video_id+".mp4"), 
                                         vcodec="libx264", 
-                                        preset="ultrafast", 
+                                        preset="ultrafast",
+                                        strict="experimental",
                                         crf=23),
                         quiet=True)
                     print("completed ffmpeg conversion")
