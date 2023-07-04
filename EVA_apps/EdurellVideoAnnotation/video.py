@@ -1,8 +1,8 @@
 from pytube import YouTube
 import pafy
 import yt_dlp as youtube_dl
-import ffmpeg
-ffmpeg.set_executable("/usr/bin/ffmpeg")
+#import ffmpeg
+#ffmpeg.set_executable("/usr/bin/ffmpeg")
 #from moviepy.editor import VideoFileClip
 import os
 import cv2
