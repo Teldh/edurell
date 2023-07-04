@@ -460,7 +460,6 @@ def download(url,_path:str=None):
                 # converting
                 if not str(new_video_file_name).endswith(".mp4"):
                     print("running ffmpeg")
-                    raise Exception("reached ffmpeg")
                     ffmpeg.run(
                         ffmpeg.output(  ffmpeg.input(new_video_file_name), 
                                         os.path.join(path_cache_video,video_id+".mp4"), 
