@@ -399,10 +399,6 @@ def download(url,_path:str=None):
     else:
         path = _path
     
-    # TODO fix pafy by commenting in 
-    # /home/<yourname>/anaconda3/envs/myenv/lib/python3.7/site-packages/pafy/backend_youtube_dl.py
-    # self._rating = self._ydl_info['average_rating']
-    # in line 50
     print(path)
     response = requests.get(url)
     if response.status_code == 200 and ("Video non disponibile" in response.text or "Video unavailable" in response.text):
@@ -468,50 +464,6 @@ def download(url,_path:str=None):
             if not vidcap.isOpened() or not min((vidcap.get(cv2.CAP_PROP_FRAME_WIDTH),vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT))) >= 360:
                 raise Exception("Video does not have enough definition to find text")
             break
-                
-        
-    if False and (not os.path.isfile(os.path.join(path,video_id+'.mp4')) or not os.path.isfile(os.path.join(path,video_id+'.mkv'))): 
-        path_cache_video = os.getcwd()
-        found = False
-        for file_name in os.listdir(path_cache_video):
-            if file_name.endswith(".mkv") or file_name.endswith(".mp4") or file_name.endswith(".webm"):
-                # renaming video
-                print("renaming file")
-                new_video_file_name = os.path.join(path_cache_video,video_id+"."+file_name.split(".")[-1])
-                os.rename(os.path.join(path_cache_video,file_name),new_video_file_name)
-                # converting NOT NEEDED and also not working on server (problem with ffmpeg)
-                #if not str(new_video_file_name).endswith(".mp4"):
-                    #try:
-                    #    ffmpeg.run(
-                    #        ffmpeg.output(  ffmpeg.input(new_video_file_name), 
-                    #                        os.path.join(path_cache_video,video_id+".mp4"), 
-                    #                        vcodec="libx264", 
-                    #                        preset="ultrafast",
-                    #                        strict="experimental",
-                    #                        crf=23),
-                    #        quiet=True)
-                    #except Exception as e:
-                    #    print("ffmpeg error")
-                    #VideoFileClip(new_video_file_name).write_videofile(os.path.join(path_cache_video,video_id+".mp4"), 
-                    #                                                   codec='libx264', 
-                    #                                                   audio_codec='aac')
-                    # remove old file
-                    #os.remove(new_video_file_name)
-                    #new_video_file_name = os.path.join(path_cache_video,video_id+".mp4")
-                # moving new file
-                print("moving file")
-                dest_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),"static","videos",video_id)
-                os.makedirs(dest_dir,exist_ok=True)
-                #os.rename(new_video_file_name,os.path.join(dest_dir,video_id+".mp4"))
-                os.rename(new_video_file_name,os.path.join(dest_dir, video_id+"."+file_name.split(".")[-1]))
-                vidcap = cv2.VideoCapture(os.path.join(dest_dir,video_id+"."+file_name.split(".")[-1]))
-                if vidcap.isOpened() and min((vidcap.get(cv2.CAP_PROP_FRAME_WIDTH),vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT))) >= 360:
-                    found = True
-                    break
-                else:
-                    raise Exception("Video does not have enough definition to find text")
-        if not found:
-            raise Exception("Cannot find downloaded video")
             
     return video_id,title,author,length
 
