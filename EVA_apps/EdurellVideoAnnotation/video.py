@@ -460,9 +460,17 @@ def download(url,_path:str=None):
         except Exception as e:
             print(e)
             raise Exception("There are no libraries to download the video because each one gives an error, cwd:"+os.getcwd())
+    
+    for file in os.listdir(path):
+        if file.endswith(".mp4") or file.endswith(".mkv"):
+            os.rename(os.path.join(path,file),os.path.join(path, video_id+"."+file.split(".")[-1]))
+            vidcap = cv2.VideoCapture(os.path.join(path,video_id+"."+file.split(".")[-1]))
+            if not vidcap.isOpened() or not min((vidcap.get(cv2.CAP_PROP_FRAME_WIDTH),vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT))) >= 360:
+                raise Exception("Video does not have enough definition to find text")
+            break
+                
         
-    print("downloaded")
-    if not os.path.isfile(os.path.join(path,video_id+'.mp4')) or not os.path.isfile(os.path.join(path,video_id+'.mkv')): 
+    if False and (not os.path.isfile(os.path.join(path,video_id+'.mp4')) or not os.path.isfile(os.path.join(path,video_id+'.mkv'))): 
         path_cache_video = os.getcwd()
         found = False
         for file_name in os.listdir(path_cache_video):
