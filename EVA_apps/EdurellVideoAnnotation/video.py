@@ -440,7 +440,7 @@ def download(url,_path:str=None):
     if not downloaded_successfully:
         try:
             print("using ytdl")
-            youtube_dl.YoutubeDL({'format':'bestvideo[height<=480]+bestaudio/best[height<=480]',"quiet":True}).download([url])
+            youtube_dl.YoutubeDL({'format': 'best[height<=480]', 'quiet': True}).download([url])
             downloaded_successfully = True
         except Exception as e:
             print(e)
@@ -448,7 +448,7 @@ def download(url,_path:str=None):
     if not downloaded_successfully:
         try:
             print("using pafy")
-            pafy.new(url).getbest(preftype="mp4", resolution="360p").download()
+            pafy.new(url).getbest(preftype="mp4").download()
             downloaded_successfully = True
         except Exception as e:
             print(e)
