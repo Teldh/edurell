@@ -226,12 +226,12 @@ export default function Result(){
     const [anchorEl1f, setAnchorEl1f] = useState(null);
     const handlePopoverOpen1 = (event) => {
         setAnchorEl1f(event.currentTarget);
-
+        
     };
     const handlePopoverClose1 = () => {
         setAnchorEl1f(null);
     };
-    const open1f = Boolean(anchorEl1);
+    const open1f = Boolean(anchorEl1f);
 
     const [anchorEl2f, setAnchorEl2f] = useState(null);
     const handlePopoverOpen2 = (event) => {
@@ -240,7 +240,7 @@ export default function Result(){
     const handlePopoverClose2 = () => {
         setAnchorEl2f(null);
     };
-    const open2f = Boolean(anchorEl2);
+    const open2f = Boolean(anchorEl2f);
 
     const [anchorEl3f, setAnchorEl3f] = useState(null);
     const handlePopoverOpen3 = (event) => {
@@ -249,7 +249,7 @@ export default function Result(){
     const handlePopoverClose3 = () => {
         setAnchorEl3f(null);
     };
-    const open3f = Boolean(anchorEl3);
+    const open3f = Boolean(anchorEl3f);
 
 
     const [alignment1, setAlignment1] = useState(location.state.listfilters[0]);
@@ -477,6 +477,32 @@ export default function Result(){
                 }}
                 />
                 <Grid
+                container
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                sx={{mt:5}}
+                >
+                    <Grid item>
+                        <Typography variant="h6" gutterBottom sx={{mb:0, pb:0}}>
+
+                            <b>Selected Filters</b>
+
+                        </Typography>
+                    </Grid>
+                    <Grid item>
+                    <Box
+                    sx={{
+                        m:0,
+                        p:0,
+                        width: '100px',
+                        height: '4px',
+                        backgroundColor: "rgb(155,221,193)",
+                    }}
+                    />
+                    </Grid>
+                    <Grid item>
+                        <Grid
         container
         direction="column"
         justifyContent="center"
@@ -936,7 +962,7 @@ export default function Result(){
                                 
                                 <RadioGroup
                                     aria-labelledby="demo-radio-buttons-group-label"
-                                    defaultValue="recent"
+                                    defaultValue={radiog}
                                     name="radio-buttons-group"
                                     onChange={(event,value)=>Setradiog(value)}
                                     
@@ -969,7 +995,11 @@ export default function Result(){
         
 
 
-        </Grid>
+                        </Grid>
+                    </Grid>
+                
+
+                </Grid>
              </Container>
             </Grid>
             <Grid item sx={{backgroundColor:"rgb(237,237,237)", mt:5, p:5}}>

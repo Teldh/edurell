@@ -118,9 +118,10 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
     let duratatot=0
     let slidishness=0
 
-    if(conceptextra[0]!=undefined){
-
+    if(conceptextra[0]!=undefined ){
+   
         slidishness = (conceptextra[0].video_slidishness*100)+"%"
+        
     }
     if(tottime != undefined){
         let hours = Math.floor(tottime /3600)
@@ -716,12 +717,15 @@ const VideoFiltered=forwardRef(({setAnchor2, idx, catalog, querylist,  UpdateCat
                                                                 </Grid>
                                                                 <Grid item>
                                                              
-                                                                        {(conceptextra[0]!=undefined)?
+                                                                        {(( conceptextra[0]===undefined ))?
                                                                             
 
-                                                                            <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>{slidishness}</Typography>
-                                                                            :
                                                                             <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>null</Typography>
+                                                                            :
+                                                                            (conceptextra[0].video_slidishness===undefined)?
+                                                                            <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>null</Typography>
+                                                                            :
+                                                                            <Typography variant="subtitle2" gutterBottom sx={{mt:1,ml:0.5}}>{slidishness}</Typography>
 
 
                                                                         }
