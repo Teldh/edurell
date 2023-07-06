@@ -72,6 +72,9 @@ export default function Comparison(){
     //used for textfield list, where we read all the concept user has selected.
     const [querylist, setQueryList]=useState([]);
 
+    //list of filters selected saved to be sended to Result to show filter selected
+    const [filterlist, setFilterList]=useState([null,null,null,null,null,null,"recent"])
+
 
     //used to retrieve the context, used to save the logged user
     const context = useContext(TokenContext);
@@ -318,6 +321,7 @@ export default function Comparison(){
 
     // when in the website you press apply filters, this function will run and filter the video available
     function ApplyFilters(listfilters){
+      setFilterList(listfilters)
      
        let catalogfiltered=[...catalogoriginal];
         catalogfiltered = catalogfiltered.filter(video=>checker(video.extracted_keywords,querylist));
@@ -692,7 +696,7 @@ export default function Comparison(){
         <ContextComparison.Provider value={[AddVideo,RemoveVideo,setSearchFilterClicked, listConcepts]}>
 
             <>
-            <Querybar ref={anchor1} openTutorial={openTutorialFunc} querylist={querylist} catalog = {catalog} catalogExtra = {catalogExtra} ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
+            <Querybar filterlist={filterlist} ref={anchor1} openTutorial={openTutorialFunc} querylist={querylist} catalog = {catalog} catalogExtra = {catalogExtra} ApplyFilters = {ApplyFilters} searchClicked={searchClicked} listvideo={listvideo} listconcepts={listConcepts} AddQueryElement={AddQueryElement} nomatch={nomatch} location={location.state===undefined?null:location.state.data}/>
             <br/>
             <Listvideo setAnchor2={setAnchor2} UpdateCatalogExtra={UpdateCatalogExtra}  catalogExtra={catalogExtra} catalog={catalog} loading={loading} querylist={querylist} catalogoriginal={catalogoriginal}/>
             </>

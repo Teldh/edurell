@@ -2,20 +2,12 @@ import React from 'react';
 import Container from '@mui/material/Container';
 import './Querybar.css';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import Queryinput from './Queryinput.js'
-import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import Secondarybutton from './Buttonsecondary.js'
-import Videoselected from './Videoselected';
 import Divider from '@mui/material/Divider';
-import Skeleton from '@mui/material/Skeleton';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Filters from './Filters.js'
-import pattern from 'patternomaly';
 import '../Header/Header.css';
 import './Comparison.css';
 import Links from '@mui/material/Link';
@@ -26,26 +18,15 @@ import InputAdornment from '@mui/material/InputAdornment'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import Header from '../Header/Header';
 import { useContext,useState,useEffect } from 'react';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 import {TokenContext} from '../account-management/TokenContext';
-import handleFetchHttpErrors from '../../helpers/handleFetchHttpErrors';
 import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import FlowChart from './FlowChart.js'
 import ReactFlow, { ReactFlowProvider, useReactFlow } from 'reactflow';
-import { ContextComparison } from './ContextComparison';
 import IconButton from '@mui/material/IconButton';
-import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Tooltip from '@mui/material/Tooltip';
-import PersonAdd from '@mui/icons-material/PersonAdd';
-import Settings from '@mui/icons-material/Settings';
 import EastIcon from '@mui/icons-material/East';
-import Logout from '@mui/icons-material/Logout';
 import {
     Link,
     Redirect,
@@ -54,12 +35,17 @@ import {
     useLocation
 } from "react-router-dom";
 import Autocomplete from '@mui/material/Autocomplete';
-import Popper from '@mui/material/Popper';
 import { useHistory } from "react-router-dom";
-import NetworkGraph from './NetworkGraph.js';
 import Barro from './BarroGraph.js';
 import Barro2 from './BarroGraph2.js';
 import { styled } from '@mui/material/styles';
+import HelpIcon from '@mui/icons-material/Help';
+import Popover from '@mui/material/Popover';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
 
 
 function DP(color = 'black') {
@@ -85,7 +71,21 @@ function DP(color = 'black') {
     return c.createPattern(shape, 'repeat')
   }
   
-
+  const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+    '& .MuiToggleButtonGroup-grouped': {
+        margin: theme.spacing(0.5),
+        border: 0,
+        '&.Mui-disabled': {
+        border: 0,
+        },
+        '&:not(:first-of-type)': {
+        borderRadius: theme.shape.borderRadius,
+        },
+        '&:first-of-type': {
+        borderRadius: theme.shape.borderRadius,
+        },
+    },
+    }));
   
 
 //the page after you select the video to compare and press the button.
@@ -130,11 +130,13 @@ export default function Result(){
     const context = useContext(TokenContext);
     const nameSurname  = context.nameSurname;
     //get from the previous page the data of the video selected for comparison
+
+    
     
     
     useEffect(() => {
         if(location.state != undefined)
-        console.log("data from previous search comparison: ", location.state.concept," ",location.state.catalog," ",location.state.catalogExtra);
+        console.log("data from previous search comparison: ", location.state.concept," ",location.state.catalog," ",location.state.catalogExtra," ",location.state.listfilters);
       }, [location]);
 
 
@@ -218,7 +220,73 @@ export default function Result(){
     };
 
 
+    
 
+    //filters states
+    const [anchorEl1f, setAnchorEl1f] = useState(null);
+    const handlePopoverOpen1 = (event) => {
+        setAnchorEl1f(event.currentTarget);
+
+    };
+    const handlePopoverClose1 = () => {
+        setAnchorEl1f(null);
+    };
+    const open1f = Boolean(anchorEl1);
+
+    const [anchorEl2f, setAnchorEl2f] = useState(null);
+    const handlePopoverOpen2 = (event) => {
+        setAnchorEl2f(event.currentTarget);
+    };
+    const handlePopoverClose2 = () => {
+        setAnchorEl2f(null);
+    };
+    const open2f = Boolean(anchorEl2);
+
+    const [anchorEl3f, setAnchorEl3f] = useState(null);
+    const handlePopoverOpen3 = (event) => {
+        setAnchorEl3f(event.currentTarget);
+    };
+    const handlePopoverClose3 = () => {
+        setAnchorEl3f(null);
+    };
+    const open3f = Boolean(anchorEl3);
+
+
+    const [alignment1, setAlignment1] = useState(location.state.listfilters[0]);
+
+    const handleChange1f = (event, newAlignment) => {
+        setAlignment1(newAlignment);
+    };
+    const [alignment2, setAlignment2] = useState(location.state.listfilters[1]);
+
+    const handleChange2f = (event, newAlignment) => {
+        setAlignment2(newAlignment);
+    };
+    const [alignment3, setAlignment3] = useState(location.state.listfilters[2]);
+
+    const handleChange3f = (event, newAlignment) => {
+        setAlignment3(newAlignment);
+    };
+
+    const [alignment4, setAlignment4] = useState(location.state.listfilters[3]);
+
+    const handleChange4f = (event, newAlignment) => {
+        setAlignment4(newAlignment);
+    };
+
+    const [alignment5, setAlignment5] = useState(location.state.listfilters[4]);
+
+    const handleChange5f = (event, newAlignment) => {
+        setAlignment5(newAlignment);
+    };
+
+    const [alignment6, setAlignment6] = useState(location.state.listfilters[5]);
+
+    const handleChange6f = (event, newAlignment) => {
+        setAlignment6(newAlignment);
+    };
+
+    const[radiog, Setradiog] = useState(location.state.listfilters[6])
     return(<>
         <Header page="dashboard" login={nameSurname}/>
         {/*TOP BAR */}
@@ -408,6 +476,500 @@ export default function Result(){
                     backgroundColor: "rgb(155,221,193)",
                 }}
                 />
+                <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        id="TWO COLUMN ONE IS FILTERS LOWER IS BUTTON"
+        style={{position:"relative"}}
+        >
+            
+
+        <Grid item sx={{ p:1, borderRadius: '50px 50px 0 0', backgroundColor:"white", pb:0,mb:0,pl:5,pr:5}}>
+            <Grid 
+            container
+            direction="row"
+            justifyContent="center"
+            alignItems="stretch"
+            spacing={2}
+            id="TRE COLONNE PRINCIPALI"
+            
+            >
+                <Grid item sx={{
+                        borderRight: '1px solid #CCCCCC',
+
+                        m:3,pr:3
+
+                    }}>
+                    <Grid
+                    container
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="flex-start"
+                    id="CARATTERISTICHE"
+                    >
+                        <Grid item>
+                            <Grid
+                            container
+                            direction="column"
+                            justifyContent="center"
+                            alignItems="flex-start"
+                            id="TITOLO"
+                            >
+                                <Grid item sx={{mb:3}}>
+                                    <Typography variant="button" gutterBottom >
+
+                                        FEATURES:
+
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item>
+                            <Grid
+                            container
+                            direction="column"
+                            justifyContent="center"
+                            alignItems="flex-start"
+                            id="ADATTO A"
+                            >
+                                <Grid item>
+                                <Grid
+                                container
+                                direction="row"
+                                justifyContent="center"
+                                alignItems="center"
+                                >
+                                    <Grid item>
+                                    <HelpIcon
+                                    onMouseEnter={handlePopoverOpen1}
+                                    onMouseLeave={handlePopoverClose1}
+                                    sx={{color:"rgb(255,128,0)"}}/>
+                                    </Grid>
+                                    <Grid item>
+                                    <Typography variant="subtitle2" display="inline" gutterBottom>
+
+                                        · Suitable for:
+
+                                    </Typography>
+                                    </Grid>
+                                </Grid>
+                                    
+                                                <Popover 
+                                                sx={{
+                                                    pointerEvents: 'none',
+
+                                                }}
+                                                open={open1f}
+                                                anchorEl={anchorEl1f}
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'left',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'right',
+                                                }}
+                                                onClose={handlePopoverClose1}
+                                                disableRestoreFocus
+                                                >
+
+                                                <Box sx={{ width: '100%', maxWidth: 200, p:2, border:2,borderColor:"#ffa825" }}>
+                                                    <Typography variant="body2" gutterBottom>
+                                                    In videos for <b>beginners</b> you are more likely to find a definition for the concept you looked up and its prerequsiites.
+                                                    </Typography>
+                                                    <Typography variant="body2" gutterBottom sx={{mt:1}}>
+                                                    If you click on <b>expert</b>, you are going to find videos where the knowledge of prerequsiites is taken for granted
+
+                                                    </Typography>
+                                                </Box>
+                                                </Popover>
+                                </Grid>
+                                <Grid item>
+                                    <StyledToggleButtonGroup
+                                    disabled={true}
+                                    value={alignment1}
+                                    exclusive
+                                    onChange={handleChange1f}
+                                    aria-label="Platform"
+                                    >
+
+                                         <ToggleButton value="novice" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>Beginners</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="expert" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>Experts</Typography>
+                                    </ToggleButton>
+                                   
+
+                                    </StyledToggleButtonGroup>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item>
+                            <Grid
+                            container
+                            direction="column"
+                            justifyContent="center"
+                            alignItems="flex-start"
+                            id="SPIEGAZIONE"
+                            >
+                                <Grid item>
+                                <Grid
+                                container
+                                direction="row"
+                                justifyContent="center"
+                                alignItems="center"
+                                >
+                                    <Grid item>
+                                    <HelpIcon
+                                    onMouseEnter={handlePopoverOpen2}
+                                    onMouseLeave={handlePopoverClose2}
+                                    sx={{color:"rgb(255,128,0)"}}/>
+                                    </Grid>
+                                    <Grid item>
+                                    <Typography variant="subtitle2" display="inline" gutterBottom>
+
+                                        · Explanation:
+
+                                    </Typography>
+                                    </Grid>
+                                    
+                                                <Popover 
+                                                sx={{
+                                                    pointerEvents: 'none',
+                                                }}
+                                                open={open2f}
+                                                anchorEl={anchorEl2f}
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'left',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'right',
+                                                }}
+                                                onClose={handlePopoverClose2}
+                                                disableRestoreFocus
+                                                >
+
+                                                <Box sx={{ width: '100%', maxWidth: 200,p:2, border:2,borderColor:"#ffa825"  }}>
+                                                    <Typography variant="body2" gutterBottom>
+                                                    <b>A basic</b> explanation would go straight to the point.
+                                                    </Typography>
+                                                    <Typography variant="body2" gutterBottom sx={{mt:1}}>
+                                                    A <b>detailed</b> explanation is broader and includes related concepts
+
+                                                    </Typography>
+                                                </Box>
+                                                </Popover>
+                                </Grid>
+                                </Grid>
+                                <Grid item>
+                                    <StyledToggleButtonGroup
+                                    disabled={true}
+                                    value={alignment2}
+                                    exclusive
+                                    onChange={handleChange2f}
+                                    aria-label="Platform"
+                                    >
+                                    <ToggleButton value="essential" style={{textTransform: 'none'}}>
+
+                                        <Typography variant="body2" display="block" gutterBottom>Basic</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="detailed" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>Detailed</Typography>
+
+                                    </ToggleButton>
+                                    </StyledToggleButtonGroup>
+                                </Grid>
+                            
+                            </Grid>
+                        </Grid>
+                        <Grid item>
+                            <Grid
+                            container
+                            direction="column"
+                            justifyContent="center"
+                            alignItems="flex-start"
+                            id="TIPO DI LEZIONE"
+                            >
+                                <Grid item>
+                                <Grid
+                                container
+                                direction="row"
+                                justifyContent="center"
+                                alignItems="center"
+                                >
+                                    <Grid item>
+                                    <HelpIcon
+                                    onMouseEnter={handlePopoverOpen3}
+                                    onMouseLeave={handlePopoverClose3}
+                                    sx={{color:"rgb(255,128,0)"}}/>
+                                    </Grid>
+                                    <Grid item>
+                                    <Typography variant="subtitle2" display="inline" gutterBottom>
+
+                                        · Kind of lesson:
+
+                                    </Typography>
+                                    </Grid>
+                                    
+                                                <Popover 
+                                                sx={{
+                                                    pointerEvents: 'none',
+                                                }}
+                                                open={open3f}
+                                                anchorEl={anchorEl3f}
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'left',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'right',
+                                                }}
+                                                onClose={handlePopoverClose3}
+                                                disableRestoreFocus
+                                                >
+
+                                                <Box sx={{ width: '100%', maxWidth: 200 ,p:2, border:2,borderColor:"#ffa825" }}>
+                                                    <Typography variant="body2" gutterBottom>
+                                                    Choose videos <b>with slides</b> if you like video lectures showing slides of what is explained
+                                                    </Typography>
+                                                    <Typography variant="body2" gutterBottom sx={{mt:1}}>
+                                                    Choose <b>no slides</b> if you prefer other teaching modes.
+
+                                                    </Typography>
+                                                </Box>
+                                                </Popover>
+                                </Grid>
+                                </Grid>
+                                <Grid item>
+                                    <StyledToggleButtonGroup
+                                    disabled={true}
+                                    value={alignment3}
+                                    exclusive
+                                    onChange={handleChange3f}
+                                    aria-label="Platform"
+                                    >
+                                    <ToggleButton value="withslide" style={{textTransform: 'none'}}>
+
+                                        <Typography variant="body2" display="block" gutterBottom>With slides</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="withoutslide" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>No slides</Typography>
+
+                                    </ToggleButton>
+                                    </StyledToggleButtonGroup>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    
+                    </Grid>
+                </Grid>
+
+
+
+                <Grid item sx={{
+                        borderRight: '1px solid #CCCCCC',
+
+                        m:3,pr:3,ml:1
+
+                    }}>
+                    <Grid
+                    container
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="flex-start"
+                    id="DURATE"
+                    >
+                        <Grid item>
+                            <Grid
+                            container
+                            direction="column"
+                            justifyContent="center"
+                            alignItems="flex-start"
+                            id="TITOLO"
+                            >
+                                <Grid item sx={{mb:3}}>
+                                    <Typography variant="button" gutterBottom>
+
+                                        DURATION:
+
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+
+
+                        <Grid item>
+                            <Grid
+                            container
+                            direction="column"
+                            justifyContent="center"
+                            alignItems="flex-start"
+                            id="DEFINIZIONE"
+                            >
+                                <Grid item>
+                                    <Typography variant="subtitle2" display="inline" gutterBottom>
+
+                                        · Definition of the concept:
+
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <StyledToggleButtonGroup
+                                    disabled={true}
+                                    value={alignment4}
+                                    exclusive
+                                    onChange={handleChange4f}
+                                    aria-label="Platform"
+                                    >
+                                    <ToggleButton value="less4" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&lt;4 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="4to20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>4 to 20 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="greater20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&gt;20 min</Typography>
+                                    </ToggleButton>
+                                    
+                                    </StyledToggleButtonGroup>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="subtitle2" display="inline" gutterBottom>
+
+                                        · In depth explanation:
+
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <StyledToggleButtonGroup
+                                    disabled={true}
+                                    value={alignment5}
+                                    exclusive
+                                    onChange={handleChange5f}
+                                    aria-label="Platform"
+                                    >
+                                    <ToggleButton value="less4" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&lt;4 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="4to20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>4 to 20 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="greater20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&gt;20 min</Typography>
+                                    </ToggleButton>
+                                    
+                                    </StyledToggleButtonGroup>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="subtitle2" display="inline" gutterBottom>
+
+                                        · Whole video:
+
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <StyledToggleButtonGroup
+                                    disabled={true}
+                                    value={alignment6}
+                                    exclusive
+                                    onChange={handleChange6f}
+                                    aria-label="Platform"
+                                    >
+                                    <ToggleButton value="less4" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&lt;4 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="4to20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>4 to 20 min</Typography>
+                                    </ToggleButton>
+                                    <ToggleButton value="greater20" style={{textTransform: 'none'}}>
+                                        <Typography variant="body2" display="block" gutterBottom>&gt;20 min</Typography>
+                                    </ToggleButton>
+                                    
+                                    </StyledToggleButtonGroup>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <Grid item sx={{m:3,ml:0}}>
+
+                    <Grid
+                    container
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="flex-start"
+                    id="ORDINA PER"
+                    >
+                        <Grid item sx={{mb:2}}>
+
+                            <Typography variant="button" gutterBottom>SORT BY:</Typography>
+
+                        </Grid>
+                        <Grid item>
+                            <FormControl>
+                            
+                               
+                                
+                                <RadioGroup
+                                    aria-labelledby="demo-radio-buttons-group-label"
+                                    defaultValue="recent"
+                                    name="radio-buttons-group"
+                                    onChange={(event,value)=>Setradiog(value)}
+                                    
+                                >
+                                    <FormControlLabel value="recent" control={<Radio color="default"/>} 
+                                        disabled={true}
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Latest </Typography>}/>
+                                    <FormControlLabel value="videolength" control={<Radio color="default"/>} 
+                                        disabled={true}
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Video duration</Typography> }/>
+                                    <FormControlLabel value="detailedlength" control={<Radio color="default"/>} 
+                                        disabled={true}
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>Definition duration</Typography>} />
+                                    <FormControlLabel value="deflength" control={<Radio color="default"/>} 
+                                        disabled={true}
+                                        label={<Typography variant="subtitle2" display="inline" gutterBottom>In depth duration</Typography>}/>
+
+                                </RadioGroup>
+                            </FormControl>
+                        </Grid>
+                    
+                    </Grid>
+                </Grid>
+
+            </Grid>
+        </Grid>
+
+        {/* FROM HERE START PART FOR BUTTON */}
+
+        
+
+
+        </Grid>
              </Container>
             </Grid>
             <Grid item sx={{backgroundColor:"rgb(237,237,237)", mt:5, p:5}}>

@@ -65,7 +65,7 @@ old chip button for filter
 
 //this is the whole component before the listvideo component. It holds the searchbar with the filters and tutorial and the video selected for comparison
 
-const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}, ref) => {
+const Querybar = forwardRef(({ filterlist, openTutorial,querylist, catalog, catalogExtra, ApplyFilters, searchClicked, listvideo, listconcepts, AddQueryElement, nomatch, location}, ref) => {
     const [expanded, setExpanded] = useState(false);
     const handleExpandClick = () => {
         setExpanded(!expanded);
@@ -97,7 +97,8 @@ const Querybar = forwardRef(({ openTutorial,querylist, catalog, catalogExtra, Ap
                         return false
                     }
                     }),
-                listConcepts: listConcepts
+                listConcepts: listConcepts,
+                listfilters: filterlist,
             },
         });
     }
