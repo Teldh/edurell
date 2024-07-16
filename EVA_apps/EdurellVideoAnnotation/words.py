@@ -1,6 +1,32 @@
 import RAKE
 import phrasemachine
 import spacy
+
+if not "en_core_web_sm" in spacy.util.get_installed_models():
+    spacy.cli.download("en_core_web_sm")
+
+import nltk
+
+try:
+    nltk.data.find('corpora/words')
+except LookupError:
+    nltk.download("words")
+
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download("punkt")
+
+try:
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download("wordnet")
+
+try:
+    nltk.data.find('omw-1.4')
+except LookupError:
+    nltk.download("omw-1.4")
+
 import re
 
 from conll import lemmatize

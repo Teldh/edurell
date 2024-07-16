@@ -333,6 +333,8 @@ import sys
 incompatible_path = '/home/anaconda3/envs/myenv/bin'
 if incompatible_path in sys.path:
     sys.path.remove(incompatible_path)
+
+#Punctuator library not working anymore with Python 3.11 need to use deepmultilingualpunctuation model
 #from punctuator import Punctuator
 from deepmultilingualpunctuation import PunctuationModel
 #################################################################################
