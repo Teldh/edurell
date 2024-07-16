@@ -333,7 +333,8 @@ import sys
 incompatible_path = '/home/anaconda3/envs/myenv/bin'
 if incompatible_path in sys.path:
     sys.path.remove(incompatible_path)
-from punctuator import Punctuator
+#from punctuator import Punctuator
+from deepmultilingualpunctuation import PunctuationModel
 #################################################################################
 
 # from lexrank import LexRank
@@ -541,8 +542,8 @@ class VideoAnalyzer:
         # if conll is not in the db
         if punctuated_transcription is None:
             print("Adding punctuation..")
-            punct = Punctuator(os.path.join(os.path.dirname(os.path.abspath(getfile(self.__class__))), "punctuator", "Demo-Europarl-EN.pcl"))
-            punctuated_transcription = punct.punctuate(transcription)
+            punct = PunctuationModel()#Punctuator(os.path.join(os.path.dirname(os.path.abspath(getfile(self.__class__))), "punctuator", "Demo-Europarl-EN.pcl"))
+            punctuated_transcription = punct.restore_punctuation(transcription)#punctuate(transcription)
 
         segments_times = db_mongo.get_segments_times(video_id)
 
