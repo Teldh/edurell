@@ -452,7 +452,7 @@ def download(url,_path:str=None):
             downloaded_successfully = True
         except Exception as e:
             print(e)
-            raise Exception("There are no libraries to download the video because each one gives an error, cwd:"+os.getcwd())
+            raise Exception("There are no libraries to download the video because each one returns an error")
     
     os.chdir(prev_cwd)
     
