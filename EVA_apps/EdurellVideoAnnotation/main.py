@@ -1,6 +1,7 @@
 from flask import render_template, jsonify, request, session, flash, redirect, url_for
 from flask_login import current_user, login_user, logout_user, login_required
-from werkzeug.urls import url_parse
+#from werkzeug.urls import url_parse
+from urllib.parse import urlparse
 from nltk import WordNetLemmatizer
 import bcrypt
 import random
@@ -47,7 +48,7 @@ def login():
         user = User(form.email.data)
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
+        if not next_page or urlparse(next_page).netloc != '':
             next_page = url_for('index')
         return redirect(next_page)
 
