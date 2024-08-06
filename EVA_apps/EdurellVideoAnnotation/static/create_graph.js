@@ -32,6 +32,7 @@ function addRelation(){
 
   let prereq = document.getElementById("prerequisite").value.toLowerCase();
   let weight = document.getElementById("weight").value.toLowerCase();
+  weight = weight.charAt(0).toUpperCase() + weight.slice(1)
   let target = document.getElementById("target").value.toLowerCase();
 
   if ((prereq === "") || (target === "")) {
