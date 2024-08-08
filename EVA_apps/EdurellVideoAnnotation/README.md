@@ -36,16 +36,32 @@ conda env create -f conda_environment.yml
 conda activate edu_anno_env
 ```
 
-(Facoltative) If you have a gpu, to improve performances:
-
-    > conda install m2w64-toolchain
-    > conda install libpython
-
 Installation completed, with the environment activated launch the project with:
 
     > python main.py
     
 <br>
+
+# On any Change in Environment Packages 
+
+To avoid inconsistency between local and server, yml file has been used to enforce same environment state
+
+open a terminal
+```
+cd {inside folder EKEELVideoAnnotation}
+```
+
+replace the conda_environment.yml inside using
+```
+conda env export --no-builds | grep -v "^prefix: " | grep -v "en-core-web-sm" > conda_environment.yml
+```
+
+to synchronize the changes in the server push updates to the repo and on the server terminal
+
+```
+cd {inside folder EKEELVideoAnnotation}
+conda env update --file conda_environment.yml --prune
+```
 
 # Notes:
     
